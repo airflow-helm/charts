@@ -1,5 +1,13 @@
 # Upgrading Steps
 
+## `v7.13.X` → `v7.14.0`
+
+> ⚠️ WARNING
+> 
+> We migrated to the [airflow-helm/charts](https://github.com/airflow-helm/charts) repo, after the deprecation of the [helm/charts](https://github.com/helm/charts/) repo.
+
+__There were NO CHANGES in this version__
+
 ## `v7.12.X` → `v7.13.0`
 
 __The following values have been ADDED:__
@@ -44,7 +52,7 @@ __The following values have been ADDED:__
 
 ## `v7.7.X` → `v7.8.0`
 
-> __WARNING:__ 
+> ⚠️ WARNING 
 >
 > If you install many pip packages with: `airflow.extraPipPackages`, `web.extraPipPackages`, or `dags.installRequirements`
 > 
@@ -72,7 +80,7 @@ __If you are using an INTERNAL redis database, some configs have changed:__
 
 ## `v7.5.X` → `v7.6.0`
 
-> __WARNING:__ 
+> ⚠️ WARNING
 >
 > We now annotate all pods with `cluster-autoscaler.kubernetes.io/safe-to-evict` by default.
 > 
@@ -201,7 +209,7 @@ __The following values have been ADDED:__
 
 ## `v6.X.X` → `v7.0.0`
 
-> __WARNING:__ 
+> ⚠️ WARNING
 >
 > You MUST stop using images derived from `puckel/docker-airflow` and instead derive from `apache/airflow`
 
@@ -329,7 +337,7 @@ __Thee following values have CHANGED:__
 
 ## `v4.X.X` → `v5.0.0`
 
-> __WARNING:__ 
+> ⚠️ WARNING
 >
 > This upgrade will fail if a custom ingress path is set for web and/or flower and `web.baseUrl` and/or `flower.urlPrefix`
 

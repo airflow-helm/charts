@@ -1,48 +1,52 @@
 # Airflow Helm Chart
 
-[Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule and monitor workflows.
+> ⚠️ NOTE
+>
+> this chart is the continuation of [stable/airflow](https://github.com/helm/charts/tree/master/stable/airflow), by the same maintainers
 
-## Installation
+[Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule, and monitor workflows.
 
-__(Helm 2) install the Airflow Helm Chart:__
-```bash
-helm install stable/airflow \
-  --name "airflow" \
-  --version "X.X.X" \
-  --namespace "airflow" \
-  --values ./custom-values.yaml
-```
+## Usage
 
-__(Helm 3) install the Airflow Helm Chart:__
-```bash
-helm repo add stable https://kubernetes-charts.storage.googleapis.com
+### 1 - Add the Repo
+
+```sh
+helm repo add airflow-stable https://airflow-helm.github.io/charts
 helm repo update
+```
 
-helm install "airflow" stable/airflow \
-  --version "X.X.X" \
-  --namespace "airflow" \
+### 2 - Install the Chart
+
+```sh
+# Helm 3
+helm install \
+  [RELEASE_NAME] \
+  airflow-stable/airflow \
+  --version [VERSION] \
+  --namespace [NAMESPACE] \
+  --values ./custom-values.yaml
+
+# Helm 2
+helm install \
+  airflow-stable/airflow \
+  --name [RELEASE_NAME] \
+  --version [VERSION] \
+  --namespace [NAMESPACE] \
   --values ./custom-values.yaml
 ```
 
-__Get the status of the Airflow Helm Chart:__
-```bash
-helm status "airflow"
-```
+### 3 - Run commands in Webserver Pod
 
-__Uninstall the Airflow Helm Chart:__
-```bash
-helm delete "airflow"
-```
+> ⚠️ NOTE
+> 
+> you might want to run commands like: `airflow create_user`
 
-__Run bash commands in the Airflow Webserver Pod:__
-```bash
-# create an interactive bash session in the Webserver Pod
-# use this bash session for commands like: `airflow create_user`
+```sh
 kubectl exec \
   -it \
-  --namespace airflow \
+  --namespace [NAMESPACE] \
   --container airflow-web \
-  Deployment/airflow-web \
+  Deployment/[RELEASE_NAME]-web \
   /bin/bash
 ```
 
@@ -50,8 +54,11 @@ kubectl exec \
 
 ## Upgrade Steps
 
-Chart version numbers: [Chart.yaml](Chart.yaml) or [Artifact Hub](https://artifacthub.io/packages/helm/helm-stable/airflow)
+> ⚠️ NOTE
+> 
+> you can find chart version numbers under [GitHub Releases](https://github.com/airflow-helm/charts/releases)
 
+- [v7.13.X → v7.14.0](UPGRADE.md#v713x--v7140)
 - [v7.12.X → v7.13.0](UPGRADE.md#v712x--v7130)
 - [v7.11.X → v7.12.0](UPGRADE.md#v711x--v7120)
 - [v7.10.X → v7.11.0](UPGRADE.md#v710x--v7110)
@@ -69,7 +76,7 @@ Chart version numbers: [Chart.yaml](Chart.yaml) or [Artifact Hub](https://artifa
 
 ---
 
-## Example Helm Values
+## Example Values
 
 Here are some starting points for your `custom-values.yaml`:
 
@@ -223,7 +230,7 @@ airflow:
 ```
 
 To create the `my-airflow-webserver-config` ConfigMap, you could use:
-```bash
+```console
 kubectl create configmap \
   my-airflow-webserver-config \
   --from-file=webserver_config.py \
@@ -382,7 +389,7 @@ redshift_user = get_secret('redshift-user')
 ```
 
 To create the `redshift-user` Secret, you could use:
-```bash
+```console
 kubectl create secret generic \
   redshift-user \
   --from-literal=redshift-user=MY_REDSHIFT_USERNAME \
@@ -419,7 +426,7 @@ This is unusually NOT necessary unless your synced DAGs include custom database 
 PostgreSQL is the default database in this chart, because we use insecure username/password combinations by default, you should create secure credentials before installing the Helm chart.
 
 Example bash command to create the required Kubernetes Secrets:
-```bash
+```console
 # set postgress password
 kubectl create secret generic \
   airflow-postgresql \
@@ -444,8 +451,9 @@ redis:
 
 ## Docs (Database) - External Database
 
-While this chart comes with an embedded [stable/postgresql](https://github.com/helm/charts/tree/master/stable/postgresql), this is NOT SUITABLE for production.
-You should make use of an external `mysql` or `postgres` database, for example, one that is managed by your cloud provider.
+> ⚠️ WARNING
+> 
+> the embedded PostgreSQL is NOT SUITABLE for production, you should configure one of the following external databases
 
 ### Option 1 - Postgres
 
@@ -463,7 +471,9 @@ externalDatabase:
 
 ### Option 2 - MySQL
 
-__WARNING:__ Airflow requires that `explicit_defaults_for_timestamp=1` in your MySQL instance, [see here](https://airflow.apache.org/docs/stable/howto/initialize-database.html)
+> ⚠️ WARNING
+>
+> you must set `explicit_defaults_for_timestamp=1` in your MySQL instance, [see here](https://airflow.apache.org/docs/stable/howto/initialize-database.html)
 
 Example values for an external MySQL database, with an existing `airflow_cluster1` database:
 ```yaml
@@ -481,8 +491,11 @@ externalDatabase:
 
 ## Docs (Other) - Log Persistence
 
+> ⚠️ NOTE
+> 
+> you will likely want to persist logs in a production deployment
+
 By default, logs from the airflow-web/scheduler/worker are written within the Docker container's filesystem, therefore any restart of the pod will wipe the logs.
-For a production deployment, you will likely want to persist the logs.
 
 ### Option 1 - S3/GCS bucket (Recommended)
 
@@ -553,11 +566,11 @@ logs:
     enabled: true
 ```
 
-## Docs (Other) - Service Monitor
+## Docs (Other) - Prometheus ServiceMonitor
 
-The service monitor is something introduced by the [CoresOS Prometheus Operator](https://github.com/coreos/prometheus-operator).
-To be able to expose metrics to prometheus you need install a plugin, this can be added to the docker image.
-A good one is [epoch8/airflow-exporter](https://github.com/epoch8/airflow-exporter), which exposes dag and task based metrics from Airflow.
+A [ServiceMonitor](https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#servicemonitor) is a resource introduced by the [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator).
+
+To be able to expose Airflow metrics to Prometheus you will need install a plugin, one option is [epoch8/airflow-exporter](https://github.com/epoch8/airflow-exporter), which exposes dag and task based metrics from Airflow.
 
 For more information, see the `serviceMonitor` section of `values.yaml`.
 
@@ -565,12 +578,9 @@ For more information, see the `serviceMonitor` section of `values.yaml`.
 
 ## Docs (Other) - DAG Storage
 
-### Option 1 - Git-Sync Sidecar (Recommended)
+### Option 1 - Git Sidecar (Recommended)
 
-This method places a git sidecar in each worker/scheduler/web Kubernetes Pod, that perpetually syncs your git repo into the dag folder every `dags.git.gitSync.refreshTime` seconds.
-
-__WARNING:__  In the `dags.git.secret` the `known_hosts` file is present to reduce the possibility of a man-in-the-middle attack.
-However, if you want to implicitly trust all repo host signatures set `dags.git.sshKeyscan` to `true`.
+This method places a git sidecar in each worker/scheduler/web Pod, that syncs your git repo into the dag folder every `dags.git.gitSync.refreshTime` seconds.
 
 ```yaml
 dags:
@@ -586,7 +596,7 @@ dags:
 ```
 
 You can create the `dags.git.secret` from your local `~/.ssh` folder using:
-```bash
+```console
 kubectl create secret generic \
   airflow-git-keys \
   --from-file=id_rsa=~/.ssh/id_rsa \
@@ -595,17 +605,28 @@ kubectl create secret generic \
   --namespace airflow
 ```
 
-### Option 2 - Mount a Shared Persistent Volume
+> ⚠️ NOTE
+> 
+> specifying `known_hosts` inside `dags.git.secret` reduces the possibility of a man-in-the-middle attack, however, if you want to implicitly trust all repo host signatures set `dags.git.sshKeyscan` to `true`
 
-This method stores your DAGs in a Kubernetes Persistent Volume Claim (PVC), you must use some external system to ensure this volume has your latest DAGs.
+### Option 2a - PersistentVolume
+
+> ⚠️ WARNING 
+> 
+> this method requires a PersistentVolumeClaim which supports `accessMode`: `ReadOnlyMany` or `ReadWriteMany`
+
+This method stores your DAGs in a PersistentVolume.
+
+You must configure some external system to ensure this volume has your latest DAGs.
 For example, you could use your CI/CD pipeline system to preform a sync as changes are pushed to a git repo.
 
 Since ALL Pods MUST HAVE the same collection of DAG files, it is recommended to create just one PVC that is shared.
 To share a PVC with multiple Pods, the PVC needs to have `accessMode` set to `ReadOnlyMany` or `ReadWriteMany` (Note: different StorageClass support different [access modes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes)).
+
 If you are using Kubernetes on a public cloud, a persistent volume controller is likely built in:
-[Amazon EKS](https://docs.aws.amazon.com/eks/latest/userguide/storage-classes.html),
-[Azure AKS](https://docs.microsoft.com/en-us/azure/aks/azure-files-dynamic-pv),
-[Google GKE](https://cloud.google.com/kubernetes-engine/docs/concepts/persistent-volumes).
+ - [Amazon EKS](https://docs.aws.amazon.com/eks/latest/userguide/storage-classes.html)
+ - [Azure AKS](https://docs.microsoft.com/en-us/azure/aks/azure-files-dynamic-pv)
+ - [Google GKE](https://cloud.google.com/kubernetes-engine/docs/concepts/persistent-volumes)
 
 For example, to use the storage class called `default`:
 ```yaml
@@ -617,11 +638,13 @@ dags:
     size: 1Gi
 ```
 
-### Option 2a - Single PVC for DAGs & Logs
+### Option 2b - Shared PersistentVolume
 
-You may want to store DAGs and logs on the same volume and configure Airflow to use subdirectories for them.
+> ⚠️ WARNING 
+> 
+> this method requires a PersistentVolumeClaim which supports `accessMode`: `ReadWriteMany`
 
-__WARNING:__ you must use a PVC which supports `accessMode: ReadWriteMany`
+This method stores both DAGs and logs on the same PersistentVolume.
 
 Here's an approach that achieves this:
 - Configure `airflow.extraVolume` and `airflow.extraVolumeMount` to put a volume at `/opt/airflow/efs`
@@ -629,13 +652,35 @@ Here's an approach that achieves this:
 - Configure `dags.path` to be `/opt/airflow/efs/dags`
 - Configure `logs.path` to be `/opt/airflow/efs/logs`
 
+### Option 3 - Container Image
+
+This method stores your DAGs inside the container image.
+
+This chart uses the official [apache/airflow image](https://hub.docker.com/r/apache/airflow), extend this image and COPY your DAGs into the `dags.path` folder:
+```docker
+FROM apache/airflow:1.10.12-python3.6
+
+# NOTE: dag path is set with the `dags.path` value
+COPY ./my_dag_folder /opt/airflow/dags
+```
+
+The following values can be used to specify the container image:
+```yaml
+airflow:
+  image:
+    repository: MY_REPO
+    tag: MY_TAG
+```
+
 ## Docs (Other) - requirements.txt
 
-We expose the `dags.installRequirements` value to enable installing any `requirements.txt` found at the root of your `dags.path` folder as airflow-workers start.
+We expose the `dags.installRequirements` value to pip install any `requirements.txt` found at the root of your `dags.path` folder as airflow-worker Pods start.
 
-__WARNING__: if you update the `requirements.txt`, you will have to restart your airflow-workers for changes to take effect
-
-__NOTE__: you might also want to consider using `airflow.extraPipPackages`
+> ⚠️ NOTE 
+> 
+> if you update the `requirements.txt`, you will have to restart each worker Pod for changes to take effect
+> 
+> you might consider using `airflow.extraPipPackages` instead
 
 ---
 
