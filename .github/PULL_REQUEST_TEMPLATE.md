@@ -17,4 +17,5 @@ describe here
 - [ ] Commits are [signed](https://github.com/airflow-helm/charts/tree/main/CONTRIBUTING.md#sign-your-work)
 - [ ] Commits are [squashed](https://github.com/airflow-helm/charts/tree/main/CONTRIBUTING.md#squash-commits) (if appropriate)
 - [ ] Chart [version bumped](https://github.com/airflow-helm/charts/tree/main/CONTRIBUTING.md#versioning)
+- [ ] Chart [documentation updated](https://github.com/airflow-helm/charts/tree/main/CONTRIBUTING.md#documentation)
 - [ ] Passes [linting](https://github.com/airflow-helm/charts/tree/main/CONTRIBUTING.md#linting)

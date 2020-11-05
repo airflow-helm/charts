@@ -6,6 +6,7 @@ Contributions are welcome via GitHub pull requests.
 
 1. Must pass [DCO check](#sign-your-work)
 1. Must pass [Versioning check](#versioning)
+1. Must pass [Documentation check](#documentation)
 1. Must pass [Squashing check](#squash-commits)
 1. Must pass [Lint check](#linting)
 
@@ -60,10 +61,22 @@ By making a contribution to this project, I certify that:
 
 ## Versioning
 
-The chart `version` should follow [SemVer](https://semver.org/)
+The chart `version` should follow [SemVer](https://semver.org/):
 - If you __REMOVE/CHANGE a value__ → bump a MAJOR version
 - If you __ADD a value__ → bump a MINOR version
 - If you __fix a bug__ → bump a PATCH version
+
+## Documentation
+
+Most non-patch changes will require documentation updates.
+
+If you __ADD a value__:
+- ensure the value has a descriptive docstring in `values.yaml`
+- ensure the value is listed under `#helm-chart-values` in `README.md` (if it is a top-level value, e.g. `airflow.config` or `dags.path`)
+
+If you __bump a MAJOR/MINOR version__:
+- add a heading for the new version to `UPGRADE.md` 
+- add a link to the heading under `#upgrade-steps` in `README.md` 
 
 ## Squash Commits
 
