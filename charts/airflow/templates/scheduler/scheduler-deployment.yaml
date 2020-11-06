@@ -78,10 +78,10 @@ spec:
         {{- toYaml .Values.scheduler.securityContext | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
-      {{- if or (.Values.dags.initContainer.enabled) (.Values.scheduler.preinitdb) (.Values.scheduler.extraInitContainers) }}
+      {{- if or (.Values.dags.initContainer.enabled) (.Values.scheduler.preinitdb) (.Values.scheduler.extraInitContainers) (.Values.scheduler.upgradedb) }}
       initContainers:
-        {{- if .Values.scheduler.preinitdb }}
-        - name: {{ .Chart.Name }}-preinitdb
+        {{- if or .Values.scheduler.upgradedb .Values.scheduler.preinitdb }}
+        - name: {{ .Chart.Name }}-upgradedb
           image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
           imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
           command:
@@ -90,7 +90,7 @@ spec:
           args:
             - "/bin/bash"
             - "-c"
-            - "/home/airflow/scripts/preinit-db.sh"
+            - "/home/airflow/scripts/upgrade-db.sh"
           envFrom:
             - configMapRef:
                 name: "{{ include "airflow.fullname" . }}-env"
@@ -236,8 +236,8 @@ spec:
                && pip install --user {{ range .Values.airflow.extraPipPackages }} {{ . | quote }} {{ end }} \
               {{- end }}
               {{- if .Values.scheduler.initdb }}
-               && echo "*** executing Airflow initdb..." \
-               && airflow initdb \
+               && echo "*** executing Airflow upgradedb..." \
+               && airflow upgradedb \
               {{- end }}
               {{- if .Values.scheduler.variables }}
                && echo "*** adding Airflow variables..." \

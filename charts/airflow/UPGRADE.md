@@ -1,5 +1,14 @@
 # Upgrading Steps
 
+## `v7.14.X` → `v7.15.0`
+
+__The following values have been ADDED:__
+* `scheduler.upgradedb`
+
+__If you are using `scheduler.initdb` or `scheduler.preintdb`, the behaviour has changed:__
+Instead of running `airflow initdb` these two commands now run `airfow upgradedb`. This command will still create
+all necessary tables but without adding some default values.
+
 ## `v7.13.X` → `v7.14.0`
 
 > ⚠️ WARNING

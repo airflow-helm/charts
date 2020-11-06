@@ -58,6 +58,7 @@ kubectl exec \
 > 
 > you can find chart version numbers under [GitHub Releases](https://github.com/airflow-helm/charts/releases)
 
+- [v7.14.X → v7.15.0](UPGRADE.md#v714x--v7150)
 - [v7.13.X → v7.14.0](UPGRADE.md#v713x--v7140)
 - [v7.12.X → v7.13.0](UPGRADE.md#v712x--v7130)
 - [v7.11.X → v7.12.0](UPGRADE.md#v711x--v7120)
@@ -414,12 +415,16 @@ extraManifests:
 
 ---
 
-## Docs (Database) - DB Initialization 
+## Docs (Database) - DB Initialization
 
-If the value `scheduler.initdb` is set to `true` (this is the default), the airflow-scheduler container will run `airflow initdb` as part of its startup script.
+If the value `scheduler.initdb` is set to `true` (this is the default), the airflow-scheduler container will run `airflow upgradedb` as part of its startup script. See `scheduler.upgradedb` for more details.
 
-If the value `scheduler.preinitdb` is set to `true`, then we ALSO RUN `airflow initdb` in an init-container (retrying 5 times).
-This is unusually NOT necessary unless your synced DAGs include custom database hooks that prevent `airflow initdb` from running.
+If the value `scheduler.preinitdb` is set to `true`, then we ALSO RUN `airflow upgradedb` in an init-container (retrying 5 times).
+This is unusually NOT necessary unless your synced DAGs include custom database hooks that prevent `airflow upgradedb` from running.
+
+If the value `scheduler.upgradedb` is set to `true`, `airflow upgradedb` will be run in an init-container. This creates all tables
+needed by airflow without a lot of default connection, charts, etc. which might be prefered over `initdb` for production environments.
+`upgrade` keeps track of migrations already applies, so it’s safe to run as often as you need.
 
 ## Docs (Database) - Passwords
 
