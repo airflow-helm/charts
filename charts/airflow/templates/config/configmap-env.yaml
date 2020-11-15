@@ -109,6 +109,12 @@ data:
   {{- if (not .Values.airflow.config.AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME) }}
   AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME: "{{ include "airflow.serviceAccountName" . }}"
   {{- end }}
+  {{- if (not .Values.airflow.config.AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY) }}
+  AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY: {{ .Values.airflow.image.repository }}
+  {{- end }}
+  {{- if (not .Values.airflow.config.AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG) }}
+  AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG: {{ .Values.airflow.image.tag }}
+  {{- end }}
   {{- end }}
 
   {{- if .Values.airflow.config }}
