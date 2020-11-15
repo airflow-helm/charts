@@ -11,7 +11,7 @@ assignees: ''
 
 **What is the bug?**
 
-A clear description of what the bug is.
+A clear description of the bug.
 
 
 **What are your Helm values?**
@@ -23,7 +23,7 @@ Any relevant parts of your `custom_values.yaml`
 
 ```console
 $ kubectl version
-please put the output of it here
+please put the output here
 ```
 
 
@@ -31,5 +31,5 @@ please put the output of it here
 
 ```console
 $ helm version
-please put the output of it here
+please put the output here
 ```
