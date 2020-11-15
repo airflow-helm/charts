@@ -35,10 +35,10 @@ name: "my-airflow"
 description: "Helm chart for my-airflow"
 type: application
 version: "1.0.0"
-appVersion: "7.14.0"
+appVersion: "7.14.1"
 dependencies:
   - name: airflow
-    version: 7.14.0
+    version: 7.14.1
     repository: "https://airflow-helm.github.io/charts"
 ```
 
