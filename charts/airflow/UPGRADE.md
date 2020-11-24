@@ -1,5 +1,10 @@
 # Upgrading Steps
 
+## `v7.14.X` → `v7.15.0`
+
+__The following value has been ADDED:__
+* `dags.ignoreFailures` - this allows for any non-zero exit codes from the `pip install` command to be ignored; requires `dags.installRequirements` to have been set, otherwise will do nothing.
+
 ## `v7.13.X` → `v7.14.0`
 
 > ⚠️ WARNING

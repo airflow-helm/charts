@@ -885,6 +885,9 @@ dags:
   ##
   installRequirements: false
 
+  ## set to true to ignore failures from `installRequirements`
+  ignoreFailures: false
+
   ## configs for the dags PVC
   ##
   persistence:

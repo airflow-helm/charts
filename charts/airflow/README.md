@@ -659,7 +659,7 @@ airflow:
 
 > ⚠️ if you update the `requirements.txt`, you will have to restart each worker Pod for changes to take effect, you might consider using `airflow.extraPipPackages` instead
 
-We expose the `dags.installRequirements` value to pip install any `requirements.txt` found at the root of your `dags.path` folder as airflow-worker Pods start.
+We expose the `dags.installRequirements` value to pip install any `requirements.txt` found at the root of your `dags.path` folder as airflow-worker Pods start. If you want ignore failures from the `pip install` command, then set `dags.ignoreFailures` to `true`.
 
 ---
 
@@ -801,6 +801,7 @@ __Airflow DAGs Values:__
 | `dags.path` | the airflow dags folder | `/opt/airflow/dags` |
 | `dags.doNotPickle` | whether to disable pickling dags from the scheduler to workers | `false` |
 | `dags.installRequirements` | install any Python `requirements.txt` at the root of `dags.path` automatically | `false` |
+| `dags.ignoreFailures` | ignore failures from installation of Python `requirements.txt`; requires setting `dags.installRequirements` | `false` |
 | `dags.persistence.*` | configs for the dags PVC | `<see values.yaml>` |
 | `dags.git.*` | configs for the DAG git repository & sync container | `<see values.yaml>` |
 | `dags.initContainer.*` | configs for the git-clone container | `<see values.yaml>` |

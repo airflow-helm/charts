@@ -17,7 +17,7 @@ data:
 
     cd {{ .Values.dags.path | quote }}
     if [ -f requirements.txt ]; then
-      pip install --user -r requirements.txt
+      pip install --user -r requirements.txt {{ if .Values.dags.ignoreFailures }}|| true{{ end }}
     else
       exit 0
     fi
