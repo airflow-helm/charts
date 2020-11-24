@@ -109,8 +109,8 @@ airflow:
   ##
   extraEnv: []
 
-  ## extra environment variables from ConfigMaps or Secrets for the web/scheduler/worker (AND flower) Pods 
-  ## 
+  ## extra environment variables from ConfigMaps or Secrets for the web/scheduler/worker (AND flower) Pods
+  ##
   ## EXAMPLE:
   ##   extraEnvFrom:
   ##     - configMapRef:
