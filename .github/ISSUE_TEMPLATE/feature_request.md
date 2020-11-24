@@ -9,21 +9,11 @@ assignees: ''
 <!-- ⚠️ BEFORE you submit an issue, please check if a similar issue already exists -->
 
 
-**Is your feature request related to a problem?**
+**What is your feature request?**
 
-Ex. I'm always frustrated when [...]
-
-
-**Describe the solution you'd like**
-
-What you want to happen.
+A clear description of what you want.
 
 
-**Describe alternatives you've considered**
+**What alternatives have you considered?**
 
-Any alternative solutions or features you've considered.
-
-
-**Additional context**
-
-Add any other context or screenshots about the feature request here.
+Any alternatives you've considered.

@@ -1,8 +1,6 @@
 # Airflow Helm Chart
 
-> ⚠️ NOTE
->
-> this chart is the continuation of [stable/airflow](https://github.com/helm/charts/tree/master/stable/airflow), by the same maintainers
+> ⚠️ this chart is the continuation of [stable/airflow](https://github.com/helm/charts/tree/master/stable/airflow), see [issue #6](https://github.com/airflow-helm/charts/issues/6) for upgrade guide
 
 [Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule, and monitor workflows.
 
@@ -37,10 +35,6 @@ helm install \
 
 ### 3 - Run commands in Webserver Pod
 
-> ⚠️ NOTE
-> 
-> you might want to run commands like: `airflow create_user`
-
 ```sh
 kubectl exec \
   -it \
@@ -48,16 +42,18 @@ kubectl exec \
   --container airflow-web \
   Deployment/[RELEASE_NAME]-web \
   /bin/bash
+
+# then run commands like 
+airflow create_user ...
 ```
 
 ---
 
 ## Upgrade Steps
 
-> ⚠️ NOTE
-> 
-> you can find chart version numbers under [GitHub Releases](https://github.com/airflow-helm/charts/releases)
+Find chart version numbers under [GitHub Releases](https://github.com/airflow-helm/charts/releases):
 
+- [v7.14.X → v7.15.0](UPGRADE.md#v7140--v7150)
 - [v7.13.X → v7.14.0](UPGRADE.md#v713x--v7140)
 - [v7.12.X → v7.13.0](UPGRADE.md#v712x--v7130)
 - [v7.11.X → v7.12.0](UPGRADE.md#v711x--v7120)
@@ -212,6 +208,18 @@ airflow:
         secretKeyRef:
           name: ldap
           key: password
+```
+
+We expose the `airflow.extraEnvFrom` value to mount all keys inside a ConfigMap or Secret as environment variables.
+
+For example, mounting keys from `ConfigMap/my-airflow-configs` and `Secret/my-airflow-secrets`:
+```yaml
+airflow:
+  extraEnvFrom:
+    - configMapRef:
+        name: my-airflow-configs
+    - secretRef:
+        name: my-airflow-secrets
 ```
 
 ## Docs (Airflow) - ConfigMaps
@@ -451,9 +459,7 @@ redis:
 
 ## Docs (Database) - External Database
 
-> ⚠️ WARNING
-> 
-> the embedded PostgreSQL is NOT SUITABLE for production, you should configure one of the following external databases
+> 🛑️️ the embedded PostgreSQL is NOT SUITABLE for production, you should configure one of the following external databases
 
 ### Option 1 - Postgres
 
@@ -471,9 +477,7 @@ externalDatabase:
 
 ### Option 2 - MySQL
 
-> ⚠️ WARNING
->
-> you must set `explicit_defaults_for_timestamp=1` in your MySQL instance, [see here](https://airflow.apache.org/docs/stable/howto/initialize-database.html)
+> ⚠️ you must set `explicit_defaults_for_timestamp=1` in your MySQL instance, [see here](https://airflow.apache.org/docs/stable/howto/initialize-database.html)
 
 Example values for an external MySQL database, with an existing `airflow_cluster1` database:
 ```yaml
@@ -491,9 +495,7 @@ externalDatabase:
 
 ## Docs (Other) - Log Persistence
 
-> ⚠️ NOTE
-> 
-> you will likely want to persist logs in a production deployment
+> 🛑️️ you should persist logs in a production deployment using one of the following methods
 
 By default, logs from the airflow-web/scheduler/worker are written within the Docker container's filesystem, therefore any restart of the pod will wipe the logs.
 
@@ -580,6 +582,8 @@ For more information, see the `serviceMonitor` section of `values.yaml`.
 
 ### Option 1 - Git Sidecar (Recommended)
 
+> ⚠️ specifying `known_hosts` inside `dags.git.secret` reduces the possibility of a man-in-the-middle attack, however, if you want to implicitly trust all repo host signatures set `dags.git.sshKeyscan` to `true`
+
 This method places a git sidecar in each worker/scheduler/web Pod, that syncs your git repo into the dag folder every `dags.git.gitSync.refreshTime` seconds.
 
 ```yaml
@@ -605,15 +609,9 @@ kubectl create secret generic \
   --namespace airflow
 ```
 
-> ⚠️ NOTE
-> 
-> specifying `known_hosts` inside `dags.git.secret` reduces the possibility of a man-in-the-middle attack, however, if you want to implicitly trust all repo host signatures set `dags.git.sshKeyscan` to `true`
-
 ### Option 2a - PersistentVolume
 
-> ⚠️ WARNING 
-> 
-> this method requires a PersistentVolumeClaim which supports `accessMode`: `ReadOnlyMany` or `ReadWriteMany`
+> ⚠️️ this method requires a PersistentVolumeClaim which supports `accessMode = ReadOnlyMany or ReadWriteMany`
 
 This method stores your DAGs in a PersistentVolume.
 
@@ -640,9 +638,7 @@ dags:
 
 ### Option 2b - Shared PersistentVolume
 
-> ⚠️ WARNING 
-> 
-> this method requires a PersistentVolumeClaim which supports `accessMode`: `ReadWriteMany`
+> ⚠️ this method requires a PersistentVolumeClaim which supports `accessMode = ReadWriteMany`
 
 This method stores both DAGs and logs on the same PersistentVolume.
 
@@ -674,13 +670,9 @@ airflow:
 
 ## Docs (Other) - requirements.txt
 
-We expose the `dags.installRequirements` value to pip install any `requirements.txt` found at the root of your `dags.path` folder as airflow-worker Pods start.
+> ⚠️ if you update the `requirements.txt`, you will have to restart each worker Pod for changes to take effect, you might consider using `airflow.extraPipPackages` instead
 
-> ⚠️ NOTE 
-> 
-> if you update the `requirements.txt`, you will have to restart each worker Pod for changes to take effect
-> 
-> you might consider using `airflow.extraPipPackages` instead
+We expose the `dags.installRequirements` value to pip install any `requirements.txt` found at the root of your `dags.path` folder as airflow-worker Pods start.
 
 ---
 
@@ -698,6 +690,7 @@ __Global Values:__
 | `airflow.config` | environment variables for the web/scheduler/worker pods (for airflow configs) | `{}` |
 | `airflow.podAnnotations` | extra annotations for the web/scheduler/worker/flower Pods | `{}` |
 | `airflow.extraEnv` | extra environment variables for the web/scheduler/worker/flower Pods | `[]` |
+| `airflow.extraEnvFrom` | extra configMap volumeMounts for the web/scheduler/worker (AND flower) Pods | `[]` |
 | `airflow.extraConfigmapMounts` | extra configMap volumeMounts for the web/scheduler/worker/flower Pods | `[]` |
 | `airflow.extraContainers` | extra containers for the web/scheduler/worker Pods | `[]` |
 | `airflow.extraPipPackages` | extra pip packages to install in the web/scheduler/worker Pods | `[]` |

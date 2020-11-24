@@ -1,5 +1,10 @@
 # Upgrading Steps
 
+## `v7.14.X` → `v7.15.0`
+
+__The following values have been ADDED:__
+* `airflow.extraEnvFrom`
+
 ## `v7.13.X` → `v7.14.0`
 
 > ⚠️ WARNING

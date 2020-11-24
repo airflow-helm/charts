@@ -24,6 +24,12 @@ airflow:
   ##     - `AIRFLOW__KUBERNETES__NAMESPACE`
   ##     - `AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME`
   ##     - `AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF`
+<<<<<<< HEAD
+  ##     - `AIRFLOW__KUBERNETES__ENV_FROM_SECRET_REF`
+=======
+  ##     - `AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY`
+  ##     - `AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG`
+>>>>>>> upstream/main
   ##
   executor: CeleryExecutor
 
@@ -106,7 +112,18 @@ airflow:
   ##
   extraEnv: []
 
-  ## extra configMap volumeMounts for the web/scheduler/worker Pods
+  ## extra environment variables from ConfigMaps or Secrets for the web/scheduler/worker (AND flower) Pods 
+  ## 
+  ## EXAMPLE:
+  ##   extraEnvFrom:
+  ##     - configMapRef:
+  ##         name: my-airflow-configs
+  ##     - secretRef:
+  ##         name: my-airflow-secrets
+  ##
+  extraEnvFrom: []
+
+  ## extra configMap volumeMounts for the web/scheduler/worker (AND flower) Pods
   ##
   ## EXAMPLE:
   ##   extraConfigmapMounts:
