@@ -53,7 +53,8 @@ airflow create_user ...
 
 Find chart version numbers under [GitHub Releases](https://github.com/airflow-helm/charts/releases):
 
-- [v7.14.X → v7.15.0](UPGRADE.md#v7140--v7150)
+- [v7.15.X → v7.16.0](UPGRADE.md#v7140--v7150)
+- [v7.14.X → v7.15.0](UPGRADE.md#v714x--v7150)
 - [v7.13.X → v7.14.0](UPGRADE.md#v713x--v7140)
 - [v7.12.X → v7.13.0](UPGRADE.md#v712x--v7130)
 - [v7.11.X → v7.12.0](UPGRADE.md#v711x--v7120)
@@ -424,10 +425,10 @@ extraManifests:
 
 ## Docs (Database) - DB Initialization 
 
-If the value `scheduler.initdb` is set to `true` (this is the default), the airflow-scheduler container will run `airflow initdb` as part of its startup script.
+If the value `scheduler.initdb` is set to `true` (this is the default), the airflow-scheduler container will run `airflow upgradedb || airflow db upgrade` as part of its startup script.
 
-If the value `scheduler.preinitdb` is set to `true`, then we ALSO RUN `airflow initdb` in an init-container (retrying 5 times).
-This is unusually NOT necessary unless your synced DAGs include custom database hooks that prevent `airflow initdb` from running.
+If the value `scheduler.preinitdb` is set to `true`, then we ALSO RUN `airflow upgradedb || airflow db upgrade` in an init-container (retrying 5 times).
+This is unusually NOT necessary unless your synced DAGs include custom database hooks that prevent `airflow upgradedb || airflow db upgrade` from running.
 
 ## Docs (Database) - Passwords
 
@@ -589,23 +590,26 @@ This method places a git sidecar in each worker/scheduler/web Pod, that syncs yo
 ```yaml
 dags:
   git:
-    url: ssh://git@repo.example.com/example.git
-    repoHost: repo.example.com
+    #ssh://git@example.com:22/REPOSITORY.git
+    url: git@github.com:USERNAME/REPOSITORY.git
+    ref: master
     secret: airflow-git-keys
     privateKeyName: id_rsa
+    repoHost: github.com
+    repoPort: 22
 
     gitSync:
       enabled: true
       refreshTime: 60
 ```
 
-You can create the `dags.git.secret` from your local `~/.ssh` folder using:
+You can create the `dags.git.secret` from your local `$HOME/.ssh` folder using:
 ```console
 kubectl create secret generic \
   airflow-git-keys \
-  --from-file=id_rsa=~/.ssh/id_rsa \
-  --from-file=id_rsa.pub=~/.ssh/id_rsa.pub \
-  --from-file=known_hosts=~/.ssh/known_hosts \
+  --from-file=id_rsa=$HOME/.ssh/id_rsa \
+  --from-file=id_rsa.pub=$HOME/.ssh/id_rsa.pub \
+  --from-file=known_hosts=$HOME/.ssh/known_hosts \
   --namespace airflow
 ```
 
@@ -718,8 +722,8 @@ __Airflow Scheduler values:__
 | `scheduler.variables` | custom airflow variables for the airflow scheduler | `"{}"` |
 | `scheduler.pools` | custom airflow pools for the airflow scheduler | `"{}"` |
 | `scheduler.numRuns` | the value of the `airflow --num_runs` parameter used to run the airflow scheduler | `-1` |
-| `scheduler.initdb` | if we run `airflow initdb` when the scheduler starts | `true` |
-| `scheduler.preinitdb` | if we run `airflow initdb` inside a special initContainer | `false` |
+| `scheduler.initdb` | if we run `airflow upgradedb` when the scheduler starts | `true` |
+| `scheduler.preinitdb` | if we run `airflow upgradedb` inside a special initContainer | `false` |
 | `scheduler.initialStartupDelay` | the number of seconds to wait (in bash) before starting the scheduler container | `0` |
 | `scheduler.livenessProbe.*` | configs for the scheduler liveness probe | `<see values.yaml>` |
 | `scheduler.extraInitContainers` | extra init containers to run before the scheduler pod | `[]` |

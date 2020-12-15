@@ -240,8 +240,8 @@ spec:
                && pip install --user {{ range .Values.airflow.extraPipPackages }} {{ . | quote }} {{ end }} \
               {{- end }}
               {{- if .Values.scheduler.initdb }}
-               && echo "*** executing Airflow initdb..." \
-               && airflow initdb \
+               && echo "*** upgrading airflow db..." \
+               && airflow upgradedb || airflow db upgrade \
               {{- end }}
               {{- if .Values.scheduler.variables }}
                && echo "*** adding Airflow variables..." \
