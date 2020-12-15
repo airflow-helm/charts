@@ -411,10 +411,10 @@ extraManifests:
 
 ## Docs (Database) - DB Initialization 
 
-If the value `scheduler.initdb` is set to `true` (this is the default), the airflow-scheduler container will run `airflow initdb` as part of its startup script.
+If the value `scheduler.initdb` is set to `true` (this is the default), the airflow-scheduler container will run `airflow upgradedb || airflow db upgrade` as part of its startup script.
 
-If the value `scheduler.preinitdb` is set to `true`, then we ALSO RUN `airflow initdb` in an init-container (retrying 5 times).
-This is unusually NOT necessary unless your synced DAGs include custom database hooks that prevent `airflow initdb` from running.
+If the value `scheduler.preinitdb` is set to `true`, then we ALSO RUN `airflow upgradedb || airflow db upgrade` in an init-container (retrying 5 times).
+This is unusually NOT necessary unless your synced DAGs include custom database hooks that prevent `airflow upgradedb || airflow db upgrade` from running.
 
 ## Docs (Database) - Passwords
 
@@ -707,8 +707,8 @@ __Airflow Scheduler values:__
 | `scheduler.variables` | custom airflow variables for the airflow scheduler | `"{}"` |
 | `scheduler.pools` | custom airflow pools for the airflow scheduler | `"{}"` |
 | `scheduler.numRuns` | the value of the `airflow --num_runs` parameter used to run the airflow scheduler | `-1` |
-| `scheduler.initdb` | if we run `airflow initdb` when the scheduler starts | `true` |
-| `scheduler.preinitdb` | if we run `airflow initdb` inside a special initContainer | `false` |
+| `scheduler.initdb` | if we run `airflow upgradedb` when the scheduler starts | `true` |
+| `scheduler.preinitdb` | if we run `airflow upgradedb` inside a special initContainer | `false` |
 | `scheduler.initialStartupDelay` | the number of seconds to wait (in bash) before starting the scheduler container | `0` |
 | `scheduler.livenessProbe.*` | configs for the scheduler liveness probe | `<see values.yaml>` |
 | `scheduler.extraInitContainers` | extra init containers to run before the scheduler pod | `[]` |
