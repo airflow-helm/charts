@@ -1,5 +1,18 @@
 # Upgrading Steps
 
+## `v7.14.X` → `v7.15.0`
+
+__The following IMPROVEMENTS have been made:__
+* We now use `airflow upgradedb || airflow db upgrade` instead of `airflow initdb` with the following values:
+    * `scheduler.initdb`
+    * `scheduler.preinitdb`
+
+__The following values have CHANGED DEFAULTS:__
+* `dags.git.gitSync.image.pullPolicy`
+    * Is now `IfNotPresent` by default
+* `dags.initContainer.image.pullPolicy`
+    * Is now `IfNotPresent` by default
+
 ## `v7.13.X` → `v7.14.0`
 
 > ⚠️ WARNING
