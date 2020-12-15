@@ -1010,7 +1010,7 @@ dags:
         repository: alpine/git
         tag: latest
         ## values: Always or IfNotPresent
-        pullPolicy: Always
+        pullPolicy: IfNotPresent
 
       ## the git sync interval in seconds
       ##
@@ -1047,7 +1047,7 @@ dags:
       repository: alpine/git
       tag: latest
       ## values: Always or IfNotPresent
-      pullPolicy: Always
+      pullPolicy: IfNotPresent
 
     ## path to mount dags-data volume to
     ##
