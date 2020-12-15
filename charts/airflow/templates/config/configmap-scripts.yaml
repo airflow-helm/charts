@@ -45,16 +45,16 @@ data:
 
     COUNT=0
     while [ "${COUNT}" -lt 5 ]; do
-      echo "*** Initializing airflow db"
-      if airflow initdb; then
-        echo "*** Initdb succeeded"
+      echo "*** upgrading airflow db"
+      if airflow upgradedb || airflow db upgrade; then
+        echo "*** upgradedb succeeded"
         exit 0
       else
         ((COUNT++))
-        echo "*** Initdb failed: waiting 5s before retry #${COUNT}"
+        echo "*** upgradedb failed: waiting 5s before retry #${COUNT}"
         sleep 5
       fi
     done
 
-    echo "*** Initdb failed after ${COUNT} retries; failed."
+    echo "*** upgradedb failed after ${COUNT} retries; failed."
     exit 1

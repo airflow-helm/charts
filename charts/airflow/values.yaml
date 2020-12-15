@@ -313,11 +313,11 @@ scheduler:
   ##
   numRuns: -1
 
-  ## if we run `airflow initdb` when the scheduler starts
+  ## if we run `airflow upgradedb || airflow db upgrade` when the scheduler starts
   ##
   initdb: true
 
-  ## if we run `airflow initdb` inside a special initContainer
+  ## if we run `airflow upgradedb || airflow db upgrade` inside a special initContainer
   ##
   ## NOTE:
   ## - may be needed if you have custom database hooks configured that will be pulled in by git-sync
