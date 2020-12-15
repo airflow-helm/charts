@@ -929,10 +929,16 @@ dags:
     ## url of the git repository
     ##
     ## EXAMPLE: (HTTP)
-    ##   url: "https://github.com/torvalds/linux.git"
+    ##   url: "https://github.com/USERNAME/REPOSITORY.git"
+    ##
+    ## EXAMPLE: (HTTP - Token)
+    ##   url: "https://USERNAME:TOKEN@github.com/USERNAME/REPOSITORY.git"
     ##
     ## EXAMPLE: (SSH)
-    ##   url: "ssh://git@github.com:torvalds/linux.git"
+    ##   url: "ssh://git@example.com:22/REPOSITORY.git"
+    ##
+    ## EXAMPLE: (SSH - GitHub)
+    ##   url: "git@github.com:USERNAME/REPOSITORY.git"
     ##
     url: ""
 
@@ -952,7 +958,7 @@ dags:
     ## if we should implicitly trust [git.repoHost]:git.repoPort, by auto creating a ~/.ssh/known_hosts
     ##
     ## WARNING:
-    ## - setting true will increase your vulnerability ot a repo spoofing attack
+    ## - setting true will increase your vulnerability to a repo spoofing attack
     ##
     ## NOTE:
     ## - this is ONLY RELEVANT for SSH git repos
