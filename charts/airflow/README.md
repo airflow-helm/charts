@@ -576,23 +576,26 @@ This method places a git sidecar in each worker/scheduler/web Pod, that syncs yo
 ```yaml
 dags:
   git:
-    url: ssh://git@repo.example.com/example.git
-    repoHost: repo.example.com
+    #ssh://git@example.com:22/REPOSITORY.git
+    url: git@github.com:USERNAME/REPOSITORY.git
+    ref: master
     secret: airflow-git-keys
     privateKeyName: id_rsa
+    repoHost: github.com
+    repoPort: 22
 
     gitSync:
       enabled: true
       refreshTime: 60
 ```
 
-You can create the `dags.git.secret` from your local `~/.ssh` folder using:
+You can create the `dags.git.secret` from your local `$HOME/.ssh` folder using:
 ```console
 kubectl create secret generic \
   airflow-git-keys \
-  --from-file=id_rsa=~/.ssh/id_rsa \
-  --from-file=id_rsa.pub=~/.ssh/id_rsa.pub \
-  --from-file=known_hosts=~/.ssh/known_hosts \
+  --from-file=id_rsa=$HOME/.ssh/id_rsa \
+  --from-file=id_rsa.pub=$HOME/.ssh/id_rsa.pub \
+  --from-file=known_hosts=$HOME/.ssh/known_hosts \
   --namespace airflow
 ```
 
