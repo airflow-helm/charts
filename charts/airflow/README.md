@@ -53,7 +53,7 @@ airflow create_user ...
 
 Find chart version numbers under [GitHub Releases](https://github.com/airflow-helm/charts/releases):
 
-- [v7.15.X → v7.16.0](UPGRADE.md#v7140--v7150)
+- [v7.15.X → v7.16.0](UPGRADE.md#v7150--v7160)
 - [v7.14.X → v7.15.0](UPGRADE.md#v714x--v7150)
 - [v7.13.X → v7.14.0](UPGRADE.md#v713x--v7140)
 - [v7.12.X → v7.13.0](UPGRADE.md#v712x--v7130)
