@@ -280,9 +280,13 @@ scheduler:
   ## NOTE:
   ## - THIS IS A STRING, containing a JSON object, with your variables in it
   ##
-  ## EXAMPLE:
+  ## EXAMPLE_STRING:
   ##   variables: |
   ##     { "environment": "dev" }
+  ##
+  ## EXAMPLE_DICT:
+  ##   variables:
+  ##     environment: dev
   ##
   variables: |
     {}
@@ -290,9 +294,9 @@ scheduler:
   ## custom airflow pools for the airflow scheduler
   ##
   ## NOTE:
-  ## - THIS IS A STRING, containing a JSON object, with your pools in it
+  ## - This can be a dict or a string, containing a JSON object, with your pools in it
   ##
-  ## EXAMPLE:
+  ## EXAMPLE_STRING:
   ##   pools: |
   ##     {
   ##       "example": {
@@ -300,6 +304,14 @@ scheduler:
   ##         "slots": 2
   ##       }
   ##     }
+  ##
+  ## EXAMPLE_DICT:
+  ##   pools:
+  ##     example: {
+  ##       description: This is an example pool with 2 slots.
+  ##       slots: 2
+  ##     }
+  ##   }
   ##
   pools: |
     {}

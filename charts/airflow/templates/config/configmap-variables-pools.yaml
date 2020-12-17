@@ -11,10 +11,18 @@ metadata:
 data:
   {{- if .Values.scheduler.variables }}
   variables.json: |
-    {{- .Values.scheduler.variables | nindent 4 }}
+    {{- if eq (typeOf .Values.scheduler.variables) "map[string]interface {}" }}
+      {{- (default .Values.scheduler.variables (.Values.scheduler.variables | toPrettyJson)) | nindent 4 }}
+    {{- else if eq (typeOf .Values.scheduler.variables) "string" }}
+      {{- .Values.scheduler.variables | nindent 4 }}
+    {{- end }}
   {{- end }}
   {{- if .Values.scheduler.pools }}
   pools.json: |
-    {{- .Values.scheduler.pools | nindent 4 }}
+    {{- if eq (typeOf .Values.scheduler.pools) "map[string]interface {}" }}
+      {{- (default .Values.scheduler.pools (.Values.scheduler.pools | toPrettyJson)) | nindent 4 }}
+    {{- else if eq (typeOf .Values.scheduler.variables) "string" }}
+      {{- .Values.scheduler.pools | nindent 4 }}
+    {{- end }}
   {{- end }}
 {{- end }}

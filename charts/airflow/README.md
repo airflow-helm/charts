@@ -170,8 +170,8 @@ We expose the `scheduler.variables` value to specify [Airflow Variables](https:/
 For example, to specify a variable called `environment`:
 ```yaml
 scheduler:
-  variables: |
-    { "environment": "dev" }
+  variables:
+    environment: "dev"
 ```
 
 ## Docs (Airflow) - Pools
