@@ -627,6 +627,7 @@ workers:
     pollingInterval: 30
     cooldownPeriod: 300
     maxReplicaCount: 100
+    sslmode: ""
 
   ## the number of seconds to wait (in bash) before starting each worker container
   ##

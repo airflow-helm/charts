@@ -21,14 +21,23 @@ spec:
   cooldownPeriod: {{ .Values.workers.keda.cooldownPeriod }}
   maxReplicaCount: {{ .Values.workers.keda.maxReplicaCount }}
   triggers:
-    - type: postgresql
+    - type: "{{ ternary "mysql" "postgresql" (eq .Values.externalDatabase.type "mysql") }}"
       metadata:
         targetQueryValue: "1"
-        userName: {{ .Values.postgresql.postgresqlUsername }}
+        {{- if .Values.postgresql.enabled }}
         host: {{ include "airflow.postgresql.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
-        dbName: {{ .Values.postgresql.postgresqlDatabase }}
         port: "5432"
-        sslmode: disable
+        userName: "{{ .Values.postgresql.postgresqlUsername }}"
+        dbName: "{{ .Values.postgresql.postgresqlDatabase }}"
+        {{- else }}
+        host: "{{ .Values.externalDatabase.host }}"
+        port: "{{ .Values.externalDatabase.port }}"
+        userName: "{{ .Values.externalDatabase.user }}"
+        dbName: "{{ .Values.externalDatabase.database }}"
+        {{- end }}
+        sslmode: {{ .Values.workers.keda.sslmode }}
         passwordFromEnv: DATABASE_PASSWORD
-        query: "SELECT ceil(COUNT(*)::decimal / 16) FROM task_instance WHERE state='running' OR state='queued'"
+        query: >-
+          SELECT ceil({{- ternary "count(*)" "count(*)::decimal" (eq .Values.externalDatabase.type "mysql") -}} / 16)
+          FROM task_instance WHERE state='running' OR state='queued'
 {{- end }}
