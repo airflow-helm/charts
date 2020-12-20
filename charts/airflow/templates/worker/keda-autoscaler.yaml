@@ -17,9 +17,9 @@ spec:
   scaleTargetRef:
     kind: StatefulSet
     name: {{ include "airflow.fullname" . }}-worker
-  pollingInterval:  {{ .Values.workers.keda.pollingInterval }}   # Optional. Default: 30 seconds
-  cooldownPeriod: {{ .Values.workers.keda.cooldownPeriod }}    # Optional. Default: 300 seconds
-  maxReplicaCount: {{ .Values.workers.keda.maxReplicaCount }}   # Optional. Default: 100
+  pollingInterval:  {{ .Values.workers.keda.pollingInterval }}
+  cooldownPeriod: {{ .Values.workers.keda.cooldownPeriod }}
+  maxReplicaCount: {{ .Values.workers.keda.maxReplicaCount }}
   triggers:
     - type: postgresql
       metadata:
