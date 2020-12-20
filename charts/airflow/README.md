@@ -358,17 +358,11 @@ dags:
 
 ### Option 2: KEDA autoscaler
 
-First install KEDA:
-
-```bash
-helm install keda \
-    --namespace keda kedacore/keda \
-    --version "v2.0.0"
-```
-
-Next, enable:
+To enable, ensure these values are set:
 
 ```yaml
+airflow:
+  executor: CeleryExecutor  # or CeleryKubernetesExecutor
 workers:
   keda:
     enabled: true 
@@ -376,8 +370,16 @@ workers:
     enabled: false  # required for KEDA
 ```
 
-Enabling keda will trigger the creation of a `ScaledObject` custom resource and an associated `hpa`.
+KEDA will autoscale the number of celery workers based on the following query:
 
+```sql
+SELECT ceil(COUNT(*)::decimal / 16)
+FROM task_instance
+WHERE state='running'
+    OR state='queued'"
+```
+
+See `templates/worker/keda-autoscaler.yaml` for more info.
 
 ## Docs (Kubernetes) - Worker Secrets
 
