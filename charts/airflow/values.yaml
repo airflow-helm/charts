@@ -621,6 +621,13 @@ workers:
     maxReplicas: 2
     metrics: []
 
+
+  keda:
+    enabled: false
+    pollingInterval: 30
+    cooldownPeriod: 300
+    maxReplicaCount: 100
+
   ## the number of seconds to wait (in bash) before starting each worker container
   ##
   initialStartupDelay: 0

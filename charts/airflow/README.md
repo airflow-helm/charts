@@ -297,6 +297,8 @@ ingress:
 
 ## Docs (Kubernetes) - Worker Autoscaling
 
+### Option 1: Horizontal Pod Autoscaler
+
 We use a Kubernetes StatefulSet for the Celery workers, this allows the webserver to requests logs from each workers individually, with a fixed DNS name.
 
 Celery workers can be scaled using the [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/).
@@ -353,6 +355,29 @@ dags:
           ## IMPORTANT! for autoscaling to work
           memory: "64Mi"
 ```
+
+### Option 2: KEDA autoscaler
+
+First install KEDA:
+
+```bash
+helm install keda \
+    --namespace keda kedacore/keda \
+    --version "v2.0.0"
+```
+
+Next, enable:
+
+```yaml
+workers:
+  keda:
+    enabled: true 
+  persistence:
+    enabled: false  # required for KEDA
+```
+
+Enabling keda will trigger the creation of a `ScaledObject` custom resource and an associated `hpa`.
+
 
 ## Docs (Kubernetes) - Worker Secrets
 

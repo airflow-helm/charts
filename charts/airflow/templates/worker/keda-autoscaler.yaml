@@ -1,0 +1,34 @@
+{{- if (and .Values.workers.keda.enabled ( or (eq .Values.airflow.executor "CeleryExecutor") (eq .Values.airflow.executor "CeleryKubernetesExecutor"))) }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ .Release.Name }}-worker
+  labels:
+    tier: airflow
+    component: worker-horizontalpodautoscaler
+    release: {{ .Release.Name }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    heritage: {{ .Release.Service }}
+    deploymentName: {{ .Release.Name }}-worker
+{{- with .Values.labels }}
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+  scaleTargetRef:
+    kind: StatefulSet
+    name: {{ include "airflow.fullname" . }}-worker
+  pollingInterval:  {{ .Values.workers.keda.pollingInterval }}   # Optional. Default: 30 seconds
+  cooldownPeriod: {{ .Values.workers.keda.cooldownPeriod }}    # Optional. Default: 300 seconds
+  maxReplicaCount: {{ .Values.workers.keda.maxReplicaCount }}   # Optional. Default: 100
+  triggers:
+    - type: postgresql
+      metadata:
+        targetQueryValue: "1"
+        userName: {{ .Values.postgresql.postgresqlUsername }}
+        host: {{ include "airflow.postgresql.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+        dbName: {{ .Values.postgresql.postgresqlDatabase }}
+        port: "5432"
+        sslmode: disable
+        passwordFromEnv: DATABASE_PASSWORD
+        query: "SELECT ceil(COUNT(*)::decimal / 16) FROM task_instance WHERE state='running' OR state='queued'"
+{{- end }}
