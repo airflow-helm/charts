@@ -241,7 +241,7 @@ spec:
               {{- end }}
               {{- if .Values.scheduler.variables }}
                && echo "*** adding Airflow variables..." \
-               && airflow variables -i /home/airflow/variables-pools/variables.json \
+               && airflow variables -i /home/airflow/variables-pools/variables.json || airflow variables import /home/airflow/variables-pools/variables.json \
               {{- end }}
               {{- if or (.Values.scheduler.connections) (.Values.scheduler.existingSecretConnections) }}
                && echo "*** adding Airflow connections..." \
@@ -249,7 +249,7 @@ spec:
               {{- end }}
               {{- if .Values.scheduler.pools }}
                && echo "*** adding Airflow pools..." \
-               && airflow pool -i /home/airflow/variables-pools/pools.json \
+               && airflow pool -i /home/airflow/variables-pools/pools.json || airflow pools import /home/airflow/variables-pools/pools.json \
               {{- end }}
                && echo "*** running scheduler..." \
                && exec airflow scheduler -n {{ .Values.scheduler.numRuns }}

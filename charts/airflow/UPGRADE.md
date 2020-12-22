@@ -1,5 +1,12 @@
 # Upgrading Steps
 
+## `v7.15.0` → `v7.15.1`
+
+__The following IMPROVEMENTS have been made:__
+* We now use `airflow variables -i /home/airflow/variables-pools/variables.json || airflow variables import /home/airflow/variables-pools/variables.json` instead of `airflow variables -i /home/airflow/variables-pools/variables.json`
+* We now use `airflow pool -i /home/airflow/variables-pools/pools.json || airflow pools import /home/airflow/variables-pools/pools.json` instead of `airflow pool -i /home/airflow/variables-pools/pools.json`
+   
+
 ## `v7.14.X` → `v7.15.0`
 
 __The following IMPROVEMENTS have been made:__
