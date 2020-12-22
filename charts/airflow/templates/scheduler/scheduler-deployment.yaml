@@ -181,6 +181,17 @@ spec:
           volumeMounts:
             - name: scripts
               mountPath: /home/airflow/scripts
+            {{- if .Values.scheduler.secretsMap }}
+            - name: {{ .Values.scheduler.secretsMap }}-volume
+              readOnly: true
+              mountPath: {{ $.Values.scheduler.secretsDir }}
+            {{- else }}
+            {{- range .Values.scheduler.secrets }}
+            - name: {{ . }}-volume
+              readOnly: true
+              mountPath: {{ $.Values.scheduler.secretsDir }}/{{ . }}
+            {{- end }}
+            {{- end }}
             {{- if .Values.dags.persistence.enabled }}
             - name: dags-data
               mountPath: {{ .Values.dags.path }}
@@ -281,6 +292,17 @@ spec:
           configMap:
             name: {{ include "airflow.fullname" . }}-scripts
             defaultMode: 0755
+        {{- if .Values.scheduler.secretsMap }}
+        - name: {{ .Values.scheduler.secretsMap }}-volume
+          secret:
+            secretName: {{ .Values.scheduler.secretsMap }}
+        {{- else }}
+        {{- range .Values.scheduler.secrets }}
+        - name: {{ . }}-volume
+          secret:
+            secretName: {{ . }}
+        {{- end }}
+        {{- end }}
         {{- if .Values.dags.persistence.enabled }}
         - name: dags-data
           persistentVolumeClaim:

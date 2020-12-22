@@ -53,6 +53,7 @@ airflow create_user ...
 
 Find chart version numbers under [GitHub Releases](https://github.com/airflow-helm/charts/releases):
 
+- [v7.15.X → v7.16.0](UPGRADE.md#v715x--v7160)
 - [v7.14.X → v7.15.0](UPGRADE.md#v714x--v7150)
 - [v7.13.X → v7.14.0](UPGRADE.md#v713x--v7140)
 - [v7.12.X → v7.13.0](UPGRADE.md#v712x--v7130)
@@ -712,6 +713,9 @@ __Airflow Scheduler values:__
 | `scheduler.preinitdb` | if we run `airflow upgradedb` inside a special initContainer | `false` |
 | `scheduler.initialStartupDelay` | the number of seconds to wait (in bash) before starting the scheduler container | `0` |
 | `scheduler.livenessProbe.*` | configs for the scheduler liveness probe | `<see values.yaml>` |
+| `scheduler.secretsDir` | the directory in which to mount secrets on scheduler containers | `/var/airflow/secrets` |
+| `scheduler.secrets` | the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>` | `[]` |
+| `scheduler.secretsMap` | the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>` | `""` |
 | `scheduler.extraInitContainers` | extra init containers to run before the scheduler pod | `[]` |
 
 __Airflow Webserver Values:__
