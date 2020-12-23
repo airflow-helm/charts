@@ -346,6 +346,21 @@ scheduler:
     periodSeconds: 30
     failureThreshold: 5
 
+  ## the directory in which to mount secrets on scheduler containers
+  ##
+  secretsDir: /var/airflow/secrets
+
+  ## the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>`
+  ##
+  secrets: []
+
+  ## the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>`
+  ##
+  ## NOTE:
+  ##  - overrides `scheduler.secrets`
+  ##
+  secretsMap: ""
+
   ## extra init containers to run before the scheduler Pod
   ##
   ## EXAMPLE:
