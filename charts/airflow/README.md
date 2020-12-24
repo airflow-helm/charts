@@ -496,9 +496,9 @@ Example, using `AIRFLOW__CORE__REMOTE_LOG_CONN_ID` (can be used with AWS too):
 ```yaml
 airflow:
   config:
-    AIRFLOW__CORE__REMOTE_LOGGING: "True"
-    AIRFLOW__CORE__REMOTE_BASE_LOG_FOLDER: "gs://<<MY-BUCKET-NAME>>/airflow/logs"
-    AIRFLOW__CORE__REMOTE_LOG_CONN_ID: "google_cloud_airflow"
+    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://<<MY-BUCKET-NAME>>/airflow/logs"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "google_cloud_airflow"
 
 scheduler:
   connections:
@@ -515,9 +515,9 @@ Example, using [Workload Identity (GKE)](https://cloud.google.com/kubernetes-eng
 ```yaml
 airflow:
   config:
-    AIRFLOW__CORE__REMOTE_LOGGING: "True"
-    AIRFLOW__CORE__REMOTE_BASE_LOG_FOLDER: "gs://<<MY-BUCKET-NAME>>/airflow/logs"
-    AIRFLOW__CORE__REMOTE_LOG_CONN_ID: "google_cloud_default"
+    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://<<MY-BUCKET-NAME>>/airflow/logs"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "google_cloud_default"
 
 serviceAccount:
   annotations:
@@ -528,9 +528,9 @@ Example, using [IAM Roles for Service Accounts (EKS)](https://docs.aws.amazon.co
 ```yaml
 airflow:
   config:
-    AIRFLOW__CORE__REMOTE_LOGGING: "True"
-    AIRFLOW__CORE__REMOTE_BASE_LOG_FOLDER: "s3://<<MY-BUCKET-NAME>>/airflow/logs"
-    AIRFLOW__CORE__REMOTE_LOG_CONN_ID: "aws_default"
+    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "s3://<<MY-BUCKET-NAME>>/airflow/logs"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "aws_default"
 
 scheduler:
   securityContext:
