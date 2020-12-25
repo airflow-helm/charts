@@ -1,6 +1,6 @@
 # Upgrading Steps
 
-## `v7.16.X` → `v7.17.0`
+## `v7.16.0` → `v7.16.1`
 
 __The following IMPROVEMENTS have been made:__
 * We now use `AIRFLOW__LOGGING` instead of `AIRFLOW__CORE` configuration:
