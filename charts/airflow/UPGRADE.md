@@ -1,5 +1,18 @@
 # Upgrading Steps
 
+## `v7.16.X` → `v7.17.0`
+
+__The following IMPROVEMENTS have been made:__
+* We now use `AIRFLOW__LOGGING` instead of `AIRFLOW__CORE` configuration:
+  * `AIRFLOW__CORE__REMOTE_LOGGING`
+    * Is now `AIRFLOW__LOGGING__REMOTE_LOGGING`
+  * `AIRFLOW__CORE__REMOTE_BASE_LOG_FOLDER`
+    * Is now `AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER`
+  * `AIRFLOW__CORE__REMOTE_LOG_CONN_ID`
+    * Is now `AIRFLOW__CORE__REMOTE_LOG_CONN_ID`
+
+## `v7.15.X` → `v7.16.0`
+
 ## `v7.14.X` → `v7.15.0`
 
 __The following IMPROVEMENTS have been made:__
