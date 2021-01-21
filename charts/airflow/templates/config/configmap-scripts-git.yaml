@@ -34,7 +34,7 @@ data:
       rm -rf $( find $DIR -mindepth 1 )
     fi
 
-    git clone $REPO -b $REF $DIR
+    git clone $REPO --depth=1 --single-branch -b $REF $DIR
   git-sync.sh: |
     #!/bin/sh -e
     REPO=$1
@@ -61,7 +61,7 @@ data:
     if [ -d "$DIR" ]; then
       rm -rf $( find $DIR -mindepth 1 )
     fi
-    git clone $REPO -b $REF $DIR
+    git clone $REPO --depth=1 --single-branch -b $REF $DIR
     {{- end }}
 
     # to break the infinite loop when we receive SIGTERM
