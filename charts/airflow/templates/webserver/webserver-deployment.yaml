@@ -218,6 +218,11 @@ spec:
                && echo "*** installing extra pip packages..." \
                && pip install --user {{ range .Values.web.extraPipPackages }} {{ . | quote }} {{ end }} \
               {{- end }}
+              {{- if .Values.web.extraStartCommand }}
+              {{- range .Values.web.extraStartCommand }} 
+               && {{ . }} \ 
+              {{- end }}
+              {{- end }}
                && echo "*** running webserver..." \
                && exec airflow webserver
           {{- if .Values.web.livenessProbe.enabled }}

@@ -738,6 +738,7 @@ __Airflow Webserver Values:__
 | `web.baseUrl` | sets `AIRFLOW__WEBSERVER__BASE_URL` | `http://localhost:8080` |
 | `web.serializeDAGs` | sets `AIRFLOW__CORE__STORE_SERIALIZED_DAGS` | `false` |
 | `web.extraPipPackages` | extra pip packages to install in the web container | `[]` |
+| `web.extraStartCommand` | extra command/script to execute as user `airflow` before starting webserver | `[]` |
 | `web.initialStartupDelay` | the number of seconds to wait (in bash) before starting the web container | `0` |
 | `web.minReadySeconds` | the number of seconds to wait before declaring a new Pod available | `5` |
 | `web.readinessProbe.*` | configs for the web Service readiness probe | `<see values.yaml>` |

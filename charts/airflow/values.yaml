@@ -483,6 +483,15 @@ web:
   ##
   extraPipPackages: []
 
+  ## extra command/script to execute as user `airflow` before starting webserver
+  ## also can be used to execute script mounted from `airflow.extraVolumeMounts`
+  ## EXAMPLE:
+  ##   extraStartCommand:
+  ##     - "sed "s/localhost:8000/$ENV_DOMAIN/g" /opt/airflow/dags/script.py"
+  ##     - /home/airflow/setup-credentials.sh
+  ##
+  extraStartCommand: []
+
   ## the number of seconds to wait (in bash) before starting the web container
   ##
   initialStartupDelay: 0

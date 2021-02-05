@@ -173,6 +173,10 @@ web:
   ##
   extraPipPackages: []
 
+  ## extra command/script to execute as user `airflow` before starting webserver
+  ##
+  extraStartCommand: []
+
   ## configs for the web Service liveness probe
   ##
   livenessProbe:
