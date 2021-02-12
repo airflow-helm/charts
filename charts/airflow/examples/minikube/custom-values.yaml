@@ -12,6 +12,9 @@
 airflow:
   ## the airflow executor type to use
   ##
+  image:
+    repository: davidtnfsh/airflow
+    tag: new
   executor: CeleryExecutor
 
   ## the fernet key used to encrypt the connections in the database
@@ -88,10 +91,11 @@ workers:
 dags:
   ## configs for the DAG git repository & sync container
   ##
+  installRequirements: true
   git:
     ## url of the git repository
     ##
-    url: "ssh://git@repo.example.com/my-airflow-dags.git"
+    url: https://<github-account>:<personal access token>@github.com/tresl-co/segments-etl-dags
 
     ## the branch/tag/sha1 which we clone
     ##
@@ -104,7 +108,7 @@ dags:
     ## - the secret commonly includes files: id_rsa, id_rsa.pub, known_hosts
     ## - known_hosts is NOT NEEDED if `git.sshKeyscan` is true
     ##
-    secret: ""
+    secret: airflow-git-keys
 
     ## the name of the private key file in your `git.secret`
     ##
@@ -121,14 +125,14 @@ dags:
     ## EXAMPLE:
     ##   repoHost: "github.com"
     ##
-    repoHost: "repo.example.com"
+    repoHost: github.com
 
     ## the port of the git repo
     ##
     ## NOTE:
     ## - this is ONLY REQUIRED for SSH git repos
     ##
-    repoPort: 22
+    repoPort: 443
 
     ## configs for the git-sync container
     ##

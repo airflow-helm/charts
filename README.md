@@ -1,5 +1,8 @@
 # Airflow Community Helm Charts
 
+## For Tresl Developer
+
+Please refer to [notion doc](https://www.notion.so/tresl/ETL-f20df50e57af459ea5b0cdacc874d95e) for details
 ## Charts
 
 | name | description |
