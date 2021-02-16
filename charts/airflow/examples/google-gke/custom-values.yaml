@@ -74,9 +74,9 @@ airflow:
       AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
 
       ## GCP Remote Logging
-      AIRFLOW__CORE__REMOTE_LOGGING: "True"
-      AIRFLOW__CORE__REMOTE_BASE_LOG_FOLDER: "gs://XXXXXXXX--airflow-cluster1/airflow/logs"
-      AIRFLOW__CORE__REMOTE_LOG_CONN_ID: "google_cloud_airflow"
+      AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://XXXXXXXX--airflow-cluster1/airflow/logs"
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "google_cloud_airflow"
 
       ## Email (SMTP)
       AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"

@@ -16,13 +16,13 @@ metadata:
     {{- toYaml .Values.scheduler.labels | nindent 4 }}
     {{- end }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.scheduler.replicas }}
   strategy:
-    # this is safe as long as `maxSurge` is 0
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 100%
+      ## multiple scheduler pods can safely run concurrently (in airflow 2.0)
+      maxSurge: 25%
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: {{ include "airflow.labels.app" . }}
@@ -32,7 +32,7 @@ spec:
     metadata:
       annotations:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
-        checksum/config-git-clone: {{ include (print $.Template.BasePath "/config/configmap-scripts-git.yaml") . | sha256sum }}
+        checksum/config-scripts-git: {{ include (print $.Template.BasePath "/config/configmap-scripts-git.yaml") . | sha256sum }}
         checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
         checksum/config-variables-pools: {{ include (print $.Template.BasePath "/config/configmap-variables-pools.yaml") . | sha256sum }}
         checksum/secret-connections: {{ include (print $.Template.BasePath "/config/secret-connections.yaml") . | sha256sum }}
@@ -81,56 +81,10 @@ spec:
       {{- if or (.Values.dags.initContainer.enabled) (.Values.scheduler.preinitdb) (.Values.scheduler.extraInitContainers) }}
       initContainers:
         {{- if .Values.scheduler.preinitdb }}
-        - name: {{ .Chart.Name }}-preinitdb
-          image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
-          imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
-          command:
-            - "/usr/bin/dumb-init"
-            - "--"
-          args:
-            - "/bin/bash"
-            - "-c"
-            - "/home/airflow/scripts/preinit-db.sh"
-          envFrom:
-            - configMapRef:
-                name: "{{ include "airflow.fullname" . }}-env"
-          env:
-            {{- include "airflow.mapenvsecrets" . | indent 12 }}
-          resources:
-            {{- toYaml .Values.scheduler.resources | nindent 12 }}
-          volumeMounts:
-            - name: scripts
-              mountPath: /home/airflow/scripts
+        {{- include "airflow.init_container.upgradedb" . | indent 8 }}
         {{- end }}
         {{- if .Values.dags.initContainer.enabled }}
-        - name: git-clone
-          image: {{ .Values.dags.initContainer.image.repository }}:{{ .Values.dags.initContainer.image.tag }}
-          imagePullPolicy: {{ .Values.dags.initContainer.image.pullPolicy }}
-          envFrom:
-            - configMapRef:
-                name: "{{ include "airflow.fullname" . }}-env"
-          env:
-            {{- include "airflow.mapenvsecrets" . | indent 12 }}
-          resources:
-            {{- toYaml .Values.dags.initContainer.resources | nindent 12 }}
-          command:
-            - /home/airflow/git/git-clone.sh
-          args:
-            - "{{ .Values.dags.git.url }}"
-            - "{{ .Values.dags.git.ref }}"
-            - "{{ .Values.dags.initContainer.mountPath }}{{ .Values.dags.initContainer.syncSubPath }}"
-            - "{{ .Values.dags.git.repoHost }}"
-            - "{{ .Values.dags.git.repoPort }}"
-            - "{{ .Values.dags.git.privateKeyName }}"
-          volumeMounts:
-            - name: git-clone
-              mountPath: /home/airflow/git
-            - name: dags-data
-              mountPath: "{{ .Values.dags.initContainer.mountPath }}"
-            {{- if .Values.dags.git.secret }}
-            - name: git-clone-secret
-              mountPath: /keys
-            {{- end }}
+        {{- include "airflow.init_container.git_clone" . | indent 8 }}
         {{- end }}
         {{- if .Values.scheduler.extraInitContainers }}
         {{- toYaml .Values.scheduler.extraInitContainers | nindent 8 }}
@@ -138,92 +92,18 @@ spec:
       {{- end }}
       containers:
         {{- if .Values.dags.git.gitSync.enabled }}
-        - name: git-sync
-          image: {{ .Values.dags.git.gitSync.image.repository }}:{{ .Values.dags.git.gitSync.image.tag }}
-          imagePullPolicy: {{ .Values.dags.git.gitSync.image.pullPolicy }}
-          envFrom:
-            - configMapRef:
-                name: "{{ include "airflow.fullname" . }}-env"
-          env:
-            {{- include "airflow.mapenvsecrets" . | indent 12 }}
-          command:
-            - /home/airflow/git/git-sync.sh
-          args:
-            - "{{ .Values.dags.git.url }}"
-            - "{{ .Values.dags.git.ref }}"
-            - "{{ .Values.dags.initContainer.mountPath }}{{ .Values.dags.initContainer.syncSubPath }}"
-            - "{{ .Values.dags.git.repoHost }}"
-            - "{{ .Values.dags.git.repoPort }}"
-            - "{{ .Values.dags.git.privateKeyName }}"
-            - "{{ .Values.dags.git.gitSync.refreshTime }}"
-          volumeMounts:
-            - name: git-clone
-              mountPath: /home/airflow/git
-            - name: dags-data
-              mountPath: "{{ .Values.dags.initContainer.mountPath }}"
-            {{- if .Values.dags.git.secret }}
-            - name: git-clone-secret
-              mountPath: /keys
-            {{- end }}
-          resources:
-            {{- toYaml .Values.dags.git.gitSync.resources | nindent 12 }}
+        {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
-        - name: {{ .Chart.Name }}-scheduler
+        - name: airflow-scheduler
           image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
           imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
+          resources:
+            {{- toYaml .Values.scheduler.resources | nindent 12 }}
           envFrom:
             - configMapRef:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
             {{- include "airflow.mapenvsecrets" . | indent 12 }}
-          resources:
-            {{- toYaml .Values.scheduler.resources | nindent 12 }}
-          volumeMounts:
-            - name: scripts
-              mountPath: /home/airflow/scripts
-            {{- if .Values.scheduler.secretsMap }}
-            - name: {{ .Values.scheduler.secretsMap }}-volume
-              readOnly: true
-              mountPath: {{ $.Values.scheduler.secretsDir }}
-            {{- else }}
-            {{- range .Values.scheduler.secrets }}
-            - name: {{ . }}-volume
-              readOnly: true
-              mountPath: {{ $.Values.scheduler.secretsDir }}/{{ . }}
-            {{- end }}
-            {{- end }}
-            {{- if .Values.dags.persistence.enabled }}
-            - name: dags-data
-              mountPath: {{ .Values.dags.path }}
-              subPath: {{ .Values.dags.persistence.subPath }}
-            {{- else if or (.Values.dags.initContainer.enabled) (.Values.dags.git.gitSync.enabled) }}
-            - name: dags-data
-              mountPath: {{ .Values.dags.path }}
-            {{- end }}
-            {{- if .Values.logs.persistence.enabled }}
-            - name: logs-data
-              mountPath: {{ .Values.logs.path }}
-              subPath: {{ .Values.logs.persistence.subPath }}
-            {{- end }}
-            {{- if or (.Values.scheduler.connections) (.Values.scheduler.existingSecretConnections) }}
-            - name: connections
-              mountPath: /home/airflow/connections
-            {{- end}}
-            {{- if or (.Values.scheduler.variables) (.Values.scheduler.pools) }}
-            - name: variables-pools
-              mountPath: /home/airflow/variables-pools/
-            {{- end}}
-            {{- range .Values.airflow.extraConfigmapMounts }}
-            - name: {{ .name }}
-              mountPath: {{ .mountPath }}
-              readOnly: {{ .readOnly }}
-              {{- if .subPath }}
-              subPath: {{ .subPath }}
-              {{- end }}
-            {{- end }}
-            {{- if .Values.airflow.extraVolumeMounts }}
-            {{- toYaml .Values.airflow.extraVolumeMounts | nindent 12 }}
-            {{- end }}
           command:
             - "/usr/bin/dumb-init"
             - "--"
@@ -248,11 +128,11 @@ spec:
               {{- end }}
               {{- if .Values.scheduler.initdb }}
                && echo "*** upgrading airflow db..." \
-               && airflow upgradedb || airflow db upgrade \
+               && airflow db upgrade || airflow upgradedb \
               {{- end }}
               {{- if .Values.scheduler.variables }}
                && echo "*** adding Airflow variables..." \
-               && airflow variables -i /home/airflow/variables-pools/variables.json \
+               && airflow variables import /home/airflow/variables-pools/variables.json || airflow variables -i /home/airflow/variables-pools/variables.json \
               {{- end }}
               {{- if or (.Values.scheduler.connections) (.Values.scheduler.existingSecretConnections) }}
                && echo "*** adding Airflow connections..." \
@@ -260,7 +140,7 @@ spec:
               {{- end }}
               {{- if .Values.scheduler.pools }}
                && echo "*** adding Airflow pools..." \
-               && airflow pool -i /home/airflow/variables-pools/pools.json \
+               && airflow pools import /home/airflow/variables-pools/pools.json || airflow pool -i /home/airflow/variables-pools/pools.json \
               {{- end }}
                && echo "*** running scheduler..." \
                && exec airflow scheduler -n {{ .Values.scheduler.numRuns }}
@@ -276,22 +156,50 @@ spec:
               - -c
               - |
                 import os
+                import sys
+
+                from airflow.jobs.scheduler_job import SchedulerJob
+                from airflow.utils.db import create_session
+                from airflow.utils.net import get_hostname
+
                 os.environ['AIRFLOW__CORE__LOGGING_LEVEL'] = 'ERROR'
                 os.environ['AIRFLOW__LOGGING__LOGGING_LEVEL'] = 'ERROR'
-                from airflow.jobs.scheduler_job import SchedulerJob
-                from airflow.utils.net import get_hostname
-                import sys
-                job = SchedulerJob.most_recent_job()
-                sys.exit(0 if job.is_alive() and job.hostname == get_hostname() else 1)
+
+                with create_session() as session:
+                    job = session.query(SchedulerJob) \
+                        .filter_by(hostname=get_hostname()) \
+                        .order_by(SchedulerJob.latest_heartbeat.desc()) \
+                        .limit(1) \
+                        .first()
+
+                sys.exit(0 if job.is_alive() else 1)
           {{- end }}
+          volumeMounts:
+            {{- include "airflow.common.volumeMounts" . | indent 12 }}
+            {{- if .Values.scheduler.secretsMap }}
+            - name: {{ .Values.scheduler.secretsMap }}-volume
+              readOnly: true
+              mountPath: {{ .Values.scheduler.secretsDir }}
+            {{- else }}
+            {{- range .Values.scheduler.secrets }}
+            - name: {{ . }}-volume
+              readOnly: true
+              mountPath: {{ $.Values.scheduler.secretsDir }}/{{ . }}
+            {{- end }}
+            {{- end }}
+            {{- if or (.Values.scheduler.connections) (.Values.scheduler.existingSecretConnections) }}
+            - name: connections
+              mountPath: /home/airflow/connections
+            {{- end }}
+            {{- if or (.Values.scheduler.variables) (.Values.scheduler.pools) }}
+            - name: variables-pools
+              mountPath: /home/airflow/variables-pools/
+            {{- end }}
         {{- if .Values.airflow.extraContainers }}
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
         {{- end }}
       volumes:
-        - name: scripts
-          configMap:
-            name: {{ include "airflow.fullname" . }}-scripts
-            defaultMode: 0755
+        {{- include "airflow.common.volumes" . | indent 8 }}
         {{- if .Values.scheduler.secretsMap }}
         - name: {{ .Values.scheduler.secretsMap }}-volume
           secret:
@@ -301,31 +209,6 @@ spec:
         - name: {{ . }}-volume
           secret:
             secretName: {{ . }}
-        {{- end }}
-        {{- end }}
-        {{- if .Values.dags.persistence.enabled }}
-        - name: dags-data
-          persistentVolumeClaim:
-            claimName: {{ .Values.dags.persistence.existingClaim | default (include "airflow.fullname" . ) }}
-        {{- else if or (.Values.dags.initContainer.enabled) (.Values.dags.git.gitSync.enabled) }}
-        - name: dags-data
-          emptyDir: {}
-        {{- end }}
-        {{- if .Values.logs.persistence.enabled }}
-        - name: logs-data
-          persistentVolumeClaim:
-            claimName: {{ .Values.logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" . | trunc 58 )) }}
-        {{- end }}
-        {{- if or (.Values.dags.initContainer.enabled) (.Values.dags.git.gitSync.enabled) }}
-        - name: git-clone
-          configMap:
-            name: {{ include "airflow.fullname" . }}-scripts-git
-            defaultMode: 0755
-        {{- if .Values.dags.git.secret }}
-        - name: git-clone-secret
-          secret:
-            secretName: {{ .Values.dags.git.secret }}
-            defaultMode: 0700
         {{- end }}
         {{- end }}
         {{- if or (.Values.scheduler.connections) (.Values.scheduler.existingSecretConnections) }}
@@ -345,11 +228,3 @@ spec:
             name: {{ include "airflow.fullname" . }}-variables-pools
             defaultMode: 0755
         {{- end }}
-        {{- range .Values.airflow.extraConfigmapMounts }}
-        - name: {{ .name }}
-          configMap:
-            name: {{ .configMap }}
-        {{- end }}
-       {{- if .Values.airflow.extraVolumes }}
-       {{- toYaml .Values.airflow.extraVolumes | nindent 8 }}
-       {{- end }}

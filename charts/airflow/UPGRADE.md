@@ -1,5 +1,36 @@
 # Upgrading Steps
 
+## `v7.15.X` → `v8.0.0`
+
+* Flower now adds `airflow.extraConfigmapMounts`, make sure .names are unique across:
+  - `airflow.extraConfigmapMounts`
+  - `flower.extraConfigmapMounts`
+  
+Split `dags.initContainer.mountPath` & `dags.initContainer.syncSubPath` up and created:
+- `dags.git.gitSync.mountPath`
+- `dags.git.gitSync.syncSubPath`
+
+Added values:
+- `scheduler.replicas`
+
+Changed default:
+- `rbac.events` = true
+- `scheduler.podDisruptionBudget.enabled` = false
+    - there was no reason for this to be enabled by default
+  
+New features
+- `scheduler.variables` and `scheduler.pools` can now be defined as YAML dicts OR JSON Strings (see values.yaml docstrings for example)
+
+NOTE:
+- if you want to make use of the new HA scheduler `scheduler.replicas`, we recommend setting a `scheduler.podDisruptionBudget`
+  - we welcome any contributions for autoscaling the scheduler replica count based on CPU load
+- airflow 2.0 removed the non-RBAC UI, meaning `AIRFLOW__WEBSERVER__RBAC` no longer does anything
+  - ((( give a quick descipton of what you need to do, e.g. adding users))
+  - https://airflow.apache.org/docs/apache-airflow/stable/upgrading-to-2.html#step-5-upgrade-airflow-dags  
+  - TO ME:
+    - consider explicitly putting webserver_config.py feature now that RBAC is default
+    - allow "existing secret" or "text variable"
+
 ## `v7.14.X` → `v7.15.0`
 
 __The following IMPROVEMENTS have been made:__

@@ -68,45 +68,25 @@ Used to discover the master Service and Secret name created by the sub-chart.
 {{- end -}}
 
 {{/*
-Bash command which echos the DB connection string in SQLAlchemy format.
-NOTE:
- - used by `AIRFLOW__CORE__SQL_ALCHEMY_CONN_CMD`
- - the `DATABASE_PASSWORD_CMD` sub-command is set in `configmap-env`
+A flag indicating if a celery-like executor is selected.
 */}}
-{{- define "DATABASE_SQLALCHEMY_CMD" -}}
-{{- if .Values.postgresql.enabled -}}
-echo -n "postgresql+psycopg2://${DATABASE_USER}:$(eval $DATABASE_PASSWORD_CMD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}"
-{{- else if and (not .Values.postgresql.enabled) (eq "postgres" .Values.externalDatabase.type) -}}
-echo -n "postgresql+psycopg2://${DATABASE_USER}:$(eval $DATABASE_PASSWORD_CMD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}${DATABASE_PROPERTIES}"
-{{- else if and (not .Values.postgresql.enabled) (eq "mysql" .Values.externalDatabase.type) -}}
-echo -n "mysql+mysqldb://${DATABASE_USER}:$(eval $DATABASE_PASSWORD_CMD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}${DATABASE_PROPERTIES}"
+{{- define "airflow.executor.celery_like" -}}
+{{- if or (eq .Values.airflow.executor "CeleryExecutor") (eq .Values.airflow.executor "CeleryKubernetesExecutor") -}}
+true
+{{- else -}}
+false
 {{- end -}}
 {{- end -}}
 
 {{/*
-Bash command which echos the DB connection string in Celery result_backend format.
-NOTE:
- - used by `AIRFLOW__CELERY__RESULT_BACKEND_CMD`
- - the `DATABASE_PASSWORD_CMD` sub-command is set in `configmap-env`
+A flag indicating if a kubernetes-like executor is selected.
 */}}
-{{- define "DATABASE_CELERY_CMD" -}}
-{{- if .Values.postgresql.enabled -}}
-echo -n "db+postgresql://${DATABASE_USER}:$(eval $DATABASE_PASSWORD_CMD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}"
-{{- else if and (not .Values.postgresql.enabled) (eq "postgres" .Values.externalDatabase.type) -}}
-echo -n "db+postgresql://${DATABASE_USER}:$(eval $DATABASE_PASSWORD_CMD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}${DATABASE_PROPERTIES}"
-{{- else if and (not .Values.postgresql.enabled) (eq "mysql" .Values.externalDatabase.type) -}}
-echo -n "db+mysql://${DATABASE_USER}:$(eval $DATABASE_PASSWORD_CMD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}${DATABASE_PROPERTIES}"
+{{- define "airflow.executor.kubernetes_like" -}}
+{{- if or (eq .Values.airflow.executor "KubernetesExecutor") (eq .Values.airflow.executor "CeleryKubernetesExecutor") -}}
+true
+{{- else -}}
+false
 {{- end -}}
-{{- end -}}
-
-{{/*
-Bash command which echos the Redis connection string.
-NOTE:
- - used by `AIRFLOW__CELERY__BROKER_URL_CMD`
- - the `REDIS_PASSWORD_CMD` sub-command is set in `configmap-env`
-*/}}
-{{- define "REDIS_CONNECTION_CMD" -}}
-echo -n "redis://$(eval $REDIS_PASSWORD_CMD)${REDIS_HOST}:${REDIS_PORT}/${REDIS_DBNUM}"
 {{- end -}}
 
 {{/*
@@ -146,7 +126,7 @@ When applicable, we use the secrets created by the postgres/redis charts (which 
 {{- /* --------------------------- */ -}}
 {{- /* ---------- REDIS ---------- */ -}}
 {{- /* --------------------------- */ -}}
-{{- if eq .Values.airflow.executor "CeleryExecutor" }}
+{{- if (include "airflow.executor.celery_like" .) }}
 {{- if .Values.redis.enabled }}
 {{- if .Values.redis.existingSecret }}
 - name: REDIS_PASSWORD
@@ -191,3 +171,206 @@ When applicable, we use the secrets created by the postgres/redis charts (which 
 {{ toYaml .Values.airflow.extraEnv }}
 {{- end }}
 {{- end }}
+
+{{/*
+Construct a list of common volumeMounts for the web/scheduler/worker/flower containers
+*/}}
+{{- define "airflow.common.volumeMounts" }}
+- name: scripts
+  mountPath: /home/airflow/scripts
+{{- if .Values.dags.persistence.enabled }}
+- name: dags-data
+  mountPath: {{ .Values.dags.path }}
+  subPath: {{ .Values.dags.persistence.subPath }}
+{{- else if or (.Values.dags.git.gitSync.enabled) (.Values.dags.initContainer.enabled) }}
+- name: dags-data
+  mountPath: {{ .Values.dags.path }}
+{{- end }}
+{{- if .Values.logs.persistence.enabled }}
+- name: logs-data
+  mountPath: {{ .Values.logs.path }}
+  subPath: {{ .Values.logs.persistence.subPath }}
+{{- end }}
+{{- range .Values.airflow.extraConfigmapMounts }}
+- name: {{ .name }}
+  mountPath: {{ .mountPath }}
+  readOnly: {{ .readOnly }}
+  {{- if .subPath }}
+  subPath: {{ .subPath }}
+  {{- end }}
+{{- end }}
+{{- if .Values.airflow.extraVolumeMounts }}
+{{- toYaml .Values.airflow.extraVolumeMounts }}
+{{- end }}
+{{- end }}
+
+{{/*
+Construct a list of volumes which used in web/scheduler/worker/flower Pods
+*/}}
+{{- define "airflow.common.volumes"}}
+- name: scripts
+  configMap:
+    name: {{ include "airflow.fullname" . }}-scripts
+    defaultMode: 0755
+{{- if or (.Values.dags.git.gitSync.enabled) (.Values.dags.initContainer.enabled) }}
+- name: scripts-git
+  configMap:
+    name: {{ include "airflow.fullname" . }}-scripts-git
+    defaultMode: 0755
+{{- if .Values.dags.git.secret }}
+- name: git-ssh-secret
+  secret:
+    secretName: {{ .Values.dags.git.secret }}
+    defaultMode: 0700
+{{- end }}
+{{- end }}
+{{- if .Values.dags.persistence.enabled }}
+- name: dags-data
+  persistentVolumeClaim:
+    claimName: {{ .Values.dags.persistence.existingClaim | default (include "airflow.fullname" . ) }}
+{{- else if or (.Values.dags.git.gitSync.enabled) (.Values.dags.initContainer.enabled) }}
+- name: dags-data
+  emptyDir: {}
+{{- end }}
+{{- if .Values.logs.persistence.enabled }}
+- name: logs-data
+  persistentVolumeClaim:
+    claimName: {{ .Values.logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" . | trunc 58 )) }}
+{{- end }}
+{{- range .Values.airflow.extraConfigmapMounts }}
+- name: {{ .name }}
+  configMap:
+    name: {{ .configMap }}
+{{- end }}
+{{- if .Values.airflow.extraVolumes }}
+{{- toYaml .Values.airflow.extraVolumes }}
+{{- end }}
+{{- end }}
+
+{{/*
+Construct a container definition for dags git-sync
+*/}}
+{{- define "airflow.container.git_sync"}}
+- name: dags-git-sync
+  image: {{ .Values.dags.git.gitSync.image.repository }}:{{ .Values.dags.git.gitSync.image.tag }}
+  imagePullPolicy: {{ .Values.dags.git.gitSync.image.pullPolicy }}
+  resources:
+    {{- toYaml .Values.dags.git.gitSync.resources | nindent 4 }}
+  command:
+    - /home/airflow/scripts-git/git-sync.sh
+  args:
+    - "{{ .Values.dags.git.url }}"
+    - "{{ .Values.dags.git.ref }}"
+    - "{{ .Values.dags.git.gitSync.mountPath }}{{ .Values.dags.git.gitSync.syncSubPath }}"
+    - "{{ .Values.dags.git.repoHost }}"
+    - "{{ .Values.dags.git.repoPort }}"
+    - "{{ .Values.dags.git.privateKeyName }}"
+    - "{{ .Values.dags.git.gitSync.refreshTime }}"
+  volumeMounts:
+    - name: dags-data
+      mountPath: "{{ .Values.dags.git.gitSync.mountPath }}"
+    - name: scripts-git
+      mountPath: /home/airflow/scripts-git
+    {{- if .Values.dags.git.secret }}
+    - name: git-ssh-secret
+      mountPath: /keys
+    {{- end }}
+{{- end }}
+
+{{/*
+Construct an init-container definition for dags git-clone
+*/}}
+{{- define "airflow.init_container.git_clone"}}
+- name: dags-git-clone
+  image: {{ .Values.dags.initContainer.image.repository }}:{{ .Values.dags.initContainer.image.tag }}
+  imagePullPolicy: {{ .Values.dags.initContainer.image.pullPolicy }}
+  resources:
+    {{- toYaml .Values.dags.initContainer.resources | nindent 4 }}
+  command:
+    - /home/airflow/scripts-git/git-clone.sh
+  args:
+    - "{{ .Values.dags.git.url }}"
+    - "{{ .Values.dags.git.ref }}"
+    - "{{ .Values.dags.initContainer.mountPath }}{{ .Values.dags.initContainer.syncSubPath }}"
+    - "{{ .Values.dags.git.repoHost }}"
+    - "{{ .Values.dags.git.repoPort }}"
+    - "{{ .Values.dags.git.privateKeyName }}"
+  volumeMounts:
+    - name: dags-data
+      mountPath: "{{ .Values.dags.initContainer.mountPath }}"
+    - name: scripts-git
+      mountPath: /home/airflow/scripts-git
+    {{- if .Values.dags.git.secret }}
+    - name: git-ssh-secret
+      mountPath: /keys
+    {{- end }}
+{{- end }}
+
+{{/*
+Construct an init-container definition for upgradedb
+*/}}
+{{- define "airflow.init_container.upgradedb"}}
+- name: upgradedb
+  image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
+  imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
+  resources:
+    {{- toYaml .Values.scheduler.resources | nindent 4 }}
+  envFrom:
+    - configMapRef:
+        name: "{{ include "airflow.fullname" . }}-env"
+  env:
+    {{- include "airflow.mapenvsecrets" . | indent 4 }}
+  command:
+    - "/usr/bin/dumb-init"
+    - "--"
+  args:
+    - "/bin/bash"
+    - "-c"
+    - "/home/airflow/scripts/retry-upgradedb.sh"
+  volumeMounts:
+    - name: scripts
+      mountPath: /home/airflow/scripts
+{{- end }}
+
+{{/*
+Bash command which echos the DB connection string in SQLAlchemy format.
+NOTE:
+ - used by `AIRFLOW__CORE__SQL_ALCHEMY_CONN_CMD`
+ - the `DATABASE_PASSWORD_CMD` sub-command is set in `configmap-env`
+*/}}
+{{- define "DATABASE_SQLALCHEMY_CMD" -}}
+{{- if .Values.postgresql.enabled -}}
+echo -n "postgresql+psycopg2://${DATABASE_USER}:$(eval $DATABASE_PASSWORD_CMD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}"
+{{- else if and (not .Values.postgresql.enabled) (eq "postgres" .Values.externalDatabase.type) -}}
+echo -n "postgresql+psycopg2://${DATABASE_USER}:$(eval $DATABASE_PASSWORD_CMD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}${DATABASE_PROPERTIES}"
+{{- else if and (not .Values.postgresql.enabled) (eq "mysql" .Values.externalDatabase.type) -}}
+echo -n "mysql+mysqldb://${DATABASE_USER}:$(eval $DATABASE_PASSWORD_CMD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}${DATABASE_PROPERTIES}"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Bash command which echos the DB connection string in Celery result_backend format.
+NOTE:
+ - used by `AIRFLOW__CELERY__RESULT_BACKEND_CMD`
+ - the `DATABASE_PASSWORD_CMD` sub-command is set in `configmap-env`
+*/}}
+{{- define "DATABASE_CELERY_CMD" -}}
+{{- if .Values.postgresql.enabled -}}
+echo -n "db+postgresql://${DATABASE_USER}:$(eval $DATABASE_PASSWORD_CMD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}"
+{{- else if and (not .Values.postgresql.enabled) (eq "postgres" .Values.externalDatabase.type) -}}
+echo -n "db+postgresql://${DATABASE_USER}:$(eval $DATABASE_PASSWORD_CMD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}${DATABASE_PROPERTIES}"
+{{- else if and (not .Values.postgresql.enabled) (eq "mysql" .Values.externalDatabase.type) -}}
+echo -n "db+mysql://${DATABASE_USER}:$(eval $DATABASE_PASSWORD_CMD)@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_DB}${DATABASE_PROPERTIES}"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Bash command which echos the Redis connection string.
+NOTE:
+ - used by `AIRFLOW__CELERY__BROKER_URL_CMD`
+ - the `REDIS_PASSWORD_CMD` sub-command is set in `configmap-env`
+*/}}
+{{- define "REDIS_CONNECTION_CMD" -}}
+echo -n "redis://$(eval $REDIS_PASSWORD_CMD)${REDIS_HOST}:${REDIS_PORT}/${REDIS_DBNUM}"
+{{- end -}}
+

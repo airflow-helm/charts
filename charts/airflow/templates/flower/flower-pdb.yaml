@@ -1,4 +1,4 @@
-{{- if and (.Values.flower.enabled) (eq .Values.airflow.executor "CeleryExecutor") (.Values.flower.podDisruptionBudget.enabled) }}
+{{- if and (.Values.flower.enabled) (include "airflow.executor.celery_like" .) (.Values.flower.podDisruptionBudget.enabled) }}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:

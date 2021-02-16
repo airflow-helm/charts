@@ -338,8 +338,8 @@ workers:
 
     ## wait at most 9min for running tasks to complete before SIGTERM
     ## WARNING: 
-    ##  - some cluster-autoscaler (GKE) will not respect graceful 
-    ##    termination periods over 10min
+    ## - some cloud cluster-autoscaler configs will not respect graceful termination 
+    ##   longer than 10min, for example, Google Kubernetes Engine (GKE)
     gracefullTermination: true
     gracefullTerminationPeriod: 540
 
@@ -413,10 +413,10 @@ extraManifests:
 
 ## Docs (Database) - DB Initialization 
 
-If the value `scheduler.initdb` is set to `true` (this is the default), the airflow-scheduler container will run `airflow upgradedb || airflow db upgrade` as part of its startup script.
+If the value `scheduler.initdb` is set to `true` (this is the default), the airflow-scheduler container will run `airflow db upgrade || airflow upgradedb` as part of its startup script.
 
-If the value `scheduler.preinitdb` is set to `true`, then we ALSO RUN `airflow upgradedb || airflow db upgrade` in an init-container (retrying 5 times).
-This is unusually NOT necessary unless your synced DAGs include custom database hooks that prevent `airflow upgradedb || airflow db upgrade` from running.
+If the value `scheduler.preinitdb` is set to `true`, then we ALSO RUN `airflow db upgrade || airflow upgradedb` in an init-container (retrying 5 times).
+This is unusually NOT necessary unless your synced DAGs include custom database hooks that prevent `airflow db upgrade || airflow upgradedb` from running.
 
 ## Docs (Database) - Passwords
 
@@ -490,15 +490,15 @@ By default, logs from the airflow-web/scheduler/worker are written within the Do
 
 ### Option 1 - S3/GCS bucket (Recommended)
 
-You must give airflow credentials for it to read/write on the remote bucket, this can be achieved with `AIRFLOW__CORE__REMOTE_LOG_CONN_ID`, or by using something like [Workload Identity (GKE)](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity), or [IAM Roles for Service Accounts (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html). 
+You must give airflow credentials for it to read/write on the remote bucket, this can be achieved with `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID`, or by using something like [Workload Identity (GKE)](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity), or [IAM Roles for Service Accounts (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html). 
 
-Example, using `AIRFLOW__CORE__REMOTE_LOG_CONN_ID` (can be used with AWS too):
+Example, using `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID` (can be used with AWS too):
 ```yaml
 airflow:
   config:
-    AIRFLOW__CORE__REMOTE_LOGGING: "True"
-    AIRFLOW__CORE__REMOTE_BASE_LOG_FOLDER: "gs://<<MY-BUCKET-NAME>>/airflow/logs"
-    AIRFLOW__CORE__REMOTE_LOG_CONN_ID: "google_cloud_airflow"
+    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://<<MY-BUCKET-NAME>>/airflow/logs"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "google_cloud_airflow"
 
 scheduler:
   connections:
@@ -515,9 +515,9 @@ Example, using [Workload Identity (GKE)](https://cloud.google.com/kubernetes-eng
 ```yaml
 airflow:
   config:
-    AIRFLOW__CORE__REMOTE_LOGGING: "True"
-    AIRFLOW__CORE__REMOTE_BASE_LOG_FOLDER: "gs://<<MY-BUCKET-NAME>>/airflow/logs"
-    AIRFLOW__CORE__REMOTE_LOG_CONN_ID: "google_cloud_default"
+    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://<<MY-BUCKET-NAME>>/airflow/logs"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "google_cloud_default"
 
 serviceAccount:
   annotations:
@@ -528,9 +528,9 @@ Example, using [IAM Roles for Service Accounts (EKS)](https://docs.aws.amazon.co
 ```yaml
 airflow:
   config:
-    AIRFLOW__CORE__REMOTE_LOGGING: "True"
-    AIRFLOW__CORE__REMOTE_BASE_LOG_FOLDER: "s3://<<MY-BUCKET-NAME>>/airflow/logs"
-    AIRFLOW__CORE__REMOTE_LOG_CONN_ID: "aws_default"
+    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "s3://<<MY-BUCKET-NAME>>/airflow/logs"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "aws_default"
 
 scheduler:
   securityContext:
@@ -676,10 +676,10 @@ __Global Values:__
 
 | Parameter | Description | Default |
 | --- | --- | --- |
-| `airflow.image.*` | configs for the docker image of the web/scheduler/worker | `<see values.yaml>` |
+| `airflow.image.*` | configs for the container image of the web/scheduler/worker/flower containers | `<see values.yaml>` |
 | `airflow.executor` | the airflow executor type to use | `CeleryExecutor` |
 | `airflow.fernetKey` | the fernet key used to encrypt the connections/variables in the database | `7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc=` |
-| `airflow.config` | environment variables for the web/scheduler/worker pods (for airflow configs) | `{}` |
+| `airflow.config` | environment variables for the web/scheduler/worker/flower pods (for airflow configs) | `{}` |
 | `airflow.podAnnotations` | extra annotations for the web/scheduler/worker/flower Pods | `{}` |
 | `airflow.extraEnv` | extra environment variables for the web/scheduler/worker/flower Pods | `[]` |
 | `airflow.extraConfigmapMounts` | extra configMap volumeMounts for the web/scheduler/worker/flower Pods | `[]` |
@@ -693,6 +693,7 @@ __Airflow Scheduler values:__
 | Parameter | Description | Default |
 | --- | --- | --- |
 | `scheduler.resources` | resource requests/limits for the scheduler Pods | `{}` |
+| `scheduler.replicas` | the number of scheduler Pods to run | `1` |
 | `scheduler.nodeSelector` | the nodeSelector configs for the scheduler Pods | `{}` |
 | `scheduler.affinity` | the affinity configs for the scheduler Pods | `{}` |
 | `scheduler.tolerations` | the toleration configs for the scheduler Pods | `[]` |
@@ -706,11 +707,11 @@ __Airflow Scheduler values:__
 | `scheduler.connections` | custom airflow connections for the airflow scheduler | `[]` |
 | `scheduler.refreshConnections` | if `scheduler.connections` are deleted and re-added after each scheduler restart | `true` |
 | `scheduler.existingSecretConnections` | the name of an existing Secret containing an `add-connections.sh` script to run on scheduler start | `""` |
-| `scheduler.variables` | custom airflow variables for the airflow scheduler | `"{}"` |
-| `scheduler.pools` | custom airflow pools for the airflow scheduler | `"{}"` |
+| `scheduler.variables` | custom variables for the airflow scheduler | `"{}"` |
+| `scheduler.pools` | custom pools for the airflow scheduler | `"{}"` |
 | `scheduler.numRuns` | the value of the `airflow --num_runs` parameter used to run the airflow scheduler | `-1` |
-| `scheduler.initdb` | if we run `airflow upgradedb` when the scheduler starts | `true` |
-| `scheduler.preinitdb` | if we run `airflow upgradedb` inside a special initContainer | `false` |
+| `scheduler.initdb` | if we run `airflow db upgrade` every time the scheduler starts | `true` |
+| `scheduler.preinitdb` | if we run `airflow db upgrade` inside an init-container which retries if the command fails | `false` |
 | `scheduler.initialStartupDelay` | the number of seconds to wait (in bash) before starting the scheduler container | `0` |
 | `scheduler.livenessProbe.*` | configs for the scheduler liveness probe | `<see values.yaml>` |
 | `scheduler.secretsDir` | the directory in which to mount secrets on scheduler containers | `/var/airflow/secrets` |
@@ -811,7 +812,7 @@ __Airflow DAGs Values:__
 | `dags.installRequirements` | install any Python `requirements.txt` at the root of `dags.path` automatically | `false` |
 | `dags.persistence.*` | configs for the dags PVC | `<see values.yaml>` |
 | `dags.git.*` | configs for the DAG git repository & sync container | `<see values.yaml>` |
-| `dags.initContainer.*` | configs for the git-clone container | `<see values.yaml>` |
+| `dags.initContainer.*` |  configs for the dags-git-clone init-container | `<see values.yaml>` |
 
 __Airflow Ingress Values:__
 

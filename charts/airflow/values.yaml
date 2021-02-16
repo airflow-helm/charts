@@ -2,11 +2,11 @@
 # Airflow - Common Configs
 ###################################
 airflow:
-  ## configs for the docker image of the web/scheduler/worker
+  ## configs for the container image of the web/scheduler/worker/flower containers
   ##
   image:
     repository: apache/airflow
-    tag: 1.10.12-python3.6
+    tag: 2.0.1-python3.8
     ## values: Always or IfNotPresent
     pullPolicy: IfNotPresent
     pullSecret: ""
@@ -14,18 +14,18 @@ airflow:
   ## the airflow executor type to use
   ##
   ## NOTE:
-  ## - this should be `CeleryExecutor` or `KubernetesExecutor`
-  ## - if set to `KubernetesExecutor`:
+  ## - this should be one of `CeleryExecutor`, `KubernetesExecutor`, or `CeleryKubernetesExecutor`
+  ## - if you set this to `KubernetesExecutor` or `CeleryKubernetesExecutor`, we automatically set:
+  ##   - `AIRFLOW__KUBERNETES__NAMESPACE`
+  ##   - `AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME` [not used in Airflow 2.0+]
+  ##   - `AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF` [not used in Airflow 2.0+]
+  ##   - `AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY`
+  ##   - `AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG`
+  ## - if you set this to `KubernetesExecutor`:
   ##   - ensure that `workers.enabled` is `false`
   ##   - ensure that `flower.enabled` is `false`
   ##   - ensure that `redis.enabled` is `false`
-  ##   - ensure that K8S configs are set in `airflow.config`
-  ##   - we set these configs automatically:
-  ##     - `AIRFLOW__KUBERNETES__NAMESPACE`
-  ##     - `AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME`
-  ##     - `AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF`
-  ##     - `AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY`
-  ##     - `AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG`
+  ##   - ensure that important `AIRFLOW__KUBERNETES__*` configs are set in `airflow.config`
   ##
   executor: CeleryExecutor
 
@@ -43,7 +43,7 @@ airflow:
   ##
   fernetKey: "7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc="
 
-  ## environment variables for the web/scheduler/worker Pods (for airflow configs)
+  ## environment variables for the web/scheduler/worker/flower Pods (for airflow configs)
   ##
   ## WARNING:
   ## - don't include sensitive variables in here, instead make use of `airflow.extraEnv` with Secrets
@@ -83,7 +83,7 @@ airflow:
   ##
   config: {}
 
-  ## extra annotations for the web/scheduler/worker Pods
+  ## extra annotations for the web/scheduler/worker/flower Pods
   ##
   ## EXAMPLE:
   ##   podAnnotations:
@@ -91,7 +91,7 @@ airflow:
   ##
   podAnnotations: {}
 
-  ## extra environment variables for the web/scheduler/worker (AND flower) Pods
+  ## extra environment variables for the web/scheduler/worker/flower Pods
   ##
   ## EXAMPLE:
   ##   extraEnv:
@@ -108,7 +108,7 @@ airflow:
   ##
   extraEnv: []
 
-  ## extra configMap volumeMounts for the web/scheduler/worker Pods
+  ## extra configMap volumeMounts for the web/scheduler/worker/flower Pods
   ##
   ## EXAMPLE:
   ##   extraConfigmapMounts:
@@ -158,7 +158,6 @@ airflow:
   ##
   extraVolumes: []
 
-
 ###################################
 # Airflow - Scheduler Configs
 ###################################
@@ -172,6 +171,13 @@ scheduler:
   ##       memory: "1Gi"
   ##
   resources: {}
+
+  ## the number of scheduler Pods to run
+  ##
+  ## NOTE:
+  ## - if you set this >1 we recommend defining a `scheduler.podDisruptionBudget`
+  ##
+  replicas: 1
 
   ## the nodeSelector configs for the scheduler Pods
   ##
@@ -212,17 +218,14 @@ scheduler:
   ## configs for the PodDisruptionBudget of the scheduler
   ##
   podDisruptionBudget:
+
     ## if a PodDisruptionBudget resource is created for the scheduler
     ##
-    enabled: true
+    enabled: false
 
     ## the maximum unavailable pods/percentage for the scheduler
     ##
-    ## NOTE:
-    ## - as there is only ever a single scheduler Pod,
-    ##   this must be 100% for Kubernetes to be able to migrate it
-    ##
-    maxUnavailable: "100%"
+    maxUnavailable: ""
 
     ## the minimum available pods/percentage for the scheduler
     ##
@@ -250,8 +253,8 @@ scheduler:
   ## the name of an existing Secret containing an `add-connections.sh` script to run on scheduler start
   ##
   ## NOTE:
-  ##  - if this is non-empty, `scheduler.connections` will be ignored
-  ##  - use this if you don't want to store connections in your values.yaml
+  ## - if this is non-empty, `scheduler.connections` will be ignored
+  ## - use this if you don't want to store connections in your values.yaml
   ##
   ## EXAMPLE SECRET:
   ##   apiVersion: v1
@@ -275,24 +278,34 @@ scheduler:
   ##
   existingSecretConnections: ""
 
-  ## custom airflow variables for the airflow scheduler
+  ## custom variables for the airflow scheduler
   ##
   ## NOTE:
-  ## - THIS IS A STRING, containing a JSON object, with your variables in it
+  ## - this can be either a "YAML Map" or "JSON string"
   ##
-  ## EXAMPLE:
+  ## EXAMPLE -- YAML MAP:
+  ##   variables:
+  ##     environment: "dev"
+  ##
+  ## EXAMPLE -- JSON STRING:
   ##   variables: |
   ##     { "environment": "dev" }
   ##
   variables: |
     {}
 
-  ## custom airflow pools for the airflow scheduler
+  ## custom pools for the airflow scheduler
   ##
   ## NOTE:
-  ## - THIS IS A STRING, containing a JSON object, with your pools in it
+  ## - this can be either a "YAML Map" or "JSON string"
   ##
-  ## EXAMPLE:
+  ## EXAMPLE -- YAML MAP:
+  ##   pools:
+  ##     example:
+  ##       description: "This is an example pool with 2 slots."
+  ##       slots: 2
+  ##
+  ## EXAMPLE -- JSON STRING:
   ##   pools: |
   ##     {
   ##       "example": {
@@ -313,11 +326,11 @@ scheduler:
   ##
   numRuns: -1
 
-  ## if we run `airflow upgradedb || airflow db upgrade` when the scheduler starts
+  ## if we run `airflow db upgrade` every time the scheduler starts
   ##
   initdb: true
 
-  ## if we run `airflow upgradedb || airflow db upgrade` inside a special initContainer
+  ## if we run `airflow db upgrade || airflow upgradedb` inside an init-container which retries if the command fails
   ##
   ## NOTE:
   ## - may be needed if you have custom database hooks configured that will be pulled in by git-sync
@@ -357,7 +370,7 @@ scheduler:
   ## the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>`
   ##
   ## NOTE:
-  ##  - overrides `scheduler.secrets`
+  ## - overrides `scheduler.secrets`
   ##
   secretsMap: ""
 
@@ -389,6 +402,9 @@ web:
   resources: {}
 
   ## the number of web Pods to run
+  ##
+  ## NOTE:
+  ## - if you set this >1 we recommend defining a `web.podDisruptionBudget`
   ##
   replicas: 1
 
@@ -431,11 +447,8 @@ web:
   ## configs for the PodDisruptionBudget of the web Deployment
   ##
   podDisruptionBudget:
+
     ## if a PodDisruptionBudget resource is created for the web Deployment
-    ##
-    ## WARNING:
-    ## - if you enable a PodDisruptionBudget, you should set `web.replicas` to a value
-    ##   large enough for Kubernetes to evict at least 1 Pod at a time
     ##
     enabled: false
 
@@ -470,7 +483,7 @@ web:
   ## sets `AIRFLOW__CORE__STORE_SERIALIZED_DAGS`
   ##
   ## NOTE:
-  ## - setting true will disable `git-sync` and `git-clone` containers in the web Pod
+  ## - setting true will disable `dags-git-sync` and `dags-git-clone` containers in the web Pod
   ## - Docs: https://airflow.apache.org/docs/stable/dag-serialization.html
   ##
   serializeDAGs: false
@@ -530,7 +543,7 @@ web:
   ## the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>`
   ##
   ## NOTE:
-  ##  - overrides `web.secrets`
+  ## - overrides `web.secrets`
   ##
   secretsMap: ""
 
@@ -555,7 +568,8 @@ workers:
   ## the number of workers Pods to run
   ##
   ## NOTE:
-  ## - when `workers.autoscaling.enabled` is true, this is the minimum
+  ## - if you set this >1 we recommend defining a `workers.podDisruptionBudget`
+  ## - this is the minimum when `workers.autoscaling.enabled` is true
   ##
   replicas: 1
 
@@ -598,14 +612,8 @@ workers:
   ## configs for the PodDisruptionBudget of the worker StatefulSet
   ##
   podDisruptionBudget:
+
     ## if a PodDisruptionBudget resource is created for the worker StatefulSet
-    ##
-    ## WARNING:
-    ## - if you enable a PodDisruptionBudget, you should set `workers.replicas` to a value
-    ##   large enough for Kubernetes to evict at least 1 Pod at a time
-    ## - if you enable `workers.celery.gracefullTermination`, you should consider
-    ##   specifying a `workers.podDisruptionBudget.minAvailable` to prevent there
-    ##   not being enough available workers during graceful termination waiting periods
     ##
     enabled: false
 
@@ -656,7 +664,7 @@ workers:
     ## if we should wait for tasks to finish before SIGTERM of the celery worker
     ##
     ## WARNING:
-    ## - consider using `workers.podDisruptionBudget.*` to prevent there not being
+    ## - consider defining a `workers.podDisruptionBudget` to prevent there not being
     ##   enough available workers during graceful termination waiting periods
     ##
     gracefullTermination: false
@@ -664,11 +672,11 @@ workers:
     ## how many seconds to wait for tasks to finish before SIGTERM of the celery worker
     ##
     ## graceful shutdown lifecycle:
-    ##   1. prevent worker accepting new tasks
-    ##   2. wait AT MOST `workers.celery.gracefullTerminationPeriod` for tasks to finish
-    ##   3. send SIGTERM to worker
-    ##   4. wait AT MOST `workers.terminationPeriod` for kill to finish
-    ##   5. send SIGKILL to worker
+    ##  1. prevent worker accepting new tasks
+    ##  2. wait AT MOST `workers.celery.gracefullTerminationPeriod` for tasks to finish
+    ##  3. send SIGTERM to worker
+    ##  4. wait AT MOST `workers.terminationPeriod` for kill to finish
+    ##  5. send SIGKILL to worker
     ##
     gracefullTerminationPeriod: 600
 
@@ -691,7 +699,7 @@ workers:
   ## the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>`
   ##
   ## NOTE:
-  ##  - overrides `worker.secrets`
+  ## - overrides `worker.secrets`
   ##
   secretsMap: ""
 
@@ -717,6 +725,9 @@ flower:
   resources: {}
 
   ## the number of flower Pods to run
+  ##
+  ## NOTE:
+  ## - if you set this >1 we recommend defining a `flower.podDisruptionBudget`
   ##
   replicas: 1
 
@@ -759,11 +770,8 @@ flower:
   ## configs for the PodDisruptionBudget of the flower Deployment
   ##
   podDisruptionBudget:
+
     ## if a PodDisruptionBudget resource is created for the flower Deployment
-    ##
-    ## WARNING:
-    ## - if you enable a PodDisruptionBudget, you should set `flower.replicas` to a value
-    ##   large enough for Kubernetes to evict at least 1 Pod at a time
     ##
     enabled: false
 
@@ -778,7 +786,7 @@ flower:
   ## the value of the flower `--auth` argument
   ##
   ## NOTE:
-  ##  - see flower docs: https://flower.readthedocs.io/en/latest/auth.html#google-oauth-2-0
+  ## - see flower docs: https://flower.readthedocs.io/en/latest/auth.html#google-oauth-2-0
   ##
   oauthDomains: ""
 
@@ -1037,7 +1045,21 @@ dags:
       ##
       refreshTime: 60
 
-  ## configs for the git-clone container
+      ## path to mount the dags volume at
+      ##
+      mountPath: "/dags"
+
+      ## sub-path under `mountPath` to create and sync the dag repo into
+      ##
+      ## WARNING:
+      ## - this MUST include a leading "/"
+      ##
+      ## EXAMPLE:
+      ##   syncSubPath: "/my_sub_directory"
+      ##
+      syncSubPath: ""
+
+  ## configs for the dags-git-clone init-container
   ##
   ## NOTE:
   ## - use this container if you want to only clone the external git repo
@@ -1070,21 +1092,17 @@ dags:
       ## values: Always or IfNotPresent
       pullPolicy: IfNotPresent
 
-    ## path to mount dags-data volume to
-    ##
-    ## WARNING:
-    ## - this path is also used by the git-sync container
+    ## path to mount the dags volume at
     ##
     mountPath: "/dags"
 
-    ## sub-path under `dags.initContainer.mountPath` to sync dags to
+    ## sub-path under `mountPath` to create and sync the dag repo into
     ##
     ## WARNING:
-    ## - this path is also used by the git-sync container
-    ## - this MUST INCLUDE the leading /
+    ## - this MUST include a leading "/"
     ##
     ## EXAMPLE:
-    ##   syncSubPath: "/subdirWithDags"
+    ##   syncSubPath: "/my_sub_directory"
     ##
     syncSubPath: ""
 
@@ -1260,7 +1278,7 @@ rbac:
   ## NOTE:
   ## - this is needed for KubernetesPodOperator() to use `log_events_on_failure=True`
   ##
-  events: false
+  events: true
 
 ###################################
 # Kubernetes - Service Account
@@ -1269,7 +1287,7 @@ serviceAccount:
   ## if a Kubernetes ServiceAccount is created
   ##
   ## NOTE:
-  ## - if false, you must create the service account outside of this helm chart,
+  ## - if false, you must create the service account outside of this chart,
   ##   with the name: `serviceAccount.name`
   ##
   create: true

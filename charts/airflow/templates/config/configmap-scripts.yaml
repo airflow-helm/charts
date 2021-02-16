@@ -38,7 +38,7 @@ data:
     while (( celery inspect --broker $AIRFLOW__CELERY__BROKER_URL --destination celery@$HOSTNAME --json active | python3 -c "import json; active_tasks = json.loads(input())['celery@$HOSTNAME']; print(len(active_tasks))" > 0 )); do
       sleep 10
     done
-  preinit-db.sh: |
+  retry-upgradedb.sh: |
     #!/bin/bash
     echo "*** Waiting 10s for database"
     sleep 10
@@ -46,7 +46,7 @@ data:
     COUNT=0
     while [ "${COUNT}" -lt 5 ]; do
       echo "*** upgrading airflow db"
-      if airflow upgradedb || airflow db upgrade; then
+      if airflow db upgrade || airflow upgradedb; then
         echo "*** upgradedb succeeded"
         exit 0
       else
