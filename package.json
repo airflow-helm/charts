@@ -1,0 +1,43 @@
+{
+  "name": "python_project_template",
+  "version": "1.0.0",
+  "description": "[![Build Status](https://github.com/david30907d/pyproject_template.svg?token=FjZQpfwxUNPpEosXv6sy&branch=master)](https://github.com/david30907d/pyproject_template)",
+  "main": "index.js",
+  "scripts": {
+    "commit": "git-cz",
+    "check": "lint-staged"
+  },
+  "husky": {
+    "hooks": {
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/david30907d/pyproject_template.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/david30907d/pyproject_template/issues"
+  },
+  "homepage": "https://github.com/david30907d/pyproject_template#readme",
+  "dependencies": {
+    "commitizen": "^4.2.2",
+    "cz-conventional-changelog": "^3.1.0",
+    "dot-prop": "^5.2.0",
+    "husky": "^1.3.1",
+    "lint-staged": "^8.1.5",
+    "lodash": "^4.17.19",
+    "minimist": "^1.2.5"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^9.1.2",
+    "@commitlint/config-conventional": "^11.0.0",
+    "cz-emoji": "^1.3.1"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-emoji"
+    }
+  }
+}
