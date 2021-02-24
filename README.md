@@ -2,7 +2,8 @@
 
 ## For Tresl Developer
 
-Please refer to [notion doc](https://www.notion.so/tresl/ETL-f20df50e57af459ea5b0cdacc874d95e) for details
+1. Please refer to [notion doc](https://www.notion.so/tresl/ETL-f20df50e57af459ea5b0cdacc874d95e) for details
+2. About secrets: [README.md](secrets/README.md)
 ## Charts
 
 | name | description |

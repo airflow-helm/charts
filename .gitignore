@@ -1,3 +1,9 @@
+# for tresl
+add-connections-secrets.yml
+node_modules/
+values-staging.yaml
+values-prod.yaml
+
 ## JetBrains
 .idea/
 *.iml
