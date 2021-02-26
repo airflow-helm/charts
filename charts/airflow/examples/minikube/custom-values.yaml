@@ -304,7 +304,7 @@ workers:
         name: memory
         target:
           type: Utilization
-          averageUtilization: 80
+          averageUtilization: 70
 
   celery:
     instances: 10
