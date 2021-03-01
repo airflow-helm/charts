@@ -242,7 +242,7 @@ workers:
         name: memory
         target:
           type: Utilization
-          averageUtilization: 80
+          averageUtilization: 70
 
   ## configs for the celery worker Pods
   ##

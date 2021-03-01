@@ -304,7 +304,7 @@ workers:
         name: memory
         target:
           type: Utilization
-          averageUtilization: 80
+          averageUtilization: 70
 
   celery:
     instances: 10
@@ -333,7 +333,7 @@ dags:
 
     ## the branch/tag/sha1 which we clone
     ##
-    ref: helm
+    ref: <master/prod>
 
     ## the name of a pre-created secret containing files for ~/.ssh/
     ##
