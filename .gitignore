@@ -3,6 +3,8 @@ add-connections-secrets.yml
 node_modules/
 values-staging.yaml
 values-prod.yaml
+secrets/add-connections-secrets-prod.yml
+secrets/add-connections-secrets-staging.yml
 
 ## JetBrains
 .idea/

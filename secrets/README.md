@@ -3,7 +3,9 @@
 ## Airflow connections
 
 1. Fill out the `add-connections-secrets.templete.yml` and save it into `add-connections-secrets.yml`
-2. Create secret: `kubectl apply -f ./add-connections-secrets.yml`
+2. Create secret:
+  * staging: `kubectl apply -f ./add-connections-secrets-staging.yml`
+  * prod: `kubectl apply -f ./add-connections-secrets-prod.yml`
 
 ## Git
 
