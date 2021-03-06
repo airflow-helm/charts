@@ -63,6 +63,10 @@ airflow:
   ##     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
   ##     AIRFLOW__WEBSERVER__RBAC: "False"
   ##
+  ##     ## Security (using LDAP)
+  ##     AIRFLOW__WEBSERVER__AUTHENTICATE: "True"
+  ##     AIRFLOW__WEBSERVER__AUTH_BACKEND: "airflow.contrib.auth.backends.ldap_auth"
+  ##
   ##     ## DAGS
   ##     AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
   ##     AIRFLOW__CORE__LOAD_EXAMPLES: "False"
@@ -74,6 +78,18 @@ airflow:
   ##     AIRFLOW__SMTP__SMTP_SSL: "False"
   ##     AIRFLOW__SMTP__SMTP_PORT: "25"
   ##     AIRFLOW__SMTP__SMTP_MAIL_FROM: "admin@example.com"
+  ##
+  ##     ## LDAP
+  ##     AIRFLOW__LDAP__URI: "ldaps://ldap.example.com:636"
+  ##     AIRFLOW__LDAP__USER_FILTER: "objectClass=*"
+  ##     AIRFLOW__LDAP__USER_NAME_ATTR: "sAMAccountName"
+  ##     AIRFLOW__LDAP__GROUP_MEMBER_ATTR: "memberOf"
+  ##     AIRFLOW__LDAP__GROUP_NAME_ATTR: "cn"
+  ##     AIRFLOW__LDAP__SUPERUSER_FILTER: "memberOf=cn=admins,ou=groups,dc=example,dc=com"
+  ##     AIRFLOW__LDAP__DATA_PROFILER_FILTER: "memberOf=cn=data_profiler,ou=groups,dc=example,dc=co"
+  ##     AIRFLOW__LDAP__BASEDN: "dc=example,dc=com"
+  ##     AIRFLOW__LDAP__SEARCH_SCOPE: "SUBTREE"
+  ##     AIRFLOW__LDAP__CACERT: "/etc/ca/ldap_ca.crt"
   ##
   ##     ## Disable noisy "Handling signal: ttou" Gunicorn log messages
   ##     GUNICORN_CMD_ARGS: "--log-level WARNING"
@@ -104,7 +120,12 @@ airflow:
   ##       valueFrom:
   ##         secretKeyRef:
   ##           name: airflow-ldap-password
-  ##           key: value
+  ##           key: password
+  ##     - name: AIRFLOW__LDAP__BIND_USER
+  ##       valueFrom:
+  ##         secretKeyRef:
+  ##           name: airflow-ldap-secret
+  ##           key: bind_dn
   ##
   extraEnv: []
 
@@ -367,9 +388,9 @@ scheduler:
   ##   extraInitContainers:
   ##     - name: volume-mount-hack
   ##       image: busybox
-  ##       command: ["sh", "-c", "chown -R 1000:1000 logs"]
+  ##       command: ["sh", "-c", "chown -R 50000:50000 /logs"]
   ##       volumeMounts:
-  ##         - mountPath: /opt/airflow/logs
+  ##         - mountPath: /logs
   ##           name: logs-data
   ##
   extraInitContainers: []
