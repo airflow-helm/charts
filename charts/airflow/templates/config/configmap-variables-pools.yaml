@@ -10,7 +10,7 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   {{- if .Values.scheduler.variables }}
-  variables.json: |
+  variables.json: |-
     {{- if eq (typeOf .Values.scheduler.variables) "map[string]interface {}" }}
     {{- toJson .Values.scheduler.variables | nindent 4 }}
     {{- else }}
@@ -18,7 +18,7 @@ data:
     {{- end }}
   {{- end }}
   {{- if .Values.scheduler.pools }}
-  pools.json: |
+  pools.json: |-
     {{- if eq (typeOf .Values.scheduler.pools) "map[string]interface {}" }}
     {{- toJson .Values.scheduler.pools | nindent 4 }}
     {{- else }}

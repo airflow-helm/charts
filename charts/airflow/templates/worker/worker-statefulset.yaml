@@ -1,7 +1,6 @@
-{{- if .Values.workers.enabled }}
-## A StatefulSet is used to give workers consistent names for DNS,
-## allowing the web server to access the log files.
+{{- if and (.Values.workers.enabled) (include "airflow.executor.celery_like" .) }}
 apiVersion: apps/v1
+## StatefulSet gives workers consistent DNS names, allowing webserver access to log files
 kind: StatefulSet
 metadata:
   name: {{ include "airflow.fullname" . }}-worker
@@ -34,11 +33,8 @@ spec:
     metadata:
       annotations:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
-        checksum/config-scripts-git: {{ include (print $.Template.BasePath "/config/configmap-scripts-git.yaml") . | sha256sum }}
         checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
-        {{- if and (.Values.dags.git.url) (.Values.dags.git.ref) }}
-        checksum/dags-git-ref: {{ .Values.dags.git.ref | sha256sum }}
-        {{- end }}
+        checksum/config-scripts-git: {{ include (print $.Template.BasePath "/config/configmap-scripts-git.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
@@ -90,9 +86,6 @@ spec:
         {{- end }}
       {{- end }}
       containers:
-        {{- if .Values.dags.git.gitSync.enabled }}
-        {{- include "airflow.container.git_sync" . | indent 8 }}
-        {{- end }}
         - name: airflow-worker
           imagePullPolicy: {{ .Values.airflow.image.pullPolicy }}
           image: "{{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}"
@@ -124,10 +117,6 @@ spec:
             - "-c"
             - >
               true \
-              {{- if gt .Values.workers.initialStartupDelay 0.0 }}
-               && echo "*** waiting {{ .Values.workers.initialStartupDelay }}s..." \
-               && sleep {{ .Values.workers.initialStartupDelay }} \
-              {{- end }}
                && mkdir -p /home/airflow/.local/bin \
                && export PATH="/home/airflow/.local/bin:$PATH" \
               {{- if .Values.dags.installRequirements }}
@@ -153,6 +142,9 @@ spec:
               mountPath: {{ $.Values.workers.secretsDir }}/{{ . }}
             {{- end }}
             {{- end }}
+        {{- if .Values.dags.git.gitSync.enabled }}
+        {{- include "airflow.container.git_sync" . | indent 8 }}
+        {{- end }}
         {{- if .Values.airflow.extraContainers }}
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
         {{- end }}

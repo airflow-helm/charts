@@ -20,7 +20,7 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      ## multiple scheduler pods can safely run concurrently (in airflow 2.0)
+      ## multiple scheduler pods can safely run concurrently (in airflow 2.0+)
       maxSurge: 25%
       maxUnavailable: 0
   selector:
@@ -32,13 +32,11 @@ spec:
     metadata:
       annotations:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
-        checksum/config-scripts-git: {{ include (print $.Template.BasePath "/config/configmap-scripts-git.yaml") . | sha256sum }}
+        checksum/config-pod-template: {{ include (print $.Template.BasePath "/config/configmap-pod-template.yaml") . | sha256sum }}
         checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
+        checksum/config-scripts-git: {{ include (print $.Template.BasePath "/config/configmap-scripts-git.yaml") . | sha256sum }}
         checksum/config-variables-pools: {{ include (print $.Template.BasePath "/config/configmap-variables-pools.yaml") . | sha256sum }}
         checksum/secret-connections: {{ include (print $.Template.BasePath "/config/secret-connections.yaml") . | sha256sum }}
-        {{- if and (.Values.dags.git.url) (.Values.dags.git.ref) }}
-        checksum/dags-git-ref: {{ .Values.dags.git.ref | sha256sum }}
-        {{- end }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
@@ -91,9 +89,6 @@ spec:
         {{- end }}
       {{- end }}
       containers:
-        {{- if .Values.dags.git.gitSync.enabled }}
-        {{- include "airflow.container.git_sync" . | indent 8 }}
-        {{- end }}
         - name: airflow-scheduler
           image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
           imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
@@ -112,10 +107,6 @@ spec:
             - "-c"
             - >
               true \
-              {{- if gt .Values.scheduler.initialStartupDelay 0.0 }}
-               && echo "*** waiting {{ .Values.scheduler.initialStartupDelay }}s..." \
-               && sleep {{ .Values.scheduler.initialStartupDelay }} \
-              {{- end }}
                && mkdir -p /home/airflow/.local/bin \
                && export PATH="/home/airflow/.local/bin:$PATH" \
               {{- if .Values.dags.installRequirements }}
@@ -178,23 +169,34 @@ spec:
             {{- include "airflow.common.volumeMounts" . | indent 12 }}
             {{- if .Values.scheduler.secretsMap }}
             - name: {{ .Values.scheduler.secretsMap }}-volume
-              readOnly: true
               mountPath: {{ .Values.scheduler.secretsDir }}
+              readOnly: true
             {{- else }}
             {{- range .Values.scheduler.secrets }}
             - name: {{ . }}-volume
-              readOnly: true
               mountPath: {{ $.Values.scheduler.secretsDir }}/{{ . }}
+              readOnly: true
             {{- end }}
             {{- end }}
             {{- if or (.Values.scheduler.connections) (.Values.scheduler.existingSecretConnections) }}
             - name: connections
               mountPath: /home/airflow/connections
+              readOnly: true
             {{- end }}
             {{- if or (.Values.scheduler.variables) (.Values.scheduler.pools) }}
             - name: variables-pools
               mountPath: /home/airflow/variables-pools/
+              readOnly: true
             {{- end }}
+            {{- if (include "airflow.executor.kubernetes_like" .) }}
+            - name: pod-template
+              mountPath: /home/airflow/pod_templates/pod_template.yaml
+              subPath: pod_template.yaml
+              readOnly: true
+            {{- end }}
+        {{- if .Values.dags.git.gitSync.enabled }}
+        {{- include "airflow.container.git_sync" . | indent 8 }}
+        {{- end }}
         {{- if .Values.airflow.extraContainers }}
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
         {{- end }}
@@ -227,4 +229,9 @@ spec:
           configMap:
             name: {{ include "airflow.fullname" . }}-variables-pools
             defaultMode: 0755
+        {{- end }}
+        {{- if (include "airflow.executor.kubernetes_like" .) }}
+        - name: pod-template
+          configMap:
+            name: {{ include "airflow.fullname" . }}-pod-template
         {{- end }}

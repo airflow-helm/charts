@@ -58,36 +58,32 @@ airflow:
   ## environment variables for the web/scheduler/worker Pods (for airflow configs)
   ##
   config:
-      ## Security
-      AIRFLOW__CORE__SECURE_MODE: "True"
-      AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.deny_all"
-      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
-      AIRFLOW__WEBSERVER__RBAC: "True"
+    ## security
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
 
-      ## SSL
-      ## NOTE: This effectively disables HTTP, so `web.readinessProbe.scheme` and `web.livenessProbe.scheme`
-      ##       need to be set accordingly
-      AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT: "/var/airflow/secrets/airflow-cluster1-cert/tls.crt"
-      AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY: "/var/airflow/secrets/airflow-cluster1-cert/tls.key"
+    ## enable SSL for webserver
+    ## setting these disables HTTP, so ensure you set: `web.readinessProbe.scheme` and `web.livenessProbe.scheme`
+    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT: "/var/airflow/secrets/airflow-cluster1-cert/tls.crt"
+    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY: "/var/airflow/secrets/airflow-cluster1-cert/tls.key"
 
-      ## DAGS
-      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
+    ## dags
+    AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
 
-      ## GCP Remote Logging
-      AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
-      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://XXXXXXXX--airflow-cluster1/airflow/logs"
-      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "google_cloud_airflow"
+    ## remote log storage
+    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://XXXXXXXX--airflow-cluster1/airflow/logs"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "google_cloud_airflow"
 
-      ## Email (SMTP)
-      AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"
-      AIRFLOW__SMTP__SMTP_HOST: "smtpmail.example.com"
-      AIRFLOW__SMTP__SMTP_STARTTLS: "False"
-      AIRFLOW__SMTP__SMTP_SSL: "False"
-      AIRFLOW__SMTP__SMTP_PORT: "25"
-      AIRFLOW__SMTP__SMTP_MAIL_FROM: "admin@airflow-cluster1.example.com"
+    ## email
+    AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"
+    AIRFLOW__SMTP__SMTP_HOST: "smtpmail.example.com"
+    AIRFLOW__SMTP__SMTP_MAIL_FROM: "admin@airflow-cluster1.example.com"
+    AIRFLOW__SMTP__SMTP_PORT: "25"
+    AIRFLOW__SMTP__SMTP_SSL: "False"
+    AIRFLOW__SMTP__SMTP_STARTTLS: "False"
 
-      ## Disable noisy "Handling signal: ttou" Gunicorn log messages
-      GUNICORN_CMD_ARGS: "--log-level WARNING"
+    ## domain used in airflow emails
+    AIRFLOW__WEBSERVER__BASE_URL: "https://airflow-cluster1.example.com/"
 
   ## extra environment variables for the web/scheduler/worker (AND flower) Pods
   ##
@@ -164,10 +160,6 @@ web:
     externalPort: 443
     loadBalancerIP: XXX.XXX.XXX.XXX
     loadBalancerSourceRanges: []
-
-  ## sets `AIRFLOW__WEBSERVER__BASE_URL`
-  ##
-  baseUrl: "https://airflow-cluster1.example.com/"
 
   ## extra pip packages to install in the web container
   ##

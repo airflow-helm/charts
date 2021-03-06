@@ -1,4 +1,4 @@
-{{- if and (.Values.workers.enabled) (.Values.workers.autoscaling.enabled) }}
+{{- if and (.Values.workers.enabled) (include "airflow.executor.celery_like" .) (.Values.workers.autoscaling.enabled) }}
 apiVersion: autoscaling/v2beta2
 kind: HorizontalPodAutoscaler
 metadata:

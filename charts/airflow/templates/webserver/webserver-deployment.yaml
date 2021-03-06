@@ -17,7 +17,6 @@ metadata:
     {{- end }}
 spec:
   replicas: {{ .Values.web.replicas }}
-  minReadySeconds: {{ .Values.web.minReadySeconds }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -35,9 +34,7 @@ spec:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
         checksum/config-scripts-git: {{ include (print $.Template.BasePath "/config/configmap-scripts-git.yaml") . | sha256sum }}
         checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
-        {{- if and (.Values.dags.git.url) (.Values.dags.git.ref) }}
-        checksum/dags-git-ref: {{ .Values.dags.git.ref | sha256sum }}
-        {{- end }}
+        checksum/config-webserver-config: {{ include (print $.Template.BasePath "/config/secret-webserver-config.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
@@ -84,9 +81,6 @@ spec:
         {{- end }}
       {{- end }}
       containers:
-        {{- if and (.Values.dags.git.gitSync.enabled) (not .Values.web.serializeDAGs) }}
-        {{- include "airflow.container.git_sync" . | indent 8 }}
-        {{- end }}
         - name: airflow-web
           image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
           imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
@@ -109,10 +103,6 @@ spec:
             - "-c"
             - >
               true \
-              {{- if gt .Values.web.initialStartupDelay 0.0 }}
-               && echo "*** waiting {{ .Values.web.initialStartupDelay }}s..." \
-               && sleep {{ .Values.web.initialStartupDelay }} \
-              {{- end }}
                && mkdir -p /home/airflow/.local/bin \
                && export PATH="/home/airflow/.local/bin:$PATH" \
               {{- if .Values.dags.installRequirements }}
@@ -161,15 +151,22 @@ spec:
             {{- include "airflow.common.volumeMounts" . | indent 12 }}
             {{- if .Values.web.secretsMap }}
             - name: {{ .Values.web.secretsMap }}-volume
-              readOnly: true
               mountPath: {{ .Values.web.secretsDir }}
+              readOnly: true
             {{- else }}
             {{- range .Values.web.secrets }}
             - name: {{ . }}-volume
-              readOnly: true
               mountPath: {{ $.Values.web.secretsDir }}/{{ . }}
+              readOnly: true
             {{- end }}
             {{- end }}
+            - name: webserver-config
+              mountPath: /home/airflow/webserver_config.py
+              subPath: webserver_config.py
+              readOnly: true
+        {{- if and (.Values.dags.git.gitSync.enabled) (not .Values.web.serializeDAGs) }}
+        {{- include "airflow.container.git_sync" . | indent 8 }}
+        {{- end }}
         {{- if .Values.airflow.extraContainers }}
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
         {{- end }}
@@ -186,4 +183,7 @@ spec:
             secretName: {{ . }}
         {{- end }}
         {{- end }}
+        - name: webserver-config
+          secret:
+            secretName: {{ include "airflow.fullname" . }}-webserver-config
 

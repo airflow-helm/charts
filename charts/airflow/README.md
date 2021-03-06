@@ -92,26 +92,26 @@ We expose the `airflow.config` value to make this easier:
 ```yaml
 airflow:
   config:
-    ## Security
-    AIRFLOW__CORE__SECURE_MODE: "True"
-    AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.deny_all"
+    ## security
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
-    AIRFLOW__WEBSERVER__RBAC: "False"
-
-    ## DAGS
-    AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
+    
+    ## dags
     AIRFLOW__CORE__LOAD_EXAMPLES: "False"
-
-    ## Email (SMTP)
+    AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
+    
+    ## email
     AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"
     AIRFLOW__SMTP__SMTP_HOST: "smtpmail.example.com"
-    AIRFLOW__SMTP__SMTP_STARTTLS: "False"
-    AIRFLOW__SMTP__SMTP_SSL: "False"
-    AIRFLOW__SMTP__SMTP_PORT: "25"
     AIRFLOW__SMTP__SMTP_MAIL_FROM: "admin@example.com"
-
-    ## Disable noisy "Handling signal: ttou" Gunicorn log messages
-    GUNICORN_CMD_ARGS: "--log-level WARNING"
+    AIRFLOW__SMTP__SMTP_PORT: "25"
+    AIRFLOW__SMTP__SMTP_SSL: "False"
+    AIRFLOW__SMTP__SMTP_STARTTLS: "False"
+    
+    ## domain used in airflow emails
+    AIRFLOW__WEBSERVER__BASE_URL: "http://airflow.example.com"
+    
+    ## ether environment variables
+    HTTP_PROXY: "http://proxy.example.com:8080"
 ```
 
 ## Docs (Airflow) - Connections
@@ -249,7 +249,7 @@ For example, you may be using `flask_oauthlib` to integrate with Okta/Google/etc
 ```yaml
 web:
   extraPipPackages:
-    - "apache-airflow[google_auth]==1.10.12"
+    - "apache-airflow[google_auth]==2.0.1"
 ```
 
 ---
@@ -266,8 +266,9 @@ If you already have something hosted at the root of your domain, you might want 
 
 In this example, would set these values:
 ```yaml
-web:
-  baseUrl: "http://example.com/airflow/"
+airflow:
+  config: 
+    AIRFLOW__WEBSERVER__BASE_URL: "http://example.com/airflow/"
 
 flower:
   urlPrefix: "/airflow/flower"
@@ -646,7 +647,7 @@ This method stores your DAGs inside the container image.
 
 This chart uses the official [apache/airflow image](https://hub.docker.com/r/apache/airflow), extend this image and COPY your DAGs into the `dags.path` folder:
 ```docker
-FROM apache/airflow:1.10.12-python3.6
+FROM apache/airflow:2.0.1-python3.8
 
 # NOTE: dag path is set with the `dags.path` value
 COPY ./my_dag_folder /opt/airflow/dags
@@ -676,10 +677,10 @@ __Global Values:__
 
 | Parameter | Description | Default |
 | --- | --- | --- |
-| `airflow.image.*` | configs for the container image of the web/scheduler/worker/flower containers | `<see values.yaml>` |
+| `airflow.image.*` | the container image for the web/scheduler/worker/flower containers | `<see values.yaml>` |
 | `airflow.executor` | the airflow executor type to use | `CeleryExecutor` |
 | `airflow.fernetKey` | the fernet key used to encrypt the connections/variables in the database | `7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc=` |
-| `airflow.config` | environment variables for the web/scheduler/worker/flower pods (for airflow configs) | `{}` |
+| `airflow.config` | environment variables for airflow configs | `{}` |
 | `airflow.podAnnotations` | extra annotations for the web/scheduler/worker/flower Pods | `{}` |
 | `airflow.extraEnv` | extra environment variables for the web/scheduler/worker/flower Pods | `[]` |
 | `airflow.extraConfigmapMounts` | extra configMap volumeMounts for the web/scheduler/worker/flower Pods | `[]` |
@@ -687,6 +688,7 @@ __Global Values:__
 | `airflow.extraPipPackages` | extra pip packages to install in the web/scheduler/worker Pods | `[]` |
 | `airflow.extraVolumeMounts` | extra volumeMounts for the web/scheduler/worker Pods | `[]` |
 | `airflow.extraVolumes` | extra volumes for the web/scheduler/worker Pods | `[]` |
+| `airflow.podTemplateFile.*` | configs to generate AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE | `<see values.yaml>` |
 
 __Airflow Scheduler values:__
 
@@ -702,7 +704,7 @@ __Airflow Scheduler values:__
 | `scheduler.podLabels` | Pod labels for the scheduler Deployment | `{}` |
 | `scheduler.annotations` | annotations for the scheduler Deployment | `{}` |
 | `scheduler.podAnnotations` | Pod Annotations for the scheduler Deployment | `{}` |
-| `scheduler.safeToEvict` | if we should tell Kubernetes Autoscaler that its safe to evict these Pods | `true` |
+| `scheduler.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true` |
 | `scheduler.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the scheduler | `<see values.yaml>` |
 | `scheduler.connections` | custom airflow connections for the airflow scheduler | `[]` |
 | `scheduler.refreshConnections` | if `scheduler.connections` are deleted and re-added after each scheduler restart | `true` |
@@ -712,7 +714,6 @@ __Airflow Scheduler values:__
 | `scheduler.numRuns` | the value of the `airflow --num_runs` parameter used to run the airflow scheduler | `-1` |
 | `scheduler.initdb` | if we run `airflow db upgrade` every time the scheduler starts | `true` |
 | `scheduler.preinitdb` | if we run `airflow db upgrade` inside an init-container which retries if the command fails | `false` |
-| `scheduler.initialStartupDelay` | the number of seconds to wait (in bash) before starting the scheduler container | `0` |
 | `scheduler.livenessProbe.*` | configs for the scheduler liveness probe | `<see values.yaml>` |
 | `scheduler.secretsDir` | the directory in which to mount secrets on scheduler containers | `/var/airflow/secrets` |
 | `scheduler.secrets` | the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>` | `[]` |
@@ -733,19 +734,17 @@ __Airflow Webserver Values:__
 | `web.podLabels` | Pod labels for the web Deployment | `{}` |
 | `web.annotations` | annotations for the web Deployment | `{}` |
 | `web.podAnnotations` | Pod annotations for the web Deployment | `{}` |
-| `web.safeToEvict` | if we should tell Kubernetes Autoscaler that its safe to evict these Pods | `true` |
+| `web.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true` |
 | `web.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the web Deployment | `<see values.yaml>` |
 | `web.service.*` | configs for the Service of the web pods | `<see values.yaml>` |
-| `web.baseUrl` | sets `AIRFLOW__WEBSERVER__BASE_URL` | `http://localhost:8080` |
 | `web.serializeDAGs` | sets `AIRFLOW__CORE__STORE_SERIALIZED_DAGS` | `false` |
 | `web.extraPipPackages` | extra pip packages to install in the web container | `[]` |
-| `web.initialStartupDelay` | the number of seconds to wait (in bash) before starting the web container | `0` |
-| `web.minReadySeconds` | the number of seconds to wait before declaring a new Pod available | `5` |
 | `web.readinessProbe.*` | configs for the web Service readiness probe | `<see values.yaml>` |
 | `web.livenessProbe.*` | configs for the web Service liveness probe | `<see values.yaml>` |
 | `web.secretsDir` | the directory in which to mount secrets on web containers | `/var/airflow/secrets` |
 | `web.secrets` | the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>` | `[]` |
 | `web.secretsMap` | the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>` | `""` |
+| `web.webserverConfigFile.*` | configs to generate webserver_config.py | `<see values.yaml>` |
 
 __Airflow Worker Values:__
 
@@ -762,10 +761,9 @@ __Airflow Worker Values:__
 | `workers.podLabels` | Pod labels for the worker StatefulSet | `{}` |
 | `workers.annotations` | annotations for the worker StatefulSet | `{}` |
 | `workers.podAnnotations` | Pod annotations for the worker StatefulSet | `{}` |
-| `workers.safeToEvict` | if we should tell Kubernetes Autoscaler that its safe to evict these Pods | `true` |
+| `workers.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true` |
 | `workers.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the worker StatefulSet | `<see values.yaml>` |
 | `workers.autoscaling.*` | configs for the HorizontalPodAutoscaler of the worker Pods | `<see values.yaml>` |
-| `workers.initialStartupDelay` | the number of seconds to wait (in bash) before starting each worker container | `0` |
 | `workers.celery.*` | configs for the celery worker Pods | `<see values.yaml>` |
 | `workers.terminationPeriod` | how many seconds to wait after SIGTERM before SIGKILL of the celery worker | `60` |
 | `workers.secretsDir` | directory in which to mount secrets on worker containers | `/var/airflow/secrets` |
@@ -785,15 +783,13 @@ __Airflow Flower Values:__
 | `flower.podLabels` | Pod labels for the flower Deployment | `{}` |
 | `flower.annotations` | annotations for the flower Deployment | `{}` |
 | `flower.podAnnotations` | Pod annotations for the flower Deployment | `{}` |
-| `flower.safeToEvict` | if we should tell Kubernetes Autoscaler that its safe to evict these Pods | `true` |
+| `flower.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true` |
 | `flower.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the flower Deployment | `<see values.yaml>` |
 | `flower.oauthDomains` | the value of the flower `--auth` argument | `""` |
 | `flower.basicAuthSecret` | the name of a pre-created secret containing the basic authentication value for flower | `""` |
 | `flower.basicAuthSecretKey` | the key within `flower.basicAuthSecret` containing the basic authentication string | `""` |
 | `flower.urlPrefix` | sets `AIRFLOW__CELERY__FLOWER_URL_PREFIX` | `""` |
 | `flower.service.*` | configs for the Service of the flower Pods | `<see values.yaml>` |
-| `flower.initialStartupDelay` | the number of seconds to wait (in bash) before starting the flower container | `0` |
-| `flower.minReadySeconds` | the number of seconds to wait before declaring a new Pod available | `5` |
 | `flower.extraConfigmapMounts` | extra ConfigMaps to mount on the flower Pods | `[]` |
 
 __Airflow Logs Values:__
@@ -808,11 +804,10 @@ __Airflow DAGs Values:__
 | Parameter | Description | Default |
 | --- | --- | --- |
 | `dags.path` | the airflow dags folder | `/opt/airflow/dags` |
-| `dags.doNotPickle` | whether to disable pickling dags from the scheduler to workers | `false` |
 | `dags.installRequirements` | install any Python `requirements.txt` at the root of `dags.path` automatically | `false` |
 | `dags.persistence.*` | configs for the dags PVC | `<see values.yaml>` |
 | `dags.git.*` | configs for the DAG git repository & sync container | `<see values.yaml>` |
-| `dags.initContainer.*` |  configs for the dags-git-clone init-container | `<see values.yaml>` |
+| `dags.initContainer.*` | configs for the git-clone init-container | `<see values.yaml>` |
 
 __Airflow Ingress Values:__
 
@@ -831,7 +826,7 @@ __Airflow Kubernetes Values:__
 | `serviceAccount.create` | if a Kubernetes ServiceAccount is created | `true` |
 | `serviceAccount.name` | the name of the ServiceAccount | `""` |
 | `serviceAccount.annotations` | annotations for the ServiceAccount | `{}` |
-| `extraManifests` | additional Kubernetes manifests to include with this chart | `[]` |
+| `extraManifests` | extra Kubernetes manifests to include alongside this chart | `[]` |
 
 __Airflow Database (Internal PostgreSQL) Values:__
 
@@ -885,10 +880,13 @@ __Airflow Prometheus Values:__
 
 | Parameter | Description | Default |
 | --- | --- | --- |
-| `serviceMonitor.enabled` | if the ServiceMonitor resources should be deployed | `false` |
+| `serviceMonitor.enabled` | if ServiceMonitor resources should be deployed | `false` |
 | `serviceMonitor.selector` | labels for ServiceMonitor, so that Prometheus can select it | `{ prometheus: "kube-prometheus" }` |
 | `serviceMonitor.path` | the ServiceMonitor web endpoint path | `/admin/metrics` |
 | `serviceMonitor.interval` | the ServiceMonitor web endpoint path | `30s` |
+
+| Parameter | Description | Default |
+| --- | --- | --- |
 | `prometheusRule.enabled` | if the PrometheusRule resources should be deployed | `false` |
 | `prometheusRule.additionalLabels` | labels for PrometheusRule, so that Prometheus can select it | `{}` |
 | `prometheusRule.groups` | alerting rules for Prometheus | `[]` |

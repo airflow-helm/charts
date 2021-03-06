@@ -18,7 +18,6 @@ metadata:
     {{- end }}
 spec:
   replicas: {{ .Values.flower.replicas }}
-  minReadySeconds: {{ .Values.flower.minReadySeconds }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -34,6 +33,8 @@ spec:
     metadata:
       annotations:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
+        checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
+        checksum/config-scripts-git: {{ include (print $.Template.BasePath "/config/configmap-scripts-git.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
@@ -96,10 +97,6 @@ spec:
             - "-c"
             - >
               true \
-              {{- if gt .Values.flower.initialStartupDelay 0.0 }}
-               && echo "*** waiting {{ .Values.flower.initialStartupDelay }}s..." \
-               && sleep {{ .Values.flower.initialStartupDelay }} \
-              {{- end }}
                && mkdir -p /home/airflow/.local/bin \
                && export PATH="/home/airflow/.local/bin:$PATH" \
                && echo "*** running flower..." \
