@@ -224,6 +224,10 @@ spec:
                && echo "*** installing global extra pip packages..." \
                && pip install --user {{ range .Values.airflow.extraPipPackages }} {{ . | quote }} {{ end }} \
               {{- end }}
+              {{- if .Values.dags.installPoetryRequirements }}
+               && echo "*** installing poetry requirements..." \
+               && /home/airflow/scripts/install-poetry-requirements.sh \
+              {{- end }}
                && echo "*** running worker..." \
                && exec airflow worker
           ports:

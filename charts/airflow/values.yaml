@@ -340,7 +340,7 @@ scheduler:
     ##
     ## NOTE:
     ## - make larger if you are installing many packages with:
-    ##   `airflow.extraPipPackages`, `web.extraPipPackages`, or `dags.installRequirements`
+    ##   `airflow.extraPipPackages`, `web.extraPipPackages`, `dags.installRequirements`, or `dags.installPoetryRequirements`
     ##
     initialDelaySeconds: 300
     periodSeconds: 30
@@ -511,7 +511,7 @@ web:
     ##
     ## NOTE:
     ## - make larger if you are installing many packages with:
-    ##   `airflow.extraPipPackages`, `web.extraPipPackages`, or `dags.installRequirements`
+    ##   `airflow.extraPipPackages`, `web.extraPipPackages`, `dags.installRequirements`, or `dags.installPoetryRequirements`
     ##
     initialDelaySeconds: 300
     periodSeconds: 30
@@ -899,6 +899,14 @@ dags:
   ## `dags.initContainer` to ensure the requirements.txt is available at Pod start
   ##
   installRequirements: false
+
+  ## install any Python `poetry.lock` or `pyproject.toml` at the root of `dags.path` automatically
+  ##
+  ## WARNING:
+  ## - if set to true, and you are using `dags.git.gitSync`, you must also enable
+  ## `dags.initContainer` to ensure the poetry.lock or pyproject.toml is available at Pod start
+  ##
+  installPoetryRequirements: false
 
   ## configs for the dags PVC
   ##

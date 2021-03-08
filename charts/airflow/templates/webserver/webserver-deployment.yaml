@@ -218,6 +218,10 @@ spec:
                && echo "*** installing extra pip packages..." \
                && pip install --user {{ range .Values.web.extraPipPackages }} {{ . | quote }} {{ end }} \
               {{- end }}
+              {{- if .Values.dags.installPoetryRequirements }}
+               && echo "*** installing poetry requirements..." \
+               && /home/airflow/scripts/install-poetry-requirements.sh \
+              {{- end }}
                && echo "*** running webserver..." \
                && exec airflow webserver
           {{- if .Values.web.livenessProbe.enabled }}

@@ -666,6 +666,12 @@ airflow:
 
 We expose the `dags.installRequirements` value to pip install any `requirements.txt` found at the root of your `dags.path` folder as airflow-worker Pods start.
 
+## Docs (Other) - poetry.lock or pyproject.toml
+
+> ⚠️ if you update the `poetry.lock` or `pyproject.toml`, you will have to restart each worker Pod for changes to take effect, you might consider using `airflow.extraPipPackages` instead
+
+We expose the `dags.installPoetryRequirements` value to poetry install any `poetry.lock` or `pyproject.toml` found at the root of your `dags.path` folder as airflow-worker Pods start.
+
 ---
 
 ## Helm Chart Values
@@ -809,6 +815,7 @@ __Airflow DAGs Values:__
 | `dags.path` | the airflow dags folder | `/opt/airflow/dags` |
 | `dags.doNotPickle` | whether to disable pickling dags from the scheduler to workers | `false` |
 | `dags.installRequirements` | install any Python `requirements.txt` at the root of `dags.path` automatically | `false` |
+| `dags.installPoetryRequirements` | install any Poetry `poetry.lock` or `pyproject.toml` at the root of `dags.path` automatically | `false` |
 | `dags.persistence.*` | configs for the dags PVC | `<see values.yaml>` |
 | `dags.git.*` | configs for the DAG git repository & sync container | `<see values.yaml>` |
 | `dags.initContainer.*` | configs for the git-clone container | `<see values.yaml>` |

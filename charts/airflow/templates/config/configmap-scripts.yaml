@@ -21,6 +21,21 @@ data:
     else
       exit 0
     fi
+  install-poetry-requirements.sh: |
+    #!/bin/bash -e
+    if [ ! -d {{ .Values.dags.path | quote }} ]; then
+      echo 'No folder {{ .Values.dags.path | quote }}'
+      exit 0
+    fi
+
+    cd {{ .Values.dags.path | quote }}
+    if [ -f poetry.lock ] || [ -f pyproject.toml ]; then
+      poetry config virtualenvs.create false
+      poetry install --no-root --no-dev
+    else
+      echo 'No file "poetry.lock" or "pyproject.toml"'
+      exit 0
+    fi
   graceful-stop-celery-worker.sh: |
     #!/bin/bash -e
     echo "*** starting graceful worker shutdown"
