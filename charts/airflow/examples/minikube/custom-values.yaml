@@ -29,6 +29,7 @@ airflow:
     AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.deny_all"
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
     AIRFLOW__WEBSERVER__RBAC: "False"
+    AIRFLOW__WEBSERVER__PAGE_SIZE: "25"
 
     ## Disable noisy "Handling signal: ttou" Gunicorn log messages
     GUNICORN_CMD_ARGS: "--log-level WARNING"
