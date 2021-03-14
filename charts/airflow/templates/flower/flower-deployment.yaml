@@ -100,10 +100,13 @@ spec:
                && mkdir -p /home/airflow/.local/bin \
                && export PATH="/home/airflow/.local/bin:$PATH" \
                && echo "*** running flower..." \
-              {{- if .Values.flower.oauthDomains }}
-               && airflow celery flower --auth={{ .Values.flower.oauthDomains | quote }} || airflow flower --auth={{ .Values.flower.oauthDomains | quote }}
+              {{- if .Values.airflow.legacyCommands }}
+               && exec airflow flower
               {{- else }}
-               && airflow celery flower || airflow flower
+               && exec airflow celery flower
+              {{- end }}
+              {{- if .Values.flower.oauthDomains -}}
+               {{ " " }}--auth={{ .Values.flower.oauthDomains | quote }}
               {{- end }}
           livenessProbe:
             initialDelaySeconds: 60

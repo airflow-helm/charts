@@ -15,38 +15,39 @@ helm repo update
 
 ### 2 - Install the Chart:
 
-Find each `CHART_VERSION` under [GitHub Releases](https://github.com/airflow-helm/charts/releases):
+Find values for `CHART_VERSION` under [GitHub Releases](https://github.com/airflow-helm/charts/releases):
 
 ```sh
+export RELEASE_NAME=my-airflow-cluster
+export NAMESPACE=my-airflow-namespace
+export CHART_VERSION=8.X.X # set the version you want
+
 # Helm 3
 helm install \
-  [RELEASE_NAME] \
+  $RELEASE_NAME \
   airflow-stable/airflow \
-  --version [CHART_VERSION] \
-  --namespace [NAMESPACE] \
+  --namespace $NAMESPACE \
+  --version $CHART_VERSION \
   --values ./custom-values.yaml
 
 # Helm 2
 helm install \
   airflow-stable/airflow \
-  --name [RELEASE_NAME] \
-  --version [CHART_VERSION] \
-  --namespace [NAMESPACE] \
+  --name $RELEASE_NAME \
+  --namespace $NAMESPACE \
+  --version $CHART_VERSION \
   --values ./custom-values.yaml
 ```
 
-### 3 - Run commands in Webserver Pod:
+### 3 - Access the WebUI
+
+> ⚠️ the default credentials are admin/admin, but you can change this with 
 
 ```sh
-kubectl exec \
-  -it \
-  --namespace [NAMESPACE] \
-  --container airflow-web \
-  Deployment/[RELEASE_NAME]-web \
-  /bin/bash
+export NAMESPACE=my-airflow-namespace
+export POD_NAME=$(kubectl get pods --namespace $NAMESPACE -l "component=web,app=airflow" -o jsonpath="{.items[0].metadata.name}")
 
-# then run commands like 
-airflow create_user ...
+kubectl port-forward --namespace $NAMESPACE $POD_NAME 8080:8080
 ```
 
 ---
@@ -188,6 +189,49 @@ airflow:
 
 </details>
 
+### How to install extra pip dependencies?
+<details>
+<summary>Show More</summary>
+<hr>
+
+You can use the `airflow.extraPipPackages` and `web.extraPipPackages` values to install Python Pip packages as each airflow Pod starts. 
+
+These values will work with any pip package that you can install with `pip install XXXX`.
+
+For example, enabling the airflow `airflow-exporter` package:
+```yaml
+airflow:
+  extraPipPackages:
+    - "airflow-exporter==1.3.1"
+```
+
+For example, you may be using `flask_oauthlib` to integrate with Okta/Google/etc for authorizing WebUI users:
+```yaml
+web:
+  extraPipPackages:
+    - "apache-airflow[google_auth]==2.0.1"
+```
+
+</details>
+
+### XXXXXXX How to create WebUI users? 
+<details>
+<summary>Show More</summary>
+<hr>
+
+TBA
+
+</details>
+
+### XXXXXXX How to define `webserver_config.py`? 
+<details>
+<summary>Show More</summary>
+<hr>
+
+TBA
+
+</details>
+
 ### How to create Airflow Connections?
 <details>
 <summary>Show More</summary>
@@ -279,31 +323,6 @@ scheduler:
         "slots": 2
       }
     }
-```
-
-</details>
-
-### How to create Airflow Pools?
-<details>
-<summary>Show More</summary>
-<hr>
-
-You can use the `airflow.extraPipPackages` and `web.extraPipPackages` values to install Python Pip packages as each airflow Pod starts. 
-
-These values will work with any pip package that you can install with `pip install XXXX`.
-
-For example, enabling the airflow `airflow-exporter` package:
-```yaml
-airflow:
-  extraPipPackages:
-    - "airflow-exporter==1.3.1"
-```
-
-For example, you may be using `flask_oauthlib` to integrate with Okta/Google/etc for authorizing WebUI users:
-```yaml
-web:
-  extraPipPackages:
-    - "apache-airflow[google_auth]==2.0.1"
 ```
 
 </details>
@@ -753,7 +772,6 @@ Parameter | Description | Default
 `scheduler.variables` | custom variables for the airflow scheduler | `"{}"`
 `scheduler.pools` | custom pools for the airflow scheduler | `"{}"`
 `scheduler.numRuns` | the value of the `airflow --num_runs` parameter used to run the airflow scheduler | `-1`
-`scheduler.dbUpgrade` | if an `airflow db upgrade` init-container is created in the scheduler Pod | `true`
 `scheduler.livenessProbe.*` | configs for the scheduler liveness probe | `<see values.yaml>`
 `scheduler.secretsDir` | the directory in which to mount secrets on scheduler containers | `/var/airflow/secrets`
 `scheduler.secrets` | the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>` | `[]`
@@ -789,6 +807,7 @@ Parameter | Description | Default
 `web.secretsDir` | the directory in which to mount secrets on web containers | `/var/airflow/secrets`
 `web.secrets` | the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>` | `[]`
 `web.secretsMap` | the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>` | `""`
+`web.createUsers` | a list of initial web users to create | `<see values.yaml>`
 `web.webserverConfigFile.*` | configs to generate webserver_config.py | `<see values.yaml>`
 
 </details>

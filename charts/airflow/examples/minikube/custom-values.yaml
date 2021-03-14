@@ -22,10 +22,7 @@ airflow:
   ##
   config:
     # Security
-    AIRFLOW__CORE__SECURE_MODE: "True"
-    AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.deny_all"
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
-    AIRFLOW__WEBSERVER__RBAC: "False"
 
     # DAGS
     AIRFLOW__CORE__LOAD_EXAMPLES: "True"

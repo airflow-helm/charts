@@ -76,18 +76,14 @@ spec:
         {{- toYaml .Values.scheduler.securityContext | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
-      {{- if or (.Values.dags.initContainer.enabled) (.Values.scheduler.preinitdb) (.Values.scheduler.extraInitContainers) }}
       initContainers:
-        {{- if .Values.scheduler.preinitdb }}
-        {{- include "airflow.init_container.upgradedb" . | indent 8 }}
-        {{- end }}
+        {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
         {{- if .Values.dags.initContainer.enabled }}
         {{- include "airflow.init_container.git_clone" . | indent 8 }}
         {{- end }}
         {{- if .Values.scheduler.extraInitContainers }}
         {{- toYaml .Values.scheduler.extraInitContainers | nindent 8 }}
         {{- end }}
-      {{- end }}
       containers:
         - name: airflow-scheduler
           image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
@@ -116,10 +112,6 @@ spec:
               {{- if .Values.airflow.extraPipPackages }}
                && echo "*** installing global extra pip packages..." \
                && pip install --user {{ range .Values.airflow.extraPipPackages }} {{ . | quote }} {{ end }} \
-              {{- end }}
-              {{- if .Values.scheduler.initdb }}
-               && echo "*** upgrading airflow db..." \
-               && airflow db upgrade || airflow upgradedb \
               {{- end }}
               {{- if .Values.scheduler.variables }}
                && echo "*** adding Airflow variables..." \

@@ -10,7 +10,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 Construct the `labels.app` for used by all resources in this chart.
 */}}
 {{- define "airflow.labels.app" -}}
-{{- .Values.nameOverride | default .Chart.Name | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s" .Chart.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -139,7 +139,7 @@ Construct a list of volumes which used in web/scheduler/worker/flower Pods
 {{- if .Values.dags.persistence.enabled }}
 - name: dags-data
   persistentVolumeClaim:
-    claimName: {{ .Values.dags.persistence.existingClaim | default (include "airflow.fullname" . ) }}
+    claimName: {{ .Values.dags.persistence.existingClaim | default (printf "%s-dags" (include "airflow.fullname" . | trunc 58)) }}
 {{- else if or (.Values.dags.git.gitSync.enabled) (.Values.dags.initContainer.enabled) }}
 - name: dags-data
   emptyDir: {}
@@ -147,7 +147,7 @@ Construct a list of volumes which used in web/scheduler/worker/flower Pods
 {{- if .Values.logs.persistence.enabled }}
 - name: logs-data
   persistentVolumeClaim:
-    claimName: {{ .Values.logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" . | trunc 58 )) }}
+    claimName: {{ .Values.logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" . | trunc 58)) }}
 {{- end }}
 {{- range .Values.airflow.extraConfigmapMounts }}
 - name: {{ .name }}
