@@ -74,6 +74,30 @@ spec:
       securityContext:
         {{- toYaml .Values.flower.securityContext | nindent 8 }}
       {{- end }}
+      initContainers:
+        {{- if or (.Values.airflow.extraPipPackages) (.Values.flower.extraPipPackages) }}
+        - name: install-python-packages
+          image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
+          imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
+          command:
+            - "/usr/bin/dumb-init"
+            - "--"
+          args:
+            - "pip"
+            - "install"
+            - "--target"
+            - "/opt/python/site-packages"
+            {{- range .Values.airflow.extraPipPackages }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- range .Values.flower.extraPipPackages }}
+            - {{ . | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: python-site-packages
+              mountPath: /opt/python/site-packages
+        {{- end }}
+        {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
       containers:
         - name: airflow-flower
           image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
@@ -85,6 +109,10 @@ spec:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
             {{- include "airflow.mapenvsecrets" . | indent 12 }}
+            {{- if or (.Values.airflow.extraPipPackages) (.Values.flower.extraPipPackages) }}
+            - name: PYTHONPATH
+              value: /opt/python/site-packages
+            {{- end }}
           ports:
             - name: flower
               containerPort: 5555
@@ -150,11 +178,19 @@ spec:
               subPath: {{ .subPath }}
               {{- end }}
             {{- end }}
+            {{- if or (.Values.airflow.extraPipPackages) (.Values.flower.extraPipPackages) }}
+            - name: python-site-packages
+              mountPath: /opt/python/site-packages
+            {{- end }}
       volumes:
         {{- include "airflow.common.volumes" . | indent 8 }}
         {{- range .Values.flower.extraConfigmapMounts }}
         - name: {{ .name }}
           configMap:
             name: {{ .configMap }}
+        {{- end }}
+        {{- if or (.Values.airflow.extraPipPackages) (.Values.flower.extraPipPackages) }}
+        - name: python-site-packages
+          emptyDir: {}
         {{- end }}
 {{- end }}

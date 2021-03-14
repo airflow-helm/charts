@@ -194,36 +194,166 @@ airflow:
 <summary>Show More</summary>
 <hr>
 
-You can use the `airflow.extraPipPackages` and `web.extraPipPackages` values to install Python Pip packages as each airflow Pod starts. 
+You can use the `airflow.extraPipPackages` value to install pip packages on all scheduler/web/worker/flower Pods.
 
-These values will work with any pip package that you can install with `pip install XXXX`.
+You can also use the more specific `scheduler.extraPipPackages`, `web.extraPipPackages`, `worker.extraPipPackages` and `flower.extraPipPackages`, (which will take precedence over `airflow.extraPipPackages`, as they are listed at the end of the `pip install ...` command).
 
-For example, enabling the airflow `airflow-exporter` package:
+For example, installing the `airflow-exporter` package on all scheduler/web/worker/flower Pods:
 ```yaml
 airflow:
   extraPipPackages:
-    - "airflow-exporter==1.3.1"
+    - "airflow-exporter~=1.4.1"
 ```
 
-For example, you may be using `flask_oauthlib` to integrate with Okta/Google/etc for authorizing WebUI users:
+For example, installing PyTorch on the scheduler/worker Pods:
 ```yaml
-web:
+scheduler:
   extraPipPackages:
-    - "apache-airflow[google_auth]==2.0.1"
+    - "torch~=1.8.0"
+
+worker:
+  extraPipPackages:
+    - "torch~=1.8.0"
 ```
 
 </details>
 
-### XXXXXXX How to create WebUI users? 
+### How to manually create airflow web users? 
 <details>
 <summary>Show More</summary>
 <hr>
 
-TBA
+You can use the `web.createUsers` value to create airflow web users each time the chart is installed/updated.
+
+For example, to create an Admin called `admin` and a User called `user`:
+```yaml
+web:
+  createUsers:
+    - role: Admin
+      username: admin
+      email: admin@example.com
+      firstName: admin
+      lastName: admin
+      password: admin
+    - role: User
+      username: user
+      email: user@example.com
+      firstName: user
+      lastName: user
+      password: user
+```
 
 </details>
 
-### XXXXXXX How to define `webserver_config.py`? 
+### How to authenticate airflow users from LDAP/OAUTH (webserver_config.py)? 
+<details>
+<summary>Show More</summary>
+<hr>
+
+You can use the `web.webserverConfigFile.*` values to adjust the Flask-Appbuilder `webserver_config.py` file, you can read Flask-builder's security docs [here](https://flask-appbuilder.readthedocs.io/en/latest/security.html).
+
+> 🛑️️ if you set up LDAP/OAUTH, you should disable `web.createUsers` to prevent automatically creating hard-coded users
+
+> ⚠️ the version of Flask-Builder installed by airflow might not be the latest, but you can use `web.extraPipPackages` to install a newer version, if needed
+
+For example, to integrate with a typical Microsoft Active Directory using `AUTH_LDAP`:
+```yaml
+web:
+  extraPipPackages:
+    ## following configs require Flask-AppBuilder 3.2.0 (or later)
+    - "Flask-AppBuilder~=3.2.0"
+    ## following configs require python-ldap
+    - "python-ldap~=3.3.1"
+  
+  webserverConfigFile:
+    stringOverride: |-
+      AUTH_TYPE = AUTH_LDAP
+      AUTH_LDAP_SERVER = "ldap://ldap.example.com"
+      AUTH_LDAP_USE_TLS = False
+      
+      # registration configs
+      AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB
+      AUTH_USER_REGISTRATION_ROLE = "Public"  # this role will be given in addition to any AUTH_ROLES_MAPPING
+      AUTH_LDAP_FIRSTNAME_FIELD = "givenName"
+      AUTH_LDAP_LASTNAME_FIELD = "sn"
+      AUTH_LDAP_EMAIL_FIELD = "mail"  # if null in LDAP, email is set to: "{username}@email.notfound"
+      
+      # bind username (for password validation)
+      AUTH_LDAP_USERNAME_FORMAT = "uid=%s,ou=users,dc=example,dc=com"  # %s is replaced with the provided username
+      # AUTH_LDAP_APPEND_DOMAIN = "example.com"  # bind usernames will look like: {USERNAME}@example.com
+      
+      # search configs
+      AUTH_LDAP_SEARCH = "ou=users,dc=example,dc=com"  # the LDAP search base (if non-empty, a search will ALWAYS happen)
+      AUTH_LDAP_UID_FIELD = "uid"  # the username field
+
+      # a mapping from LDAP DN to a list of FAB roles
+      AUTH_ROLES_MAPPING = {
+          "cn=airflow_users,ou=groups,dc=example,dc=com": ["User"],
+          "cn=airflow_admins,ou=groups,dc=example,dc=com": ["Admin"],
+      }
+      
+      # the LDAP user attribute which has their role DNs
+      AUTH_LDAP_GROUP_FIELD = "memberOf"
+      
+      # if we should replace ALL the user's roles each login, or only on registration
+      AUTH_ROLES_SYNC_AT_LOGIN = True
+      
+      # force users to re-auth after 30min of inactivity (to keep roles in sync)
+      PERMANENT_SESSION_LIFETIME = 1800
+```
+
+For example, to integrate with Okta using `AUTH_OAUTH`:
+```yaml
+web:
+  extraPipPackages:
+    ## following configs require Flask-AppBuilder 3.2.0 (or later)
+    - "Flask-AppBuilder~=3.2.0"
+    ## following configs require Authlib
+    - "Authlib~=0.15.3"
+  
+  webserverConfigFile:
+    stringOverride: |-
+      AUTH_TYPE = AUTH_OAUTH
+      
+      # registration configs
+      AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB
+      AUTH_USER_REGISTRATION_ROLE = "Public"  # this role will be given in addition to any AUTH_ROLES_MAPPING
+
+      # the list of providers which the user can choose from
+      OAUTH_PROVIDERS = [
+          {
+              'name': 'okta',
+              'icon': 'fa-circle-o',
+              'token_key': 'access_token',
+              'remote_app': {
+                  'client_id': 'OKTA_KEY',
+                  'client_secret': 'OKTA_SECRET',
+                  'api_base_url': 'https://OKTA_DOMAIN.okta.com/oauth2/v1/',
+                  'client_kwargs': {
+                      'scope': 'openid profile email groups'
+                  },
+                  'access_token_url': 'https://OKTA_DOMAIN.okta.com/oauth2/v1/token',
+                  'authorize_url': 'https://OKTA_DOMAIN.okta.com/oauth2/v1/authorize',
+              }
+          }
+      ]
+      
+      # a mapping from the values of `userinfo["role_keys"]` to a list of FAB roles
+      AUTH_ROLES_MAPPING = {
+          "FAB_USERS": ["User"],
+          "FAB_ADMINS": ["Admin"],
+      }
+
+      # if we should replace ALL the user's roles each login, or only on registration
+      AUTH_ROLES_SYNC_AT_LOGIN = True
+      
+      # force users to re-auth after 30min of inactivity (to keep roles in sync)
+      PERMANENT_SESSION_LIFETIME = 1800
+```
+
+</details>
+
+### XXXXXXX How to export airflow dag/task metrics to Prometheus? 
 <details>
 <summary>Show More</summary>
 <hr>
@@ -776,7 +906,7 @@ Parameter | Description | Default
 `scheduler.secretsDir` | the directory in which to mount secrets on scheduler containers | `/var/airflow/secrets`
 `scheduler.secrets` | the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>` | `[]`
 `scheduler.secretsMap` | the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>` | `""`
-`scheduler.extraInitContainers` | extra init containers to run before the scheduler pod | `[]`
+`scheduler.extraInitContainers` | extra init containers to run in the scheduler Pods | `[]`
 
 </details>
 

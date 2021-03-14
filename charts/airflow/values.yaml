@@ -105,6 +105,14 @@ airflow:
   ##
   extraEnv: []
 
+  ## extra pip packages to install in the web/scheduler/worker/flower Pods
+  ##
+  ## EXAMPLE:
+  ##   extraPipPackages:
+  ##     - "SomeProject==1.0.0"
+  ##
+  extraPipPackages: []
+
   ## extra configMap volumeMounts for the web/scheduler/worker/flower Pods
   ##
   ## EXAMPLE:
@@ -128,14 +136,6 @@ airflow:
   ##       mountPath: /dags
   ##
   extraContainers: []
-
-  ## extra pip packages to install in the web/scheduler/worker Pods
-  ##
-  ## EXAMPLE:
-  ##   extraPipPackages:
-  ##     - "airflow-exporter==1.3.1"
-  ##
-  extraPipPackages: []
 
   ## extra volumeMounts for the web/scheduler/worker Pods
   ##
@@ -401,7 +401,15 @@ scheduler:
   ##
   secretsMap: ""
 
-  ## extra init containers to run before the scheduler Pod
+  ## extra pip packages to install in the scheduler Pods
+  ##
+  ## EXAMPLE:
+  ##   extraPipPackages:
+  ##     - "SomeProject==1.0.0"
+  ##
+  extraPipPackages: []
+
+  ## extra init containers to run in the scheduler Pods
   ##
   ## EXAMPLE:
   ##   extraInitContainers:
@@ -508,14 +516,6 @@ web:
   ##
   serializeDAGs: false
 
-  ## extra pip packages to install in the web container
-  ##
-  ## EXAMPLE: ( packages used by RBAC UI for OAuth )
-  ##   extraPipPackages:
-  ##     - "apache-airflow[google_auth]==2.0.1"
-  ##
-  extraPipPackages: []
-
   ## configs for the web Service readiness probe
   ##
   readinessProbe:
@@ -558,6 +558,14 @@ web:
   ## - overrides `web.secrets`
   ##
   secretsMap: ""
+
+  ## extra pip packages to install in the web Pods
+  ##
+  ## EXAMPLE:
+  ##   extraPipPackages:
+  ##     - "SomeProject==1.0.0"
+  ##
+  extraPipPackages: []
 
   ## a list of initial web users to create
   ##
@@ -738,6 +746,14 @@ workers:
   ##
   secretsMap: ""
 
+  ## extra pip packages to install in the worker Pod
+  ##
+  ## EXAMPLE:
+  ##   extraPipPackages:
+  ##     - "SomeProject==1.0.0"
+  ##
+  extraPipPackages: []
+
 ###################################
 # Airflow - Flower Configs
 ###################################
@@ -849,6 +865,14 @@ flower:
     loadBalancerSourceRanges: []
     nodePort:
       http: ""
+
+  ## extra pip packages to install in the flower Pod
+  ##
+  ## EXAMPLE:
+  ##   extraPipPackages:
+  ##     - "SomeProject==1.0.0"
+  ##
+  extraPipPackages: []
 
   ## extra ConfigMaps to mount on the flower Pods
   ##

@@ -77,6 +77,28 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       initContainers:
+        {{- if or (.Values.airflow.extraPipPackages) (.Values.scheduler.extraPipPackages) }}
+        - name: install-python-packages
+          image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
+          imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
+          command:
+            - "/usr/bin/dumb-init"
+            - "--"
+          args:
+            - "pip"
+            - "install"
+            - "--target"
+            - "/opt/python/site-packages"
+            {{- range .Values.airflow.extraPipPackages }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- range .Values.scheduler.extraPipPackages }}
+            - {{ . | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: python-site-packages
+              mountPath: /opt/python/site-packages
+        {{- end }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
         {{- if .Values.dags.initContainer.enabled }}
         {{- include "airflow.init_container.git_clone" . | indent 8 }}
@@ -95,6 +117,10 @@ spec:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
             {{- include "airflow.mapenvsecrets" . | indent 12 }}
+            {{- if or (.Values.airflow.extraPipPackages) (.Values.scheduler.extraPipPackages) }}
+            - name: PYTHONPATH
+              value: /opt/python/site-packages
+            {{- end }}
           command:
             - "/usr/bin/dumb-init"
             - "--"
@@ -108,10 +134,6 @@ spec:
               {{- if .Values.dags.installRequirements }}
                && echo "*** installing requirements..." \
                && /home/airflow/scripts/install-requirements.sh \
-              {{- end }}
-              {{- if .Values.airflow.extraPipPackages }}
-               && echo "*** installing global extra pip packages..." \
-               && pip install --user {{ range .Values.airflow.extraPipPackages }} {{ . | quote }} {{ end }} \
               {{- end }}
               {{- if .Values.scheduler.variables }}
                && echo "*** adding Airflow variables..." \
@@ -180,6 +202,10 @@ spec:
               mountPath: /home/airflow/variables-pools/
               readOnly: true
             {{- end }}
+            {{- if or (.Values.airflow.extraPipPackages) (.Values.scheduler.extraPipPackages) }}
+            - name: python-site-packages
+              mountPath: /opt/python/site-packages
+            {{- end }}
             {{- if (include "airflow.executor.kubernetes_like" .) }}
             - name: pod-template
               mountPath: /home/airflow/pod_templates/pod_template.yaml
@@ -221,6 +247,10 @@ spec:
           configMap:
             name: {{ include "airflow.fullname" . }}-variables-pools
             defaultMode: 0755
+        {{- end }}
+        {{- if or (.Values.airflow.extraPipPackages) (.Values.scheduler.extraPipPackages) }}
+        - name: python-site-packages
+          emptyDir: {}
         {{- end }}
         {{- if (include "airflow.executor.kubernetes_like" .) }}
         - name: pod-template

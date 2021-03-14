@@ -80,6 +80,28 @@ spec:
         {{- toYaml .Values.workers.securityContext | nindent 8 }}
       {{- end }}
       initContainers:
+        {{- if or (.Values.airflow.extraPipPackages) (.Values.workers.extraPipPackages) }}
+        - name: install-python-packages
+          image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
+          imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
+          command:
+            - "/usr/bin/dumb-init"
+            - "--"
+          args:
+            - "pip"
+            - "install"
+            - "--target"
+            - "/opt/python/site-packages"
+            {{- range .Values.airflow.extraPipPackages }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- range .Values.workers.extraPipPackages }}
+            - {{ . | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: python-site-packages
+              mountPath: /opt/python/site-packages
+        {{- end }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
         {{- if .Values.dags.initContainer.enabled }}
         {{- include "airflow.init_container.git_clone" . | indent 8 }}
@@ -95,6 +117,10 @@ spec:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
             {{- include "airflow.mapenvsecrets" . | indent 12 }}
+            {{- if or (.Values.airflow.extraPipPackages) (.Values.workers.extraPipPackages) }}
+            - name: PYTHONPATH
+              value: /opt/python/site-packages
+            {{- end }}
           {{- if and (include "airflow.executor.celery_like" .) (.Values.workers.celery.gracefullTermination) }}
           lifecycle:
             preStop:
@@ -122,10 +148,6 @@ spec:
                && echo "*** installing requirements..." \
                && /home/airflow/scripts/install-requirements.sh \
               {{- end }}
-              {{- if .Values.airflow.extraPipPackages }}
-               && echo "*** installing global extra pip packages..." \
-               && pip install --user {{ range .Values.airflow.extraPipPackages }} {{ . | quote }} {{ end }} \
-              {{- end }}
                && echo "*** running worker..." \
               {{- if .Values.airflow.legacyCommands }}
                && exec airflow worker
@@ -145,6 +167,10 @@ spec:
               mountPath: {{ $.Values.workers.secretsDir }}/{{ . }}
             {{- end }}
             {{- end }}
+            {{- if or (.Values.airflow.extraPipPackages) (.Values.workers.extraPipPackages) }}
+            - name: python-site-packages
+              mountPath: /opt/python/site-packages
+            {{- end }}
         {{- if .Values.dags.git.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
@@ -163,5 +189,9 @@ spec:
           secret:
             secretName: {{ . }}
         {{- end }}
+        {{- end }}
+        {{- if or (.Values.airflow.extraPipPackages) (.Values.workers.extraPipPackages) }}
+        - name: python-site-packages
+          emptyDir: {}
         {{- end }}
 {{- end }}

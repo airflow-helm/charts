@@ -75,6 +75,28 @@ spec:
         {{- toYaml .Values.web.securityContext | nindent 8 }}
       {{- end }}
       initContainers:
+        {{- if or (.Values.airflow.extraPipPackages) (.Values.web.extraPipPackages) }}
+        - name: install-python-packages
+          image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
+          imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
+          command:
+            - "/usr/bin/dumb-init"
+            - "--"
+          args:
+            - "pip"
+            - "install"
+            - "--target"
+            - "/opt/python/site-packages"
+            {{- range .Values.airflow.extraPipPackages }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- range .Values.web.extraPipPackages }}
+            - {{ . | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: python-site-packages
+              mountPath: /opt/python/site-packages
+        {{- end }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
         {{- if and (.Values.dags.initContainer.enabled) (not .Values.web.serializeDAGs) }}
         {{- include "airflow.init_container.git_clone" . | indent 8 }}
@@ -94,6 +116,10 @@ spec:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
             {{- include "airflow.mapenvsecrets" . | indent 12 }}
+            {{- if or (.Values.airflow.extraPipPackages) (.Values.web.extraPipPackages) }}
+            - name: PYTHONPATH
+              value: /opt/python/site-packages
+            {{- end }}
           command:
             - "/usr/bin/dumb-init"
             - "--"
@@ -107,14 +133,6 @@ spec:
               {{- if .Values.dags.installRequirements }}
                && echo "*** installing requirements..." \
                && /home/airflow/scripts/install-requirements.sh \
-              {{- end }}
-              {{- if .Values.airflow.extraPipPackages }}
-               && echo "*** installing global extra pip packages..." \
-               && pip install --user {{ range .Values.airflow.extraPipPackages }} {{ . | quote }} {{ end }} \
-              {{- end }}
-              {{- if .Values.web.extraPipPackages }}
-               && echo "*** installing extra pip packages..." \
-               && pip install --user {{ range .Values.web.extraPipPackages }} {{ . | quote }} {{ end }} \
               {{- end }}
                && echo "*** running webserver..." \
                && exec airflow webserver
@@ -159,6 +177,10 @@ spec:
               readOnly: true
             {{- end }}
             {{- end }}
+            {{- if or (.Values.airflow.extraPipPackages) (.Values.web.extraPipPackages) }}
+            - name: python-site-packages
+              mountPath: /opt/python/site-packages
+            {{- end }}
             - name: webserver-config
               mountPath: /opt/airflow/webserver_config.py
               subPath: webserver_config.py
@@ -182,7 +204,10 @@ spec:
             secretName: {{ . }}
         {{- end }}
         {{- end }}
+        {{- if or (.Values.airflow.extraPipPackages) (.Values.web.extraPipPackages) }}
+        - name: python-site-packages
+          emptyDir: {}
+        {{- end }}
         - name: webserver-config
           secret:
             secretName: {{ include "airflow.fullname" . }}-webserver-config
-
