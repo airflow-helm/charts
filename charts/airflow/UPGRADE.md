@@ -2,34 +2,115 @@
 
 ## `v7.15.X` → `v8.0.0`
 
-* Flower now adds `airflow.extraConfigmapMounts`, make sure .names are unique across:
-  - `airflow.extraConfigmapMounts`
-  - `flower.extraConfigmapMounts`
-  
-Split `dags.initContainer.mountPath` & `dags.initContainer.syncSubPath` up and created:
-- `dags.git.gitSync.mountPath`
-- `dags.git.gitSync.syncSubPath`
+WARNING: the default version of airflow + Python has been upgraded to:
+- airflow: 2.0.1 
+- python: 3.8
+- CHECK YOUR DAGS: https://airflow.apache.org/docs/apache-airflow/stable/upgrading-to-2.html#step-5-upgrade-airflow-dags
 
-Added values:
-- `scheduler.replicas`
+WARNING: if intend to keep using airflow 1.10.X, you must enable `airflow.legacyCommands`
+- there is no longer any guarantee for 1.10 support
+
+WARNING: we added native support for `webserver_config.py`
+- if you were using a `airflow.extraConfigmapMounts` previously, please move to `web.webserverConfigFile.stringOverride`
+- ?? we need to provide an existing-secret alternative to stringOverride ??
+
+WARNING: we have added the `web.createUsers` value, which will fufilled by a post-install Job
+- meaning after each `helm install/upgrade ...` the users defined in `web.createUsers` will be created in RBAC
+- if you don't want this, please explicitly set `web.createUsers` to `[]`
+
+WARNING: the `dags.installRequirements` value has been removed, please move to `airflow.extra...`
+- we removed this feature for two main reasons: 
+   1. this change allowed us to move the pip install commands into an init-container, which greatly simplifies pod-startup, and removes the need to set any kind of delay in serving web-traffic to Webserver/FLower Pods
+   2. the installRequirements command only run at Pod started up, meaning you would have to restart all your pods if you updated the `requirements.txt` in your repo
+- ?? add an `extraPipPackages` value for `pod_template.yaml` ??
+
+WARNING: if you were using git-sync, you must move to the new `dags.gitSync` values 
+- ?? link to README.md ??
+
+WARNING: if you were using `dags.persistence.enabled` (but not setting `dags.persistence.existingClaim`), the name of the PVC will change, meaning your dags will disappear
+- to fix this, set `dags.persistence.existingClaim` to the value of the previous PVC (which will be your Helm RELEASE_NAME)
+
+WARNING: the flower Pods are now affected by `airflow.extraConfigmapMounts`
+
+NOTE: there are now docs for how to set up your Microsoft-AD/OAUTH
+- ?? add a link to README here ??
+
+NOTE: the `scheduler.variables` and `scheduler.pools` values can now be defined as YAML dicts OR JSON Strings 
+- see values.yaml docstrings for example
+
+NOTE: if you want to make use of Airfow 2.0's ability to run multiple schedulers, (e.g. setting `scheduler.replicas` > 1), we recommend setting a `scheduler.podDisruptionBudget`
+- we welcome any contributions for the autoscaling the scheduler replica count based on CPU load (or KEDA)
+
+NOTE: `scheduler.preinitdb` and `scheduler.initdb` have been moved to a post-install Job
+- meaning they will only run one time per `helm install/upgrade ...` (rather than each time the scheduler starts)
 
 Changed default:
-- `rbac.events` = true
-- `scheduler.podDisruptionBudget.enabled` = false
-    - there was no reason for this to be enabled by default
-  
-New features
-- `scheduler.variables` and `scheduler.pools` can now be defined as YAML dicts OR JSON Strings (see values.yaml docstrings for example)
+- `rbac.events` = `true`
+- `scheduler.podDisruptionBudget.enabled` = `false`
 
-NOTE:
-- if you want to make use of the new HA scheduler `scheduler.replicas`, we recommend setting a `scheduler.podDisruptionBudget`
-  - we welcome any contributions for autoscaling the scheduler replica count based on CPU load
-- airflow 2.0 removed the non-RBAC UI, meaning `AIRFLOW__WEBSERVER__RBAC` no longer does anything
-  - ((( give a quick descipton of what you need to do, e.g. adding users))
-  - https://airflow.apache.org/docs/apache-airflow/stable/upgrading-to-2.html#step-5-upgrade-airflow-dags  
-  - TO ME:
-    - consider explicitly putting webserver_config.py feature now that RBAC is default
-    - allow "existing secret" or "text variable"
+Added values:
+- `airflow.legacyCommands`
+- `airflow.podTemplateFile.stringOverride`
+- `airflow.podTemplateFile.nodeSelector`
+- `airflow.podTemplateFile.affinity`
+- `airflow.podTemplateFile.tolerations`
+- `airflow.podTemplateFile.podAnnotations`
+- `airflow.podTemplateFile.securityContext`
+- `scheduler.replicas`
+- `scheduler.extraPipPackages`
+- `workers.extraPipPackages`
+- `flower.extraPipPackages`
+- `web.webserverConfigFile.stringOverride`
+- `dags.gitSync.enabled`
+- `dags.gitSync.image.repository`
+- `dags.gitSync.image.tag`
+- `dags.gitSync.image.pullPolicy`
+- `dags.gitSync.resources`
+- `dags.gitSync.repo`
+- `dags.gitSync.repoSubPath`
+- `dags.gitSync.branch`
+- `dags.gitSync.revision`
+- `dags.gitSync.depth`
+- `dags.gitSync.syncWait`
+- `dags.gitSync.syncTimeout`
+- `dags.gitSync.httpSecret`
+- `dags.gitSync.httpSecretUsernameKey`
+- `dags.gitSync.httpSecretPasswordKey`
+- `dags.gitSync.sshSecret`
+- `dags.gitSync.sshSecretKey`
+- `dags.gitSync.sshKnownHosts`
+  
+Removed the following values:
+- `scheduler.initialStartupDelay` 
+- `scheduler.preinitdb` (replaced by a post-install Job)
+- `scheduler.initdb` (replaced by a post-install Job)
+- `web.initialStartupDelay`
+- `workers.initialStartupDelay`
+- `web.minReadySeconds`
+- `flower.initialStartupDelay`
+- `flower.minReadySeconds`
+  
+- `web.baseUrl`
+- `dags.doNotPickle`
+- `dags.installRequirements`
+- `dags.git.url`
+- `dags.git.ref`
+- `dags.git.secret`
+- `dags.git.sshKeyscan`
+- `dags.git.privateKeyName`
+- `dags.git.repoHost`
+- `dags.git.repoPort`
+- `dags.git.gitSync.enabled`
+- `dags.git.gitSync.resources`
+- `dags.git.gitSync.image`
+- `dags.git.gitSync.refreshTime`
+- `dags.git.gitSync.mountPath`
+- `dags.git.gitSync.syncSubPath`
+- `dags.initContainer.enabled`
+- `dags.initContainer.resources`
+- `dags.initContainer.image.*`
+- `dags.initContainer.mountPath`
+- `dags.initContainer.syncSubPath`
 
 ## `v7.14.X` → `v7.15.0`
 
