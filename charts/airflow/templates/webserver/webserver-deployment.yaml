@@ -111,7 +111,7 @@ spec:
             - configMapRef:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
-            {{- include "airflow.mapenvsecrets" . | indent 12 }}
+            {{- include "airflow.common.env" . | indent 12 }}
             {{- if or (.Values.airflow.extraPipPackages) (.Values.web.extraPipPackages) }}
             - name: PYTHONPATH
               value: /opt/python/site-packages
@@ -128,15 +128,10 @@ spec:
             initialDelaySeconds: {{ .Values.web.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.web.livenessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.web.livenessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.web.livenessProbe.successThreshold }}
             failureThreshold: {{ .Values.web.livenessProbe.failureThreshold }}
             httpGet:
               scheme: {{ .Values.web.livenessProbe.scheme }}
-              {{- if .Values.ingress.web.livenessPath }}
-              path: "{{ .Values.ingress.web.livenessPath }}"
-              {{- else }}
-              path: "{{ .Values.ingress.web.path }}/health"
-              {{- end }}
+              path: "/health"
               port: web
           {{- end }}
           {{- if .Values.web.readinessProbe.enabled }}
@@ -144,26 +139,14 @@ spec:
             initialDelaySeconds: {{ .Values.web.readinessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.web.readinessProbe.periodSeconds }}
             timeoutSeconds: {{ .Values.web.readinessProbe.timeoutSeconds }}
-            successThreshold: {{ .Values.web.readinessProbe.successThreshold }}
             failureThreshold: {{ .Values.web.readinessProbe.failureThreshold }}
             httpGet:
               scheme: {{ .Values.web.readinessProbe.scheme }}
-              path: "{{ .Values.ingress.web.path }}/health"
+              path: "/health"
               port: web
           {{- end }}
           volumeMounts:
             {{- include "airflow.common.volumeMounts" . | indent 12 }}
-            {{- if .Values.web.secretsMap }}
-            - name: {{ .Values.web.secretsMap }}-volume
-              mountPath: {{ .Values.web.secretsDir }}
-              readOnly: true
-            {{- else }}
-            {{- range .Values.web.secrets }}
-            - name: {{ . }}-volume
-              mountPath: {{ $.Values.web.secretsDir }}/{{ . }}
-              readOnly: true
-            {{- end }}
-            {{- end }}
             {{- if or (.Values.airflow.extraPipPackages) (.Values.web.extraPipPackages) }}
             - name: python-site-packages
               mountPath: /opt/python/site-packages
@@ -172,6 +155,9 @@ spec:
               mountPath: /opt/airflow/webserver_config.py
               subPath: webserver_config.py
               readOnly: true
+            {{- if .Values.web.extraVolumeMounts }}
+            {{- toYaml .Values.web.extraVolumeMounts | nindent 12 }}
+            {{- end }}
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
@@ -180,17 +166,6 @@ spec:
         {{- end }}
       volumes:
         {{- include "airflow.common.volumes" . | indent 8 }}
-        {{- if .Values.web.secretsMap }}
-        - name: {{ .Values.web.secretsMap }}-volume
-          secret:
-            secretName: {{ .Values.web.secretsMap }}
-        {{- else }}
-        {{- range .Values.web.secrets }}
-        - name: {{ . }}-volume
-          secret:
-            secretName: {{ . }}
-        {{- end }}
-        {{- end }}
         {{- if or (.Values.airflow.extraPipPackages) (.Values.web.extraPipPackages) }}
         - name: python-site-packages
           emptyDir: {}
@@ -198,3 +173,7 @@ spec:
         - name: webserver-config
           secret:
             secretName: {{ include "airflow.fullname" . }}-webserver-config
+            defaultMode: 0644
+        {{- if .Values.web.extraVolumes }}
+        {{- toYaml .Values.web.extraVolumes | nindent 8 }}
+        {{- end }}

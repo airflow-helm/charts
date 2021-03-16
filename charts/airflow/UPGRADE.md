@@ -27,10 +27,26 @@ WARNING: the `dags.installRequirements` value has been removed, please move to `
 WARNING: if you were using git-sync, you must move to the new `dags.gitSync` values 
 - ?? link to README.md ??
 
+WARNING: the way you mount extra secrets/configmaps has changed
+- `airflow.extraConfigmapMounts` has been removed
+  - if you still need to mount configmap as a file, you can use `airflow.extraVolumes` and `airflow.extraVolumeMounts`
+- `scheduler.secretsDir`, `scheduler.secrets`, `scheduler.secretsMap` have been removed
+  - if you still need to mount volumes, you can use `scheduler.extraVolumes`, `scheduler.extraVolumeMounts`
+- `web.secretsDir`, `web.secrets`, `web.secretsMap` have been removed
+  - if you still need to mount volumes, you can use `web.extraVolumes`, `web.extraVolumeMounts`
+- `workers.secretsDir`, `workers.secrets`, `workers.secretsMap` have been removed
+  - if you still need to mount volumes, you can use `workers.extraVolumes`, `workers.extraVolumeMounts`
+- `flower.secretsDir`, `flower.secrets`, `flower.secretsMap`, `flower.extraConfigmapMounts` have been removed
+  - if you still need to mount volumes, you can use `flower.extraVolumes`, `flower.extraVolumeMounts`
+
 WARNING: if you were using `dags.persistence.enabled` (but not setting `dags.persistence.existingClaim`), the name of the PVC will change, meaning your dags will disappear
 - to fix this, set `dags.persistence.existingClaim` to the value of the previous PVC (which will be your Helm RELEASE_NAME)
 
-WARNING: the flower Pods are now affected by `airflow.extraConfigmapMounts`
+WARNING: the flower Pods are now affected by 
+- `airflow.extraPipPackages`
+- `airflow.extraContainers`
+- `airflow.extraVolumeMounts`
+- `airlfow.extraVolumes`
 
 NOTE: there are now docs for how to set up your Microsoft-AD/OAUTH
 - ?? add a link to README here ??
@@ -38,14 +54,36 @@ NOTE: there are now docs for how to set up your Microsoft-AD/OAUTH
 NOTE: the `scheduler.variables` and `scheduler.pools` values can now be defined as YAML dicts OR JSON Strings 
 - see values.yaml docstrings for example
 
-NOTE: if you want to make use of Airfow 2.0's ability to run multiple schedulers, (e.g. setting `scheduler.replicas` > 1), we recommend setting a `scheduler.podDisruptionBudget`
+NOTE: if you want to make use of Airflow 2.0's ability to run multiple schedulers, (e.g. setting `scheduler.replicas` > 1), we recommend setting a `scheduler.podDisruptionBudget`
 - we welcome any contributions for the autoscaling the scheduler replica count based on CPU load (or KEDA)
 
 NOTE: `scheduler.preinitdb` and `scheduler.initdb` have been moved to a post-install Job
 - meaning they will only run one time per `helm install/upgrade ...` (rather than each time the scheduler starts)
 
+New Features:
+- pip install in init-container
+- webserver_config.py
+- create users post-install job
+- wait-for-db migrations before starting pods
+- db upgrade done in post-install job
+- git-sync container
+- new docs structure (expandable questions)
+- HA scheduler 
+- cleaned up flower liveness/readiness probes
+
+Removed Features:
+- install requirements 
+
 Changed default:
 - `rbac.events` = `true`
+- `scheduler.livenessProbe.initialDelaySeconds` = `10`
+- `web.readinessProbe.enabled` = `true`
+- `web.readinessProbe.timeoutSeconds` = `5`
+- `web.livenessProbe.periodSeconds` = `10`
+- `web.readinessProbe.failureThreshold` = `6`  
+- `web.livenessProbe.initialDelaySeconds` = `10`  
+- `web.livenessProbe.timeoutSeconds` = `5`  
+- `web.livenessProbe.failureThreshold` = `6`  
 - `scheduler.podDisruptionBudget.enabled` = `false`
 
 Added values:
@@ -58,9 +96,27 @@ Added values:
 - `airflow.podTemplateFile.securityContext`
 - `scheduler.replicas`
 - `scheduler.extraPipPackages`
-- `workers.extraPipPackages`
-- `flower.extraPipPackages`
+- `scheduler.extraVolumeMounts`
+- `scheduler.extraVolumes`
 - `web.webserverConfigFile.stringOverride`
+- `web.extraVolumeMounts`
+- `web.extraVolumes`
+- `workers.extraPipPackages`
+- `workers.extraVolumeMounts`
+- `workers.extraVolumes`
+- `flower.readinessProbe.enabled`
+- `flower.readinessProbe.initialDelaySeconds`
+- `flower.readinessProbe.periodSeconds`
+- `flower.readinessProbe.timeoutSeconds`
+- `flower.readinessProbe.failureThreshold`
+- `flower.livenessProbe.enabled`
+- `flower.livenessProbe.initialDelaySeconds`
+- `flower.livenessProbe.periodSeconds`
+- `flower.livenessProbe.timeoutSeconds`
+- `flower.livenessProbe.failureThreshold`
+- `flower.extraPipPackages`
+- `flower.extraVolumeMounts`
+- `flower.extraVolumes`
 - `dags.gitSync.enabled`
 - `dags.gitSync.image.repository`
 - `dags.gitSync.image.tag`
@@ -81,16 +137,33 @@ Added values:
 - `dags.gitSync.sshKnownHosts`
   
 Removed the following values:
+- `airflow.extraConfigmapMounts`
 - `scheduler.initialStartupDelay` 
 - `scheduler.preinitdb` (replaced by a post-install Job)
 - `scheduler.initdb` (replaced by a post-install Job)
+- `scheduler.secretsDir`
+- `scheduler.secrets`
+- `scheduler.secretsMap`  
 - `web.initialStartupDelay`
-- `workers.initialStartupDelay`
 - `web.minReadySeconds`
+- `web.baseUrl`
+- `web.serializeDAGs`
+- `web.readinessProbe.successThreshold`
+- `web.livenessProbe.successThreshold`
+- `web.secretsDir`
+- `web.secrets`
+- `web.secretsMap`  
+- `workers.initialStartupDelay`
+- `workers.secretsDir`
+- `workers.secrets`
+- `workers.secretsMap`
 - `flower.initialStartupDelay`
 - `flower.minReadySeconds`
-  
-- `web.baseUrl`
+- `flower.extraConfigmapMounts`
+- `flower.urlPrefix`
+- `flower.secretsDir`
+- `flower.secrets`
+- `flower.secretsMap`
 - `dags.doNotPickle`
 - `dags.installRequirements`
 - `dags.git.url`
@@ -111,6 +184,8 @@ Removed the following values:
 - `dags.initContainer.image.*`
 - `dags.initContainer.mountPath`
 - `dags.initContainer.syncSubPath`
+- `ingress.web.livenessPath`
+- `ingress.flower.livenessPath`
 
 ## `v7.14.X` → `v7.15.0`
 

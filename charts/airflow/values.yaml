@@ -93,7 +93,18 @@ airflow:
   ##
   podAnnotations: {}
 
+  ## extra pip packages to install in the web/scheduler/worker/flower Pods
+  ##
+  ## EXAMPLE:
+  ##   extraPipPackages:
+  ##     - "SomeProject==1.0.0"
+  ##
+  extraPipPackages: []
+
   ## extra environment variables for the web/scheduler/worker/flower Pods
+  ##
+  ## SPEC - EnvVar:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#envvar-v1-core
   ##
   ## EXAMPLE:
   ##   extraEnv:
@@ -105,39 +116,25 @@ airflow:
   ##
   extraEnv: []
 
-  ## extra pip packages to install in the web/scheduler/worker/flower Pods
+  ## extra containers for the web/scheduler/worker/flower Pods
   ##
-  ## EXAMPLE:
-  ##   extraPipPackages:
-  ##     - "SomeProject==1.0.0"
-  ##
-  extraPipPackages: []
-
-  ## extra configMap volumeMounts for the web/scheduler/worker/flower Pods
-  ##
-  ## EXAMPLE:
-  ##   extraConfigmapMounts:
-  ##     - name: airflow-webserver-config
-  ##       mountPath: /opt/airflow/webserver_config.py
-  ##       configMap: airflow-webserver-config
-  ##       readOnly: true
-  ##       subPath: webserver_config.py
-  ##
-  extraConfigmapMounts: []
-
-  ## extra containers for the web/scheduler/worker Pods
+  ## SPEC - Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
   ##
   ## EXAMPLE: (a sidecar that syncs DAGs from object storage)
   ##   extraContainers:
   ##     - name: s3-sync
   ##       image: my-user/s3sync:latest
   ##       volumeMounts:
-  ##     - name: synchronised-dags
-  ##       mountPath: /dags
+  ##         - name: synchronised-dags
+  ##           mountPath: /dags
   ##
   extraContainers: []
 
-  ## extra volumeMounts for the web/scheduler/worker Pods
+  ## extra VolumeMounts for the web/scheduler/worker/flower Pods
+  ##
+  ## SPEC - VolumeMount:
+  ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
   ##
   ## EXAMPLE:
   ##   extraVolumeMounts:
@@ -146,7 +143,10 @@ airflow:
   ##
   extraVolumeMounts: []
 
-  ## extra volumes for the web/scheduler/worker Pods
+  ## extra Volumes for the web/scheduler/worker/flower Pods
+  ##
+  ## SPEC - Volume:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
   ##
   ## EXAMPLE:
   ##   extraVolumes:
@@ -205,21 +205,10 @@ airflow:
     ##
     securityContext: {}
 
-
 ###################################
 # Airflow - Scheduler Configs
 ###################################
 scheduler:
-  ## resource requests/limits for the scheduler Pod
-  ##
-  ## EXAMPLE:
-  ##   resources:
-  ##     requests:
-  ##       cpu: "1000m"
-  ##       memory: "1Gi"
-  ##
-  resources: {}
-
   ## the number of scheduler Pods to run
   ##
   ## NOTE:
@@ -227,19 +216,38 @@ scheduler:
   ##
   replicas: 1
 
+  ## resource requests/limits for the scheduler Pod
+  ##
+  ## SPEC - ResourceRequirements:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ##
+  resources: {}
+
   ## the nodeSelector configs for the scheduler Pods
+  ##
+  ## DOCS:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   ##
   nodeSelector: {}
 
   ## the affinity configs for the scheduler Pods
   ##
+  ## SPEC - Affinity:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+  ##
   affinity: {}
 
   ## the toleration configs for the scheduler Pods
   ##
+  ## SPEC - Toleration:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+  ##
   tolerations: []
 
   ## the security context for the scheduler Pods
+  ##
+  ## SPEC - SecurityContext:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
   ##
   securityContext: {}
 
@@ -255,7 +263,7 @@ scheduler:
   ##
   annotations: {}
 
-  ## Pod Annotations for the scheduler Deployment
+  ## Pod annotations for the scheduler Deployment
   ##
   podAnnotations: {}
 
@@ -284,7 +292,7 @@ scheduler:
   ##   connections:
   ##     - id: my_aws
   ##       type: aws
-  ##       extra: |
+  ##       extra: |-
   ##         {
   ##           "aws_access_key_id": "XXXXXXXX",
   ##           "aws_secret_access_key": "XXXXXXXX",
@@ -330,76 +338,39 @@ scheduler:
   ## NOTE:
   ## - this can be either a "YAML Map" or "JSON string"
   ##
-  ## EXAMPLE -- YAML MAP:
+  ## EXAMPLE: (YAML Map)
   ##   variables:
   ##     environment: "dev"
   ##
-  ## EXAMPLE -- JSON STRING:
-  ##   variables: |-
-  ##     { "environment": "dev" }
-  ##
-  variables: |-
-    {}
+  variables: {}
 
   ## custom pools for the airflow scheduler
   ##
   ## NOTE:
   ## - this can be either a "YAML Map" or "JSON string"
   ##
-  ## EXAMPLE -- YAML MAP:
+  ## EXAMPLE: (YAML Map)
   ##   pools:
   ##     example:
   ##       description: "This is an example pool with 2 slots."
   ##       slots: 2
   ##
-  ## EXAMPLE -- JSON STRING:
-  ##   pools: |-
-  ##     {
-  ##       "example": {
-  ##         "description": "This is an example pool with 2 slots.",
-  ##         "slots": 2
-  ##       }
-  ##     }
-  ##
-  pools: |-
-    {}
+  pools: {}
 
   ## sets `airflow --num_runs` parameter used to run the airflow scheduler
   ##
   numRuns: -1
 
-  ## configs for the scheduler liveness probe
+  ## configs for the scheduler Pods' liveness probe
   ##
   ## NOTE:
-  ## - the maximum number of seconds the scheduler can be unhealthy =
-  ##   `livenessProbe.periodSeconds` x `livenessProbe.failureThreshold`
+  ## - `periodSeconds` x `failureThreshold` = max seconds a scheduler can be unhealthy
   ##
   livenessProbe:
     enabled: true
-    ## the number of seconds to wait before checking pod health
-    ##
-    ## NOTE:
-    ## - make larger if you are installing many packages with:
-    ##   `airflow.extraPipPackages`, `web.extraPipPackages`, or `dags.installRequirements`
-    ##
-    initialDelaySeconds: 300
+    initialDelaySeconds: 10
     periodSeconds: 30
     failureThreshold: 5
-
-  ## the directory in which to mount secrets on scheduler containers
-  ##
-  secretsDir: /var/airflow/secrets
-
-  ## the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>`
-  ##
-  secrets: []
-
-  ## the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>`
-  ##
-  ## NOTE:
-  ## - overrides `scheduler.secrets`
-  ##
-  secretsMap: ""
 
   ## extra pip packages to install in the scheduler Pods
   ##
@@ -409,34 +380,31 @@ scheduler:
   ##
   extraPipPackages: []
 
+  ## extra VolumeMounts for the scheduler Pods
+  ##
+  ## SPEC - VolumeMount:
+  ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+  ##
+  extraVolumeMounts: []
+
+  ## extra Volumes for the scheduler Pods
+  ##
+  ## SPEC - Volume:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+  ##
+  extraVolumes: []
+
   ## extra init containers to run in the scheduler Pods
   ##
-  ## EXAMPLE:
-  ##   extraInitContainers:
-  ##     - name: volume-mount-hack
-  ##       image: busybox
-  ##       command: ["sh", "-c", "chown -R 1000:1000 logs"]
-  ##       volumeMounts:
-  ##         - mountPath: /opt/airflow/logs
-  ##           name: logs-data
+  ## SPEC - Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
   ##
   extraInitContainers: []
-
 
 ###################################
 # Airflow - WebUI Configs
 ###################################
 web:
-  ## resource requests/limits for the airflow web Pods
-  ##
-  ## EXAMPLE:
-  ##   resources:
-  ##     requests:
-  ##       cpu: "500m"
-  ##       memory: "1Gi"
-  ##
-  resources: {}
-
   ## the number of web Pods to run
   ##
   ## NOTE:
@@ -444,19 +412,38 @@ web:
   ##
   replicas: 1
 
+  ## resource requests/limits for the web Pod
+  ##
+  ## SPEC - ResourceRequirements:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ##
+  resources: {}
+
   ## the nodeSelector configs for the web Pods
+  ##
+  ## DOCS:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   ##
   nodeSelector: {}
 
   ## the affinity configs for the web Pods
   ##
+  ## SPEC - Affinity:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+  ##
   affinity: {}
 
   ## the toleration configs for the web Pods
   ##
+  ## SPEC - Toleration:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+  ##
   tolerations: []
 
   ## the security context for the web Pods
+  ##
+  ## SPEC - SecurityContext:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
   ##
   securityContext: {}
 
@@ -508,56 +495,25 @@ web:
     nodePort:
       http: ""
 
-  ## sets `AIRFLOW__CORE__STORE_SERIALIZED_DAGS`
-  ##
-  ## NOTE:
-  ## - setting true will disable `dags-git-sync` and `dags-git-clone` containers in the web Pod
-  ## - Docs: https://airflow.apache.org/docs/stable/dag-serialization.html
-  ##
-  serializeDAGs: false
-
-  ## configs for the web Service readiness probe
+  ## configs for the web Pods' readiness probe
   ##
   readinessProbe:
-    enabled: false
+    enabled: true
     scheme: HTTP
     initialDelaySeconds: 10
     periodSeconds: 10
-    timeoutSeconds: 1
-    successThreshold: 1
-    failureThreshold: 3
+    timeoutSeconds: 5
+    failureThreshold: 6
 
-  ## configs for the web Service liveness probe
+  ## configs for the web Pods' liveness probe
   ##
   livenessProbe:
     enabled: true
     scheme: HTTP
-    ## the number of seconds to wait before checking pod health
-    ##
-    ## NOTE:
-    ## - make larger if you are installing many packages with:
-    ##   `airflow.extraPipPackages`, `web.extraPipPackages`, or `dags.installRequirements`
-    ##
-    initialDelaySeconds: 300
-    periodSeconds: 30
-    timeoutSeconds: 3
-    successThreshold: 1
-    failureThreshold: 2
-
-  ## the directory in which to mount secrets on web containers
-  ##
-  secretsDir: /var/airflow/secrets
-
-  ## the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>`
-  ##
-  secrets: []
-
-  ## the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>`
-  ##
-  ## NOTE:
-  ## - overrides `web.secrets`
-  ##
-  secretsMap: ""
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
 
   ## extra pip packages to install in the web Pods
   ##
@@ -566,6 +522,20 @@ web:
   ##     - "SomeProject==1.0.0"
   ##
   extraPipPackages: []
+
+  ## extra VolumeMounts for the web Pods
+  ##
+  ## SPEC - VolumeMount:
+  ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+  ##
+  extraVolumeMounts: []
+
+  ## extra Volumes for the web Pods
+  ##
+  ## SPEC - Volume:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+  ##
+  extraVolumes: []
 
   ## a list of initial web users to create
   ##
@@ -599,24 +569,14 @@ web:
     stringOverride: ""
 
 ###################################
-# Airflow - Worker Configs
+# Airflow - Celery Worker Configs
 ###################################
 workers:
   ## if the airflow workers StatefulSet should be deployed
   ##
   enabled: true
 
-  ## resource requests/limits for the airflow worker Pods
-  ##
-  ## EXAMPLE:
-  ##   resources:
-  ##     requests:
-  ##       cpu: "1000m"
-  ##       memory: "2Gi"
-  ##
-  resources: {}
-
-  ## the number of workers Pods to run
+  ## the number of worker Pods to run
   ##
   ## NOTE:
   ## - if you set this >1 we recommend defining a `workers.podDisruptionBudget`
@@ -624,19 +584,38 @@ workers:
   ##
   replicas: 1
 
+  ## resource requests/limits for the worker Pod
+  ##
+  ## SPEC - ResourceRequirements:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ##
+  resources: {}
+
   ## the nodeSelector configs for the worker Pods
+  ##
+  ## DOCS:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   ##
   nodeSelector: {}
 
   ## the affinity configs for the worker Pods
   ##
+  ## SPEC - Affinity:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+  ##
   affinity: {}
 
   ## the toleration configs for the worker Pods
   ##
+  ## SPEC - Toleration:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+  ##
   tolerations: []
 
   ## the security context for the worker Pods
+  ##
+  ## SPEC - SecurityContext:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
   ##
   securityContext: {}
 
@@ -734,21 +713,6 @@ workers:
   ##
   terminationPeriod: 60
 
-  ## directory in which to mount secrets on worker containers
-  ##
-  secretsDir: /var/airflow/secrets
-
-  ## the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>`
-  ##
-  secrets: []
-
-  ## the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>`
-  ##
-  ## NOTE:
-  ## - overrides `worker.secrets`
-  ##
-  secretsMap: ""
-
   ## extra pip packages to install in the worker Pod
   ##
   ## EXAMPLE:
@@ -757,23 +721,27 @@ workers:
   ##
   extraPipPackages: []
 
+  ## extra VolumeMounts for the worker Pods
+  ##
+  ## SPEC - VolumeMount:
+  ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+  ##
+  extraVolumeMounts: []
+
+  ## extra Volumes for the worker Pods
+  ##
+  ## SPEC - Volume:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+  ##
+  extraVolumes: []
+
 ###################################
 # Airflow - Flower Configs
 ###################################
 flower:
-  ## if the Flower UI should be deployed
+  ## if the airflow flower UI should be deployed
   ##
   enabled: true
-
-  ## resource requests/limits for the flower Pods
-  ##
-  ## EXAMPLE:
-  ##   resources:
-  ##     requests:
-  ##       cpu: "100m"
-  ##       memory: "126Mi"
-  ##
-  resources: {}
 
   ## the number of flower Pods to run
   ##
@@ -782,19 +750,38 @@ flower:
   ##
   replicas: 1
 
+  ## resource requests/limits for the flower Pod
+  ##
+  ## SPEC - ResourceRequirements:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ##
+  resources: {}
+
   ## the nodeSelector configs for the flower Pods
+  ##
+  ## DOCS:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   ##
   nodeSelector: {}
 
   ## the affinity configs for the flower Pods
   ##
+  ## SPEC - Affinity:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+  ##
   affinity: {}
 
   ## the toleration configs for the flower Pods
   ##
+  ## SPEC - Toleration:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+  ##
   tolerations: []
 
   ## the security context for the flower Pods
+  ##
+  ## SPEC - SecurityContext:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
   ##
   securityContext: {}
 
@@ -843,20 +830,13 @@ flower:
   ## the name of a pre-created secret containing the basic authentication value for flower
   ##
   ## NOTE:
-  ## - This sets `AIRFLOW__CELERY__FLOWER_BASIC_AUTH`
+  ## - this will override any value of `config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH`
   ##
   basicAuthSecret: ""
 
   ## the key within `flower.basicAuthSecret` containing the basic authentication string
   ##
   basicAuthSecretKey: ""
-
-  ## sets `AIRFLOW__CELERY__FLOWER_URL_PREFIX`
-  ##
-  ## NOTE:
-  ## - should match `ingress.flower.path` config
-  ##
-  urlPrefix: ""
 
   ## configs for the Service of the flower Pods
   ##
@@ -867,7 +847,25 @@ flower:
     loadBalancerIP: ""
     loadBalancerSourceRanges: []
     nodePort:
-      http: ""
+      http:
+
+  ## configs for the flower Pods' readinessProbe probe
+  ##
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+  ## configs for the flower Pods' liveness probe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
 
   ## extra pip packages to install in the flower Pod
   ##
@@ -877,17 +875,19 @@ flower:
   ##
   extraPipPackages: []
 
-  ## extra ConfigMaps to mount on the flower Pods
+  ## extra VolumeMounts for the flower Pods
   ##
-  ## EXAMPLE:
-  ##   extraConfigmapMounts:
-  ##     - name: extra-cert
-  ##       mountPath: /etc/ssl/certs/extra-cert.pem
-  ##       configMap: extra-certificates
-  ##       readOnly: true
-  ##       subPath: extra-cert.pem
+  ## SPEC - VolumeMount:
+  ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
   ##
-  extraConfigmapMounts: []
+  extraVolumeMounts: []
+
+  ## extra Volumes for the flower Pods
+  ##
+  ## SPEC - Volume:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+  ##
+  extraVolumes: []
 
 ###################################
 # Airflow - Logs Configs
@@ -1111,13 +1111,6 @@ ingress:
     ##
     host: ""
 
-    ## the livenessPath for the web Ingress
-    ##
-    ## NOTE:
-    ## - if set to "", defaults to: `{ingress.web.path}/health`
-    ##
-    livenessPath: ""
-
     ## configs for web Ingress TLS
     ##
     tls:
@@ -1137,8 +1130,8 @@ ingress:
     ## EXAMPLE:
     ##   precedingPaths:
     ##     - path: "/*"
-    ##       serviceName: "ssl-redirect"
-    ##       servicePort: "use-annotation"
+    ##       serviceName: "my-service"
+    ##       servicePort: "port-name"
     ##
     precedingPaths: []
 
@@ -1147,8 +1140,8 @@ ingress:
     ## EXAMPLE:
     ##   succeedingPaths:
     ##     - path: "/extra-service"
-    ##       serviceName: "extra-service"
-    ##       servicePort: "use-annotation"
+    ##       serviceName: "my-service"
+    ##       servicePort: "port-name"
     ##
     succeedingPaths: []
 
@@ -1169,7 +1162,7 @@ ingress:
     ## - do NOT include the trailing slash (for root, set an empty string)
     ##
     ## NOTE:
-    ## - should match `flower.urlPrefix` config
+    ## - should match `AIRFLOW__CELERY__FLOWER_URL_PREFIX` config
     ##
     ## EXAMPLE: (if set to "/airflow/flower")
     ## - UI: http://example.com/airflow/flower
@@ -1179,16 +1172,6 @@ ingress:
     ## the hostname for the flower Ingress
     ##
     host: ""
-
-    ## the livenessPath for the flower Ingress
-    ##
-    ## WARNING:
-    ## - keep the trailing slash
-    ##
-    ## NOTE:
-    ## - if set to "", defaults to: `{ingress.flower.path}/`
-    ##
-    livenessPath: ""
 
     ## configs for flower Ingress TLS
     ##
@@ -1209,8 +1192,8 @@ ingress:
     ## EXAMPLE:
     ##   precedingPaths:
     ##     - path: "/*"
-    ##       serviceName: "ssl-redirect"
-    ##       servicePort: "use-annotation"
+    ##       serviceName: "my-service"
+    ##       servicePort: "port-name"
     ##
     precedingPaths: []
 
@@ -1219,8 +1202,8 @@ ingress:
     ## EXAMPLE:
     ##   succeedingPaths:
     ##     - path: "/extra-service"
-    ##       serviceName: "extra-service"
-    ##       servicePort: "use-annotation"
+    ##       serviceName: "my-service"
+    ##       servicePort: "port-name"
     ##
     succeedingPaths: []
 

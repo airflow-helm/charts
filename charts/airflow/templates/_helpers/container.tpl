@@ -9,7 +9,7 @@ Define an init-container which waits for DB migrations
     - configMapRef:
         name: "{{ include "airflow.fullname" . }}-env"
   env:
-    {{- include "airflow.mapenvsecrets" . | indent 4 }}
+    {{- include "airflow.common.env" . | indent 4 }}
   command:
     - "/usr/bin/dumb-init"
     - "--"
@@ -99,7 +99,7 @@ Define a container which regularly syncs a git-repo
 {{- end }}
 
 {{/*
-Construct a list of common volumeMounts for the web/scheduler/worker/flower containers
+Construct a list of common "volumeMounts" for the web/scheduler/worker/flower containers
 */}}
 {{- define "airflow.common.volumeMounts" }}
 - name: scripts
@@ -118,21 +118,13 @@ Construct a list of common volumeMounts for the web/scheduler/worker/flower cont
   mountPath: {{ .Values.logs.path }}
   subPath: {{ .Values.logs.persistence.subPath }}
 {{- end }}
-{{- range .Values.airflow.extraConfigmapMounts }}
-- name: {{ .name }}
-  mountPath: {{ .mountPath }}
-  readOnly: {{ .readOnly }}
-  {{- if .subPath }}
-  subPath: {{ .subPath }}
-  {{- end }}
-{{- end }}
 {{- if .Values.airflow.extraVolumeMounts }}
 {{- toYaml .Values.airflow.extraVolumeMounts }}
 {{- end }}
 {{- end }}
 
 {{/*
-Construct a list of volumes which used in web/scheduler/worker/flower Pods
+Construct a list of common "volumes" for the web/scheduler/worker/flower Pods
 */}}
 {{- define "airflow.common.volumes" }}
 - name: scripts
@@ -164,12 +156,80 @@ Construct a list of volumes which used in web/scheduler/worker/flower Pods
   persistentVolumeClaim:
     claimName: {{ .Values.logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" . | trunc 58)) }}
 {{- end }}
-{{- range .Values.airflow.extraConfigmapMounts }}
-- name: {{ .name }}
-  configMap:
-    name: {{ .configMap }}
-{{- end }}
 {{- if .Values.airflow.extraVolumes }}
 {{- toYaml .Values.airflow.extraVolumes }}
+{{- end }}
+{{- end }}
+
+{{/*
+Construct a list of common "env" for the web/scheduler/worker/flower Pods
+NOTE: when applicable, we use the secrets created by the postgres/redis charts (which have fixed names and secret keys)
+*/}}
+{{- define "airflow.common.env" -}}
+{{- /* ------------------------------ */ -}}
+{{- /* ---------- POSTGRES ---------- */ -}}
+{{- /* ------------------------------ */ -}}
+{{- if .Values.postgresql.enabled }}
+{{- if .Values.postgresql.existingSecret }}
+- name: DATABASE_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.postgresql.existingSecret }}
+      key: {{ .Values.postgresql.existingSecretKey }}
+{{- else }}
+- name: DATABASE_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "airflow.postgresql.fullname" . }}
+      key: postgresql-password
+{{- end }}
+{{- else }}
+{{- if .Values.externalDatabase.passwordSecret }}
+- name: DATABASE_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.externalDatabase.passwordSecret }}
+      key: {{ .Values.externalDatabase.passwordSecretKey }}
+{{- else }}
+- name: DATABASE_PASSWORD
+  value: ""
+{{- end }}
+{{- end }}
+{{- /* --------------------------- */ -}}
+{{- /* ---------- REDIS ---------- */ -}}
+{{- /* --------------------------- */ -}}
+{{- if (include "airflow.executor.celery_like" .) }}
+{{- if .Values.redis.enabled }}
+{{- if .Values.redis.existingSecret }}
+- name: REDIS_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.redis.existingSecret }}
+      key: {{ .Values.redis.existingSecretPasswordKey }}
+{{- else }}
+- name: REDIS_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ include "airflow.redis.fullname" . }}
+      key: redis-password
+{{- end }}
+{{- else }}
+{{- if .Values.externalRedis.passwordSecret }}
+- name: REDIS_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.externalRedis.passwordSecret }}
+      key: {{ .Values.externalRedis.passwordSecretKey }}
+{{- else }}
+- name: REDIS_PASSWORD
+  value: ""
+{{- end }}
+{{- end }}
+{{- end }}
+{{- /* ---------------------------- */ -}}
+{{- /* ---------- EXTRAS ---------- */ -}}
+{{- /* ---------------------------- */ -}}
+{{- if .Values.airflow.extraEnv }}
+{{ toYaml .Values.airflow.extraEnv }}
 {{- end }}
 {{- end }}

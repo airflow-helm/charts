@@ -75,7 +75,7 @@ A __production__ starting point for GKE on Google Cloud (CeleryExecutor) | [link
 
 ## Airflow Configs
 
-### How to set Airflow configs?
+### How to set airflow configs?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -110,7 +110,7 @@ airflow:
 
 </details>
 
-### How to store Airflow DAGs?
+### How to store DAGs?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -211,7 +211,7 @@ airflow:
 
 </details>
 
-### How to install extra pip dependencies?
+### How to install pip dependencies?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -240,7 +240,7 @@ worker:
 
 </details>
 
-### How to manually create airflow web users? 
+### How to create airflow users? 
 <details>
 <summary>Show More</summary>
 <hr>
@@ -267,7 +267,7 @@ web:
 
 </details>
 
-### How to authenticate airflow users from LDAP/OAUTH (webserver_config.py)? 
+### How to authenticate airflow users with LDAP/OAUTH? 
 <details>
 <summary>Show More</summary>
 <hr>
@@ -375,6 +375,15 @@ web:
 
 </details>
 
+### XXXXXXX How to set a custom fernet (encryption) key? 
+<details>
+<summary>Show More</summary>
+<hr>
+
+TBA
+
+</details>
+
 ### XXXXXXX How to export airflow dag/task metrics to Prometheus? 
 <details>
 <summary>Show More</summary>
@@ -384,7 +393,7 @@ TBA
 
 </details>
 
-### How to create Airflow Connections?
+### How to create airflow connections?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -438,7 +447,7 @@ stringData:
 
 </details>
 
-### How to create Airflow Variables?
+### How to create airflow variables?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -456,7 +465,7 @@ scheduler:
 
 </details>
 
-### How to create Airflow Pools?
+### How to create airflow pools?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -479,7 +488,7 @@ scheduler:
 
 </details>
 
-### How to set up Airflow Worker autoscaling?
+### XXXXX How to set up celery worker autoscaling?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -625,7 +634,7 @@ serviceAccount:
 
 ## Database Configs
 
-### How to set username/password of the embedded Postgres?
+### How to use the embedded Postgres?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -660,7 +669,7 @@ redis:
 
 </details>
 
-### How to set up an external database (recommended)?
+### How to use an external database (recommended)?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -704,11 +713,11 @@ externalDatabase:
 <summary>Show More</summary>
 <hr>
 
-You can use the `airflow.extraEnv` value to mount extra environment variables with the same syntax as `env` in ContainerSpec.
+You can use the `airflow.extraEnv` value to mount extra environment variables with the same structure as [EnvVar in ContainerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#envvar-v1-core).
 
 This method can be used to pass sensitive configs to Airflow.
 
-For example, passing a Fernet key and LDAP password, (the `airflow` and `ldap` Kubernetes Secrets must already exist):
+For example, passing a Fernet key, (the `airflow` Kubernetes Secret must already exist):
 ```yaml
 airflow:
   extraEnv:
@@ -717,44 +726,11 @@ airflow:
         secretKeyRef:
           name: airflow
           key: fernet-key
-    - name: AIRFLOW__LDAP__BIND_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: ldap
-          key: password
 ```
 
 </details>
 
-### How to mount ConfigMaps as files (All Pods)?
-<details>
-<summary>Show More</summary>
-<hr>
-
-You can use the `airflow.extraConfigmapMounts` value to mount the keys of a ConfigMap as files.
-
-For example, a `webserver_config.py` file:
-```yaml
-airflow:
-  extraConfigmapMounts:
-    - name: my-webserver-config
-      mountPath: /opt/airflow/webserver_config.py
-      configMap: my-airflow-webserver-config
-      readOnly: true
-      subPath: webserver_config.py
-```
-
-To create the `my-airflow-webserver-config` ConfigMap, you could use:
-```console
-kubectl create configmap \
-  my-airflow-webserver-config \
-  --from-file=webserver_config.py \
-  --namespace airflow
-```
-
-</details>
-
-### How to mount Secrets as files (Worker Pods)?
+### XXXXX How to mount Secrets/Configmaps as files (Worker Pods)?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -764,12 +740,18 @@ You can use the `workers.secrets` value to mount secrets at `{workers.secretsDir
 For example, mounting password Secrets:
 ```yaml
 workers:
-  secretsDir: /var/airflow/secrets
-  secrets:
+  extraVolumeMounts:
+    ...
     - redshift-user
     - redshift-password
     - elasticsearch-user
     - elasticsearch-password
+    ...
+  extraVolumes:
+    ...
+    ...
+    ...
+
 ```
 
 With the above configuration, you could read the `redshift-user` password from within a DAG or Python function using:
@@ -797,6 +779,15 @@ kubectl create secret generic \
 
 </details>
 
+### XXXXX How to set up a LoadBalancer service (recommended)?
+<details>
+<summary>Show More</summary>
+<hr>
+
+TBA
+
+</details>
+
 ### How to set up an Ingress?
 <details>
 <summary>Show More</summary>
@@ -813,14 +804,12 @@ In this example, would set these values:
 airflow:
   config: 
     AIRFLOW__WEBSERVER__BASE_URL: "http://example.com/airflow/"
-
-flower:
-  urlPrefix: "/airflow/flower"
+    AIRFLOW__CELERY__FLOWER_URL_PREFIX: "/airflow/flower"
 
 ingress:
+  enabled: true
   web:
     path: "/airflow"
-
   flower:
     path: "/airflow/flower"
 ```
@@ -841,7 +830,7 @@ ingress:
 
 </details>
 
-### How to set up Prometheus with Airflow?
+### XXXXXX How to integrate airflow with Prometheus?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -852,7 +841,7 @@ A [ServiceMonitor](https://github.com/prometheus-operator/prometheus-operator/bl
 
 </details>
 
-### How to add extra Kubernetes manifests?
+### How to add extra manifests?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -887,12 +876,11 @@ Parameter | Description | Default
 `airflow.fernetKey` | the fernet key used to encrypt the connections/variables in the database | `7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc=`
 `airflow.config` | environment variables for airflow configs | `{}`
 `airflow.podAnnotations` | extra annotations for the web/scheduler/worker/flower Pods | `{}`
+`airflow.extraPipPackages` | extra pip packages to install in the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraEnv` | extra environment variables for the web/scheduler/worker/flower Pods | `[]`
-`airflow.extraConfigmapMounts` | extra configMap volumeMounts for the web/scheduler/worker/flower Pods | `[]`
-`airflow.extraContainers` | extra containers for the web/scheduler/worker Pods | `[]`
-`airflow.extraPipPackages` | extra pip packages to install in the web/scheduler/worker Pods | `[]`
-`airflow.extraVolumeMounts` | extra volumeMounts for the web/scheduler/worker Pods | `[]`
-`airflow.extraVolumes` | extra volumes for the web/scheduler/worker Pods | `[]`
+`airflow.extraContainers` | extra containers for the web/scheduler/worker/flower Pods | `[]`
+`airflow.extraVolumeMounts` | extra VolumeMounts for the web/scheduler/worker/flower Pods | `[]`
+`airflow.extraVolumes` | extra Volumes for the web/scheduler/worker/flower Pods | `[]`
 `airflow.podTemplateFile.*` | configs to generate AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE | `<see values.yaml>`
 
 </details>
@@ -904,8 +892,8 @@ Parameter | Description | Default
 
 Parameter | Description | Default
 --- | --- | ---
-`scheduler.resources` | resource requests/limits for the scheduler Pods | `{}`
 `scheduler.replicas` | the number of scheduler Pods to run | `1`
+`scheduler.resources` | resource requests/limits for the scheduler Pods | `{}`
 `scheduler.nodeSelector` | the nodeSelector configs for the scheduler Pods | `{}`
 `scheduler.affinity` | the affinity configs for the scheduler Pods | `{}`
 `scheduler.tolerations` | the toleration configs for the scheduler Pods | `[]`
@@ -913,19 +901,19 @@ Parameter | Description | Default
 `scheduler.labels` | labels for the scheduler Deployment | `{}`
 `scheduler.podLabels` | Pod labels for the scheduler Deployment | `{}`
 `scheduler.annotations` | annotations for the scheduler Deployment | `{}`
-`scheduler.podAnnotations` | Pod Annotations for the scheduler Deployment | `{}`
+`scheduler.podAnnotations` | Pod annotations for the scheduler Deployment | `{}`
 `scheduler.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
 `scheduler.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the scheduler | `<see values.yaml>`
 `scheduler.connections` | custom airflow connections for the airflow scheduler | `[]`
 `scheduler.refreshConnections` | if `scheduler.connections` are deleted and re-added after each scheduler restart | `true`
 `scheduler.existingSecretConnections` | the name of an existing Secret containing an `add-connections.sh` script to run on scheduler start | `""`
-`scheduler.variables` | custom variables for the airflow scheduler | `"{}"`
-`scheduler.pools` | custom pools for the airflow scheduler | `"{}"`
+`scheduler.variables` | custom variables for the airflow scheduler | `{}`
+`scheduler.pools` | custom pools for the airflow scheduler | `{}`
 `scheduler.numRuns` | the value of the `airflow --num_runs` parameter used to run the airflow scheduler | `-1`
-`scheduler.livenessProbe.*` | configs for the scheduler liveness probe | `<see values.yaml>`
-`scheduler.secretsDir` | the directory in which to mount secrets on scheduler containers | `/var/airflow/secrets`
-`scheduler.secrets` | the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>` | `[]`
-`scheduler.secretsMap` | the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>` | `""`
+`scheduler.extraPipPackages` | extra pip packages to install in the scheduler Pods | `[]`
+`scheduler.extraVolumeMounts` | extra VolumeMounts for the scheduler Pods | `[]`
+`scheduler.extraVolumes` | extra Volumes for the scheduler Pods | `[]`
+`scheduler.livenessProbe.*` | configs for the scheduler Pods' liveness probe | `<see values.yaml>`
 `scheduler.extraInitContainers` | extra init containers to run in the scheduler Pods | `[]`
 
 </details>
@@ -937,8 +925,8 @@ Parameter | Description | Default
 
 Parameter | Description | Default
 --- | --- | ---
-`web.resources` | resource requests/limits for the airflow web pods | `{}`
 `web.replicas` | the number of web Pods to run | `1`
+`web.resources` | resource requests/limits for the airflow web pods | `{}`
 `web.nodeSelector` | the number of web Pods to run | `{}`
 `web.affinity` | the affinity configs for the web Pods | `{}`
 `web.tolerations` | the toleration configs for the web Pods | `[]`
@@ -950,19 +938,17 @@ Parameter | Description | Default
 `web.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
 `web.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the web Deployment | `<see values.yaml>`
 `web.service.*` | configs for the Service of the web pods | `<see values.yaml>`
-`web.serializeDAGs` | sets `AIRFLOW__CORE__STORE_SERIALIZED_DAGS` | `false`
-`web.extraPipPackages` | extra pip packages to install in the web container | `[]`
-`web.readinessProbe.*` | configs for the web Service readiness probe | `<see values.yaml>`
-`web.livenessProbe.*` | configs for the web Service liveness probe | `<see values.yaml>`
-`web.secretsDir` | the directory in which to mount secrets on web containers | `/var/airflow/secrets`
-`web.secrets` | the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>` | `[]`
-`web.secretsMap` | the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>` | `""`
+`web.readinessProbe.*` | configs for the web Pods' readiness probe | `<see values.yaml>`
+`web.livenessProbe.*` | configs for the web Pods' liveness probe | `<see values.yaml>`
+`web.extraPipPackages` | extra pip packages to install in the web Pods | `[]`
+`web.extraVolumeMounts` | extra VolumeMounts for the web Pods | `[]`
+`web.extraVolumes` | extra Volumes for the web Pods | `[]`
 `web.createUsers` | a list of initial web users to create | `<see values.yaml>`
 `web.webserverConfigFile.*` | configs to generate webserver_config.py | `<see values.yaml>`
 
 </details>
 
-### Airflow Worker:
+### Airflow Celery Worker:
 <details>
 <summary>Show More</summary>
 <hr>
@@ -970,8 +956,8 @@ Parameter | Description | Default
 Parameter | Description | Default
 --- | --- | ---
 `workers.enabled` | if the airflow workers StatefulSet should be deployed | `true`
-`workers.resources` | resource requests/limits for the airflow worker Pods | `{}`
 `workers.replicas` | the number of workers Pods to run | `1`
+`workers.resources` | resource requests/limits for the airflow worker Pods | `{}`
 `workers.nodeSelector` | the nodeSelector configs for the worker Pods | `{}`
 `workers.affinity` | the affinity configs for the worker Pods | `{}`
 `workers.tolerations` | the toleration configs for the worker Pods | `[]`
@@ -985,10 +971,10 @@ Parameter | Description | Default
 `workers.autoscaling.*` | configs for the HorizontalPodAutoscaler of the worker Pods | `<see values.yaml>`
 `workers.celery.*` | configs for the celery worker Pods | `<see values.yaml>`
 `workers.terminationPeriod` | how many seconds to wait after SIGTERM before SIGKILL of the celery worker | `60`
-`workers.secretsDir` | directory in which to mount secrets on worker containers | `/var/airflow/secrets`
-`workers.secrets` | the names of existing Kubernetes Secrets to mount as files at `{workers.secretsDir}/<secret_name>/<keys_in_secret>` | `[]`
-`workers.secretsMap` | the name of an existing Kubernetes Secret to mount as files to `{web.secretsDir}/<keys_in_secret>` | `""`
-  
+`workers.extraPipPackages` | extra pip packages to install in the worker Pods | `[]`
+`workers.extraVolumeMounts` | extra VolumeMounts for the worker Pods | `[]`
+`workers.extraVolumes` | extra Volumes for the worker Pods | `[]`
+
 </details>
 
 ### Airflow Flower:
@@ -1000,6 +986,7 @@ Parameter | Description | Default
 --- | --- | ---
 `flower.enabled` | if the Flower UI should be deployed | `true`
 `flower.resources` | resource requests/limits for the flower Pods | `{}`
+`flower.nodeSelector` | the nodeSelector configs for the flower Pods | `{}`
 `flower.affinity` | the affinity configs for the flower Pods | `{}`
 `flower.tolerations` | the toleration configs for the flower Pods | `[]`
 `flower.securityContext` | the security context for the flower Pods | `{}`
@@ -1012,9 +999,10 @@ Parameter | Description | Default
 `flower.oauthDomains` | the value of the flower `--auth` argument | `""`
 `flower.basicAuthSecret` | the name of a pre-created secret containing the basic authentication value for flower | `""`
 `flower.basicAuthSecretKey` | the key within `flower.basicAuthSecret` containing the basic authentication string | `""`
-`flower.urlPrefix` | sets `AIRFLOW__CELERY__FLOWER_URL_PREFIX` | `""`
 `flower.service.*` | configs for the Service of the flower Pods | `<see values.yaml>`
-`flower.extraConfigmapMounts` | extra ConfigMaps to mount on the flower Pods | `[]`
+`flower.extraPipPackages` | extra pip packages to install in the flower Pod | `[]`
+`flower.extraVolumeMounts` | extra VolumeMounts for the flower Pods | `[]`
+`flower.extraVolumes` | extra Volumes for the flower Pods | `[]`
 
 </details>
 
@@ -1038,10 +1026,8 @@ Parameter | Description | Default
 Parameter | Description | Default
 --- | --- | ---
 `dags.path` | the airflow dags folder | `/opt/airflow/dags`
-`dags.installRequirements` | install any Python `requirements.txt` at the root of `dags.path` automatically | `false`
 `dags.persistence.*` | configs for the dags PVC | `<see values.yaml>`
-`dags.git.*` | configs for the DAG git repository & sync container | `<see values.yaml>`
-`dags.initContainer.*` | configs for the git-clone init-container | `<see values.yaml>`
+`dags.gitSync.*` | configs for the git-sync sidecar  | `<see values.yaml>`
 
 </details>
 

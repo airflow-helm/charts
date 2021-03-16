@@ -107,10 +107,17 @@ spec:
             - configMapRef:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
-            {{- include "airflow.mapenvsecrets" . | indent 12 }}
+            {{- include "airflow.common.env" . | indent 12 }}
             {{- if or (.Values.airflow.extraPipPackages) (.Values.flower.extraPipPackages) }}
             - name: PYTHONPATH
               value: /opt/python/site-packages
+            {{- end }}
+            {{- if .Values.flower.basicAuthSecret }}
+            - name: AIRFLOW__CELERY__FLOWER_BASIC_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.flower.basicAuthSecret }}
+                  key: {{ .Values.flower.basicAuthSecretKey }}
             {{- end }}
           ports:
             - name: flower
@@ -135,61 +142,54 @@ spec:
               {{- if .Values.flower.oauthDomains -}}
                {{ " " }}--auth={{ .Values.flower.oauthDomains | quote }}
               {{- end }}
-          livenessProbe:
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            timeoutSeconds: 1
-            successThreshold: 1
-            failureThreshold: 3
-            {{- if and (.Values.flower.basicAuthSecret) (not .Values.airflow.config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH) }}
+          {{- if .Values.flower.readinessProbe.enabled }}
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.flower.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.flower.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.flower.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.flower.readinessProbe.failureThreshold }}
             exec:
               command:
-                - /bin/sh
-                - -c
-                - "curl -H 'Authorization: Basic $(echo -n $AIRFLOW__CELERY__FLOWER_BASIC_AUTH | base64)' 'http://localhost:5555
-                  {{- if .Values.ingress.flower.livenessPath -}}
-                  {{ .Values.ingress.flower.livenessPath }}
-                  {{- else -}}
-                  {{ .Values.ingress.flower.path }}/
-                  {{- end -}}
-                  '"
-            {{- else }}
-            httpGet:
-              {{- if .Values.ingress.flower.livenessPath }}
-              path: "{{ .Values.ingress.flower.livenessPath }}"
-              {{- else }}
-              path: "{{ .Values.ingress.flower.path }}/"
-              {{- end }}
-              port: flower
-              {{- if .Values.airflow.config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH }}
-              httpHeaders:
-                - name: Authorization
-                  value: Basic {{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH | b64enc }}
-              {{- end }}
-            {{- end }}
+                - "/bin/bash"
+                - "-c"
+                {{- if or (.Values.flower.basicAuthSecret) (.Values.airflow.config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH) }}
+                - "exec curl --user $AIRFLOW__CELERY__FLOWER_BASIC_AUTH 'http://localhost:5555{{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX }}'"
+                {{- else }}
+                - "exec curl 'http://localhost:5555{{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX }}'"
+                {{- end }}
+          {{- end }}
+          {{- if .Values.flower.livenessProbe.enabled }}
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.flower.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.flower.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.flower.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.flower.livenessProbe.failureThreshold }}
+            exec:
+              command:
+                - "/bin/bash"
+                - "-c"
+                {{- if or (.Values.flower.basicAuthSecret) (.Values.airflow.config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH) }}
+                - "exec curl --user $AIRFLOW__CELERY__FLOWER_BASIC_AUTH 'http://localhost:5555{{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX }}'"
+                {{- else }}
+                - "exec curl 'http://localhost:5555{{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX }}'"
+                {{- end }}
+          {{- end }}
           volumeMounts:
             {{- include "airflow.common.volumeMounts" . | indent 12 }}
-            {{- range .Values.flower.extraConfigmapMounts }}
-            - name: {{ .name }}
-              mountPath: {{ .mountPath }}
-              readOnly: {{ .readOnly }}
-              {{- if .subPath }}
-              subPath: {{ .subPath }}
-              {{- end }}
-            {{- end }}
             {{- if or (.Values.airflow.extraPipPackages) (.Values.flower.extraPipPackages) }}
             - name: python-site-packages
               mountPath: /opt/python/site-packages
             {{- end }}
+            {{- if .Values.flower.extraVolumeMounts }}
+            {{- toYaml .Values.flower.extraVolumeMounts | nindent 12 }}
+            {{- end }}
       volumes:
         {{- include "airflow.common.volumes" . | indent 8 }}
-        {{- range .Values.flower.extraConfigmapMounts }}
-        - name: {{ .name }}
-          configMap:
-            name: {{ .configMap }}
-        {{- end }}
         {{- if or (.Values.airflow.extraPipPackages) (.Values.flower.extraPipPackages) }}
         - name: python-site-packages
           emptyDir: {}
+        {{- end }}
+        {{- if .Values.flower.extraVolumes }}
+        {{- toYaml .Values.flower.extraVolumes | nindent 8 }}
         {{- end }}
 {{- end }}

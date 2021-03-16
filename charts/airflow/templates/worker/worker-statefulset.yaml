@@ -112,7 +112,7 @@ spec:
             - configMapRef:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
-            {{- include "airflow.mapenvsecrets" . | indent 12 }}
+            {{- include "airflow.common.env" . | indent 12 }}
             {{- if or (.Values.airflow.extraPipPackages) (.Values.workers.extraPipPackages) }}
             - name: PYTHONPATH
               value: /opt/python/site-packages
@@ -143,20 +143,12 @@ spec:
             {{- end }}
           volumeMounts:
             {{- include "airflow.common.volumeMounts" . | indent 12 }}
-            {{- if .Values.workers.secretsMap }}
-            - name: {{ .Values.workers.secretsMap }}-volume
-              readOnly: true
-              mountPath: {{ .Values.workers.secretsDir }}
-            {{- else }}
-            {{- range .Values.workers.secrets }}
-            - name: {{ . }}-volume
-              readOnly: true
-              mountPath: {{ $.Values.workers.secretsDir }}/{{ . }}
-            {{- end }}
-            {{- end }}
             {{- if or (.Values.airflow.extraPipPackages) (.Values.workers.extraPipPackages) }}
             - name: python-site-packages
               mountPath: /opt/python/site-packages
+            {{- end }}
+            {{- if .Values.workers.extraVolumeMounts }}
+            {{- toYaml .Values.workers.extraVolumeMounts | nindent 12 }}
             {{- end }}
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
@@ -166,19 +158,11 @@ spec:
         {{- end }}
       volumes:
         {{- include "airflow.common.volumes" . | indent 8 }}
-        {{- if .Values.workers.secretsMap }}
-        - name: {{ .Values.workers.secretsMap }}-volume
-          secret:
-            secretName: {{ .Values.workers.secretsMap }}
-        {{- else }}
-        {{- range .Values.workers.secrets }}
-        - name: {{ . }}-volume
-          secret:
-            secretName: {{ . }}
-        {{- end }}
-        {{- end }}
         {{- if or (.Values.airflow.extraPipPackages) (.Values.workers.extraPipPackages) }}
         - name: python-site-packages
           emptyDir: {}
+        {{- end }}
+        {{- if .Values.workers.extraVolumes }}
+        {{- toYaml .Values.workers.extraVolumes | nindent 8 }}
         {{- end }}
 {{- end }}

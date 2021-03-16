@@ -80,9 +80,6 @@ data:
   {{- end }}
   AIRFLOW__CORE__SQL_ALCHEMY_CONN_CMD: |-
     bash -c 'eval "$DATABASE_SQLALCHEMY_CMD"'
-  {{- if .Values.web.serializeDAGs }}
-  AIRFLOW__CORE__STORE_SERIALIZED_DAGS: "{{ .Values.web.serializeDAGs }}"
-  {{- end }}
   AIRFLOW__WEBSERVER__WEB_SERVER_PORT: "8080"
 
   {{- if include "airflow.executor.celery_like" . }}
@@ -93,7 +90,6 @@ data:
     bash -c 'eval "$REDIS_CONNECTION_CMD"'
   {{- if .Values.flower.enabled }}
   AIRFLOW__CELERY__FLOWER_PORT: "5555"
-  AIRFLOW__CELERY__FLOWER_URL_PREFIX: "{{ .Values.flower.urlPrefix }}"
   {{- end }}
   AIRFLOW__CELERY__RESULT_BACKEND_CMD: |-
     bash -c 'eval "$DATABASE_CELERY_CMD"'

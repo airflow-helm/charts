@@ -33,7 +33,7 @@ spec:
             - configMapRef:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
-            {{- include "airflow.mapenvsecrets" . | indent 12 }}
+            {{- include "airflow.common.env" . | indent 12 }}
           command:
             - "/usr/bin/dumb-init"
             - "--"
@@ -53,7 +53,7 @@ spec:
             - configMapRef:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
-            {{- include "airflow.mapenvsecrets" . | indent 12 }}
+            {{- include "airflow.common.env" . | indent 12 }}
           command:
             - "/usr/bin/dumb-init"
             - "--"

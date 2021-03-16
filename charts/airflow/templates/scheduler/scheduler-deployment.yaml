@@ -112,7 +112,7 @@ spec:
             - configMapRef:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
-            {{- include "airflow.mapenvsecrets" . | indent 12 }}
+            {{- include "airflow.common.env" . | indent 12 }}
             {{- if or (.Values.airflow.extraPipPackages) (.Values.scheduler.extraPipPackages) }}
             - name: PYTHONPATH
               value: /opt/python/site-packages
@@ -148,10 +148,10 @@ spec:
             failureThreshold: {{ .Values.scheduler.livenessProbe.failureThreshold }}
             exec:
               command:
-              - python
-              - -Wignore
-              - -c
-              - |
+              - "python"
+              - "-Wignore"
+              - "-c"
+              - |-
                 import os
                 import sys
 
@@ -173,17 +173,6 @@ spec:
           {{- end }}
           volumeMounts:
             {{- include "airflow.common.volumeMounts" . | indent 12 }}
-            {{- if .Values.scheduler.secretsMap }}
-            - name: {{ .Values.scheduler.secretsMap }}-volume
-              mountPath: {{ .Values.scheduler.secretsDir }}
-              readOnly: true
-            {{- else }}
-            {{- range .Values.scheduler.secrets }}
-            - name: {{ . }}-volume
-              mountPath: {{ $.Values.scheduler.secretsDir }}/{{ . }}
-              readOnly: true
-            {{- end }}
-            {{- end }}
             {{- if or (.Values.scheduler.connections) (.Values.scheduler.existingSecretConnections) }}
             - name: connections
               mountPath: /home/airflow/connections
@@ -204,6 +193,9 @@ spec:
               subPath: pod_template.yaml
               readOnly: true
             {{- end }}
+            {{- if .Values.scheduler.extraVolumeMounts }}
+            {{- toYaml .Values.scheduler.extraVolumeMounts | nindent 12 }}
+            {{- end }}
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
@@ -212,17 +204,6 @@ spec:
         {{- end }}
       volumes:
         {{- include "airflow.common.volumes" . | indent 8 }}
-        {{- if .Values.scheduler.secretsMap }}
-        - name: {{ .Values.scheduler.secretsMap }}-volume
-          secret:
-            secretName: {{ .Values.scheduler.secretsMap }}
-        {{- else }}
-        {{- range .Values.scheduler.secrets }}
-        - name: {{ . }}-volume
-          secret:
-            secretName: {{ . }}
-        {{- end }}
-        {{- end }}
         {{- if or (.Values.scheduler.connections) (.Values.scheduler.existingSecretConnections) }}
         - name: connections
           secret:
@@ -248,4 +229,7 @@ spec:
         - name: pod-template
           configMap:
             name: {{ include "airflow.fullname" . }}-pod-template
+        {{- end }}
+        {{- if .Values.scheduler.extraVolumes }}
+        {{- toYaml .Values.scheduler.extraVolumes | nindent 8 }}
         {{- end }}
