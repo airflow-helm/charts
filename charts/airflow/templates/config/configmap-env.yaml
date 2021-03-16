@@ -68,9 +68,11 @@ data:
   ## logging - airflow 2.0.X
   AIRFLOW__LOGGING__BASE_LOG_FOLDER: "{{ .Values.logs.path }}"
   AIRFLOW__LOGGING__DAG_PROCESSOR_MANAGER_LOG_LOCATION: "{{ .Values.logs.path }}/dag_processor_manager/dag_processor_manager.log"
+  ## logging
+  AIRFLOW__SCHEDULER__CHILD_PROCESS_LOG_DIRECTORY: "{{ .Values.logs.path }}/scheduler"
 
   ## other configs
-  AIRFLOW__CORE__DAGS_FOLDER: "{{ .Values.dags.path }}"
+  AIRFLOW__CORE__DAGS_FOLDER: "{{ include "airflow.dags.path" . }}"
   AIRFLOW__CORE__ENABLE_XCOM_PICKLING: "false" # for forward compatibility with 2.0
   AIRFLOW__CORE__EXECUTOR: "{{ .Values.airflow.executor }}"
   {{- if .Values.airflow.fernetKey }}
@@ -81,7 +83,6 @@ data:
   {{- if .Values.web.serializeDAGs }}
   AIRFLOW__CORE__STORE_SERIALIZED_DAGS: "{{ .Values.web.serializeDAGs }}"
   {{- end }}
-  AIRFLOW__SCHEDULER__CHILD_PROCESS_LOG_DIRECTORY: "{{ .Values.logs.path }}/scheduler"
   AIRFLOW__WEBSERVER__WEB_SERVER_PORT: "8080"
 
   {{- if include "airflow.executor.celery_like" . }}

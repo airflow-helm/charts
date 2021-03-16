@@ -34,7 +34,6 @@ spec:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
         checksum/config-pod-template: {{ include (print $.Template.BasePath "/config/configmap-pod-template.yaml") . | sha256sum }}
         checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
-        checksum/config-scripts-git: {{ include (print $.Template.BasePath "/config/configmap-scripts-git.yaml") . | sha256sum }}
         checksum/config-variables-pools: {{ include (print $.Template.BasePath "/config/configmap-variables-pools.yaml") . | sha256sum }}
         checksum/secret-connections: {{ include (print $.Template.BasePath "/config/secret-connections.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
@@ -100,9 +99,6 @@ spec:
               mountPath: /opt/python/site-packages
         {{- end }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
-        {{- if .Values.dags.initContainer.enabled }}
-        {{- include "airflow.init_container.git_clone" . | indent 8 }}
-        {{- end }}
         {{- if .Values.scheduler.extraInitContainers }}
         {{- toYaml .Values.scheduler.extraInitContainers | nindent 8 }}
         {{- end }}
@@ -131,10 +127,6 @@ spec:
               true \
                && mkdir -p /home/airflow/.local/bin \
                && export PATH="/home/airflow/.local/bin:$PATH" \
-              {{- if .Values.dags.installRequirements }}
-               && echo "*** installing requirements..." \
-               && /home/airflow/scripts/install-requirements.sh \
-              {{- end }}
               {{- if .Values.scheduler.variables }}
                && echo "*** adding Airflow variables..." \
                && airflow variables import /home/airflow/variables-pools/variables.json || airflow variables -i /home/airflow/variables-pools/variables.json \
@@ -212,7 +204,7 @@ spec:
               subPath: pod_template.yaml
               readOnly: true
             {{- end }}
-        {{- if .Values.dags.git.gitSync.enabled }}
+        {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
         {{- if .Values.airflow.extraContainers }}

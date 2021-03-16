@@ -158,7 +158,7 @@ airflow:
   ## configs to generate AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE
   ##
   ## NOTE:
-  ## - our default pod_template.yaml respects chart values like `dags.git.gitSync.enabled`
+  ## - our default pod_template.yaml respects chart values like `dags.gitSync.enabled`
   ##   by including the required sidecar containers
   ## - read airflow docs for pod_template.yaml here:
   ##   https://airflow.apache.org/docs/apache-airflow/stable/executor/kubernetes.html#pod-template-file
@@ -677,6 +677,9 @@ workers:
 
   ## configs for the HorizontalPodAutoscaler of the worker Pods
   ##
+  ## NOTE:
+  ## - if using git-sync, ensure `dags.gitSync.resources` is set
+  ##
   ## EXAMPLE:
   ##   autoscaling:
   ##     enabled: true
@@ -938,14 +941,6 @@ dags:
   ##
   path: /opt/airflow/dags
 
-  ## install any Python "requirements.txt" at the root of `dags.path` automatically
-  ##
-  ## WARNING:
-  ## - if set to true, and you are using `dags.git.gitSync`, you must also enable
-  ##   `dags.initContainer` to ensure the requirements.txt is available at Pod start
-  ##
-  installRequirements: false
-
   ## configs for the dags PVC
   ##
   persistence:
@@ -986,136 +981,22 @@ dags:
     ##
     size: 1Gi
 
-  ## configs for the DAG git repository & sync container
+  ## configs for the git-sync sidecar (https://github.com/kubernetes/git-sync)
   ##
-  git:
-    ## url of the git repository
-    ##
-    ## EXAMPLE: (HTTP)
-    ##   url: "https://github.com/USERNAME/REPOSITORY.git"
-    ##
-    ## EXAMPLE: (HTTP - Token)
-    ##   url: "https://USERNAME:TOKEN@github.com/USERNAME/REPOSITORY.git"
-    ##
-    ## EXAMPLE: (SSH)
-    ##   url: "ssh://git@example.com:22/REPOSITORY.git"
-    ##
-    ## EXAMPLE: (SSH - GitHub)
-    ##   url: "git@github.com:USERNAME/REPOSITORY.git"
-    ##
-    url: ""
-
-    ## the branch/tag/sha1 which we clone
-    ##
-    ref: master
-
-    ## the name of a pre-created Secret with files for the $HOME/.ssh/ directory
-    ##
-    ## NOTE:
-    ## - this is ONLY REQUIRED for SSH git repos
-    ## - this Secret will include these files:
-    ##   - id_rsa      (rename with `git.privateKeyName`)
-    ##   - known_hosts (only needed if `git.sshKeyscan` is false)
-    ##
-    secret: ""
-
-    ## if we should implicitly trust `git.repoHost` by auto creating $HOME/.ssh/known_hosts
-    ##
-    ## WARNING:
-    ## - setting true will increase your vulnerability to a repo spoofing attack
-    ##
-    ## NOTE:
-    ## - this is ONLY REQUIRED for SSH git repos
-    ## - you MUST SET `git.repoHost` and `git.repoPort` for this to work
-    ##
-    sshKeyscan: false
-
-    ## the name of the private key file in your `git.secret`
-    ##
-    ## NOTE:
-    ## - this is ONLY REQUIRED for SSH git repos (with key auth)
-    ##
-    privateKeyName: id_rsa
-
-    ## the host name of the git repo
-    ##
-    ## NOTE:
-    ## - this is ONLY REQUIRED for SSH git repos
-    ##
-    ## EXAMPLE:
-    ##   repoHost: "github.com"
-    ##
-    repoHost: ""
-
-    ## the port of the git repo
-    ##
-    ## NOTE:
-    ## - this is ONLY REQUIRED for SSH git repos
-    ##
-    repoPort: 22
-
-    ## configs for the git-sync container
-    ##
-    gitSync:
-      ## enable the git-sync sidecar container
-      ##
-      enabled: false
-
-      ## resource requests/limits for the git-sync container
-      ##
-      ## NOTE:
-      ## - when `workers.autoscaling` is true, YOU MUST SPECIFY a resource request
-      ##
-      ## EXAMPLE:
-      ##   resources:
-      ##     requests:
-      ##       cpu: "50m"
-      ##       memory: "64Mi"
-      ##
-      resources: {}
-
-      ## the docker image for the git-sync container
-      image:
-        repository: alpine/git
-        tag: latest
-        ## values: Always or IfNotPresent
-        pullPolicy: IfNotPresent
-
-      ## the git sync interval in seconds
-      ##
-      refreshTime: 60
-
-      ## path to mount the dags volume at (only for the git-sync container)
-      ##
-      mountPath: "/dags"
-
-      ## sub-path under `gitSync.mountPath` to sync the dag repo into
-      ##
-      ## WARNING:
-      ## - this MUST include a leading "/"
-      ##
-      ## EXAMPLE:
-      ##   syncSubPath: "/my_sub_directory"
-      ##
-      syncSubPath: ""
-
-  ## configs for the git-clone init-container
-  ##
-  ## NOTE:
-  ## - use this container if you want to only clone the external git repo
-  ##   at Pod start-time, and not keep it synchronised afterwards
-  ##
-  initContainer:
-    ## enable the git-clone init-container
-    ##
-    ## NOTE:
-    ## - this is NOT required for the git-sync sidecar to work
-    ## - this is mostly used for when `dags.installRequirements` is true to ensure that
-    ##   "requirements.txt" is available at Pod start
+  gitSync:
+    ## if the git-sync sidecar container is enabled
     ##
     enabled: false
 
-    ## resource requests/limits for the git-clone container
+    ## the git-sync container image
+    ##
+    image:
+      repository: k8s.gcr.io/git-sync/git-sync
+      tag: v3.2.2
+      ## values: Always or IfNotPresent
+      pullPolicy: IfNotPresent
+
+    ## resource requests/limits for the git-sync container
     ##
     ## EXAMPLE:
     ##   resources:
@@ -1125,26 +1006,75 @@ dags:
     ##
     resources: {}
 
-    ## the docker image for the git-clone container
-    image:
-      repository: alpine/git
-      tag: latest
-      ## values: Always or IfNotPresent
-      pullPolicy: IfNotPresent
-
-    ## path to mount the dags volume at (only for the git-clone container)
+    ## the url of the git repo
     ##
-    mountPath: "/dags"
+    ## EXAMPLE - HTTPS:
+    ##    repo: "https://github.com/USERNAME/REPOSITORY.git"
+    ##
+    ## EXAMPLE - SSH:
+    ##    repo: "git@github.com:USERNAME/REPOSITORY.git"
+    ##
+    repo: ""
 
-    ## sub-path under `initContainer.mountPath` to sync the dag repo into
+    ## the sub-path (within your repo) where dags are located
+    ##
+    ## NOTE:
+    ## - only dags under this path (within your repo) will be seen by airflow,
+    ##   but the full repo will be cloned
+    ##
+    repoSubPath: ""
+
+    ## the git branch to check out
+    ##
+    branch: master
+
+    ## the git revision (tag or hash) to check out
+    ##
+    revision: HEAD
+
+    ## shallow clone with a history truncated to the specified number of commits
+    ##
+    depth: 1
+
+    ## the number of seconds between syncs
+    ##
+    syncWait: 60
+
+    ## the max number of seconds allowed for a complete sync
+    ##
+    syncTimeout: 120
+
+    ## the name of a pre-created Secret with git http credentials
+    ##
+    httpSecret: ""
+
+    ## the key in `dags.gitSync.httpSecret` with your git username
+    ##
+    httpSecretUsernameKey: username
+
+    ## the key in `dags.gitSync.httpSecret` with your git password/token
+    ##
+    httpSecretPasswordKey: password
+
+    ## the name of a pre-created Secret with git ssh credentials
+    ##
+    sshSecret: ""
+
+    ## the key in `dags.gitSync.sshSecret` with your ssh-key file
+    ##
+    sshSecretKey: id_rsa
+
+    ## the string value of a "known_hosts" file (for SSH only)
     ##
     ## WARNING:
-    ## - this MUST include a leading "/"
+    ## - known_hosts verification will be disabled if left empty, making you more
+    ##   vulnerable to repo spoofing attacks
     ##
     ## EXAMPLE:
-    ##   syncSubPath: "/my_sub_directory"
+    ##    sshKnownHosts: |-
+    ##      <HOST_NAME> ssh-rsa <HOST_KEY>
     ##
-    syncSubPath: ""
+    sshKnownHosts: ""
 
 ###################################
 # Kubernetes - Ingress Configs

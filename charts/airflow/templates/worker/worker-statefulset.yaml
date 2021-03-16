@@ -34,7 +34,6 @@ spec:
       annotations:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
         checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
-        checksum/config-scripts-git: {{ include (print $.Template.BasePath "/config/configmap-scripts-git.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
@@ -103,9 +102,6 @@ spec:
               mountPath: /opt/python/site-packages
         {{- end }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
-        {{- if .Values.dags.initContainer.enabled }}
-        {{- include "airflow.init_container.git_clone" . | indent 8 }}
-        {{- end }}
       containers:
         - name: airflow-worker
           image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
@@ -140,20 +136,11 @@ spec:
           args:
             - "bash"
             - "-c"
-            - >
-              true \
-               && mkdir -p /home/airflow/.local/bin \
-               && export PATH="/home/airflow/.local/bin:$PATH" \
-              {{- if .Values.dags.installRequirements }}
-               && echo "*** installing requirements..." \
-               && /home/airflow/scripts/install-requirements.sh \
-              {{- end }}
-               && echo "*** running worker..." \
-              {{- if .Values.airflow.legacyCommands }}
-               && exec airflow worker
-              {{- else }}
-               && exec airflow celery worker
-              {{- end }}
+            {{- if .Values.airflow.legacyCommands }}
+            - "exec airflow worker"
+            {{- else }}
+            - "exec airflow celery worker"
+            {{- end }}
           volumeMounts:
             {{- include "airflow.common.volumeMounts" . | indent 12 }}
             {{- if .Values.workers.secretsMap }}
@@ -171,7 +158,7 @@ spec:
             - name: python-site-packages
               mountPath: /opt/python/site-packages
             {{- end }}
-        {{- if .Values.dags.git.gitSync.enabled }}
+        {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
         {{- if .Values.airflow.extraContainers }}

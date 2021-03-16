@@ -29,11 +29,9 @@ spec:
   securityContext:
     {{- toYaml .Values.airflow.podTemplateFile.securityContext | nindent 4 }}
   {{- end }}
-  {{- if .Values.dags.initContainer.enabled }}
+  {{- if .Values.dags.gitSync.enabled }}
   initContainers:
-    {{- if .Values.dags.initContainer.enabled }}
-    {{- include "airflow.init_container.git_clone" . | indent 4 }}
-    {{- end }}
+    {{- include "airflow.container.git_sync" (dict "Values" .Values "sync_one_time" "true") | indent 4 }}
   {{- end }}
   containers:
     - name: base
@@ -44,13 +42,12 @@ spec:
             name: "{{ include "airflow.fullname" . }}-env"
       env:
         {{- include "airflow.mapenvsecrets" . | indent 8 }}
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: LocalExecutor
       ports: []
       command: []
       args: []
       volumeMounts:
         {{- include "airflow.common.volumeMounts" . | indent 8 }}
-    {{- if .Values.dags.git.gitSync.enabled }}
-    {{- include "airflow.container.git_sync" . | indent 4 }}
-    {{- end }}
   volumes:
     {{- include "airflow.common.volumes" . | indent 4 }}

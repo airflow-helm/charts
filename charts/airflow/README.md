@@ -66,14 +66,12 @@ v7.11.X | v7.12.0 | [link](UPGRADE.md#v711x--v7120)
 v7.10.X | v7.11.0 | [link](UPGRADE.md#v710x--v7110)
 v7.9.X | v7.10.0 | [link](UPGRADE.md#v79x--v7100)
 
-
 ## Examples
 
 Description | Example `values.yaml`
 --- | ---
 A __non-production__ starting point for use with minikube (CeleryExecutor) | [link](examples/minikube/custom-values.yaml)
 A __production__ starting point for GKE on Google Cloud (CeleryExecutor) | [link](examples/google-gke/custom-values.yaml)
-
 
 ## Airflow Configs
 
@@ -117,39 +115,63 @@ airflow:
 <summary>Show More</summary>
 <hr>
 
-<h3>Option 1 - Git-Sidecar (recommended)</h3>
+<h3>Option 1a - SSH git-sync sidecar (recommended)</h3>
 
-This method places a git sidecar in each worker/scheduler/web Pod, that syncs your git repo into the dag folder every `dags.git.gitSync.refreshTime` seconds.
+This method uses an SSH git-sync sidecar in Pod, to sync your git repo into the dag folder every `dags.gitSync.syncWait` seconds.
 
+For example:
 ```yaml
 dags:
-  git:
-    #ssh://git@example.com:22/REPOSITORY.git
-    url: git@github.com:USERNAME/REPOSITORY.git
-    ref: master
-    secret: airflow-git-keys
-    privateKeyName: id_rsa
-    repoHost: github.com
-    repoPort: 22
-
-    gitSync:
-      enabled: true
-      refreshTime: 60
+  gitSync:
+    enabled: true
+    repo: "git@github.com:USERNAME/REPOSITORY.git"
+    branch: "master"
+    revision: "HEAD"
+    syncWait: 60
+    sshSecret: "airflow-ssh-git-secret"
+    sshSecretKey: "id_rsa"
+    
+    # "known_hosts" verification can be disabled by setting to "" 
+    sshKnownHosts: |-
+      github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
 ```
 
-> ⚠️ specifying `known_hosts` inside `dags.git.secret` reduces the possibility of a man-in-the-middle attack, however, if you want to implicitly trust all repo host signatures set `dags.git.sshKeyscan` to `true`
-
-You can create the `dags.git.secret` from your local `$HOME/.ssh` folder using:
+You can create `Secret/airflow-ssh-git-secret` using this command:
 ```console
 kubectl create secret generic \
-  airflow-git-keys \
+  airflow-ssh-git-secret \
   --from-file=id_rsa=$HOME/.ssh/id_rsa \
-  --from-file=id_rsa.pub=$HOME/.ssh/id_rsa.pub \
-  --from-file=known_hosts=$HOME/.ssh/known_hosts \
-  --namespace airflow
+  --namespace my-airflow-namespace
 ```
 
-<h3>Option 2 - Kubernetes PVC</h3>
+<h3>Option 1b - HTTP git-sync sidecar</h3>
+
+This method uses an HTTP git sidecar in Pod, to sync your git repo into the dag folder every `dags.gitSync.syncWait` seconds.
+
+For example:
+```yaml
+dags:
+  gitSync:
+    enabled: true
+    repo: "https://github.com/USERNAME/REPOSITORY.git"
+    branch: "master"
+    revision: "HEAD"
+    syncWait: 60
+    httpSecret: "airflow-http-git-secret"
+    httpSecretUsernameKey: username
+    httpSecretPasswordKey: password
+```
+
+You can create `Secret/airflow-http-git-secret` using this command:
+```console
+kubectl create secret generic \
+  airflow-http-git-secret \
+  --from-literal=username=MY_GIT_USERNAME \
+  --from-literal=password=MY_GIT_TOKEN \
+  --namespace my-airflow-namespace
+```
+
+<h3>Option 2 - kubernetes PVC</h3>
 
 This method stores your DAGs in a Kubernetes PersistentVolume, you must configure some external system to ensure this volume has your latest DAGs.
 For example, you could use your CI/CD pipeline system to preform a sync as changes are pushed to a git repo.
@@ -167,7 +189,7 @@ dags:
     size: 1Gi
 ```
 
-<h3>Option 3 - Container Image</h3>
+<h3>Option 3 - embedded into container</h3>
 
 This method stores your DAGs inside the container image.
 
@@ -675,7 +697,6 @@ externalDatabase:
 
 </details>
 
-
 ## Kubernetes Configs
 
 ### How to mount ConfigMaps/Secrets as environment variables (All Pods)?
@@ -851,7 +872,6 @@ extraManifests:
 ```
 
 </details>
-
 
 ## Chart Values
 

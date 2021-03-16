@@ -32,7 +32,6 @@ spec:
     metadata:
       annotations:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
-        checksum/config-scripts-git: {{ include (print $.Template.BasePath "/config/configmap-scripts-git.yaml") . | sha256sum }}
         checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
         checksum/config-webserver-config: {{ include (print $.Template.BasePath "/config/secret-webserver-config.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
@@ -98,9 +97,6 @@ spec:
               mountPath: /opt/python/site-packages
         {{- end }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
-        {{- if and (.Values.dags.initContainer.enabled) (not .Values.web.serializeDAGs) }}
-        {{- include "airflow.init_container.git_clone" . | indent 8 }}
-        {{- end }}
       containers:
         - name: airflow-web
           image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
@@ -126,16 +122,7 @@ spec:
           args:
             - "bash"
             - "-c"
-            - >
-              true \
-               && mkdir -p /home/airflow/.local/bin \
-               && export PATH="/home/airflow/.local/bin:$PATH" \
-              {{- if .Values.dags.installRequirements }}
-               && echo "*** installing requirements..." \
-               && /home/airflow/scripts/install-requirements.sh \
-              {{- end }}
-               && echo "*** running webserver..." \
-               && exec airflow webserver
+            - "exec airflow webserver"
           {{- if .Values.web.livenessProbe.enabled }}
           livenessProbe:
             initialDelaySeconds: {{ .Values.web.livenessProbe.initialDelaySeconds }}
@@ -185,7 +172,7 @@ spec:
               mountPath: /opt/airflow/webserver_config.py
               subPath: webserver_config.py
               readOnly: true
-        {{- if and (.Values.dags.git.gitSync.enabled) (not .Values.web.serializeDAGs) }}
+        {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
         {{- if .Values.airflow.extraContainers }}

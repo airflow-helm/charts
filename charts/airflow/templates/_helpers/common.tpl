@@ -84,77 +84,12 @@ true
 {{- end -}}
 
 {{/*
-Construct a list of common volumeMounts for the web/scheduler/worker/flower containers
+The path containing DAG files
 */}}
-{{- define "airflow.common.volumeMounts" }}
-- name: scripts
-  mountPath: /home/airflow/scripts
-  readOnly: true
-{{- if .Values.dags.persistence.enabled }}
-- name: dags-data
-  mountPath: {{ .Values.dags.path }}
-  subPath: {{ .Values.dags.persistence.subPath }}
-{{- else if or (.Values.dags.git.gitSync.enabled) (.Values.dags.initContainer.enabled) }}
-- name: dags-data
-  mountPath: {{ .Values.dags.path }}
-{{- end }}
-{{- if .Values.logs.persistence.enabled }}
-- name: logs-data
-  mountPath: {{ .Values.logs.path }}
-  subPath: {{ .Values.logs.persistence.subPath }}
-{{- end }}
-{{- range .Values.airflow.extraConfigmapMounts }}
-- name: {{ .name }}
-  mountPath: {{ .mountPath }}
-  readOnly: {{ .readOnly }}
-  {{- if .subPath }}
-  subPath: {{ .subPath }}
-  {{- end }}
-{{- end }}
-{{- if .Values.airflow.extraVolumeMounts }}
-{{- toYaml .Values.airflow.extraVolumeMounts }}
-{{- end }}
-{{- end }}
-
-{{/*
-Construct a list of volumes which used in web/scheduler/worker/flower Pods
-*/}}
-{{- define "airflow.common.volumes"}}
-- name: scripts
-  configMap:
-    name: {{ include "airflow.fullname" . }}-scripts
-    defaultMode: 0755
-{{- if or (.Values.dags.git.gitSync.enabled) (.Values.dags.initContainer.enabled) }}
-- name: scripts-git
-  configMap:
-    name: {{ include "airflow.fullname" . }}-scripts-git
-    defaultMode: 0755
-{{- if .Values.dags.git.secret }}
-- name: git-ssh-secret
-  secret:
-    secretName: {{ .Values.dags.git.secret }}
-    defaultMode: 0700
-{{- end }}
-{{- end }}
-{{- if .Values.dags.persistence.enabled }}
-- name: dags-data
-  persistentVolumeClaim:
-    claimName: {{ .Values.dags.persistence.existingClaim | default (printf "%s-dags" (include "airflow.fullname" . | trunc 58)) }}
-{{- else if or (.Values.dags.git.gitSync.enabled) (.Values.dags.initContainer.enabled) }}
-- name: dags-data
-  emptyDir: {}
-{{- end }}
-{{- if .Values.logs.persistence.enabled }}
-- name: logs-data
-  persistentVolumeClaim:
-    claimName: {{ .Values.logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" . | trunc 58)) }}
-{{- end }}
-{{- range .Values.airflow.extraConfigmapMounts }}
-- name: {{ .name }}
-  configMap:
-    name: {{ .configMap }}
-{{- end }}
-{{- if .Values.airflow.extraVolumes }}
-{{- toYaml .Values.airflow.extraVolumes }}
-{{- end }}
-{{- end }}
+{{- define "airflow.dags.path" -}}
+{{- if .Values.dags.gitSync.enabled -}}
+{{- printf "%s/repo/%s" (.Values.dags.path | trimSuffix "/") (.Values.dags.gitSync.repoSubPath | trimAll "/") -}}
+{{- else -}}
+{{- printf .Values.dags.path -}}
+{{- end -}}
+{{- end -}}
