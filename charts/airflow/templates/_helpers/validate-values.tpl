@@ -1,7 +1,14 @@
+{{/* Checks for legacyCommands */}}
+{{- if .Values.airflow.legacyCommands }}
+  {{- if not (eq "1" (.Values.scheduler.replicas | toString)) }}
+  {{ required "If `airflow.legacyCommands=true`, then `scheduler.replicas` must be set to `1`!" nil }}
+  {{- end }}
+{{- end }}
+
 {{/* Checks for executor */}}
 {{- if eq .Values.airflow.executor "KubernetesExecutor" }}
   {{- if or (.Values.workers.enabled) (.Values.flower.enabled) (.Values.redis.enabled) }}
-  {{ required "If `airflow.executor=KubernetesExecutor, none of [`workers.enabled`, `flower.enabled`, `redis.enabled`] should be `true`!" nil }}
+  {{ required "If `airflow.executor=KubernetesExecutor`, none of [`workers.enabled`, `flower.enabled`, `redis.enabled`] should be `true`!" nil }}
   {{- end }}
 {{- end }}
 
@@ -18,6 +25,10 @@
 
 {{/* Checks for git-sync */}}
 {{- if .Values.dags.gitSync.enabled }}
+  {{- if .Values.dags.persistence.enabled }}
+  {{ required "If `dags.gitSync.enabled=true`, then `persistence.enabled` must be disabled!" nil }}
+  {{- end }}
+
   {{- if not .Values.dags.gitSync.repo }}
   {{ required "If `dags.gitSync.enabled=true`, then `dags.gitSync.repo` must be non-empty!" nil }}
   {{- end }}

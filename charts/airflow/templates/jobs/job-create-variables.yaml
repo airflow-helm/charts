@@ -1,8 +1,8 @@
-{{- if .Values.airflow.users }}
+{{- if .Values.airflow.variables }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "airflow.fullname" . }}-create-users
+  name: {{ include "airflow.fullname" . }}-create-variables
   annotations:
     helm.sh/hook: post-install,post-upgrade
     helm.sh/hook-weight: "-1"
@@ -29,7 +29,7 @@ spec:
       {{- end }}
       restartPolicy: OnFailure
       containers:
-        - name: create-users
+        - name: create-variables
           image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
           imagePullPolicy: {{ .Values.airflow.image.pullPolicy }}
           envFrom:
@@ -43,7 +43,7 @@ spec:
           args:
             - "python"
             - "-Wignore"
-            - "/job_scripts/create_users.py"
+            - "/job_scripts/create_variables.py"
           volumeMounts:
             - name: job-scripts
               mountPath: /job_scripts

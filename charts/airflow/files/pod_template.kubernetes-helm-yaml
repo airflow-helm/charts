@@ -2,9 +2,9 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: dummy-name
-  {{- if .Values.airflow.podTemplateFile.podAnnotations }}
+  {{- if .Values.airflow.kubernetesPodTemplate.podAnnotations }}
   annotations:
-    {{- toYaml .Values.airflow.podTemplateFile.podAnnotations | nindent 4 }}
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.podAnnotations | nindent 4 }}
   {{- end }}
 spec:
   {{- if .Values.airflow.image.pullSecret }}
@@ -13,21 +13,21 @@ spec:
   {{- end }}
   restartPolicy: Never
   serviceAccountName: {{ include "airflow.serviceAccountName" . }}
-  {{- if .Values.airflow.podTemplateFile.nodeSelector }}
+  {{- if .Values.airflow.kubernetesPodTemplate.nodeSelector }}
   nodeSelector:
-    {{- toYaml .Values.airflow.podTemplateFile.nodeSelector | nindent 4 }}
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.nodeSelector | nindent 4 }}
   {{- end }}
-  {{- if .Values.airflow.podTemplateFile.affinity }}
+  {{- if .Values.airflow.kubernetesPodTemplate.affinity }}
   affinity:
-    {{- toYaml .Values.airflow.podTemplateFile.affinity | nindent 4 }}
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.affinity | nindent 4 }}
   {{- end }}
-  {{- if .Values.airflow.podTemplateFile.tolerations }}
+  {{- if .Values.airflow.kubernetesPodTemplate.tolerations }}
   tolerations:
-    {{- toYaml .Values.airflow.podTemplateFile.tolerations | nindent 4 }}
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.tolerations | nindent 4 }}
   {{- end }}
-  {{- if .Values.airflow.podTemplateFile.securityContext }}
+  {{- if .Values.airflow.kubernetesPodTemplate.securityContext }}
   securityContext:
-    {{- toYaml .Values.airflow.podTemplateFile.securityContext | nindent 4 }}
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.securityContext | nindent 4 }}
   {{- end }}
   {{- if .Values.dags.gitSync.enabled }}
   initContainers:

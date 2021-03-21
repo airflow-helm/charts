@@ -80,9 +80,9 @@ A __production__ starting point for GKE on Google Cloud (CeleryExecutor) | [link
 <summary>Show More</summary>
 <hr>
 
-While we don't expose the `airflow.cfg` directly, you can use [environment variables](https://airflow.apache.org/docs/stable/howto/set-config.html) to set Airflow configs.
+While we don't expose the "airflow.cfg" file directly, you can use [environment variables](https://airflow.apache.org/docs/stable/howto/set-config.html) to set Airflow configs.
 
-We expose the `airflow.config` value to make this easier:
+The `airflow.config` value makes this easier, each key-value is mounted as an environment variable on each scheduler/web/worker/flower Pod:
 ```yaml
 airflow:
   config:
@@ -117,10 +117,14 @@ airflow:
 
 <h3>Option 1a - SSH git-sync sidecar (recommended)</h3>
 
-This method uses an SSH git-sync sidecar in Pod, to sync your git repo into the dag folder every `dags.gitSync.syncWait` seconds.
+This method uses an SSH git-sync sidecar to sync your git repo into the dag folder every `dags.gitSync.syncWait` seconds.
 
 For example:
 ```yaml
+airflow:
+  config:
+    AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: 60
+
 dags:
   gitSync:
     enabled: true
@@ -146,10 +150,14 @@ kubectl create secret generic \
 
 <h3>Option 1b - HTTP git-sync sidecar</h3>
 
-This method uses an HTTP git sidecar in Pod, to sync your git repo into the dag folder every `dags.gitSync.syncWait` seconds.
+This method uses an HTTP git sidecar to sync your git repo into the dag folder every `dags.gitSync.syncWait` seconds.
 
 For example:
 ```yaml
+airflow:
+  config:
+    AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: 60
+
 dags:
   gitSync:
     enabled: true
@@ -171,13 +179,16 @@ kubectl create secret generic \
   --namespace my-airflow-namespace
 ```
 
-<h3>Option 2 - kubernetes PVC</h3>
+<h3>Option 2 - shared volume</h3>
 
-This method stores your DAGs in a Kubernetes PersistentVolume, you must configure some external system to ensure this volume has your latest DAGs.
-For example, you could use your CI/CD pipeline system to preform a sync as changes are pushed to a git repo.
+With this method, you store your DAGs in a Kubernetes PersistentVolume, which is mounted to all scheduler/web/worker Pods.
 
-To share a PVC with multiple Pods, the PVC needs to have `accessMode` set to `ReadOnlyMany` or `ReadWriteMany` (Note: different StorageClass support different [access modes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes)).
-If you are using Kubernetes on a public cloud, a persistent volume controller is likely built in: [Amazon EKS](https://docs.aws.amazon.com/eks/latest/userguide/storage-classes.html), [Azure AKS](https://docs.microsoft.com/en-us/azure/aks/azure-files-dynamic-pv), [Google GKE](https://cloud.google.com/kubernetes-engine/docs/concepts/persistent-volumes)
+You must configure some external system to ensure this volume has your latest DAGs, for example, you could use your CI/CD pipeline system to preform a sync as changes are pushed to your DAGs git repo.
+
+> ⚠️ the PVC needs to have `accessMode` = `ReadOnlyMany` (or `ReadWriteMany`) 
+> 
+> Different StorageClasses support different [access-modes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
+> For Kubernetes on public cloud, a persistent volume controller is likely built in, so check the available access-modes: [Amazon EKS](https://docs.aws.amazon.com/eks/latest/userguide/storage-classes.html), [Azure AKS](https://docs.microsoft.com/en-us/azure/aks/azure-files-dynamic-pv), [Google GKE](https://cloud.google.com/kubernetes-engine/docs/concepts/persistent-volumes)
 
 Example values to use a StorageClass called `default`:
 ```yaml
@@ -189,11 +200,11 @@ dags:
     size: 1Gi
 ```
 
-<h3>Option 3 - embedded into container</h3>
+<h3>Option 3 - embedded into container image</h3>
 
 This method stores your DAGs inside the container image.
 
-This chart uses the official [apache/airflow image](https://hub.docker.com/r/apache/airflow), extend this image and COPY your DAGs into the `dags.path` folder:
+This chart uses the official [apache/airflow image](https://hub.docker.com/r/apache/airflow), so extend it with your dag files:
 ```docker
 FROM apache/airflow:2.0.1-python3.8
 
@@ -201,7 +212,7 @@ FROM apache/airflow:2.0.1-python3.8
 COPY ./my_dag_folder /opt/airflow/dags
 ```
 
-The following values can be used to specify the container image:
+Then use this container image with the chart:
 ```yaml
 airflow:
   image:
@@ -211,14 +222,18 @@ airflow:
 
 </details>
 
-### How to install pip dependencies?
+### How to install extra pip packages?
 <details>
 <summary>Show More</summary>
 <hr>
 
-You can use the `airflow.extraPipPackages` value to install pip packages on all scheduler/web/worker/flower Pods.
+<h3>Option 1 - use init-containers</h3>
 
-You can also use the more specific `scheduler.extraPipPackages`, `web.extraPipPackages`, `worker.extraPipPackages` and `flower.extraPipPackages`, (which will take precedence over `airflow.extraPipPackages`, as they are listed at the end of the `pip install ...` command).
+> 🛑️️️ seriously consider the implications of having each Pod run `pip install` before using this feature in production
+
+You can use the `airflow.extraPipPackages` value to install pip packages on all Pods, you can also use the more specific `scheduler.extraPipPackages`, `web.extraPipPackages`, `worker.extraPipPackages` and `flower.extraPipPackages`.
+
+Packages defined with the more specific values will take precedence over `airflow.extraPipPackages`, as they are listed at the end of the `pip install ...` command, and pip takes the package version which is __defined last__.
 
 For example, installing the `airflow-exporter` package on all scheduler/web/worker/flower Pods:
 ```yaml
@@ -227,7 +242,7 @@ airflow:
     - "airflow-exporter~=1.4.1"
 ```
 
-For example, installing PyTorch on the scheduler/worker Pods:
+For example, installing PyTorch on the scheduler/worker Pods only:
 ```yaml
 scheduler:
   extraPipPackages:
@@ -238,6 +253,28 @@ worker:
     - "torch~=1.8.0"
 ```
 
+<h3>Option 2 - embedded into container image (recommended)</h3>
+
+You can extend the airflow container image with your pip packages.
+
+> ⚠️ this chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images)
+
+For example, extending `airflow:2.0.1-python3.8` with the `torch` package:
+```docker
+FROM apache/airflow:2.0.1-python3.8
+
+# install your pip packages
+RUN pip install torch~=1.8.0
+```
+
+Then use this container image with the chart:
+```yaml
+airflow:
+  image:
+    repository: MY_REPO
+    tag: MY_TAG
+```
+
 </details>
 
 ### How to create airflow users? 
@@ -245,24 +282,29 @@ worker:
 <summary>Show More</summary>
 <hr>
 
-You can use the `web.createUsers` value to create airflow web users each time the chart is installed/updated.
+You can use the `airflow.users` value to create airflow users with a post-install/post-update helm hook Job.
 
-For example, to create an Admin called `admin` and a User called `user`:
+> ⚠️ if you need to edit the users in the web-ui (for example, to change their password), you should set `airflow.usersUpdate` to `false`
+
+For example, to create `admin` (with "Admin" RBAC role) and `user` (with "User" RBAC role):
 ```yaml
-web:
-  createUsers:
-    - role: Admin
-      username: admin
+airflow:
+  users:
+    - username: admin
+      password: admin123
+      role: Admin
       email: admin@example.com
       firstName: admin
       lastName: admin
-      password: admin
-    - role: User
-      username: user
+    - username: user
+      password: user123
+      role: User
       email: user@example.com
       firstName: user
       lastName: user
-      password: user
+
+  ## if we update users or just create them the first time (lookup by `username`)
+  usersUpdate: true
 ```
 
 </details>
@@ -272,9 +314,9 @@ web:
 <summary>Show More</summary>
 <hr>
 
-You can use the `web.webserverConfigFile.*` values to adjust the Flask-Appbuilder `webserver_config.py` file, you can read Flask-builder's security docs [here](https://flask-appbuilder.readthedocs.io/en/latest/security.html).
+You can use the `web.webserverConfig.*` values to adjust the Flask-Appbuilder `webserver_config.py` file, you can read Flask-builder's security docs [here](https://flask-appbuilder.readthedocs.io/en/latest/security.html).
 
-> 🛑️️ if you set up LDAP/OAUTH, you should disable `web.createUsers` to prevent automatically creating hard-coded users
+> 🛑️️ if you set up LDAP/OAUTH, you should set `airflow.users` to `[]` (and delete any previously created users)
 
 > ⚠️ the version of Flask-Builder installed by airflow might not be the latest, but you can use `web.extraPipPackages` to install a newer version, if needed
 
@@ -282,12 +324,12 @@ For example, to integrate with a typical Microsoft Active Directory using `AUTH_
 ```yaml
 web:
   extraPipPackages:
-    ## following configs require Flask-AppBuilder 3.2.0 (or later)
+    ## the following configs require Flask-AppBuilder 3.2.0 (or later)
     - "Flask-AppBuilder~=3.2.0"
-    ## following configs require python-ldap
+    ## the following configs require python-ldap
     - "python-ldap~=3.3.1"
-  
-  webserverConfigFile:
+
+  webserverConfig:
     stringOverride: |-
       AUTH_TYPE = AUTH_LDAP
       AUTH_LDAP_SERVER = "ldap://ldap.example.com"
@@ -328,12 +370,12 @@ For example, to integrate with Okta using `AUTH_OAUTH`:
 ```yaml
 web:
   extraPipPackages:
-    ## following configs require Flask-AppBuilder 3.2.0 (or later)
+    ## the following configs require Flask-AppBuilder 3.2.0 (or later)
     - "Flask-AppBuilder~=3.2.0"
-    ## following configs require Authlib
+    ## the following configs require Authlib
     - "Authlib~=0.15.3"
-  
-  webserverConfigFile:
+
+  webserverConfig:
     stringOverride: |-
       AUTH_TYPE = AUTH_OAUTH
       
@@ -398,51 +440,53 @@ TBA
 <summary>Show More</summary>
 <hr>
 
-<h3>Option 1 - Helm Value</h3>
+You can use the `airflow.connections` value to create airflow [Connections](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#connections) with a post-install/post-update helm hook Job.
 
-You can create [Airflow Connections](https://airflow.apache.org/docs/stable/concepts.html#connections) using the `scheduler.connections` value.
+> ⚠️ if you need to edit the connections in the web-ui (for example, to add a sensitive password), you should set `airflow.connectionsUpdate` to `false`
 
-The Connections will be deleted and re-added each time an airflow-scheduler Pod starts (undoing any changes made in the WebUI), you can disable the delete behaviour by setting `scheduler.refreshConnections=false`.
-
-For example, to add a connection called `my_aws`:
+For example, to create connections called `my_aws`, `my_gcp`, `my_postgres`, and `my_ssh`:
 ```yaml
 scheduler:
   connections:
+    ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html
     - id: my_aws
       type: aws
+      description: my AWS connection
       extra: |-
-        {
-          "aws_access_key_id": "XXXXXXXX",
+        { "aws_access_key_id": "XXXXXXXX",
           "aws_secret_access_key": "XXXXXXXX",
-          "region_name":"eu-central-1"
-        }
-```
+          "region_name":"eu-central-1" }
+    ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-google/stable/connections/gcp.html
+    - id: my_gcp
+      type: google_cloud_platform
+      description: my GCP connection
+      extra: |-
+        { "extra__google_cloud_platform__keyfile_dict": "XXXXXXXX",
+          "extra__google_cloud_platform__num_retries: "XXXXXXXX" }
+    ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-postgres/stable/connections/postgres.html
+    - id: my_postgres
+      type: postgres
+      description: my Postgres connection
+      host: postgres.example.com
+      port: 5432
+      login: db_user
+      password: db_pass
+      schema: my_db
+      extra: |-
+        { "sslmode": "allow" }
+    ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-ssh/stable/connections/ssh.html
+    - id: my_ssh
+      type: ssh
+      description: my SSH connection
+      host: ssh.example.com
+      port: 22
+      login: ssh_user
+      password: ssh_pass
+      extra: |-
+        { "timeout": "15" }
 
-<h3>Option 2 - Pre-Created Kubernetes Secret</h3>
-
-If you don't want to store connections in your `values.yaml`, use `scheduler.existingSecretConnections` to specify the name of an existing Kubernetes Secret containing an `add-connections.sh` script.
-Your script will be run EACH TIME an airflow-scheduler Pod starts, and `scheduler.connections` will not longer work.
-
-Here is an example Secret you might create:
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: my-airflow-connections
-type: Opaque
-stringData:
-  add-connections.sh: |
-    #!/usr/bin/env bash
-
-    # remove any existing connection
-    airflow connections --delete \
-      --conn_id "my_aws"
-  
-    # re-add your custom connection
-    airflow connections --add \
-      --conn_id "my_aws" \
-      --conn_type "aws" \
-      --conn_extra "{\"aws_access_key_id\": \"XXXXXXXX\", \"aws_secret_access_key\": \"XXXXXXXX\", \"region_name\":\"eu-central-1\"}"
+  ## if we update connections or just create them the first time (lookup by `id`)
+  connectionsUpdate: true
 ```
 
 </details>
@@ -452,15 +496,21 @@ stringData:
 <summary>Show More</summary>
 <hr>
 
-You can create [Airflow Variables](https://airflow.apache.org/docs/stable/concepts.html#variables) using the `scheduler.variables` value.
+You can use the `airflow.variables` value to create airflow [Variables](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#variables) with a post-install/post-update helm hook Job.
 
-The Variables will be automatically re-imported each time an airflow-scheduler Pod starts.
+> ⚠️ if you need to edit the variables in the web-ui, you should set `airflow.variablesUpdate` to `false`
 
-For example, to specify a variable called `environment`:
+For example, to create variables called `var_1`, `var_2`:
 ```yaml
-scheduler:
+airflow:
   variables:
-    environment: "dev"
+    - key: "var_1"
+      value: "my_value_1"
+    - key: "var_2"
+      value: "my_value_2"
+
+  ## if we update variables or just create them the first time (lookup by `key`)
+  variablesUpdate: true
 ```
 
 </details>
@@ -470,20 +520,23 @@ scheduler:
 <summary>Show More</summary>
 <hr>
 
-You can create [Airflow Pools](https://airflow.apache.org/docs/stable/concepts.html#pools) using the `scheduler.pools` value.
+You can use the `airflow.pools` value to create airflow [Pools](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#pools) with a post-install/post-update helm hook Job.
 
-The Pools will be automatically re-imported each time an airflow-scheduler Pod starts.
+> ⚠️ if you need to edit the variables in the web-ui, you should set `airflow.poolsUpdate` to `false`
 
-For example, to create a pool called `example`:
+For example, to create pools called `pool_1`, `pool_2`:
 ```yaml
-scheduler:
-  pools: |
-    {
-      "example": {
-        "description": "This is an example pool with 2 slots.",
-        "slots": 2
-      }
-    }
+airflow:
+  variables:
+    - name: "pool_1"
+      slots: 5
+      description: "example pool with 5 slots"
+    - name: "pool_2"
+      slots: 10
+      description: "example pool with 10 slots"
+
+  ## if we update pools or just create them the first time (lookup by `name`)
+  poolsUpdate: true
 ```
 
 </details>
@@ -871,17 +924,27 @@ extraManifests:
 
 Parameter | Description | Default
 --- | --- | ---
+`airflow.legacyCommands` | if we use legacy 1.10 airflow commands | `false`
 `airflow.image.*` | the container image for the web/scheduler/worker/flower containers | `<see values.yaml>`
 `airflow.executor` | the airflow executor type to use | `CeleryExecutor`
 `airflow.fernetKey` | the fernet key used to encrypt the connections/variables in the database | `7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc=`
 `airflow.config` | environment variables for airflow configs | `{}`
+`airflow.users` | a list of initial users to create | `<see values.yaml>`
+`airflow.usersUpdate` | if we update users or just create them the first time (lookup by `username`) | `true`
+`airflow.users` | a list of initial users to create | `<see values.yaml>`
+`airflow.connections` | a list of initial connections to create | `<see values.yaml>`
+`airflow.connectionsUpdate` | if we update connections or just create them the first time (lookup by `id`) | `true`
+`airflow.variables` | a list of initial variables to create | `<see values.yaml>`
+`airflow.variablesUpdate` | if we update variables or just create them the first time (lookup by `key`) | `true`
+`airflow.pools` | a list of initial pools to create | `<see values.yaml>`
+`airflow.poolsUpdate` | if we update pools or just create them the first time (lookup by `name`) | `true`
 `airflow.podAnnotations` | extra annotations for the web/scheduler/worker/flower Pods | `{}`
 `airflow.extraPipPackages` | extra pip packages to install in the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraEnv` | extra environment variables for the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraContainers` | extra containers for the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraVolumeMounts` | extra VolumeMounts for the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraVolumes` | extra Volumes for the web/scheduler/worker/flower Pods | `[]`
-`airflow.podTemplateFile.*` | configs to generate AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE | `<see values.yaml>`
+`airflow.kubernetesPodTemplate.*` | configs to generate the AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE | `<see values.yaml>`
 
 </details>
 
@@ -904,11 +967,6 @@ Parameter | Description | Default
 `scheduler.podAnnotations` | Pod annotations for the scheduler Deployment | `{}`
 `scheduler.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
 `scheduler.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the scheduler | `<see values.yaml>`
-`scheduler.connections` | custom airflow connections for the airflow scheduler | `[]`
-`scheduler.refreshConnections` | if `scheduler.connections` are deleted and re-added after each scheduler restart | `true`
-`scheduler.existingSecretConnections` | the name of an existing Secret containing an `add-connections.sh` script to run on scheduler start | `""`
-`scheduler.variables` | custom variables for the airflow scheduler | `{}`
-`scheduler.pools` | custom pools for the airflow scheduler | `{}`
 `scheduler.numRuns` | the value of the `airflow --num_runs` parameter used to run the airflow scheduler | `-1`
 `scheduler.extraPipPackages` | extra pip packages to install in the scheduler Pods | `[]`
 `scheduler.extraVolumeMounts` | extra VolumeMounts for the scheduler Pods | `[]`
@@ -925,6 +983,7 @@ Parameter | Description | Default
 
 Parameter | Description | Default
 --- | --- | ---
+`web.webserverConfig.*` | configs to generate webserver_config.py | `<see values.yaml>`
 `web.replicas` | the number of web Pods to run | `1`
 `web.resources` | resource requests/limits for the airflow web pods | `{}`
 `web.nodeSelector` | the number of web Pods to run | `{}`
@@ -943,8 +1002,6 @@ Parameter | Description | Default
 `web.extraPipPackages` | extra pip packages to install in the web Pods | `[]`
 `web.extraVolumeMounts` | extra VolumeMounts for the web Pods | `[]`
 `web.extraVolumes` | extra Volumes for the web Pods | `[]`
-`web.createUsers` | a list of initial web users to create | `<see values.yaml>`
-`web.webserverConfigFile.*` | configs to generate webserver_config.py | `<see values.yaml>`
 
 </details>
 

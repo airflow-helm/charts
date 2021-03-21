@@ -34,7 +34,6 @@ spec:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
         checksum/config-pod-template: {{ include (print $.Template.BasePath "/config/configmap-pod-template.yaml") . | sha256sum }}
         checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
-        checksum/config-variables-pools: {{ include (print $.Template.BasePath "/config/configmap-variables-pools.yaml") . | sha256sum }}
         checksum/secret-connections: {{ include (print $.Template.BasePath "/config/secret-connections.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
@@ -123,24 +122,7 @@ spec:
           args:
             - "bash"
             - "-c"
-            - >
-              true \
-               && mkdir -p /home/airflow/.local/bin \
-               && export PATH="/home/airflow/.local/bin:$PATH" \
-              {{- if .Values.scheduler.variables }}
-               && echo "*** adding Airflow variables..." \
-               && airflow variables import /home/airflow/variables-pools/variables.json || airflow variables -i /home/airflow/variables-pools/variables.json \
-              {{- end }}
-              {{- if or (.Values.scheduler.connections) (.Values.scheduler.existingSecretConnections) }}
-               && echo "*** adding Airflow connections..." \
-               && /home/airflow/connections/add-connections.sh \
-              {{- end }}
-              {{- if .Values.scheduler.pools }}
-               && echo "*** adding Airflow pools..." \
-               && airflow pools import /home/airflow/variables-pools/pools.json || airflow pool -i /home/airflow/variables-pools/pools.json \
-              {{- end }}
-               && echo "*** running scheduler..." \
-               && exec airflow scheduler -n {{ .Values.scheduler.numRuns }}
+            - "exec airflow scheduler -n {{ .Values.scheduler.numRuns }}"
           {{- if .Values.scheduler.livenessProbe.enabled }}
           livenessProbe:
             initialDelaySeconds: {{ .Values.scheduler.livenessProbe.initialDelaySeconds }}
@@ -173,16 +155,6 @@ spec:
           {{- end }}
           volumeMounts:
             {{- include "airflow.common.volumeMounts" . | indent 12 }}
-            {{- if or (.Values.scheduler.connections) (.Values.scheduler.existingSecretConnections) }}
-            - name: connections
-              mountPath: /home/airflow/connections
-              readOnly: true
-            {{- end }}
-            {{- if or (.Values.scheduler.variables) (.Values.scheduler.pools) }}
-            - name: variables-pools
-              mountPath: /home/airflow/variables-pools/
-              readOnly: true
-            {{- end }}
             {{- if or (.Values.airflow.extraPipPackages) (.Values.scheduler.extraPipPackages) }}
             - name: python-site-packages
               mountPath: /opt/python/site-packages
@@ -204,23 +176,6 @@ spec:
         {{- end }}
       volumes:
         {{- include "airflow.common.volumes" . | indent 8 }}
-        {{- if or (.Values.scheduler.connections) (.Values.scheduler.existingSecretConnections) }}
-        - name: connections
-          secret:
-            secretName: |-
-              {{- if .Values.scheduler.existingSecretConnections }}
-              {{ .Values.scheduler.existingSecretConnections }}
-              {{- else }}
-              {{ include "airflow.fullname" . }}-connections
-              {{- end }}
-            defaultMode: 0755
-        {{- end }}
-        {{- if or (.Values.scheduler.variables) (.Values.scheduler.pools) }}
-        - name: variables-pools
-          configMap:
-            name: {{ include "airflow.fullname" . }}-variables-pools
-            defaultMode: 0755
-        {{- end }}
         {{- if or (.Values.airflow.extraPipPackages) (.Values.scheduler.extraPipPackages) }}
         - name: python-site-packages
           emptyDir: {}

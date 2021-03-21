@@ -11,12 +11,12 @@ WARNING: if intend to keep using airflow 1.10.X, you must enable `airflow.legacy
 - there is no longer any guarantee for 1.10 support
 
 WARNING: we added native support for `webserver_config.py`
-- if you were using a `airflow.extraConfigmapMounts` previously, please move to `web.webserverConfigFile.stringOverride`
+- if you were using a `airflow.extraConfigmapMounts` previously, please move to `web.webserverConfig.stringOverride`
 - ?? we need to provide an existing-secret alternative to stringOverride ??
 
-WARNING: we have added the `web.createUsers` value, which will fufilled by a post-install Job
-- meaning after each `helm install/upgrade ...` the users defined in `web.createUsers` will be created in RBAC
-- if you don't want this, please explicitly set `web.createUsers` to `[]`
+WARNING: we have added `airflow.users` value:
+- who's default value will automatically create an admin user, if you don't want this, please explicitly set `airflow.users` to `[]`
+- after each `helm install/upgrade ...` the users defined in `airflow.users` will be created in RBAC
 
 WARNING: the `dags.installRequirements` value has been removed, please move to `airflow.extra...`
 - we removed this feature for two main reasons: 
@@ -39,6 +39,18 @@ WARNING: the way you mount extra secrets/configmaps has changed
 - `flower.secretsDir`, `flower.secrets`, `flower.secretsMap`, `flower.extraConfigmapMounts` have been removed
   - if you still need to mount volumes, you can use `flower.extraVolumes`, `flower.extraVolumeMounts`
 
+WARNING: we have changed the way to define airflow connections/variables/pools
+- all are now installed in a post-install helm Job (so are only run each time you install/update the chart, rather than each time the scheduler starts)
+- connections:
+   - removed `scheduler.connections` and `scheduler.existingSecretConnections` and `scheduler.refreshConnections`
+   - added `airflow.connections` and `airflow.connectionsUpdate`
+- variables:
+   - removed `scheduler.variables`
+   - added `airflow.variables` and `airflow.variablesUpdate`
+- pools:
+   - removed `scheduler.pools`
+   - added `airflow.pools` and `airflow.poolsUpdate`
+
 WARNING: if you were using `dags.persistence.enabled` (but not setting `dags.persistence.existingClaim`), the name of the PVC will change, meaning your dags will disappear
 - to fix this, set `dags.persistence.existingClaim` to the value of the previous PVC (which will be your Helm RELEASE_NAME)
 
@@ -50,9 +62,6 @@ WARNING: the flower Pods are now affected by
 
 NOTE: there are now docs for how to set up your Microsoft-AD/OAUTH
 - ?? add a link to README here ??
-
-NOTE: the `scheduler.variables` and `scheduler.pools` values can now be defined as YAML dicts OR JSON Strings 
-- see values.yaml docstrings for example
 
 NOTE: if you want to make use of Airflow 2.0's ability to run multiple schedulers, (e.g. setting `scheduler.replicas` > 1), we recommend setting a `scheduler.podDisruptionBudget`
 - we welcome any contributions for the autoscaling the scheduler replica count based on CPU load (or KEDA)
@@ -88,17 +97,25 @@ Changed default:
 
 Added values:
 - `airflow.legacyCommands`
-- `airflow.podTemplateFile.stringOverride`
-- `airflow.podTemplateFile.nodeSelector`
-- `airflow.podTemplateFile.affinity`
-- `airflow.podTemplateFile.tolerations`
-- `airflow.podTemplateFile.podAnnotations`
-- `airflow.podTemplateFile.securityContext`
+- `airflow.users`
+- `airflow.usersUpdate`
+- `airflow.connections`
+- `airflow.connectionsUpdate`
+- `airflow.variables`
+- `airflow.variablesUpdate`
+- `airflow.pools`
+- `airflow.poolsUpdate`
+- `airflow.kubernetesPodTemplate.stringOverride`
+- `airflow.kubernetesPodTemplate.nodeSelector`
+- `airflow.kubernetesPodTemplate.affinity`
+- `airflow.kubernetesPodTemplate.tolerations`
+- `airflow.kubernetesPodTemplate.podAnnotations`
+- `airflow.kubernetesPodTemplate.securityContext`
 - `scheduler.replicas`
 - `scheduler.extraPipPackages`
 - `scheduler.extraVolumeMounts`
 - `scheduler.extraVolumes`
-- `web.webserverConfigFile.stringOverride`
+- `web.webserverConfig.stringOverride`
 - `web.extraVolumeMounts`
 - `web.extraVolumes`
 - `workers.extraPipPackages`
@@ -141,6 +158,11 @@ Removed the following values:
 - `scheduler.initialStartupDelay` 
 - `scheduler.preinitdb` (replaced by a post-install Job)
 - `scheduler.initdb` (replaced by a post-install Job)
+- `scheduler.connections`
+- `scheduler.refreshConnections`
+- `scheduler.existingSecretConnections`
+- `scheduler.pools`
+- `scheduler.variables`
 - `scheduler.secretsDir`
 - `scheduler.secrets`
 - `scheduler.secretsMap`  
@@ -181,7 +203,9 @@ Removed the following values:
 - `dags.git.gitSync.syncSubPath`
 - `dags.initContainer.enabled`
 - `dags.initContainer.resources`
-- `dags.initContainer.image.*`
+- `dags.initContainer.image.repository`
+- `dags.initContainer.image.tag`
+- `dags.initContainer.image.pullPolicy`
 - `dags.initContainer.mountPath`
 - `dags.initContainer.syncSubPath`
 - `ingress.web.livenessPath`
