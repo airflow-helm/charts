@@ -1,5 +1,10 @@
 # Upgrading Steps
 
+## `v7.16.X` → `v7.17.0`
+
+__The following values have been ADDED:__
+* `dags.git.gitSync.maxFailures`
+
 ## `v7.14.X` → `v7.15.0`
 
 __The following IMPROVEMENTS have been made:__

@@ -128,6 +128,7 @@ spec:
             - "{{ .Values.dags.git.repoPort }}"
             - "{{ .Values.dags.git.privateKeyName }}"
             - "{{ .Values.dags.git.gitSync.refreshTime }}"
+            - "{{ .Values.dags.git.gitSync.maxFailures }}"
           volumeMounts:
             - name: git-clone
               mountPath: /home/airflow/git

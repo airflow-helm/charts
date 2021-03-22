@@ -44,6 +44,9 @@ data:
     REPO_PORT=$5
     PRIVATE_KEY=$6
     SYNC_TIME=$7
+    MAX_FAILURES=$8
+
+    export REF
 
     mkdir -p ~/.ssh/
 
@@ -67,11 +70,31 @@ data:
     # to break the infinite loop when we receive SIGTERM
     trap "exit 0" SIGTERM
 
+    at_least_once=0
+    fail_count=0
+
+    set +e
+
     cd $DIR
     while true; do
-      git fetch origin $REF;
-      git reset --hard origin/$REF;
-      git clean -fd;
+      if (git fetch origin $REF && \
+          git reset --hard origin/$REF && \
+          git clean -fd); then
+        fail_count=0
+        at_least_once=1
+      else
+        if [ ${at_least_once} -lt 1 ]; then
+          echo "Failed initial sync"
+          exit 1
+        fi
+        if [ ${MAX_FAILURES} -ge 0 ]; then
+          fail_count=$(expr $fail_count + 1)
+          if [ ${fail_count} -gt ${MAX_FAILURES} ]; then
+            echo "Failed $fail_count consecutive syncs"
+            exit 1
+          fi
+        fi
+      fi
       date;
       sleep $SYNC_TIME;
     done

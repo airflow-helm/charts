@@ -53,6 +53,7 @@ airflow create_user ...
 
 Find chart version numbers under [GitHub Releases](https://github.com/airflow-helm/charts/releases):
 
+- [v7.16.X → v7.17.0](UPGRADE.md#v716x--v7170)
 - [v7.15.X → v7.16.0](UPGRADE.md#v715x--v7160)
 - [v7.14.X → v7.15.0](UPGRADE.md#v714x--v7150)
 - [v7.13.X → v7.14.0](UPGRADE.md#v713x--v7140)
@@ -575,6 +576,8 @@ For more information, see the `serviceMonitor` section of `values.yaml`.
 
 This method places a git sidecar in each worker/scheduler/web Pod, that syncs your git repo into the dag folder every `dags.git.gitSync.refreshTime` seconds.
 
+The sidecar container will abort if the git sync process fails more than `dags.git.gitSync.maxFailures` times after at least one successful sync.  (If set to `-1` it will ignore all failures if at least one sync has succeeded.)
+
 ```yaml
 dags:
   git:
@@ -589,6 +592,7 @@ dags:
     gitSync:
       enabled: true
       refreshTime: 60
+      maxFailures: 60
 ```
 
 You can create the `dags.git.secret` from your local `$HOME/.ssh` folder using:

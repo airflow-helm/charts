@@ -1037,6 +1037,11 @@ dags:
       ##
       refreshTime: 60
 
+      ## maximum number of git sync failures after one successful sync
+      ## before the container aborts.
+      ## "-1" will disable checking if at least one sync has succeeded.
+      maxFailures: 0
+
   ## configs for the git-clone container
   ##
   ## NOTE:
