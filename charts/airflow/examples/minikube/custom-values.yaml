@@ -259,6 +259,7 @@ scheduler:
       "SNOWFLAKE_CHUNK_SIZE": "8000",
       "PG_PUBLIC_SCHEMA": "PUBLIC",
       "PG_STAGING_SCHEMA": "STAGING",
+      "PG_CHUNK_SIZE": "3000",
       "SEGMENT_KEY": "<>"
     }
 
