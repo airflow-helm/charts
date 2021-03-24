@@ -1,18 +1,18 @@
-{{/* Checks for legacyCommands */}}
+{{/* Checks for airflow.legacyCommands */}}
 {{- if .Values.airflow.legacyCommands }}
   {{- if not (eq "1" (.Values.scheduler.replicas | toString)) }}
   {{ required "If `airflow.legacyCommands=true`, then `scheduler.replicas` must be set to `1`!" nil }}
   {{- end }}
 {{- end }}
 
-{{/* Checks for executor */}}
+{{/* Checks for airflow.executor */}}
 {{- if eq .Values.airflow.executor "KubernetesExecutor" }}
   {{- if or (.Values.workers.enabled) (.Values.flower.enabled) (.Values.redis.enabled) }}
   {{ required "If `airflow.executor=KubernetesExecutor`, none of [`workers.enabled`, `flower.enabled`, `redis.enabled`] should be `true`!" nil }}
   {{- end }}
 {{- end }}
 
-{{/* Checks for configs */}}
+{{/* Checks for airflow.config */}}
 {{- if .Values.airflow.config.AIRFLOW__CELERY__BROKER_URL }}
 {{ required "Don't define `airflow.config.AIRFLOW__CELERY__BROKER_URL`, it will be automatically set by the chart!" nil }}
 {{- end }}
@@ -23,7 +23,7 @@
 {{ required "Don't define `airflow.config.AIRFLOW__CORE__SQL_ALCHEMY_CONN`, it will be automatically set by the chart!" nil }}
 {{- end }}
 
-{{/* Checks for git-sync */}}
+{{/* Checks for dags.gitSync */}}
 {{- if .Values.dags.gitSync.enabled }}
   {{- if .Values.dags.persistence.enabled }}
   {{ required "If `dags.gitSync.enabled=true`, then `persistence.enabled` must be disabled!" nil }}

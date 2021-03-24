@@ -130,7 +130,7 @@ spec:
             timeoutSeconds: {{ .Values.web.livenessProbe.timeoutSeconds }}
             failureThreshold: {{ .Values.web.livenessProbe.failureThreshold }}
             httpGet:
-              scheme: {{ .Values.web.livenessProbe.scheme }}
+              scheme: {{ include "airflow.web.scheme" . }}
               path: "/health"
               port: web
           {{- end }}
@@ -141,7 +141,7 @@ spec:
             timeoutSeconds: {{ .Values.web.readinessProbe.timeoutSeconds }}
             failureThreshold: {{ .Values.web.readinessProbe.failureThreshold }}
             httpGet:
-              scheme: {{ .Values.web.readinessProbe.scheme }}
+              scheme: {{ include "airflow.web.scheme" . }}
               path: "/health"
               port: web
           {{- end }}

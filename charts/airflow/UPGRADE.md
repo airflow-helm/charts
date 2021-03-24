@@ -63,6 +63,10 @@ WARNING: the flower Pods are now affected by
 NOTE: there are now docs for how to set up your Microsoft-AD/OAUTH
 - ?? add a link to README here ??
 
+NOTE: you no longer need to set `web.readinessProbe.scheme` or `web.livenessProbe.scheme`, as we set them based on if these configs are set:
+- `airflow.config.AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT`
+- `airflow.config.AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY`
+
 NOTE: if you want to make use of Airflow 2.0's ability to run multiple schedulers, (e.g. setting `scheduler.replicas` > 1), we recommend setting a `scheduler.podDisruptionBudget`
 - we welcome any contributions for the autoscaling the scheduler replica count based on CPU load (or KEDA)
 
@@ -170,7 +174,9 @@ Removed the following values:
 - `web.minReadySeconds`
 - `web.baseUrl`
 - `web.serializeDAGs`
+- `web.readinessProbe.scheme`
 - `web.readinessProbe.successThreshold`
+- `web.livenessProbe.scheme`
 - `web.livenessProbe.successThreshold`
 - `web.secretsDir`
 - `web.secrets`

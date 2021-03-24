@@ -32,6 +32,48 @@ Construct the name of the airflow ServiceAccount.
 {{- end -}}
 
 {{/*
+A flag indicating if a celery-like executor is selected (empty if false)
+*/}}
+{{- define "airflow.executor.celery_like" -}}
+{{- if or (eq .Values.airflow.executor "CeleryExecutor") (eq .Values.airflow.executor "CeleryKubernetesExecutor") -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+A flag indicating if a kubernetes-like executor is selected (empty if false)
+*/}}
+{{- define "airflow.executor.kubernetes_like" -}}
+{{- if or (eq .Values.airflow.executor "KubernetesExecutor") (eq .Values.airflow.executor "CeleryKubernetesExecutor") -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+The scheme (HTTP, HTTPS) used by the webserver
+*/}}
+{{- define "airflow.web.scheme" -}}
+{{- if and (.Values.airflow.config.AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT) (.Values.airflow.config.AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY) -}}
+HTTPS
+{{- else -}}
+HTTP
+{{- end -}}
+{{- end -}}
+
+
+{{/*
+The path containing DAG files
+*/}}
+{{- define "airflow.dags.path" -}}
+{{- if .Values.dags.gitSync.enabled -}}
+{{- printf "%s/repo/%s" (.Values.dags.path | trimSuffix "/") (.Values.dags.gitSync.repoSubPath | trimAll "/") -}}
+{{- else -}}
+{{- printf .Values.dags.path -}}
+{{- end -}}
+{{- end -}}
+
+
+{{/*
 Construct the `postgresql.fullname` of the postgresql sub-chat chart.
 Used to discover the Service and Secret name created by the sub-chart.
 */}}
@@ -62,34 +104,5 @@ Used to discover the master Service and Secret name created by the sub-chart.
 {{- else -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-A flag indicating if a celery-like executor is selected (empty if false)
-*/}}
-{{- define "airflow.executor.celery_like" -}}
-{{- if or (eq .Values.airflow.executor "CeleryExecutor") (eq .Values.airflow.executor "CeleryKubernetesExecutor") -}}
-true
-{{- end -}}
-{{- end -}}
-
-{{/*
-A flag indicating if a kubernetes-like executor is selected (empty if false)
-*/}}
-{{- define "airflow.executor.kubernetes_like" -}}
-{{- if or (eq .Values.airflow.executor "KubernetesExecutor") (eq .Values.airflow.executor "CeleryKubernetesExecutor") -}}
-true
-{{- end -}}
-{{- end -}}
-
-{{/*
-The path containing DAG files
-*/}}
-{{- define "airflow.dags.path" -}}
-{{- if .Values.dags.gitSync.enabled -}}
-{{- printf "%s/repo/%s" (.Values.dags.path | trimSuffix "/") (.Values.dags.gitSync.repoSubPath | trimAll "/") -}}
-{{- else -}}
-{{- printf .Values.dags.path -}}
 {{- end -}}
 {{- end -}}

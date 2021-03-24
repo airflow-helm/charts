@@ -30,21 +30,6 @@
 # - Secret: airflow-cluster1-git-secret
 # - cert-manager.io/Certificate: airflow-cluster1-cert
 #
-# Helm Install Commands:
-#   helm install stable/airflow \
-#     --version "X.X.X" \
-#     --name "airflow-cluster1" \
-#     --namespace "airflow-cluster1" \
-#     --values ./custom-values.yaml
-#
-# Run bash commands in the Scheduler Pod: (use to: `airflow create_user`)
-#   kubectl exec \
-#     -it \
-#     --namespace airflow-cluster1 \
-#     --container airflow-scheduler \
-#     Deployment/airflow--airflow-cluster1-scheduler \
-#     /bin/bash
-#
 
 ###################################
 # Airflow - Common Configs
@@ -61,9 +46,8 @@ airflow:
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
 
     ## enable SSL for webserver
-    ## setting these disables HTTP, so ensure you set: `web.readinessProbe.scheme` and `web.livenessProbe.scheme`
-    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT: "/var/airflow/secrets/airflow-cluster1-cert/tls.crt"
-    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY: "/var/airflow/secrets/airflow-cluster1-cert/tls.key"
+    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT: "/opt/airflow/ssl-cert/tls.crt"
+    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY: "/opt/airflow/ssl-cert/tls.key"
 
     ## dags
     AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
@@ -71,7 +55,7 @@ airflow:
     ## remote log storage
     AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
     AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://XXXXXXXX--airflow-cluster1/airflow/logs"
-    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "google_cloud_airflow"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "my_gcp"
 
     ## email
     AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"
@@ -83,6 +67,46 @@ airflow:
 
     ## domain used in airflow emails
     AIRFLOW__WEBSERVER__BASE_URL: "https://airflow-cluster1.example.com/"
+
+  ## a list of initial users to create
+  ##
+  users:
+    - username: admin
+      password: admin123
+      role: Admin
+      email: admin@example.com
+      firstName: admin
+      lastName: admin
+
+  ## if we update users or just create them the first time (lookup by `username`)
+  ##
+  usersUpdate: false
+
+  ## a list of initial connections to create
+  ##
+  connections:
+    ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-google/stable/connections/gcp.html
+    - id: my_gcp
+      type: google_cloud_platform
+      description: my GCP connection
+      extra: |-
+        { "extra__google_cloud_platform__num_retries": "5" }
+
+  ## a list of initial variables to create
+  ##
+  variables:
+    - key: "environment"
+      value: "prod"
+
+  ## a list of initial pools to create
+  ##
+  pools:
+    - name: "pool_1"
+      slots: 5
+      description: "example pool with 5 slots"
+    - name: "pool_2"
+      slots: 10
+      description: "example pool with 10 slots"
 
   ## extra environment variables for the web/scheduler/worker (AND flower) Pods
   ##
@@ -102,41 +126,33 @@ scheduler:
   resources:
     requests:
       cpu: "1000m"
-      memory: "1Gi"
-
-  ## custom airflow connections for the airflow scheduler
-  ##
-  connections:
-    - id: google_cloud_airflow
-      type: google_cloud_platform
-      extra: '{"extra__google_cloud_platform__num_retries": "5"}'
-
-  ## custom airflow variables for the airflow scheduler
-  ##
-  variables:
-    environment: "prod"
-
-  ## custom airflow pools for the airflow scheduler
-  ##
-  pools:
-    example:
-      description: "This is an example pool with 2 slots."
-      slots: 2
+      memory: "512Mi"
 
 ###################################
 # Airflow - WebUI Configs
 ###################################
 web:
-  ## resource requests/limits for the airflow web Pods
+  ## configs to generate webserver_config.py
   ##
-  resources:
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
+  webserverConfig:
+    ## the full text value to mount as the webserver_config.py file
+    ##
+    stringOverride: |-
+      from flask_appbuilder.security.manager import AUTH_DB
+
+      # use embedded DB for auth
+      AUTH_TYPE = AUTH_DB
 
   ## the number of web Pods to run
   ##
   replicas: 1
+
+  ## resource requests/limits for the airflow web Pods
+  ##
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "900Mi"
 
   ## configs for the Service of the web Pods
   ##
@@ -148,47 +164,19 @@ web:
     loadBalancerIP: XXX.XXX.XXX.XXX
     loadBalancerSourceRanges: []
 
-  ## extra pip packages to install in the web container
+  ## extra VolumeMounts for the web Pods
   ##
-  extraPipPackages: []
+  extraVolumeMounts:
+    - name: ssl-cert
+      mountPath: /opt/airflow/ssl-cert
+      readOnly: true
 
-  ## configs for the web Service liveness probe
+  ## extra Volumes for the web Pods
   ##
-  livenessProbe:
-    ## the scheme used in the liveness probe: {HTTP,HTTPS}
-    ##
-    scheme: HTTPS
-
-    ## the number of seconds to wait before checking pod health
-    ##
-    ## NOTE:
-    ## - make larger if you are installing many packages with:
-    ##   `airflow.extraPipPackages`, `web.extraPipPackages`, or `dags.installRequirements`
-    ##
-    initialDelaySeconds: 300
-
-  ## the directory in which to mount secrets on web containers
-  ##
-  secretsDir: /var/airflow/secrets
-
-  ## secret names which will be mounted as a file at `{web.secretsDir}/<secret_name>`
-  ##
-  secrets:
-    - airflow-cluster1-cert
-
-  ## a list of initial web users to create
-  ##
-  createUsers: []
-
-  ## configs to generate webserver_config.py
-  ##
-  webserverConfigFile:
-    ## the full text value to mount as the webserver_config.py file
-    ##
-    stringOverride: |-
-      from flask_appbuilder.security.manager import AUTH_DB
-      # use embedded DB for auth
-      AUTH_TYPE = AUTH_DB
+  extraVolumes:
+    - name: ssl-cert
+      secret:
+        secretName: airflow-cluster1-cert
 
 ###################################
 # Airflow - Worker Configs
@@ -198,16 +186,16 @@ workers:
   ##
   enabled: true
 
+  ## the number of workers Pods to run
+  ##
+  replicas: 2
+
   ## resource requests/limits for the airflow worker Pods
   ##
   resources:
     requests:
-      cpu: "1000m"
+      cpu: "256m"
       memory: "2Gi"
-
-  ## the number of workers Pods to run
-  ##
-  replicas: 2
 
   ## configs for the PodDisruptionBudget of the worker StatefulSet
   ##
@@ -264,14 +252,6 @@ workers:
   ##
   terminationPeriod: 60
 
-  ## directory in which to mount secrets on worker containers
-  ##
-  secretsDir: /var/airflow/secrets
-
-  ## secret names which will be mounted as a file at `{workers.secretsDir}/<secret_name>`
-  ##
-  secrets: []
-
 ###################################
 # Airflow - Flower Configs
 ###################################
@@ -284,8 +264,8 @@ flower:
   ##
   resources:
     requests:
-      cpu: "100m"
-      memory: "126Mi"
+      cpu: "10m"
+      memory: "64Mi"
 
   ## configs for the Service of the flower Pods
   ##
@@ -441,8 +421,8 @@ redis:
     ##
     resources:
       requests:
-        cpu: "100m"
-        memory: "256Mi"
+        cpu: "10m"
+        memory: "32Mi"
 
     ## configs for the PVC of the redis master
     ##
@@ -458,8 +438,8 @@ redis:
     ##
     resources:
       requests:
-        cpu: "100m"
-        memory: "256Mi"
+        cpu: "10m"
+        memory: "32Mi"
 
     ## configs for the PVC of the redis slaves
     ##

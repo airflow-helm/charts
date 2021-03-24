@@ -535,7 +535,6 @@ web:
   ##
   readinessProbe:
     enabled: true
-    scheme: HTTP
     initialDelaySeconds: 10
     periodSeconds: 10
     timeoutSeconds: 5
@@ -545,7 +544,6 @@ web:
   ##
   livenessProbe:
     enabled: true
-    scheme: HTTP
     initialDelaySeconds: 10
     periodSeconds: 10
     timeoutSeconds: 5
