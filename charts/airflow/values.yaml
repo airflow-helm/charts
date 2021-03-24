@@ -84,16 +84,13 @@ airflow:
 
   ## a list of initial users to create
   ##
-  ## EXAMPLE:
-  ##   users:
-  ##     - username: admin
-  ##       password: admin123
-  ##       role: Admin
-  ##       email: admin@example.com
-  ##       firstName: admin
-  ##       lastName: admin
-  ##
-  users: []
+  users:
+    - username: admin
+      password: admin
+      role: Admin
+      email: admin@example.com
+      firstName: admin
+      lastName: admin
 
   ## if we update users or just create them the first time (lookup by `username`)
   ##

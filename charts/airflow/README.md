@@ -108,6 +108,7 @@ airflow:
     HTTP_PROXY: "http://proxy.example.com:8080"
 ```
 
+<hr>
 </details>
 
 ### How to store DAGs?
@@ -140,7 +141,7 @@ dags:
       github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
 ```
 
-You can create `Secret/airflow-ssh-git-secret` using this command:
+You can create the `airflow-ssh-git-secret` Secret using:
 ```console
 kubectl create secret generic \
   airflow-ssh-git-secret \
@@ -170,7 +171,7 @@ dags:
     httpSecretPasswordKey: password
 ```
 
-You can create `Secret/airflow-http-git-secret` using this command:
+You can create `airflow-http-git-secret` Secret using:
 ```console
 kubectl create secret generic \
   airflow-http-git-secret \
@@ -204,7 +205,9 @@ dags:
 
 This method stores your DAGs inside the container image.
 
-This chart uses the official [apache/airflow image](https://hub.docker.com/r/apache/airflow), so extend it with your dag files:
+> ⚠️ this chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images)
+
+For example, extending `airflow:2.0.1-python3.8` with some dags:
 ```docker
 FROM apache/airflow:2.0.1-python3.8
 
@@ -220,6 +223,7 @@ airflow:
     tag: MY_TAG
 ```
 
+<hr>
 </details>
 
 ### How to install extra pip packages?
@@ -275,6 +279,7 @@ airflow:
     tag: MY_TAG
 ```
 
+<hr>
 </details>
 
 ### How to create airflow users? 
@@ -291,7 +296,7 @@ For example, to create `admin` (with "Admin" RBAC role) and `user` (with "User" 
 airflow:
   users:
     - username: admin
-      password: admin123
+      password: admin
       role: Admin
       email: admin@example.com
       firstName: admin
@@ -307,6 +312,7 @@ airflow:
   usersUpdate: true
 ```
 
+<hr>
 </details>
 
 ### How to authenticate airflow users with LDAP/OAUTH? 
@@ -415,24 +421,40 @@ web:
       PERMANENT_SESSION_LIFETIME = 1800
 ```
 
+<hr>
 </details>
 
-### XXXXXXX How to set a custom fernet (encryption) key? 
+### How to set a custom fernet (encryption) key? 
 <details>
 <summary>Show More</summary>
 <hr>
 
-TBA
+<h3>Option 1 - using value</h3>
 
-</details>
+You can customize the fernet encryption key using the `airflow.fernetKey` value, which sets the `AIRFLOW__CORE__FERNET_KEY` environment variable.
 
-### XXXXXXX How to export airflow dag/task metrics to Prometheus? 
-<details>
-<summary>Show More</summary>
+For example:
+```yaml
+aiflow:
+  fernetKey: "7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc="
+```
+
+<h3>Option 2 - using secret (recommended)</h3>
+
+You can customize the fernet encryption key by pre-creating a Secret, and specifying it with the `airflow.extraEnv` value.
+
+For example, if the Secret `airflow-fernet-key` already exist, and contains a key called `value`:
+```yaml
+airflow:
+  extraEnv:
+    - name: AIRFLOW__CORE__FERNET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow-fernet-key
+          key: value
+```
+
 <hr>
-
-TBA
-
 </details>
 
 ### How to create airflow connections?
@@ -489,6 +511,7 @@ scheduler:
   connectionsUpdate: true
 ```
 
+<hr>
 </details>
 
 ### How to create airflow variables?
@@ -513,6 +536,7 @@ airflow:
   variablesUpdate: true
 ```
 
+<hr>
 </details>
 
 ### How to create airflow pools?
@@ -539,9 +563,10 @@ airflow:
   poolsUpdate: true
 ```
 
+<hr>
 </details>
 
-### XXXXX How to set up celery worker autoscaling?
+### How to set up celery worker autoscaling?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -591,14 +616,14 @@ workers:
   terminationPeriod: 60
 
 dags:
-  git:
-    gitSync:
-      resources:
-        requests:
-          ## IMPORTANT! for autoscaling to work
-          memory: "64Mi"
+  gitSync:
+    resources:
+      requests:
+        ## IMPORTANT! for autoscaling to work with gitSync
+        memory: "64Mi"
 ```
 
+<hr>
 </details>
 
 ### How to persist Airflow logs (recommended)?
@@ -626,23 +651,23 @@ logs:
 
 You must give airflow credentials for it to read/write on the remote bucket, this can be achieved with `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID`, or by using something like [Workload Identity (GKE)](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity), or [IAM Roles for Service Accounts (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html). 
 
-Example, using `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID` (can be used with AWS too):
+Example, using `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID` (can be used with S3 + AWS connection too):
 ```yaml
 airflow:
   config:
     AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
     AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://<<MY-BUCKET-NAME>>/airflow/logs"
-    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "google_cloud_airflow"
-
-scheduler:
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "my_gcp"
+    
   connections:
-    - id: google_cloud_airflow
+    ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-google/stable/connections/gcp.html
+    - id: my_gcp
       type: google_cloud_platform
+      description: my GCP connection
       extra: |-
-        {
-         "extra__google_cloud_platform__num_retries": "5",
-         "extra__google_cloud_platform__keyfile_dict": "{...}"
-        }
+        { "extra__google_cloud_platform__keyfile_dict": "XXXXXXXX",
+          "extra__google_cloud_platform__keyfile_dict: "XXXXXXXX",
+          "extra__google_cloud_platform__num_retries": "5" }
 ```
     
 Example, using [Workload Identity (GKE)](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity):
@@ -683,6 +708,7 @@ serviceAccount:
     eks.amazonaws.com/role-arn: "arn:aws:iam::XXXXXXXXXX:role/<<MY-ROLE-NAME>>"
 ```
 
+<hr>
 </details>
 
 ## Database Configs
@@ -702,13 +728,13 @@ For example, to create the required Kubernetes Secrets:
 kubectl create secret generic \
   airflow-postgresql \
   --from-literal=postgresql-password=$(openssl rand -base64 13) \
-  --namespace airflow
+  --namespace my-airflow-namespace
 
 # set redis password
 kubectl create secret generic \
   airflow-redis \
   --from-literal=redis-password=$(openssl rand -base64 13) \
-  --namespace airflow
+  --namespace my-airflow-namespace
 ```
 
 Example `values.yaml`, to use those secrets:
@@ -720,6 +746,7 @@ redis:
   existingSecret: airflow-redis
 ```
 
+<hr>
 </details>
 
 ### How to use an external database (recommended)?
@@ -757,11 +784,12 @@ externalDatabase:
   passwordSecretKey: "mysql-password"
 ```
 
+<hr>
 </details>
 
 ## Kubernetes Configs
 
-### How to mount ConfigMaps/Secrets as environment variables (All Pods)?
+### How to mount ConfigMaps/Secrets as environment variables?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -770,75 +798,58 @@ You can use the `airflow.extraEnv` value to mount extra environment variables wi
 
 This method can be used to pass sensitive configs to Airflow.
 
-For example, passing a Fernet key, (the `airflow` Kubernetes Secret must already exist):
+For example, if the Secret `airflow-fernet-key` already exist, and contains a key called `value`:
 ```yaml
 airflow:
   extraEnv:
     - name: AIRFLOW__CORE__FERNET_KEY
       valueFrom:
         secretKeyRef:
-          name: airflow
-          key: fernet-key
+          name: airflow-fernet-key
+          key: value
 ```
 
+<hr>
 </details>
 
-### XXXXX How to mount Secrets/Configmaps as files (Worker Pods)?
+### How to mount Secrets/Configmaps as files on workers?
 <details>
 <summary>Show More</summary>
 <hr>
 
-You can use the `workers.secrets` value to mount secrets at `{workers.secretsDir}/<secret-name>` in airflow-worker Pods.
+You can use the `workers.extraVolumeMounts` and `workers.extraVolumes` values to mount Secretes as files.
 
-For example, mounting password Secrets:
+For example, if the Secret `redshift-creds` already exist, and has keys called `user` and `password`:
 ```yaml
 workers:
   extraVolumeMounts:
-    ...
-    - redshift-user
-    - redshift-password
-    - elasticsearch-user
-    - elasticsearch-password
-    ...
+    - name: redshift-creds
+      mountPath: /opt/airflow/secrets/redshift-creds
+      readOnly: true
+
   extraVolumes:
-    ...
-    ...
-    ...
-
+    - name: redshift-creds
+      secret:
+        secretName: redshift-creds
 ```
 
-With the above configuration, you could read the `redshift-user` password from within a DAG or Python function using:
+You could then read the `/opt/airflow/secrets/redshift-creds` files from within a DAG Python function:
 ```python
-import os
 from pathlib import Path
-
-def get_secret(secret_name):
-    secrets_dir = Path('/var/airflow/secrets')
-    secret_path = secrets_dir / secret_name
-    assert secret_path.exists(), f'could not find {secret_name} at {secret_path}'
-    secret_data = secret_path.read_text().strip()
-    return secret_data
-
-redshift_user = get_secret('redshift-user')
+redis_user = Path("/opt/airflow/secrets/redshift-creds/user").read_text().strip()
+redis_password = Path("/opt/airflow/secrets/redshift-creds/password").read_text().strip()
 ```
 
-To create the `redshift-user` Secret, you could use:
+To create the `redshift-creds` Secret, you could use:
 ```console
 kubectl create secret generic \
-  redshift-user \
-  --from-literal=redshift-user=MY_REDSHIFT_USERNAME \
-  --namespace airflow
+  redshift-creds \
+  --from-literal=user=MY_REDSHIFT_USERNAME \
+  --from-literal=password=MY_REDSHIFT_PASSWORD \
+  --namespace my-airflow-namespace
 ```
 
-</details>
-
-### XXXXX How to set up a LoadBalancer service (recommended)?
-<details>
-<summary>Show More</summary>
 <hr>
-
-TBA
-
 </details>
 
 ### How to set up an Ingress?
@@ -846,9 +857,9 @@ TBA
 <summary>Show More</summary>
 <hr>
 
-The chart provides an optional Kubernetes Ingress resource, for accessing airflow-webserver and airflow-flower outside of the cluster.
+The chart provides the `ingress.*` values for deploying a Kubernetes Ingress to allow access to airflow outside the cluster.
 
-If you already have something hosted at the root of your domain, you might want to place airflow under a URL-prefix:
+Consider the situation where you already have something hosted at the root of your domain, you might want to place airflow under a URL-prefix:
 - http://example.com/airflow/
 - http://example.com/airflow/flower
 
@@ -869,9 +880,9 @@ ingress:
 
 We expose the `ingress.web.precedingPaths` and `ingress.web.succeedingPaths` values, which are __before__ and __after__ the default path respectively.
 
-A common use-case is enabling https with the `aws-alb-ingress-controller` [ssl-redirect](https://kubernetes-sigs.github.io/aws-alb-ingress-controller/guide/tasks/ssl_redirect/), which needs a redirect path to be hit before the airflow-webserver one.
+> ⚠️ A common use-case is [enabling SSL with the aws-alb-ingress-controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/tasks/ssl_redirect/), which needs a redirect path to be hit before the airflow-webserver one.
 
-You would set the values of `precedingPaths` as the following:
+For example, setting `ingress.web.precedingPaths` for an aws-alb-ingress-controller with SSL:
 ```yaml
 ingress:
   web:
@@ -881,9 +892,10 @@ ingress:
         servicePort: "use-annotation"
 ```
 
+<hr>
 </details>
 
-### XXXXXX How to integrate airflow with Prometheus?
+### How to integrate airflow with Prometheus?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -892,6 +904,7 @@ To be able to expose Airflow metrics to Prometheus you will need install a plugi
 
 A [ServiceMonitor](https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#servicemonitor) is a resource introduced by the [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator), ror more information, see the `serviceMonitor` section of `values.yaml`.
 
+<hr>
 </details>
 
 ### How to add extra manifests?
@@ -913,6 +926,7 @@ extraManifests:
         name: "gcp-cloud-armor-policy-test"
 ```
 
+<hr>
 </details>
 
 ## Chart Values
@@ -946,6 +960,7 @@ Parameter | Description | Default
 `airflow.extraVolumes` | extra Volumes for the web/scheduler/worker/flower Pods | `[]`
 `airflow.kubernetesPodTemplate.*` | configs to generate the AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE | `<see values.yaml>`
 
+<hr>
 </details>
 
 ### Airflow Scheduler:
@@ -974,6 +989,7 @@ Parameter | Description | Default
 `scheduler.livenessProbe.*` | configs for the scheduler Pods' liveness probe | `<see values.yaml>`
 `scheduler.extraInitContainers` | extra init containers to run in the scheduler Pods | `[]`
 
+<hr>
 </details>
 
 ### Airflow Webserver:
@@ -1003,6 +1019,7 @@ Parameter | Description | Default
 `web.extraVolumeMounts` | extra VolumeMounts for the web Pods | `[]`
 `web.extraVolumes` | extra Volumes for the web Pods | `[]`
 
+<hr>
 </details>
 
 ### Airflow Celery Worker:
@@ -1032,6 +1049,7 @@ Parameter | Description | Default
 `workers.extraVolumeMounts` | extra VolumeMounts for the worker Pods | `[]`
 `workers.extraVolumes` | extra Volumes for the worker Pods | `[]`
 
+<hr>
 </details>
 
 ### Airflow Flower:
@@ -1061,6 +1079,7 @@ Parameter | Description | Default
 `flower.extraVolumeMounts` | extra VolumeMounts for the flower Pods | `[]`
 `flower.extraVolumes` | extra Volumes for the flower Pods | `[]`
 
+<hr>
 </details>
 
 ### Logs:
@@ -1073,6 +1092,7 @@ Parameter | Description | Default
 `logs.path` | the airflow logs folder | `/opt/airflow/logs`
 `logs.persistence.*` | configs for the logs PVC | `<see values.yaml>`
 
+<hr>
 </details>
 
 ### DAGs:
@@ -1086,6 +1106,7 @@ Parameter | Description | Default
 `dags.persistence.*` | configs for the dags PVC | `<see values.yaml>`
 `dags.gitSync.*` | configs for the git-sync sidecar  | `<see values.yaml>`
 
+<hr>
 </details>
 
 ### Kubernetes (Ingress):
@@ -1099,6 +1120,7 @@ Parameter | Description | Default
 `ingress.web.*` | configs for the Ingress of the web Service | `<see values.yaml>`
 `ingress.flower.*` | configs for the Ingress of the flower Service | `<see values.yaml>`
 
+<hr>
 </details>
 
 ### Kubernetes (Other):
@@ -1115,6 +1137,7 @@ Parameter | Description | Default
 `serviceAccount.annotations` | annotations for the ServiceAccount | `{}`
 `extraManifests` | extra Kubernetes manifests to include alongside this chart | `[]`
 
+<hr>
 </details>
 
 ### Database (Embedded - Postgres):
@@ -1133,6 +1156,7 @@ Parameter | Description | Default
 `postgresql.persistence.*` | configs for the PVC of postgresql | `<see values.yaml>`
 `postgresql.master.*` | configs for the postgres StatefulSet | `<see values.yaml>`
 
+<hr>
 </details>
 
 ### Database (External - Postgres/MySQL):
@@ -1151,6 +1175,7 @@ Parameter | Description | Default
 `externalDatabase.passwordSecretKey` | the key within `externalDatabase.passwordSecret` containing the password string | `postgresql-password`
 `externalDatabase.properties` | the connection properties e.g. "?sslmode=require" | `""`
 
+<hr>
 </details>
 
 ### Redis (Embedded):
@@ -1168,6 +1193,7 @@ Parameter | Description | Default
 `redis.master.*` | configs for the redis master | `<see values.yaml>`
 `redis.slave.*` | configs for the redis slaves | `<see values.yaml>`
 
+<hr>
 </details>
 
 ### Redis (External):
@@ -1183,6 +1209,7 @@ Parameter | Description | Default
 `externalRedis.passwordSecret` | the name of a pre-created secret containing the external redis password | `""`
 `externalRedis.passwordSecretKey` | the key within `externalRedis.passwordSecret` containing the password string | `redis-password`
 
+<hr>
 </details>
 
 ### Prometheus:
@@ -1200,6 +1227,7 @@ Parameter | Description | Default
 `prometheusRule.additionalLabels` | labels for PrometheusRule, so that Prometheus can select it | `{}`
 `prometheusRule.groups` | alerting rules for Prometheus | `[]`
 
+<hr>
 </details>
 
 <br>
