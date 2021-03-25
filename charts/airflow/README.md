@@ -15,6 +15,8 @@ helm repo update
 
 ### 2 - Install the Chart:
 
+> ⚠️  find values for `CHART_VERSION` under [GitHub Releases](https://github.com/airflow-helm/charts/releases)
+
 ```sh
 export RELEASE_NAME=my-airflow-cluster # set a name!
 export NAMESPACE=my-airflow-namespace # set a namespace!
@@ -38,24 +40,21 @@ helm install \
   --values $VALUES_FILE
 ```
 
-> ⚠️  find values for `CHART_VERSION` under [GitHub Releases](https://github.com/airflow-helm/charts/releases)
-
 ### 3 - Access the WebUI
 
-```sh
-export NAMESPACE=my-airflow-namespace
-export POD_NAME=$(kubectl get pods --namespace $NAMESPACE -l "component=web,app=airflow" -o jsonpath="{.items[0].metadata.name}")
+> ⚠️ browse to http://localhost:8080 after running the following commands 
 
+```sh
+export NAMESPACE=my-airflow-namespace # set a namespace!
+
+export POD_NAME=$(kubectl get pods --namespace $NAMESPACE -l "component=web,app=airflow" -o jsonpath="{.items[0].metadata.name}")
 kubectl port-forward --namespace $NAMESPACE $POD_NAME 8080:8080
 ```
 
-> ⚠️ browse to http://localhost:8080 after running the above commands 
->
 > - default credentials -- user: __admin__ - password: __admin__
 > - [How to create airflow users?](#how-to-create-airflow-users)
 > - [How to authenticate airflow users with LDAP/OAUTH?](#how-to-authenticate-airflow-users-with-ldapoauth)
 
----
 
 # Documentation
 
