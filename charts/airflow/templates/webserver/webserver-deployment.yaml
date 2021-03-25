@@ -1,3 +1,4 @@
+{{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.web.extraPipPackages }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -32,7 +33,6 @@ spec:
     metadata:
       annotations:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
-        checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
         checksum/config-webserver-config: {{ include (print $.Template.BasePath "/config/secret-webserver-config.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
@@ -74,27 +74,8 @@ spec:
         {{- toYaml .Values.web.securityContext | nindent 8 }}
       {{- end }}
       initContainers:
-        {{- if or (.Values.airflow.extraPipPackages) (.Values.web.extraPipPackages) }}
-        - name: install-python-packages
-          image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
-          imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
-          command:
-            - "/usr/bin/dumb-init"
-            - "--"
-          args:
-            - "pip"
-            - "install"
-            - "--target"
-            - "/opt/python/site-packages"
-            {{- range .Values.airflow.extraPipPackages }}
-            - {{ . | quote }}
-            {{- end }}
-            {{- range .Values.web.extraPipPackages }}
-            - {{ . | quote }}
-            {{- end }}
-          volumeMounts:
-            - name: python-site-packages
-              mountPath: /opt/python/site-packages
+        {{- if $extraPipPackages }}
+        {{- include "airflow.init_container.install_pip_packages" (dict "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
         {{- end }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
       containers:
@@ -112,7 +93,7 @@ spec:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
             {{- include "airflow.common.env" . | indent 12 }}
-            {{- if or (.Values.airflow.extraPipPackages) (.Values.web.extraPipPackages) }}
+            {{- if $extraPipPackages }}
             - name: PYTHONPATH
               value: /opt/python/site-packages
             {{- end }}
@@ -145,35 +126,25 @@ spec:
               path: "/health"
               port: web
           {{- end }}
+          {{- $extraVolumeMounts := .Values.web.extraVolumeMounts }}
+          {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
           volumeMounts:
-            {{- include "airflow.common.volumeMounts" . | indent 12 }}
-            {{- if or (.Values.airflow.extraPipPackages) (.Values.web.extraPipPackages) }}
-            - name: python-site-packages
-              mountPath: /opt/python/site-packages
-            {{- end }}
+            {{- $volumeMounts | indent 12 }}
             - name: webserver-config
               mountPath: /opt/airflow/webserver_config.py
               subPath: webserver_config.py
               readOnly: true
-            {{- if .Values.web.extraVolumeMounts }}
-            {{- toYaml .Values.web.extraVolumeMounts | nindent 12 }}
-            {{- end }}
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
         {{- if .Values.airflow.extraContainers }}
-        {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
+        {{- toYaml .Values.airflow.extraContainers | indent 8 }}
         {{- end }}
+      {{- $extraVolumes := .Values.web.extraVolumes }}
+      {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
       volumes:
-        {{- include "airflow.common.volumes" . | indent 8 }}
-        {{- if or (.Values.airflow.extraPipPackages) (.Values.web.extraPipPackages) }}
-        - name: python-site-packages
-          emptyDir: {}
-        {{- end }}
+        {{- $volumes | indent 8 }}
         - name: webserver-config
           secret:
             secretName: {{ include "airflow.fullname" . }}-webserver-config
             defaultMode: 0644
-        {{- if .Values.web.extraVolumes }}
-        {{- toYaml .Values.web.extraVolumes | nindent 8 }}
-        {{- end }}

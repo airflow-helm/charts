@@ -2,6 +2,9 @@
 
 ## `v7.15.X` → `v8.0.0`
 
+WARNING: this is a major upgrade, so expect a few issues at first, please raise issues for them as you find them. 
+- you also might want to consider starting your values.yaml file again.
+
 WARNING: the default version of airflow + Python has been upgraded to:
 - airflow: 2.0.1 
 - python: 3.8

@@ -60,7 +60,6 @@ HTTP
 {{- end -}}
 {{- end -}}
 
-
 {{/*
 The path containing DAG files
 */}}
@@ -71,7 +70,6 @@ The path containing DAG files
 {{- printf .Values.dags.path -}}
 {{- end -}}
 {{- end -}}
-
 
 {{/*
 Construct the `postgresql.fullname` of the postgresql sub-chat chart.

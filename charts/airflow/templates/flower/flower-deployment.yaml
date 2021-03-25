@@ -1,3 +1,4 @@
+{{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.flower.extraPipPackages }}
 {{- if and (.Values.flower.enabled) (include "airflow.executor.celery_like" .) }}
 apiVersion: apps/v1
 kind: Deployment
@@ -33,7 +34,6 @@ spec:
     metadata:
       annotations:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
-        checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
@@ -74,27 +74,8 @@ spec:
         {{- toYaml .Values.flower.securityContext | nindent 8 }}
       {{- end }}
       initContainers:
-        {{- if or (.Values.airflow.extraPipPackages) (.Values.flower.extraPipPackages) }}
-        - name: install-python-packages
-          image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
-          imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
-          command:
-            - "/usr/bin/dumb-init"
-            - "--"
-          args:
-            - "pip"
-            - "install"
-            - "--target"
-            - "/opt/python/site-packages"
-            {{- range .Values.airflow.extraPipPackages }}
-            - {{ . | quote }}
-            {{- end }}
-            {{- range .Values.flower.extraPipPackages }}
-            - {{ . | quote }}
-            {{- end }}
-          volumeMounts:
-            - name: python-site-packages
-              mountPath: /opt/python/site-packages
+        {{- if $extraPipPackages }}
+        {{- include "airflow.init_container.install_pip_packages" (dict "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
         {{- end }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
       containers:
@@ -108,7 +89,7 @@ spec:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
             {{- include "airflow.common.env" . | indent 12 }}
-            {{- if or (.Values.airflow.extraPipPackages) (.Values.flower.extraPipPackages) }}
+            {{- if $extraPipPackages }}
             - name: PYTHONPATH
               value: /opt/python/site-packages
             {{- end }}
@@ -126,22 +107,18 @@ spec:
           command:
             - "/usr/bin/dumb-init"
             - "--"
-          args:
             - "bash"
             - "-c"
-            - >
-              true \
-               && mkdir -p /home/airflow/.local/bin \
-               && export PATH="/home/airflow/.local/bin:$PATH" \
-               && echo "*** running flower..." \
-              {{- if .Values.airflow.legacyCommands }}
-               && exec airflow flower
+          args:
+            {{- if .Values.airflow.legacyCommands }}
+            - "exec airflow flower"
               {{- else }}
-               && exec airflow celery flower
-              {{- end }}
-              {{- if .Values.flower.oauthDomains -}}
-               {{ " " }}--auth={{ .Values.flower.oauthDomains | quote }}
-              {{- end }}
+            - "exec airflow celery flower"
+            {{- end }}
+            {{- if .Values.flower.oauthDomains }}
+            - "--auth"
+            - {{ .Values.flower.oauthDomains | quote }}
+            {{- end }}
           {{- if .Values.flower.readinessProbe.enabled }}
           readinessProbe:
             initialDelaySeconds: {{ .Values.flower.readinessProbe.initialDelaySeconds }}
@@ -174,22 +151,16 @@ spec:
                 - "exec curl 'http://localhost:5555{{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX }}'"
                 {{- end }}
           {{- end }}
+          {{- $extraVolumeMounts := .Values.flower.extraVolumeMounts }}
+          {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+          {{- if $volumeMounts }}
           volumeMounts:
-            {{- include "airflow.common.volumeMounts" . | indent 12 }}
-            {{- if or (.Values.airflow.extraPipPackages) (.Values.flower.extraPipPackages) }}
-            - name: python-site-packages
-              mountPath: /opt/python/site-packages
-            {{- end }}
-            {{- if .Values.flower.extraVolumeMounts }}
-            {{- toYaml .Values.flower.extraVolumeMounts | nindent 12 }}
-            {{- end }}
+            {{- $volumeMounts | indent 12 }}
+          {{- end }}
+      {{- $extraVolumes := .Values.flower.extraVolumes }}
+      {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
+      {{- if $volumes }}
       volumes:
-        {{- include "airflow.common.volumes" . | indent 8 }}
-        {{- if or (.Values.airflow.extraPipPackages) (.Values.flower.extraPipPackages) }}
-        - name: python-site-packages
-          emptyDir: {}
-        {{- end }}
-        {{- if .Values.flower.extraVolumes }}
-        {{- toYaml .Values.flower.extraVolumes | nindent 8 }}
-        {{- end }}
+        {{- $volumes | indent 8 }}
+      {{- end }}
 {{- end }}

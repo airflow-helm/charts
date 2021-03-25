@@ -3,7 +3,7 @@
 # - This is intended to be a `custom-values.yaml` starting point for non-production deployment (like minikube)
 
 # External Dependencies:
-# - A PUBLIC git repo for DAGs: git@repo.example.com/my-airflow-dags.git
+# - A PUBLIC git repo for DAGs: https://github.com/USERNAME/REPOSITORY.git
 #
 
 ###################################
@@ -123,11 +123,11 @@ dags:
   gitSync:
     ## if the git-sync sidecar container is enabled
     ##
-    enabled: true
+    enabled: false
 
     ## the url of the git repo
     ##
-    repo: "git@repo.example.com/my-airflow-dags.git"
+    repo: "https://github.com/USERNAME/REPOSITORY.git"
 
     ## the git branch to check out
     ##
@@ -141,13 +141,17 @@ dags:
     ##
     syncWait: 60
 
-    ## the name of a pre-created Secret with git ssh credentials
+    ## the name of a pre-created Secret with git http credentials
     ##
-    sshSecret: ""
+    httpSecret: ""
 
-    ## the key in `dags.gitSync.sshSecret` with your ssh-key file
+    ## the key in `dags.gitSync.httpSecret` with your git username
     ##
-    sshSecretKey: id_rsa
+    httpSecretUsernameKey: username
+
+    ## the key in `dags.gitSync.httpSecret` with your git password/token
+    ##
+    httpSecretPasswordKey: password
 
 ###################################
 # Database - PostgreSQL Chart

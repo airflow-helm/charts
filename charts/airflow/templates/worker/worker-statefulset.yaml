@@ -1,3 +1,4 @@
+{{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.workers.extraPipPackages }}
 {{- if and (.Values.workers.enabled) (include "airflow.executor.celery_like" .) }}
 apiVersion: apps/v1
 ## StatefulSet gives workers consistent DNS names, allowing webserver access to log files
@@ -33,7 +34,6 @@ spec:
     metadata:
       annotations:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
-        checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
@@ -79,27 +79,8 @@ spec:
         {{- toYaml .Values.workers.securityContext | nindent 8 }}
       {{- end }}
       initContainers:
-        {{- if or (.Values.airflow.extraPipPackages) (.Values.workers.extraPipPackages) }}
-        - name: install-python-packages
-          image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
-          imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
-          command:
-            - "/usr/bin/dumb-init"
-            - "--"
-          args:
-            - "pip"
-            - "install"
-            - "--target"
-            - "/opt/python/site-packages"
-            {{- range .Values.airflow.extraPipPackages }}
-            - {{ . | quote }}
-            {{- end }}
-            {{- range .Values.workers.extraPipPackages }}
-            - {{ . | quote }}
-            {{- end }}
-          volumeMounts:
-            - name: python-site-packages
-              mountPath: /opt/python/site-packages
+        {{- if $extraPipPackages }}
+        {{- include "airflow.init_container.install_pip_packages" (dict "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
         {{- end }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
       containers:
@@ -113,7 +94,7 @@ spec:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
             {{- include "airflow.common.env" . | indent 12 }}
-            {{- if or (.Values.airflow.extraPipPackages) (.Values.workers.extraPipPackages) }}
+            {{- if $extraPipPackages }}
             - name: PYTHONPATH
               value: /opt/python/site-packages
             {{- end }}
@@ -124,7 +105,40 @@ spec:
                 command:
                   - "timeout"
                   - "{{ .Values.workers.celery.gracefullTerminationPeriod }}s"
-                  - "/home/airflow/scripts/graceful-stop-celery-worker.sh"
+                  - "python"
+                  - "-Wignore"
+                  - "-c"
+                  - |-
+                    import os
+                    import time
+                    import subprocess
+                    from celery import Celery
+                    from celery.app.control import Inspect
+                    from typing import List
+
+                    def run_command(cmd: List[str]) -> str:
+                        process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+                        output, error = process.communicate()
+                        if error is not None:
+                            raise Exception(error)
+                        else:
+                            return output.decode(encoding="utf-8")
+
+                    broker_url = run_command(["bash", "-c", "eval $AIRFLOW__CELERY__BROKER_URL_CMD"])
+                    local_celery_host = f"celery@{os.environ['HOSTNAME']}"
+                    app = Celery(broker=broker_url)
+
+                    # prevent the worker accepting new tasks
+                    print(f"canceling celery consumer for {local_celery_host}...")
+                    app.control.cancel_consumer("default", destination=[local_celery_host])
+
+                    # wait until the worker finishes its current tasks
+                    i = Inspect(app=app, destination=[local_celery_host])
+                    active_tasks = i.active()[local_celery_host]
+                    while len(active_tasks) > 0:
+                        print(f"waiting [10 sec] for remaining tasks to finish: {[task.get('name') for task in active_tasks]}")
+                        time.sleep(10)
+                        active_tasks = i.active()[local_celery_host]
           {{- end }}
           ports:
             - name: wlog
@@ -141,28 +155,22 @@ spec:
             {{- else }}
             - "exec airflow celery worker"
             {{- end }}
+          {{- $extraVolumeMounts := .Values.workers.extraVolumeMounts }}
+          {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+          {{- if $volumeMounts }}
           volumeMounts:
-            {{- include "airflow.common.volumeMounts" . | indent 12 }}
-            {{- if or (.Values.airflow.extraPipPackages) (.Values.workers.extraPipPackages) }}
-            - name: python-site-packages
-              mountPath: /opt/python/site-packages
-            {{- end }}
-            {{- if .Values.workers.extraVolumeMounts }}
-            {{- toYaml .Values.workers.extraVolumeMounts | nindent 12 }}
-            {{- end }}
+            {{- $volumeMounts | indent 12 }}
+          {{- end }}
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
         {{- if .Values.airflow.extraContainers }}
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
         {{- end }}
+      {{- $extraVolumes := .Values.workers.extraVolumes }}
+      {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
+      {{- if $volumes }}
       volumes:
-        {{- include "airflow.common.volumes" . | indent 8 }}
-        {{- if or (.Values.airflow.extraPipPackages) (.Values.workers.extraPipPackages) }}
-        - name: python-site-packages
-          emptyDir: {}
-        {{- end }}
-        {{- if .Values.workers.extraVolumes }}
-        {{- toYaml .Values.workers.extraVolumes | nindent 8 }}
-        {{- end }}
+        {{- $volumes | indent 8 }}
+      {{- end }}
 {{- end }}

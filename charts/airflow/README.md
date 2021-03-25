@@ -15,12 +15,11 @@ helm repo update
 
 ### 2 - Install the Chart:
 
-Find values for `CHART_VERSION` under [GitHub Releases](https://github.com/airflow-helm/charts/releases):
-
 ```sh
-export RELEASE_NAME=my-airflow-cluster
-export NAMESPACE=my-airflow-namespace
-export CHART_VERSION=8.X.X # set the version you want
+export RELEASE_NAME=my-airflow-cluster # set a name!
+export NAMESPACE=my-airflow-namespace # set a namespace!
+export CHART_VERSION=8.X.X # set a version!
+export VALUES_FILE=./custom-values.yaml # set your values file path!
 
 # Helm 3
 helm install \
@@ -28,7 +27,7 @@ helm install \
   airflow-stable/airflow \
   --namespace $NAMESPACE \
   --version $CHART_VERSION \
-  --values ./custom-values.yaml
+  --values $VALUES_FILE
 
 # Helm 2
 helm install \
@@ -36,12 +35,12 @@ helm install \
   --name $RELEASE_NAME \
   --namespace $NAMESPACE \
   --version $CHART_VERSION \
-  --values ./custom-values.yaml
+  --values $VALUES_FILE
 ```
 
-### 3 - Access the WebUI
+> ⚠️  find values for `CHART_VERSION` under [GitHub Releases](https://github.com/airflow-helm/charts/releases)
 
-> ⚠️ the default credentials are admin/admin, but you can change this with 
+### 3 - Access the WebUI
 
 ```sh
 export NAMESPACE=my-airflow-namespace
@@ -49,6 +48,12 @@ export POD_NAME=$(kubectl get pods --namespace $NAMESPACE -l "component=web,app=
 
 kubectl port-forward --namespace $NAMESPACE $POD_NAME 8080:8080
 ```
+
+> ⚠️ browse to http://localhost:8080 after running the above commands 
+>
+> - default credentials -- user: __admin__ - password: __admin__
+> - [How to create airflow users?](#how-to-create-airflow-users)
+> - [How to authenticate airflow users with LDAP/OAUTH?](#how-to-authenticate-airflow-users-with-ldapoauth)
 
 ---
 

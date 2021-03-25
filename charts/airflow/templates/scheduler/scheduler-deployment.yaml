@@ -1,3 +1,4 @@
+{{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.scheduler.extraPipPackages }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,8 +34,6 @@ spec:
       annotations:
         checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
         checksum/config-pod-template: {{ include (print $.Template.BasePath "/config/configmap-pod-template.yaml") . | sha256sum }}
-        checksum/config-scripts: {{ include (print $.Template.BasePath "/config/configmap-scripts.yaml") . | sha256sum }}
-        checksum/secret-connections: {{ include (print $.Template.BasePath "/config/secret-connections.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
@@ -75,27 +74,8 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       initContainers:
-        {{- if or (.Values.airflow.extraPipPackages) (.Values.scheduler.extraPipPackages) }}
-        - name: install-python-packages
-          image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
-          imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
-          command:
-            - "/usr/bin/dumb-init"
-            - "--"
-          args:
-            - "pip"
-            - "install"
-            - "--target"
-            - "/opt/python/site-packages"
-            {{- range .Values.airflow.extraPipPackages }}
-            - {{ . | quote }}
-            {{- end }}
-            {{- range .Values.scheduler.extraPipPackages }}
-            - {{ . | quote }}
-            {{- end }}
-          volumeMounts:
-            - name: python-site-packages
-              mountPath: /opt/python/site-packages
+        {{- if $extraPipPackages }}
+        {{- include "airflow.init_container.install_pip_packages" (dict "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
         {{- end }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
         {{- if .Values.scheduler.extraInitContainers }}
@@ -112,7 +92,7 @@ spec:
                 name: "{{ include "airflow.fullname" . }}-env"
           env:
             {{- include "airflow.common.env" . | indent 12 }}
-            {{- if or (.Values.airflow.extraPipPackages) (.Values.scheduler.extraPipPackages) }}
+            {{- if $extraPipPackages }}
             - name: PYTHONPATH
               value: /opt/python/site-packages
             {{- end }}
@@ -153,38 +133,32 @@ spec:
 
                 sys.exit(0 if job.is_alive() else 1)
           {{- end }}
+          {{- $extraVolumeMounts := .Values.scheduler.extraVolumeMounts }}
+          {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+          {{- if or ($volumeMounts) (include "airflow.executor.kubernetes_like" .) }}
           volumeMounts:
-            {{- include "airflow.common.volumeMounts" . | indent 12 }}
-            {{- if or (.Values.airflow.extraPipPackages) (.Values.scheduler.extraPipPackages) }}
-            - name: python-site-packages
-              mountPath: /opt/python/site-packages
-            {{- end }}
+            {{- $volumeMounts | indent 12 }}
             {{- if (include "airflow.executor.kubernetes_like" .) }}
             - name: pod-template
               mountPath: /home/airflow/pod_templates/pod_template.yaml
               subPath: pod_template.yaml
               readOnly: true
             {{- end }}
-            {{- if .Values.scheduler.extraVolumeMounts }}
-            {{- toYaml .Values.scheduler.extraVolumeMounts | nindent 12 }}
-            {{- end }}
+          {{- end }}
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
         {{- if .Values.airflow.extraContainers }}
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
         {{- end }}
+      {{- $extraVolumes := .Values.scheduler.extraVolumes }}
+      {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
+      {{- if or ($volumes) (include "airflow.executor.kubernetes_like" .) }}
       volumes:
-        {{- include "airflow.common.volumes" . | indent 8 }}
-        {{- if or (.Values.airflow.extraPipPackages) (.Values.scheduler.extraPipPackages) }}
-        - name: python-site-packages
-          emptyDir: {}
-        {{- end }}
+        {{- $volumes | indent 8 }}
         {{- if (include "airflow.executor.kubernetes_like" .) }}
         - name: pod-template
           configMap:
             name: {{ include "airflow.fullname" . }}-pod-template
         {{- end }}
-        {{- if .Values.scheduler.extraVolumes }}
-        {{- toYaml .Values.scheduler.extraVolumes | nindent 8 }}
-        {{- end }}
+      {{- end }}

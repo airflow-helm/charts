@@ -1,7 +1,7 @@
 {{/*
 Define an init-container which waits for DB migrations
 */}}
-{{- define "airflow.init_container.wait_for_db_migrations"}}
+{{- define "airflow.init_container.wait_for_db_migrations" }}
 - name: wait-for-db-migrations
   image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
   imagePullPolicy: {{ .Values.airflow.image.pullPolicy }}
@@ -25,9 +25,34 @@ Define an init-container which waits for DB migrations
 {{- end }}
 
 {{/*
-Define a container which regularly syncs a git-repo
+Define an init-container which installs a list of pip packages
+EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "Values" .Values "extraPipPackages" $extraPipPackages) }}
 */}}
-{{- define "airflow.container.git_sync"}}
+{{- define "airflow.init_container.install_pip_packages" }}
+- name: install-pip-packages
+  image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
+  imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
+  command:
+    - "/usr/bin/dumb-init"
+    - "--"
+  args:
+    - "pip"
+    - "install"
+    - "--target"
+    - "/opt/python/site-packages"
+    {{- range .extraPipPackages }}
+    - {{ . | quote }}
+    {{- end }}
+  volumeMounts:
+    - name: python-site-packages
+      mountPath: /opt/python/site-packages
+{{- end }}
+
+{{/*
+Define a container which regularly syncs a git-repo
+EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Values" .Values "sync_one_time" "true") }}
+*/}}
+{{- define "airflow.container.git_sync" }}
 - name: dags-git-sync
   image: {{ .Values.dags.gitSync.image.repository }}:{{ .Values.dags.gitSync.image.tag }}
   imagePullPolicy: {{ .Values.dags.gitSync.image.pullPolicy }}
@@ -99,12 +124,11 @@ Define a container which regularly syncs a git-repo
 {{- end }}
 
 {{/*
-Construct a list of common "volumeMounts" for the web/scheduler/worker/flower containers
+The list of `volumeMounts` for web/scheduler/worker/flower container
+EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
 */}}
-{{- define "airflow.common.volumeMounts" }}
-- name: scripts
-  mountPath: /home/airflow/scripts
-  readOnly: true
+{{- define "airflow.volumeMounts" }}
+{{- /* dags */ -}}
 {{- if .Values.dags.persistence.enabled }}
 - name: dags-data
   mountPath: {{ .Values.dags.path }}
@@ -113,51 +137,87 @@ Construct a list of common "volumeMounts" for the web/scheduler/worker/flower co
 - name: dags-data
   mountPath: {{ .Values.dags.path }}
 {{- end }}
+
+{{- /* logs */ -}}
 {{- if .Values.logs.persistence.enabled }}
 - name: logs-data
   mountPath: {{ .Values.logs.path }}
   subPath: {{ .Values.logs.persistence.subPath }}
 {{- end }}
+
+{{- /* pip-packages */ -}}
+{{- if .extraPipPackages }}
+- name: python-site-packages
+  mountPath: /opt/python/site-packages
+{{- end }}
+
+{{- /* user-defined (global) */ -}}
 {{- if .Values.airflow.extraVolumeMounts }}
 {{- toYaml .Values.airflow.extraVolumeMounts }}
+{{- end }}
+
+{{- /* user-defined */ -}}
+{{- if .extraVolumeMounts }}
+{{- toYaml .extraVolumeMounts }}
 {{- end }}
 {{- end }}
 
 {{/*
-Construct a list of common "volumes" for the web/scheduler/worker/flower Pods
+The list of `volumes` for web/scheduler/worker/flower Pods
+EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
 */}}
-{{- define "airflow.common.volumes" }}
-- name: scripts
-  configMap:
-    name: {{ include "airflow.fullname" . }}-scripts
-    defaultMode: 0755
-{{- if and (.Values.dags.gitSync.enabled) (.Values.dags.gitSync.sshSecret) }}
+{{- define "airflow.volumes" }}
+{{- /* dags */ -}}
+{{- if .Values.dags.persistence.enabled }}
+- name: dags-data
+  persistentVolumeClaim:
+    {{- if .Values.dags.persistence.existingClaim }}
+    claimName: {{ .Values.dags.persistence.existingClaim }}
+    {{- else }}
+    claimName: {{ printf "%s-dags" (include "airflow.fullname" . | trunc 58) }}
+    {{- end }}
+{{- else if .Values.dags.gitSync.enabled }}
+- name: dags-data
+  emptyDir: {}
+{{- end }}
+
+{{- /* logs */ -}}
+{{- if .Values.logs.persistence.enabled }}
+- name: logs-data
+  mountPath: {{ .Values.logs.path }}
+  subPath: {{ .Values.logs.persistence.subPath }}
+{{- end }}
+
+{{- /* git-sync */ -}}
+{{- if .Values.dags.gitSync.enabled }}
+{{- if .Values.dags.gitSync.sshSecret }}
 - name: git-secret
   secret:
     secretName: {{ .Values.dags.gitSync.sshSecret }}
     defaultMode: 0644
 {{- end }}
-{{- if and (.Values.dags.gitSync.enabled) (.Values.dags.gitSync.sshKnownHosts) }}
+{{- if .Values.dags.gitSync.sshKnownHosts }}
 - name: git-known-hosts
   secret:
     secretName: {{ include "airflow.fullname" . }}-known-hosts
     defaultMode: 0644
 {{- end }}
-{{- if .Values.dags.persistence.enabled }}
-- name: dags-data
-  persistentVolumeClaim:
-    claimName: {{ .Values.dags.persistence.existingClaim | default (printf "%s-dags" (include "airflow.fullname" . | trunc 58)) }}
-{{- else if .Values.dags.gitSync.enabled }}
-- name: dags-data
+{{- end }}
+
+{{- /* pip-packages */ -}}
+{{- if .extraPipPackages }}
+- name: python-site-packages
   emptyDir: {}
 {{- end }}
-{{- if .Values.logs.persistence.enabled }}
-- name: logs-data
-  persistentVolumeClaim:
-    claimName: {{ .Values.logs.persistence.existingClaim | default (printf "%s-logs" (include "airflow.fullname" . | trunc 58)) }}
-{{- end }}
+
+{{- /* user-defined (global) */ -}}
 {{- if .Values.airflow.extraVolumes }}
 {{- toYaml .Values.airflow.extraVolumes }}
+{{- end }}
+
+{{- /* user-defined */ -}}
+{{- if .extraVolumes }}
+{{- toYaml .extraVolumes }}
 {{- end }}
 {{- end }}
 
