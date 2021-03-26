@@ -16,10 +16,9 @@ Define an init-container which checks the DB status
 - name: check-db
   {{- include "airflow.image" . | indent 2 }}
   envFrom:
-    - configMapRef:
-        name: "{{ include "airflow.fullname" . }}-env"
+    {{- include "airflow.envFrom" . | indent 4 }}
   env:
-    {{- include "airflow.common.env" . | indent 4 }}
+    {{- include "airflow.env" . | indent 4 }}
   command:
     - "/usr/bin/dumb-init"
     - "--"
@@ -40,10 +39,9 @@ Define an init-container which waits for DB migrations
 - name: wait-for-db-migrations
   {{- include "airflow.image" . | indent 2 }}
   envFrom:
-    - configMapRef:
-        name: "{{ include "airflow.fullname" . }}-env"
+    {{- include "airflow.envFrom" . | indent 4 }}
   env:
-    {{- include "airflow.common.env" . | indent 4 }}
+    {{- include "airflow.env" . | indent 4 }}
   command:
     - "/usr/bin/dumb-init"
     - "--"
@@ -260,13 +258,18 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Values" .Values "extraPipPack
 {{- end }}
 
 {{/*
-Construct a list of common "env" for the web/scheduler/worker/flower Pods
-NOTE: when applicable, we use the secrets created by the postgres/redis charts (which have fixed names and secret keys)
+The list of `envFrom` for web/scheduler/worker/flower Pods
 */}}
-{{- define "airflow.common.env" -}}
-{{- /* ------------------------------ */ -}}
-{{- /* ---------- POSTGRES ---------- */ -}}
-{{- /* ------------------------------ */ -}}
+{{- define "airflow.envFrom" }}
+- secretRef:
+    name: "{{ include "airflow.fullname" . }}-config"
+{{- end }}
+
+{{/*
+The list of `env` for web/scheduler/worker/flower Pods
+*/}}
+{{- define "airflow.env" }}
+{{- /* postgres environment variables */ -}}
 {{- if .Values.postgresql.enabled }}
 {{- if .Values.postgresql.existingSecret }}
 - name: DATABASE_PASSWORD
@@ -293,9 +296,8 @@ NOTE: when applicable, we use the secrets created by the postgres/redis charts (
   value: ""
 {{- end }}
 {{- end }}
-{{- /* --------------------------- */ -}}
-{{- /* ---------- REDIS ---------- */ -}}
-{{- /* --------------------------- */ -}}
+
+{{- /* redis environment variables */ -}}
 {{- if .Values.redis.enabled }}
 {{- if .Values.redis.existingSecret }}
 - name: REDIS_PASSWORD
@@ -322,10 +324,9 @@ NOTE: when applicable, we use the secrets created by the postgres/redis charts (
   value: ""
 {{- end }}
 {{- end }}
-{{- end }}
-{{- /* ---------------------------- */ -}}
-{{- /* ---------- EXTRAS ---------- */ -}}
-{{- /* ---------------------------- */ -}}
+
+{{- /* user-defined environment variables */ -}}
 {{- if .Values.airflow.extraEnv }}
 {{ toYaml .Values.airflow.extraEnv }}
+{{- end }}
 {{- end }}

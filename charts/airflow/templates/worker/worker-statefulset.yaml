@@ -33,7 +33,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
+        checksum/secret-config: {{ include (print $.Template.BasePath "/config/secret-config.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
@@ -90,10 +90,9 @@ spec:
           resources:
             {{- toYaml .Values.workers.resources | nindent 12 }}
           envFrom:
-            - configMapRef:
-                name: "{{ include "airflow.fullname" . }}-env"
+            {{- include "airflow.envFrom" . | indent 12 }}
           env:
-            {{- include "airflow.common.env" . | indent 12 }}
+            {{- include "airflow.env" . | indent 12 }}
             {{- if $extraPipPackages }}
             - name: PYTHONPATH
               value: /opt/python/site-packages

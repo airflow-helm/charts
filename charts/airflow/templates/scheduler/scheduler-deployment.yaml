@@ -32,7 +32,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
+        checksum/secret-config: {{ include (print $.Template.BasePath "/config/secret-config.yaml") . | sha256sum }}
         checksum/config-pod-template: {{ include (print $.Template.BasePath "/config/configmap-pod-template.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
@@ -88,10 +88,9 @@ spec:
           resources:
             {{- toYaml .Values.scheduler.resources | nindent 12 }}
           envFrom:
-            - configMapRef:
-                name: "{{ include "airflow.fullname" . }}-env"
+            {{- include "airflow.envFrom" . | indent 12 }}
           env:
-            {{- include "airflow.common.env" . | indent 12 }}
+            {{- include "airflow.env" . | indent 12 }}
             {{- if $extraPipPackages }}
             - name: PYTHONPATH
               value: /opt/python/site-packages
@@ -142,9 +141,9 @@ spec:
           {{- if or ($volumeMounts) (include "airflow.executor.kubernetes_like" .) }}
           volumeMounts:
             {{- $volumeMounts | indent 12 }}
-            {{- if (include "airflow.executor.kubernetes_like" .) }}
+            {{- if include "airflow.executor.kubernetes_like" . }}
             - name: pod-template
-              mountPath: /home/airflow/pod_templates/pod_template.yaml
+              mountPath: /opt/airflow/pod_templates/pod_template.yaml
               subPath: pod_template.yaml
               readOnly: true
             {{- end }}
@@ -160,7 +159,7 @@ spec:
       {{- if or ($volumes) (include "airflow.executor.kubernetes_like" .) }}
       volumes:
         {{- $volumes | indent 8 }}
-        {{- if (include "airflow.executor.kubernetes_like" .) }}
+        {{- if include "airflow.executor.kubernetes_like" . }}
         - name: pod-template
           configMap:
             name: {{ include "airflow.fullname" . }}-pod-template

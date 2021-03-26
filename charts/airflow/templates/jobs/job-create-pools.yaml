@@ -33,10 +33,9 @@ spec:
         - name: create-pools
           {{- include "airflow.image" . | indent 10 }}
           envFrom:
-            - configMapRef:
-                name: "{{ include "airflow.fullname" $ }}-env"
+            {{- include "airflow.envFrom" . | indent 12 }}
           env:
-            {{- include "airflow.common.env" $ | indent 12 }}
+            {{- include "airflow.env" . | indent 12 }}
           command:
             - "/usr/bin/dumb-init"
             - "--"

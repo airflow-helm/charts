@@ -1,4 +1,4 @@
-{{- if (include "airflow.executor.kubernetes_like" .) }}
+{{- if include "airflow.executor.kubernetes_like" . }}
 apiVersion: v1
 kind: ConfigMap
 metadata:

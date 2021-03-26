@@ -45,7 +45,7 @@ spec:
         - configMapRef:
             name: "{{ include "airflow.fullname" . }}-env"
       env:
-        {{- include "airflow.common.env" . | indent 8 }}
+        {{- include "airflow.env" . | indent 8 }}
         - name: AIRFLOW__CORE__EXECUTOR
           value: LocalExecutor
       ports: []
