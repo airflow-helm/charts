@@ -14,6 +14,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
+  ttlSecondsAfterFinished: 300
   template:
     metadata:
       labels:
@@ -23,15 +24,14 @@ spec:
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
     spec:
+      restartPolicy: OnFailure
       {{- if .Values.airflow.image.pullSecret }}
       imagePullSecrets:
         - name: {{ .Values.airflow.image.pullSecret }}
       {{- end }}
-      restartPolicy: OnFailure
       containers:
         - name: create-variables
-          image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
-          imagePullPolicy: {{ .Values.airflow.image.pullPolicy }}
+          {{- include "airflow.image" . | indent 10 }}
           envFrom:
             - configMapRef:
                 name: "{{ include "airflow.fullname" $ }}-env"

@@ -51,9 +51,10 @@ export POD_NAME=$(kubectl get pods --namespace $NAMESPACE -l "component=web,app=
 kubectl port-forward --namespace $NAMESPACE $POD_NAME 8080:8080
 ```
 
-> - default credentials -- user: __admin__ - password: __admin__
-> - [How to create airflow users?](#how-to-create-airflow-users)
-> - [How to authenticate airflow users with LDAP/OAUTH?](#how-to-authenticate-airflow-users-with-ldapoauth)
+__NOTE:__
+- default credentials -- user: __admin__ - password: __admin__
+- [How to create airflow users?](#how-to-create-airflow-users)
+- [How to authenticate airflow users with LDAP/OAUTH?](#how-to-authenticate-airflow-users-with-ldapoauth)
 
 
 # Documentation
@@ -943,7 +944,7 @@ extraManifests:
 Parameter | Description | Default
 --- | --- | ---
 `airflow.legacyCommands` | if we use legacy 1.10 airflow commands | `false`
-`airflow.image.*` | the container image for the web/scheduler/worker/flower containers | `<see values.yaml>`
+`airflow.image.*` | configs for the airflow container image | `<see values.yaml>`
 `airflow.executor` | the airflow executor type to use | `CeleryExecutor`
 `airflow.fernetKey` | the fernet key used to encrypt the connections/variables in the database | `7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc=`
 `airflow.config` | environment variables for airflow configs | `{}`

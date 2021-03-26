@@ -1,5 +1,5 @@
 {{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.flower.extraPipPackages }}
-{{- if and (.Values.flower.enabled) (include "airflow.executor.celery_like" .) }}
+{{- if .Values.flower.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -51,11 +51,11 @@ spec:
         {{- toYaml .Values.flower.podLabels | nindent 8 }}
         {{- end }}
     spec:
+      restartPolicy: Always
       {{- if .Values.airflow.image.pullSecret }}
       imagePullSecrets:
         - name: {{ .Values.airflow.image.pullSecret }}
       {{- end }}
-      restartPolicy: Always
       {{- if .Values.flower.nodeSelector }}
       nodeSelector:
         {{- toYaml .Values.flower.nodeSelector | nindent 8 }}
@@ -77,11 +77,11 @@ spec:
         {{- if $extraPipPackages }}
         {{- include "airflow.init_container.install_pip_packages" (dict "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
         {{- end }}
+        {{- include "airflow.init_container.check_db" . | indent 8 }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
       containers:
         - name: airflow-flower
-          image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
-          imagePullPolicy: {{ .Values.airflow.image.pullPolicy }}
+          {{- include "airflow.image" . | indent 10 }}
           resources:
             {{- toYaml .Values.flower.resources | nindent 12 }}
           envFrom:

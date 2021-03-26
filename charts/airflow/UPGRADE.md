@@ -2,6 +2,8 @@
 
 ## `v7.15.X` → `v8.0.0`
 
+NOTE: first release with native support for `KubernetesExecutor` and `CeleryKubernetesExecutor` executor, just set `airflow.executor`
+
 WARNING: this is a major upgrade, so expect a few issues at first, please raise issues for them as you find them. 
 - you also might want to consider starting your values.yaml file again.
 
@@ -104,6 +106,8 @@ Changed default:
 
 Added values:
 - `airflow.legacyCommands`
+- `airflow.image.uid`
+- `airflow.image.gid`
 - `airflow.users`
 - `airflow.usersUpdate`
 - `airflow.connections`
@@ -118,6 +122,9 @@ Added values:
 - `airflow.kubernetesPodTemplate.tolerations`
 - `airflow.kubernetesPodTemplate.podAnnotations`
 - `airflow.kubernetesPodTemplate.securityContext`
+- `airflow.kubernetesPodTemplate.extraPipPackages`
+- `airflow.kubernetesPodTemplate.extraVolumeMounts`
+- `airflow.kubernetesPodTemplate.extraVolumes`  
 - `scheduler.replicas`
 - `scheduler.extraPipPackages`
 - `scheduler.extraVolumeMounts`
@@ -145,6 +152,8 @@ Added values:
 - `dags.gitSync.image.repository`
 - `dags.gitSync.image.tag`
 - `dags.gitSync.image.pullPolicy`
+- `dags.gitSync.image.uid`
+- `dags.gitSync.image.gid`  
 - `dags.gitSync.resources`
 - `dags.gitSync.repo`
 - `dags.gitSync.repoSubPath`
@@ -184,6 +193,7 @@ Removed the following values:
 - `web.secretsDir`
 - `web.secrets`
 - `web.secretsMap`  
+- `workers.celery.instances`  
 - `workers.initialStartupDelay`
 - `workers.secretsDir`
 - `workers.secrets`
@@ -335,8 +345,6 @@ __The following IMPROVEMENTS have been made:__
 * You can now specify minReadySeconds for flower
 
 __The following values have CHANGED DEFAULTS:__
-* `workers.celery.instances`:
-    * Is now `16` by default (letting each worker take 16 tasks)
 * `postgresql.master.podAnnotations`:
     * Is now `{"cluster-autoscaler.kubernetes.io/safe-to-evict": "true"}`
 * `redis.master.podAnnotations`:

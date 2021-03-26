@@ -6,7 +6,7 @@ airflow:
   ##
   legacyCommands: false
 
-  ## the container image for the web/scheduler/worker/flower containers
+  ## configs for the airflow container image
   ##
   image:
     repository: apache/airflow
@@ -14,15 +14,13 @@ airflow:
     ## values: Always or IfNotPresent
     pullPolicy: IfNotPresent
     pullSecret: ""
+    uid: 50000
+    gid: 50000
 
   ## the airflow executor type to use
   ##
   ## NOTE:
-  ## - possible values:
-  ##   - CeleryExecutor
-  ##   - CeleryKubernetesExecutor
-  ##   - KubernetesExecutor
-  ##
+  ## - allowed values: "CeleryExecutor", "CeleryKubernetesExecutor", "KubernetesExecutor"
   ## - if you set KubernetesExecutor or CeleryKubernetesExecutor, we automatically set:
   ##   - AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF [unused from Airflow 2.0+]
   ##   - AIRFLOW__KUBERNETES__NAMESPACE
@@ -30,11 +28,6 @@ airflow:
   ##   - AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY
   ##   - AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG
   ##   - AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME [unused from Airflow 2.0+]
-  ##
-  ## - if you set KubernetesExecutor, you should:
-  ##   - set `workers.enabled` to `false`
-  ##   - set `flower.enabled` to `false`
-  ##   - set `redis.enabled` to `false`
   ##
   executor: CeleryExecutor
 
@@ -51,14 +44,9 @@ airflow:
 
   ## environment variables for airflow configs
   ##
-  ## https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html
-  ##
   ## NOTE:
-  ## - airflow configs env-vars are structured: "AIRFLOW__<config_section>__<config_name>"
-  ## - DON'T SET THESE CONFIGS, the chart will overwrite them:
-  ##   - AIRFLOW__CELERY__BROKER_URL
-  ##   - AIRFLOW__CELERY__RESULT_BACKEND
-  ##   - AIRFLOW__CORE__SQL_ALCHEMY_CONN
+  ## - config docs: https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html
+  ## - airflow configs env-vars are structured: "AIRFLOW__{config_section}__{config_name}"
   ##
   ## EXAMPLE:
   ##   config:
@@ -173,10 +161,6 @@ airflow:
 
   ## extra annotations for the web/scheduler/worker/flower Pods
   ##
-  ## EXAMPLE:
-  ##   podAnnotations:
-  ##     iam.amazonaws.com/role: "airflow-Role"
-  ##
   podAnnotations: {}
 
   ## extra pip packages to install in the web/scheduler/worker/flower Pods
@@ -192,28 +176,12 @@ airflow:
   ## SPEC - EnvVar:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#envvar-v1-core
   ##
-  ## EXAMPLE:
-  ##   extraEnv:
-  ##     - name: AIRFLOW__CORE__FERNET_KEY
-  ##       valueFrom:
-  ##         secretKeyRef:
-  ##           name: airflow-fernet-key
-  ##           key: value
-  ##
   extraEnv: []
 
   ## extra containers for the web/scheduler/worker/flower Pods
   ##
   ## SPEC - Container:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
-  ##
-  ## EXAMPLE: (a sidecar that syncs DAGs from object storage)
-  ##   extraContainers:
-  ##     - name: s3-sync
-  ##       image: my-user/s3sync:latest
-  ##       volumeMounts:
-  ##         - name: synchronised-dags
-  ##           mountPath: /dags
   ##
   extraContainers: []
 
@@ -222,11 +190,6 @@ airflow:
   ## SPEC - VolumeMount:
   ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
   ##
-  ## EXAMPLE:
-  ##   extraVolumeMounts:
-  ##     - name: synchronised-dags
-  ##       mountPath: /opt/airflow/dags
-  ##
   extraVolumeMounts: []
 
   ## extra Volumes for the web/scheduler/worker/flower Pods
@@ -234,20 +197,16 @@ airflow:
   ## SPEC - Volume:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
   ##
-  ## EXAMPLE:
-  ##   extraVolumes:
-  ##     - name: synchronised-dags
-  ##       emptyDir: {}
-  ##
   extraVolumes: []
 
   ## configs to generate the AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE
   ##
   ## NOTE:
   ## - the generated "pod_template.yaml" is only mounted if `airflow.executor` is:
-  ##   CeleryKubernetesExecutor or KubernetesExecutor
+  ##   "CeleryKubernetesExecutor" or "KubernetesExecutor"
   ## - values like `dags.gitSync.enabled` are respected by including the required sidecar
   ##   containers in the template
+  ## - the global `airflow.extraPipPackages` will NOT be installed in any circumstance
   ## - read the airflow docs for pod-template-file:
   ##   https://airflow.apache.org/docs/apache-airflow/stable/executor/kubernetes.html#pod-template-file
   ##
@@ -274,13 +233,22 @@ airflow:
 
     ## the nodeSelector configs for the Pod template
     ##
+    ## DOCS:
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+    ##
     nodeSelector: {}
 
     ## the affinity configs for the Pod template
     ##
+    ## SPEC - Affinity:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+    ##
     affinity: {}
 
     ## the toleration configs for the Pod template
+    ##
+    ## SPEC - Toleration:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
     ##
     tolerations: []
 
@@ -290,7 +258,32 @@ airflow:
 
     ## the security context for the Pod template
     ##
+    ## SPEC - SecurityContext:
+    ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
+    ##
     securityContext: {}
+
+    ## extra pip packages to install in the Pod template
+    ##
+    ## EXAMPLE:
+    ##   extraPipPackages:
+    ##     - "SomeProject==1.0.0"
+    ##
+    extraPipPackages: []
+
+    ## extra VolumeMounts for the Pod template
+    ##
+    ## SPEC - VolumeMount:
+    ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+    ##
+    extraVolumeMounts: []
+
+    ## extra Volumes for the Pod template
+    ##
+    ## SPEC - Volume:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+    ##
+    extraVolumes: []
 
 ###################################
 # Airflow - Scheduler Configs
@@ -679,13 +672,6 @@ workers:
   ## configs for the celery worker Pods
   ##
   celery:
-    ## the number of tasks each celery worker can run at a time
-    ##
-    ## NOTE:
-    ## - sets AIRFLOW__CELERY__WORKER_CONCURRENCY
-    ##
-    instances: 16
-
     ## if celery worker Pods are gracefully terminated
     ##
     ## graceful termination process:
@@ -946,10 +932,6 @@ dags:
   persistence:
     ## if a persistent volume is mounted at `dags.path`
     ##
-    ## WARNING:
-    ## - do not enable `dags.git.gitSync` if this is enabled, otherwise all the git-sync
-    ##   containers will fight for control over this PVC
-    ##
     enabled: false
 
     ## the name of an existing PVC to use
@@ -995,6 +977,8 @@ dags:
       tag: v3.2.2
       ## values: Always or IfNotPresent
       pullPolicy: IfNotPresent
+      uid: 65533
+      gid: 65533
 
     ## resource requests/limits for the git-sync container
     ##
@@ -1161,9 +1145,6 @@ ingress:
     ## WARNING:
     ## - do NOT include the trailing slash (for root, set an empty string)
     ##
-    ## NOTE:
-    ## - should match `AIRFLOW__CELERY__FLOWER_URL_PREFIX` config
-    ##
     ## EXAMPLE: (if set to "/airflow/flower")
     ## - UI: http://example.com/airflow/flower
     ##
@@ -1257,6 +1238,9 @@ serviceAccount:
 # Kubernetes - Extra Manifests
 ###################################
 ## extra Kubernetes manifests to include alongside this chart
+##
+## NOTE:
+## - this can be used to include ANY Kubernetes YAML resource
 ##
 ## EXAMPLE:
 ##   extraManifests:

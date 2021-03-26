@@ -1,10 +1,44 @@
 {{/*
+Define the image configs for airflow containers
+*/}}
+{{- define "airflow.image" }}
+image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
+imagePullPolicy: {{ .Values.airflow.image.pullPolicy }}
+securityContext:
+  runAsUser: {{ .Values.airflow.image.uid }}
+  runAsGroup: {{ .Values.airflow.image.gid }}
+{{- end }}
+
+{{/*
+Define an init-container which checks the DB status
+*/}}
+{{- define "airflow.init_container.check_db" }}
+- name: check-db
+  {{- include "airflow.image" . | indent 2 }}
+  envFrom:
+    - configMapRef:
+        name: "{{ include "airflow.fullname" . }}-env"
+  env:
+    {{- include "airflow.common.env" . | indent 4 }}
+  command:
+    - "/usr/bin/dumb-init"
+    - "--"
+  args:
+    - "bash"
+    - "-c"
+    {{- if .Values.airflow.legacyCommands }}
+    - "exec airflow checkdb"
+    {{- else }}
+    - "exec airflow db check"
+    {{- end }}
+{{- end }}
+
+{{/*
 Define an init-container which waits for DB migrations
 */}}
 {{- define "airflow.init_container.wait_for_db_migrations" }}
 - name: wait-for-db-migrations
-  image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
-  imagePullPolicy: {{ .Values.airflow.image.pullPolicy }}
+  {{- include "airflow.image" . | indent 2 }}
   envFrom:
     - configMapRef:
         name: "{{ include "airflow.fullname" . }}-env"
@@ -30,8 +64,7 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "V
 */}}
 {{- define "airflow.init_container.install_pip_packages" }}
 - name: install-pip-packages
-  image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
-  imagePullPolicy: {{ .Values.airflow.image.pullPolicy}}
+  {{- include "airflow.image" . | indent 2 }}
   command:
     - "/usr/bin/dumb-init"
     - "--"
@@ -56,6 +89,9 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Values" .Values "s
 - name: dags-git-sync
   image: {{ .Values.dags.gitSync.image.repository }}:{{ .Values.dags.gitSync.image.tag }}
   imagePullPolicy: {{ .Values.dags.gitSync.image.pullPolicy }}
+  securityContext:
+    runAsUser: {{ .Values.dags.gitSync.image.uid }}
+    runAsGroup: {{ .Values.dags.gitSync.image.gid }}
   resources:
     {{- toYaml .Values.dags.gitSync.resources | nindent 4 }}
   env:
@@ -79,6 +115,8 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Values" .Values "s
       value: {{ .Values.dags.gitSync.syncWait | quote }}
     - name: GIT_SYNC_TIMEOUT
       value: {{ .Values.dags.gitSync.syncTimeout | quote }}
+    - name: GIT_SYNC_ADD_USER
+      value: "true"
     {{- if .Values.dags.gitSync.sshSecret }}
     - name: GIT_SYNC_SSH
       value: "true"
@@ -258,7 +296,6 @@ NOTE: when applicable, we use the secrets created by the postgres/redis charts (
 {{- /* --------------------------- */ -}}
 {{- /* ---------- REDIS ---------- */ -}}
 {{- /* --------------------------- */ -}}
-{{- if (include "airflow.executor.celery_like" .) }}
 {{- if .Values.redis.enabled }}
 {{- if .Values.redis.existingSecret }}
 - name: REDIS_PASSWORD
@@ -291,5 +328,4 @@ NOTE: when applicable, we use the secrets created by the postgres/redis charts (
 {{- /* ---------------------------- */ -}}
 {{- if .Values.airflow.extraEnv }}
 {{ toYaml .Values.airflow.extraEnv }}
-{{- end }}
 {{- end }}

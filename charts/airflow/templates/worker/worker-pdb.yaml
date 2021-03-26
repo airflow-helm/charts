@@ -1,4 +1,4 @@
-{{- if and (.Values.workers.enabled) (include "airflow.executor.celery_like" .) (.Values.workers.podDisruptionBudget.enabled) }}
+{{- if and (.Values.workers.enabled) (.Values.workers.podDisruptionBudget.enabled) }}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:

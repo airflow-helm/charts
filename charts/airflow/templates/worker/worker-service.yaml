@@ -1,6 +1,6 @@
-{{- if and (.Values.workers.enabled) (include "airflow.executor.celery_like" .) }}
+{{- if .Values.workers.enabled }}
 apiVersion: v1
-## Service gives stable DNS entries for workers, used by webserver for logs
+## this Service gives stable DNS entries for workers, used by webserver for logs
 kind: Service
 metadata:
   name: {{ include "airflow.fullname" . }}-worker

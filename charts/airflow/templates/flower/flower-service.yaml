@@ -1,4 +1,4 @@
-{{- if and (.Values.flower.enabled) (include "airflow.executor.celery_like" .) }}
+{{- if .Values.flower.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
