@@ -145,5 +145,9 @@ spec:
         {{- $volumes | indent 8 }}
         - name: webserver-config
           secret:
+            {{- if .Values.web.webserverConfig.existingSecret }}
+            secretName: {{ .Values.web.webserverConfig.existingSecret }}
+            {{- else }}
             secretName: {{ include "airflow.fullname" . }}-webserver-config
+            {{- end }}
             defaultMode: 0644

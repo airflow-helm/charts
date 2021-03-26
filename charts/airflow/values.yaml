@@ -420,7 +420,7 @@ web:
     ## the full text value to mount as the webserver_config.py file
     ##
     ## NOTE:
-    ## - if set, will override all other values
+    ## - if set, will override all values except `webserverConfig.existingSecret`
     ##
     ## EXAMPLE:
     ##    stringOverride: |-
@@ -434,6 +434,10 @@ web:
     ##      AUTH_TYPE = AUTH_DB
     ##
     stringOverride: ""
+
+    ## the name of a pre-created secret containing a `webserver_config.py` file as a key
+    ##
+    existingSecret: ""
 
   ## the number of web Pods to run
   ##

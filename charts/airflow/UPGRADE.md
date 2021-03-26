@@ -61,10 +61,10 @@
 - `web.readinessProbe.enabled` = `true`
 - `web.readinessProbe.timeoutSeconds` = `5`
 - `web.livenessProbe.periodSeconds` = `10`
-- `web.readinessProbe.failureThreshold` = `6`  
-- `web.livenessProbe.initialDelaySeconds` = `10`  
-- `web.livenessProbe.timeoutSeconds` = `5`  
-- `web.livenessProbe.failureThreshold` = `6`  
+- `web.readinessProbe.failureThreshold` = `6`
+- `web.livenessProbe.initialDelaySeconds` = `10`
+- `web.livenessProbe.timeoutSeconds` = `5`
+- `web.livenessProbe.failureThreshold` = `6`
 - `scheduler.podDisruptionBudget.enabled` = `false`
 
 ### VALUES - New:
@@ -87,12 +87,13 @@
 - `airflow.kubernetesPodTemplate.securityContext`
 - `airflow.kubernetesPodTemplate.extraPipPackages`
 - `airflow.kubernetesPodTemplate.extraVolumeMounts`
-- `airflow.kubernetesPodTemplate.extraVolumes`  
+- `airflow.kubernetesPodTemplate.extraVolumes`
 - `scheduler.replicas`
 - `scheduler.extraPipPackages`
 - `scheduler.extraVolumeMounts`
 - `scheduler.extraVolumes`
 - `web.webserverConfig.stringOverride`
+- `web.webserverConfig.existingSecret`
 - `web.extraVolumeMounts`
 - `web.extraVolumes`
 - `workers.extraPipPackages`
@@ -116,7 +117,7 @@
 - `dags.gitSync.image.tag`
 - `dags.gitSync.image.pullPolicy`
 - `dags.gitSync.image.uid`
-- `dags.gitSync.image.gid`  
+- `dags.gitSync.image.gid`
 - `dags.gitSync.resources`
 - `dags.gitSync.repo`
 - `dags.gitSync.repoSubPath`
@@ -134,7 +135,7 @@
   
 ### VALUES - Removed:
 - `airflow.extraConfigmapMounts`
-- `scheduler.initialStartupDelay` 
+- `scheduler.initialStartupDelay`
 - `scheduler.preinitdb`
 - `scheduler.initdb`
 - `scheduler.connections`
@@ -144,7 +145,7 @@
 - `scheduler.variables`
 - `scheduler.secretsDir`
 - `scheduler.secrets`
-- `scheduler.secretsMap`  
+- `scheduler.secretsMap`
 - `web.initialStartupDelay`
 - `web.minReadySeconds`
 - `web.baseUrl`
@@ -155,8 +156,8 @@
 - `web.livenessProbe.successThreshold`
 - `web.secretsDir`
 - `web.secrets`
-- `web.secretsMap`  
-- `workers.celery.instances`  
+- `web.secretsMap`
+- `workers.celery.instances`
 - `workers.initialStartupDelay`
 - `workers.secretsDir`
 - `workers.secrets`
