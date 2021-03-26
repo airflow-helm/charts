@@ -2,97 +2,60 @@
 
 ## `v7.15.X` → `v8.0.0`
 
-NOTE: first release with native support for `KubernetesExecutor` and `CeleryKubernetesExecutor` executor, just set `airflow.executor`
+> 🛑️️ this is a MAJOR update, meaning there are BREAKING changes
+> - you might want to start your `values.yaml` file again
 
-WARNING: this is a major upgrade, so expect a few issues at first, please raise issues for them as you find them. 
-- you also might want to consider starting your values.yaml file again.
+> ⚠️ the default version of airflow has changed to `2.0.1`
+> - check your dags [are compatible](https://airflow.apache.org/docs/apache-airflow/stable/upgrading-to-2.html#step-5-upgrade-airflow-dags)
+> - note that you won't be able to downgrade your database back to `1.10.X` schema
+> - the default version of python has changed to `3.8`
 
-WARNING: the default version of airflow + Python has been upgraded to:
-- airflow: 2.0.1 
-- python: 3.8
-- CHECK YOUR DAGS: https://airflow.apache.org/docs/apache-airflow/stable/upgrading-to-2.html#step-5-upgrade-airflow-dags
+### Feature Highlights:
+- native support for "KubernetesExecutor", and "CeleryKubernetesExecutor", see the new `airflow.kubernetesPodTemplate.*` values
+- native support for "webserver_config.py", see the new `web.webserverConfig.*` values
+- native support for [Airflow 2.0's HA scheduler](https://airflow.apache.org/docs/apache-airflow/stable/scheduler.html#running-more-than-one-scheduler), see the new `scheduler.replicas` value
+- significantly improved git-sync system by moving to [kubernetes/git-sync](https://github.com/kubernetes/git-sync)
+- significantly improved pip installs by moving to an init-container
+- added a [guide for integrating airflow with your "Microsoft AD" or "OAUTH"](README.md#how-to-authenticate-airflow-users-with-ldapoauth)
+- general cleanup of almost every helm file
+- significant docs/README rewrite
 
-WARNING: if intend to keep using airflow 1.10.X, you must enable `airflow.legacyCommands`
-- there is no longer any guarantee for 1.10 support
+### Other Features:
+- added `airflow.users` to help you create/update airflow web users:
+  - __WARNING:__ default settings create an admin user (user: __admin__ - password: __admin__), disable by setting `airflow.users` to `[]`
+- added `airflow.connections` to help you create/update airflow connections:
+- added `airflow.variables` to help you create/update airflow variables:
+- added `airflow.pools` to help you create/update airflow pools:
+- flower Pods are now affected by `airflow.extraPipPackages`, `airflow.extraContainers`, `airflow.extraVolumeMounts`, `airlfow.extraVolumes`  
+- you no longer need to set `web.readinessProbe.scheme` or `web.livenessProbe.scheme`, we now only use HTTPS if `AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT` and `AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY` are set
+- airflow db upgrades are now managed with a post "helm upgrade" Job, meaning it only runs once per upgrade (rather than each time the scheduler starts)
 
-WARNING: we added native support for `webserver_config.py`
-- if you were using a `airflow.extraConfigmapMounts` previously, please move to `web.webserverConfig.stringOverride`
-- ?? we need to provide an existing-secret alternative to stringOverride ??
+### Removed Features
+- the `XXX.extraConfigmapMounts`, `XXX.secretsDir`, `XXX.secrets`, `XXX.secretsMap` values have been removed, and replaced with `XXX.extraVolumes` and `XXX.extraVolumeMounts`, which use typical Kubernetes volume-mount syntax
+- the `dags.installRequirements` value has been removed, please instead use the `XXX.extraPipPackages` values, this change was made for two main reasons: 
+  1. allowed us to move the pip-install commands into an init-container, which greatly simplifies pod-startup, and removes the need to set any kind of readiness-probe delay in Webserver/Flower Pods
+  2. the installRequirements command only ran at Pod start up, meaning you would have to restart all your pods if you updated the `requirements.txt` in your git repo (which isn't very declarative)
 
-WARNING: we have added `airflow.users` value:
-- who's default value will automatically create an admin user, if you don't want this, please explicitly set `airflow.users` to `[]`
-- after each `helm install/upgrade ...` the users defined in `airflow.users` will be created in RBAC
+### Known Issues:
+- some environments seem to get failures in the scheduler liveness probe, if you encounter scheduler restarts, disable the probe with `scheduler.livenessProbe.enabled` until we fix it (or contribute your fix!)
+- if you want to continue using airflow `1.10.X`, you must enable `airflow.legacyCommands`, but note that not all features of the chart will work (and there is no expectation of full support for `1.10.X`)
+- if you were using `dags.persistence.enabled` but not explicitly setting `dags.persistence.existingClaim`, the name of the PVC will change (meaning your dags will disappear)
+  - to fix this, set `dags.persistence.existingClaim` to the value of the previous dags PVC (which will be your Helm RELEASE_NAME)
 
-WARNING: the `dags.installRequirements` value has been removed, please move to `airflow.extra...`
-- we removed this feature for two main reasons: 
-   1. this change allowed us to move the pip install commands into an init-container, which greatly simplifies pod-startup, and removes the need to set any kind of delay in serving web-traffic to Webserver/FLower Pods
-   2. the installRequirements command only run at Pod started up, meaning you would have to restart all your pods if you updated the `requirements.txt` in your repo
-- ?? add an `extraPipPackages` value for `pod_template.yaml` ??
+### Recommendations:
+- start your values.yaml from scratch (by looking at the new examples, and defaults)
 
-WARNING: if you were using git-sync, you must move to the new `dags.gitSync` values 
-- ?? link to README.md ??
+### Request for Contributions:
+- improvements for the docs
+- any feature you need to get the chart running in your environment (NOTE: we won't always implement every feature proposed)
+- resolve the issue with Scheduler liveness probe
+  - The issue is the python import: `from airflow.jobs.scheduler_job import SchedulerJob` fails in the probe, but NOT when executing bash commands on the container, which is strange!
+- replace the `postgresql` and `redis` sub-charts (currently declared in `requirements.yaml`) with straight YAML in this chart
+- implement a system where `XXX.extraPipPackages` only requires a single installation after each "helm upgrade" (probably using Jobs and PersistentVolumeClaims)
+   - This will be most beneficial for `airflow.kubernetesPodTemplate.extraPipPackages`, as those pip installs have to run for every task in "KubernetesExecutor" mode
+- autoscaling using [KEDA](https://github.com/kedacore/keda) for the scheduler/worker replica counts (this will let us remove the largely useless HorizontalPodAutoscaler approach)
 
-WARNING: the way you mount extra secrets/configmaps has changed
-- `airflow.extraConfigmapMounts` has been removed
-  - if you still need to mount configmap as a file, you can use `airflow.extraVolumes` and `airflow.extraVolumeMounts`
-- `scheduler.secretsDir`, `scheduler.secrets`, `scheduler.secretsMap` have been removed
-  - if you still need to mount volumes, you can use `scheduler.extraVolumes`, `scheduler.extraVolumeMounts`
-- `web.secretsDir`, `web.secrets`, `web.secretsMap` have been removed
-  - if you still need to mount volumes, you can use `web.extraVolumes`, `web.extraVolumeMounts`
-- `workers.secretsDir`, `workers.secrets`, `workers.secretsMap` have been removed
-  - if you still need to mount volumes, you can use `workers.extraVolumes`, `workers.extraVolumeMounts`
-- `flower.secretsDir`, `flower.secrets`, `flower.secretsMap`, `flower.extraConfigmapMounts` have been removed
-  - if you still need to mount volumes, you can use `flower.extraVolumes`, `flower.extraVolumeMounts`
-
-WARNING: we have changed the way to define airflow connections/variables/pools
-- all are now installed in a post-install helm Job (so are only run each time you install/update the chart, rather than each time the scheduler starts)
-- connections:
-   - removed `scheduler.connections` and `scheduler.existingSecretConnections` and `scheduler.refreshConnections`
-   - added `airflow.connections` and `airflow.connectionsUpdate`
-- variables:
-   - removed `scheduler.variables`
-   - added `airflow.variables` and `airflow.variablesUpdate`
-- pools:
-   - removed `scheduler.pools`
-   - added `airflow.pools` and `airflow.poolsUpdate`
-
-WARNING: if you were using `dags.persistence.enabled` (but not setting `dags.persistence.existingClaim`), the name of the PVC will change, meaning your dags will disappear
-- to fix this, set `dags.persistence.existingClaim` to the value of the previous PVC (which will be your Helm RELEASE_NAME)
-
-WARNING: the flower Pods are now affected by 
-- `airflow.extraPipPackages`
-- `airflow.extraContainers`
-- `airflow.extraVolumeMounts`
-- `airlfow.extraVolumes`
-
-NOTE: there are now docs for how to set up your Microsoft-AD/OAUTH
-- ?? add a link to README here ??
-
-NOTE: you no longer need to set `web.readinessProbe.scheme` or `web.livenessProbe.scheme`, as we set them based on if these configs are set:
-- `airflow.config.AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT`
-- `airflow.config.AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY`
-
-NOTE: if you want to make use of Airflow 2.0's ability to run multiple schedulers, (e.g. setting `scheduler.replicas` > 1), we recommend setting a `scheduler.podDisruptionBudget`
-- we welcome any contributions for the autoscaling the scheduler replica count based on CPU load (or KEDA)
-
-NOTE: `scheduler.preinitdb` and `scheduler.initdb` have been moved to a post-install Job
-- meaning they will only run one time per `helm install/upgrade ...` (rather than each time the scheduler starts)
-
-New Features:
-- pip install in init-container
-- webserver_config.py
-- create users post-install job
-- wait-for-db migrations before starting pods
-- db upgrade done in post-install job
-- git-sync container
-- new docs structure (expandable questions)
-- HA scheduler 
-- cleaned up flower liveness/readiness probes
-
-Removed Features:
-- install requirements 
-
-Changed default:
+### VALUES - Changed Defaults:
 - `rbac.events` = `true`
 - `scheduler.livenessProbe.initialDelaySeconds` = `10`
 - `web.readinessProbe.enabled` = `true`
@@ -104,7 +67,7 @@ Changed default:
 - `web.livenessProbe.failureThreshold` = `6`  
 - `scheduler.podDisruptionBudget.enabled` = `false`
 
-Added values:
+### VALUES - New:
 - `airflow.legacyCommands`
 - `airflow.image.uid`
 - `airflow.image.gid`
@@ -169,11 +132,11 @@ Added values:
 - `dags.gitSync.sshSecretKey`
 - `dags.gitSync.sshKnownHosts`
   
-Removed the following values:
+### VALUES - Removed:
 - `airflow.extraConfigmapMounts`
 - `scheduler.initialStartupDelay` 
-- `scheduler.preinitdb` (replaced by a post-install Job)
-- `scheduler.initdb` (replaced by a post-install Job)
+- `scheduler.preinitdb`
+- `scheduler.initdb`
 - `scheduler.connections`
 - `scheduler.refreshConnections`
 - `scheduler.existingSecretConnections`

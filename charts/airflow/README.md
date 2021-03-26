@@ -15,7 +15,7 @@ helm repo update
 
 ### 2 - Install the Chart:
 
-> ⚠️  find values for `CHART_VERSION` under [GitHub Releases](https://github.com/airflow-helm/charts/releases)
+> ⚠️ find values for `CHART_VERSION` under [GitHub Releases](https://github.com/airflow-helm/charts/releases)
 
 ```sh
 export RELEASE_NAME=my-airflow-cluster # set a name!
