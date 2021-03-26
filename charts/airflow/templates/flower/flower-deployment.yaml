@@ -111,7 +111,7 @@ spec:
           args:
             {{- if .Values.airflow.legacyCommands }}
             - "exec airflow flower"
-              {{- else }}
+            {{- else }}
             - "exec airflow celery flower"
             {{- end }}
             {{- if .Values.flower.oauthDomains }}

@@ -342,6 +342,11 @@ web:
 
   webserverConfig:
     stringOverride: |-
+      from airflow import configuration as conf
+      from flask_appbuilder.security.manager import AUTH_LDAP
+
+      SQLALCHEMY_DATABASE_URI = conf.get('core', 'SQL_ALCHEMY_CONN')
+      
       AUTH_TYPE = AUTH_LDAP
       AUTH_LDAP_SERVER = "ldap://ldap.example.com"
       AUTH_LDAP_USE_TLS = False
@@ -388,6 +393,11 @@ web:
 
   webserverConfig:
     stringOverride: |-
+      from airflow import configuration as conf
+      from flask_appbuilder.security.manager import AUTH_LDAP
+
+      SQLALCHEMY_DATABASE_URI = conf.get('core', 'SQL_ALCHEMY_CONN')
+      
       AUTH_TYPE = AUTH_OAUTH
       
       # registration configs
