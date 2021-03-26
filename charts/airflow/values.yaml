@@ -379,6 +379,7 @@ scheduler:
     enabled: true
     initialDelaySeconds: 10
     periodSeconds: 30
+    timeoutSeconds: 10
     failureThreshold: 5
 
   ## extra pip packages to install in the scheduler Pods

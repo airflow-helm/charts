@@ -37,7 +37,6 @@
   2. the installRequirements command only ran at Pod start up, meaning you would have to restart all your pods if you updated the `requirements.txt` in your git repo (which isn't very declarative)
 
 ### Known Issues:
-- some environments seem to get failures in the scheduler liveness probe, if you encounter scheduler restarts, disable the probe with `scheduler.livenessProbe.enabled` until we fix it (or contribute your fix!)
 - if you want to continue using airflow `1.10.X`, you must enable `airflow.legacyCommands`, but note that not all features of the chart will work (and there is no expectation of full support for `1.10.X`)
 - if you were using `dags.persistence.enabled` but not explicitly setting `dags.persistence.existingClaim`, the name of the PVC will change (meaning your dags will disappear)
   - to fix this, set `dags.persistence.existingClaim` to the value of the previous dags PVC (which will be your Helm RELEASE_NAME)
@@ -48,8 +47,6 @@
 ### Request for Contributions:
 - improvements for the docs
 - any feature you need to get the chart running in your environment (NOTE: we won't always implement every feature proposed)
-- resolve the issue with Scheduler liveness probe
-  - The issue is the python import: `from airflow.jobs.scheduler_job import SchedulerJob` fails in the probe, but NOT when executing bash commands on the container, which is strange!
 - replace the `postgresql` and `redis` sub-charts (currently declared in `requirements.yaml`) with straight YAML in this chart
 - implement a system where `XXX.extraPipPackages` only requires a single installation after each "helm upgrade" (probably using Jobs and PersistentVolumeClaims)
    - This will be most beneficial for `airflow.kubernetesPodTemplate.extraPipPackages`, as those pip installs have to run for every task in "KubernetesExecutor" mode
@@ -89,6 +86,7 @@
 - `airflow.kubernetesPodTemplate.extraVolumeMounts`
 - `airflow.kubernetesPodTemplate.extraVolumes`
 - `scheduler.replicas`
+- `scheduler.livenessProbe.timeoutSeconds`
 - `scheduler.extraPipPackages`
 - `scheduler.extraVolumeMounts`
 - `scheduler.extraVolumes`

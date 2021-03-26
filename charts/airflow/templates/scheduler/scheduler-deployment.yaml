@@ -107,6 +107,7 @@ spec:
             initialDelaySeconds: {{ .Values.scheduler.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.scheduler.livenessProbe.periodSeconds }}
             failureThreshold: {{ .Values.scheduler.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.scheduler.livenessProbe.timeoutSeconds }}
             exec:
               command:
                 - "python"
@@ -115,14 +116,9 @@ spec:
                 - |
                   from typing import List
                   from airflow.jobs.scheduler_job import SchedulerJob
+                  from airflow.utils.db import create_session
                   from airflow.utils.net import get_hostname
                   from airflow.utils.state import State
-
-                  {{- if .Values.airflow.legacyCommands }}
-                  from airflow.utils.db import create_session
-                  {{- else }}
-                  from airflow.utils.session import create_session
-                  {{- end }}
 
                   with create_session() as session:
                       hostname = get_hostname()
