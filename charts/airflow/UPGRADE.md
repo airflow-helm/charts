@@ -1,5 +1,197 @@
 # Upgrading Steps
 
+## `v7.15.X` → `v8.0.0`
+
+> 🛑️️ this is a MAJOR update, meaning there are BREAKING changes
+> - you might want to start your `values.yaml` file again
+
+> ⚠️ the default version of airflow has changed to `2.0.1`
+> - check your dags [are compatible](https://airflow.apache.org/docs/apache-airflow/stable/upgrading-to-2.html#step-5-upgrade-airflow-dags)
+> - note that you won't be able to downgrade your database back to `1.10.X` schema
+> - the default version of python has changed to `3.8`
+
+### Feature Highlights:
+- native support for "KubernetesExecutor", and "CeleryKubernetesExecutor", see the new `airflow.kubernetesPodTemplate.*` values
+- native support for "webserver_config.py", see the new `web.webserverConfig.*` values
+- native support for [Airflow 2.0's HA scheduler](https://airflow.apache.org/docs/apache-airflow/stable/scheduler.html#running-more-than-one-scheduler), see the new `scheduler.replicas` value
+- significantly improved git-sync system by moving to [kubernetes/git-sync](https://github.com/kubernetes/git-sync)
+- significantly improved pip installs by moving to an init-container
+- added a [guide for integrating airflow with your "Microsoft AD" or "OAUTH"](README.md#how-to-authenticate-airflow-users-with-ldapoauth)
+- general cleanup of almost every helm file
+- significant docs/README rewrite
+
+### Other Features:
+- added `airflow.users` to help you create/update airflow web users:
+  - __WARNING:__ default settings create an admin user (user: __admin__ - password: __admin__), disable by setting `airflow.users` to `[]`
+- added `airflow.connections` to help you create/update airflow connections:
+- added `airflow.variables` to help you create/update airflow variables:
+- added `airflow.pools` to help you create/update airflow pools:
+- flower Pods are now affected by `airflow.extraPipPackages`, `airflow.extraContainers`, `airflow.extraVolumeMounts`, `airlfow.extraVolumes`  
+- you no longer need to set `web.readinessProbe.scheme` or `web.livenessProbe.scheme`, we now only use HTTPS if `AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT` and `AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY` are set
+- airflow db upgrades are now managed with a post "helm upgrade" Job, meaning it only runs once per upgrade (rather than each time the scheduler starts)
+
+### Removed Features
+- the `XXX.extraConfigmapMounts`, `XXX.secretsDir`, `XXX.secrets`, `XXX.secretsMap` values have been removed, and replaced with `XXX.extraVolumes` and `XXX.extraVolumeMounts`, which use typical Kubernetes volume-mount syntax
+- the `dags.installRequirements` value has been removed, please instead use the `XXX.extraPipPackages` values, this change was made for two main reasons: 
+  1. allowed us to move the pip-install commands into an init-container, which greatly simplifies pod-startup, and removes the need to set any kind of readiness-probe delay in Webserver/Flower Pods
+  2. the installRequirements command only ran at Pod start up, meaning you would have to restart all your pods if you updated the `requirements.txt` in your git repo (which isn't very declarative)
+
+### Known Issues:
+- if you want to continue using airflow `1.10.X`, you must enable `airflow.legacyCommands`, but note that not all features of the chart will work (and there is no expectation of full support for `1.10.X`)
+- if you were using `dags.persistence.enabled` but not explicitly setting `dags.persistence.existingClaim`, the name of the PVC will change (meaning your dags will disappear)
+  - to fix this, set `dags.persistence.existingClaim` to the value of the previous dags PVC (which will be your Helm RELEASE_NAME)
+
+### Recommendations:
+- start your values.yaml from scratch (by looking at the new examples, and defaults)
+
+### Request for Contributions:
+- improvements for the docs
+- any feature you need to get the chart running in your environment (NOTE: we won't always implement every feature proposed)
+- replace the `postgresql` and `redis` sub-charts (currently declared in `requirements.yaml`) with straight YAML in this chart
+- implement a system where `XXX.extraPipPackages` only requires a single installation after each "helm upgrade" (probably using Jobs and PersistentVolumeClaims)
+   - This will be most beneficial for `airflow.kubernetesPodTemplate.extraPipPackages`, as those pip installs have to run for every task in "KubernetesExecutor" mode
+- autoscaling using [KEDA](https://github.com/kedacore/keda) for the scheduler/worker replica counts (this will let us remove the largely useless HorizontalPodAutoscaler approach)
+
+### VALUES - Changed Defaults:
+- `rbac.events` = `true`
+- `scheduler.livenessProbe.initialDelaySeconds` = `10`
+- `web.readinessProbe.enabled` = `true`
+- `web.readinessProbe.timeoutSeconds` = `5`
+- `web.livenessProbe.periodSeconds` = `10`
+- `web.readinessProbe.failureThreshold` = `6`
+- `web.livenessProbe.initialDelaySeconds` = `10`
+- `web.livenessProbe.timeoutSeconds` = `5`
+- `web.livenessProbe.failureThreshold` = `6`
+- `scheduler.podDisruptionBudget.enabled` = `false`
+
+### VALUES - New:
+- `airflow.legacyCommands`
+- `airflow.image.uid`
+- `airflow.image.gid`
+- `airflow.users`
+- `airflow.usersUpdate`
+- `airflow.connections`
+- `airflow.connectionsUpdate`
+- `airflow.variables`
+- `airflow.variablesUpdate`
+- `airflow.pools`
+- `airflow.poolsUpdate`
+- `airflow.kubernetesPodTemplate.stringOverride`
+- `airflow.kubernetesPodTemplate.nodeSelector`
+- `airflow.kubernetesPodTemplate.affinity`
+- `airflow.kubernetesPodTemplate.tolerations`
+- `airflow.kubernetesPodTemplate.podAnnotations`
+- `airflow.kubernetesPodTemplate.securityContext`
+- `airflow.kubernetesPodTemplate.extraPipPackages`
+- `airflow.kubernetesPodTemplate.extraVolumeMounts`
+- `airflow.kubernetesPodTemplate.extraVolumes`
+- `scheduler.replicas`
+- `scheduler.livenessProbe.timeoutSeconds`
+- `scheduler.extraPipPackages`
+- `scheduler.extraVolumeMounts`
+- `scheduler.extraVolumes`
+- `web.webserverConfig.stringOverride`
+- `web.webserverConfig.existingSecret`
+- `web.extraVolumeMounts`
+- `web.extraVolumes`
+- `workers.extraPipPackages`
+- `workers.extraVolumeMounts`
+- `workers.extraVolumes`
+- `flower.readinessProbe.enabled`
+- `flower.readinessProbe.initialDelaySeconds`
+- `flower.readinessProbe.periodSeconds`
+- `flower.readinessProbe.timeoutSeconds`
+- `flower.readinessProbe.failureThreshold`
+- `flower.livenessProbe.enabled`
+- `flower.livenessProbe.initialDelaySeconds`
+- `flower.livenessProbe.periodSeconds`
+- `flower.livenessProbe.timeoutSeconds`
+- `flower.livenessProbe.failureThreshold`
+- `flower.extraPipPackages`
+- `flower.extraVolumeMounts`
+- `flower.extraVolumes`
+- `dags.gitSync.enabled`
+- `dags.gitSync.image.repository`
+- `dags.gitSync.image.tag`
+- `dags.gitSync.image.pullPolicy`
+- `dags.gitSync.image.uid`
+- `dags.gitSync.image.gid`
+- `dags.gitSync.resources`
+- `dags.gitSync.repo`
+- `dags.gitSync.repoSubPath`
+- `dags.gitSync.branch`
+- `dags.gitSync.revision`
+- `dags.gitSync.depth`
+- `dags.gitSync.syncWait`
+- `dags.gitSync.syncTimeout`
+- `dags.gitSync.httpSecret`
+- `dags.gitSync.httpSecretUsernameKey`
+- `dags.gitSync.httpSecretPasswordKey`
+- `dags.gitSync.sshSecret`
+- `dags.gitSync.sshSecretKey`
+- `dags.gitSync.sshKnownHosts`
+  
+### VALUES - Removed:
+- `airflow.extraConfigmapMounts`
+- `scheduler.initialStartupDelay`
+- `scheduler.preinitdb`
+- `scheduler.initdb`
+- `scheduler.connections`
+- `scheduler.refreshConnections`
+- `scheduler.existingSecretConnections`
+- `scheduler.pools`
+- `scheduler.variables`
+- `scheduler.secretsDir`
+- `scheduler.secrets`
+- `scheduler.secretsMap`
+- `web.initialStartupDelay`
+- `web.minReadySeconds`
+- `web.baseUrl`
+- `web.serializeDAGs`
+- `web.readinessProbe.scheme`
+- `web.readinessProbe.successThreshold`
+- `web.livenessProbe.scheme`
+- `web.livenessProbe.successThreshold`
+- `web.secretsDir`
+- `web.secrets`
+- `web.secretsMap`
+- `workers.celery.instances`
+- `workers.initialStartupDelay`
+- `workers.secretsDir`
+- `workers.secrets`
+- `workers.secretsMap`
+- `flower.initialStartupDelay`
+- `flower.minReadySeconds`
+- `flower.extraConfigmapMounts`
+- `flower.urlPrefix`
+- `flower.secretsDir`
+- `flower.secrets`
+- `flower.secretsMap`
+- `dags.doNotPickle`
+- `dags.installRequirements`
+- `dags.git.url`
+- `dags.git.ref`
+- `dags.git.secret`
+- `dags.git.sshKeyscan`
+- `dags.git.privateKeyName`
+- `dags.git.repoHost`
+- `dags.git.repoPort`
+- `dags.git.gitSync.enabled`
+- `dags.git.gitSync.resources`
+- `dags.git.gitSync.image`
+- `dags.git.gitSync.refreshTime`
+- `dags.git.gitSync.mountPath`
+- `dags.git.gitSync.syncSubPath`
+- `dags.initContainer.enabled`
+- `dags.initContainer.resources`
+- `dags.initContainer.image.repository`
+- `dags.initContainer.image.tag`
+- `dags.initContainer.image.pullPolicy`
+- `dags.initContainer.mountPath`
+- `dags.initContainer.syncSubPath`
+- `ingress.web.livenessPath`
+- `ingress.flower.livenessPath`
+
 ## `v7.14.X` → `v7.15.0`
 
 __The following IMPROVEMENTS have been made:__
@@ -115,8 +307,6 @@ __The following IMPROVEMENTS have been made:__
 * You can now specify minReadySeconds for flower
 
 __The following values have CHANGED DEFAULTS:__
-* `workers.celery.instances`:
-    * Is now `16` by default (letting each worker take 16 tasks)
 * `postgresql.master.podAnnotations`:
     * Is now `{"cluster-autoscaler.kubernetes.io/safe-to-evict": "true"}`
 * `redis.master.podAnnotations`:

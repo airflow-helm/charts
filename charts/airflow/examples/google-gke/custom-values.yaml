@@ -27,24 +27,8 @@
 # - Secret: airflow-cluster1-fernet-key
 # - Secret: airflow-cluster1-mysql-password
 # - Secret: airflow-cluster1-redis-password
-# - Secret: airflow-cluster1-git-keys
-# - ConfigMap: airflow-cluster1-webserver-config
+# - Secret: airflow-cluster1-git-secret
 # - cert-manager.io/Certificate: airflow-cluster1-cert
-#
-# Helm Install Commands:
-#   helm install stable/airflow \
-#     --version "X.X.X" \
-#     --name "airflow-cluster1" \
-#     --namespace "airflow-cluster1" \
-#     --values ./custom-values.yaml
-#
-# Run bash commands in the Scheduler Pod: (use to: `airflow create_user`)
-#   kubectl exec \
-#     -it \
-#     --namespace airflow-cluster1 \
-#     --container airflow-scheduler \
-#     Deployment/airflow--airflow-cluster1-scheduler \
-#     /bin/bash
 #
 
 ###################################
@@ -58,36 +42,71 @@ airflow:
   ## environment variables for the web/scheduler/worker Pods (for airflow configs)
   ##
   config:
-      ## Security
-      AIRFLOW__CORE__SECURE_MODE: "True"
-      AIRFLOW__API__AUTH_BACKEND: "airflow.api.auth.backend.deny_all"
-      AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
-      AIRFLOW__WEBSERVER__RBAC: "True"
+    ## security
+    AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
 
-      ## SSL
-      ## NOTE: This effectively disables HTTP, so `web.readinessProbe.scheme` and `web.livenessProbe.scheme`
-      ##       need to be set accordingly
-      AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT: "/var/airflow/secrets/airflow-cluster1-cert/tls.crt"
-      AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY: "/var/airflow/secrets/airflow-cluster1-cert/tls.key"
+    ## enable SSL for webserver
+    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT: "/opt/airflow/ssl-cert/tls.crt"
+    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY: "/opt/airflow/ssl-cert/tls.key"
 
-      ## DAGS
-      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
+    ## dags
+    AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
 
-      ## GCP Remote Logging
-      AIRFLOW__CORE__REMOTE_LOGGING: "True"
-      AIRFLOW__CORE__REMOTE_BASE_LOG_FOLDER: "gs://XXXXXXXX--airflow-cluster1/airflow/logs"
-      AIRFLOW__CORE__REMOTE_LOG_CONN_ID: "google_cloud_airflow"
+    ## remote log storage
+    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://XXXXXXXX--airflow-cluster1/airflow/logs"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "my_gcp"
 
-      ## Email (SMTP)
-      AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"
-      AIRFLOW__SMTP__SMTP_HOST: "smtpmail.example.com"
-      AIRFLOW__SMTP__SMTP_STARTTLS: "False"
-      AIRFLOW__SMTP__SMTP_SSL: "False"
-      AIRFLOW__SMTP__SMTP_PORT: "25"
-      AIRFLOW__SMTP__SMTP_MAIL_FROM: "admin@airflow-cluster1.example.com"
+    ## email
+    AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"
+    AIRFLOW__SMTP__SMTP_HOST: "smtpmail.example.com"
+    AIRFLOW__SMTP__SMTP_MAIL_FROM: "admin@airflow-cluster1.example.com"
+    AIRFLOW__SMTP__SMTP_PORT: "25"
+    AIRFLOW__SMTP__SMTP_SSL: "False"
+    AIRFLOW__SMTP__SMTP_STARTTLS: "False"
 
-      ## Disable noisy "Handling signal: ttou" Gunicorn log messages
-      GUNICORN_CMD_ARGS: "--log-level WARNING"
+    ## domain used in airflow emails
+    AIRFLOW__WEBSERVER__BASE_URL: "https://airflow-cluster1.example.com/"
+
+  ## a list of initial users to create
+  ##
+  users:
+    - username: admin
+      password: admin
+      role: Admin
+      email: admin@example.com
+      firstName: admin
+      lastName: admin
+
+  ## if we update users or just create them the first time (lookup by `username`)
+  ##
+  usersUpdate: false
+
+  ## a list of initial connections to create
+  ##
+  connections:
+    ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-google/stable/connections/gcp.html
+    - id: my_gcp
+      type: google_cloud_platform
+      description: my GCP connection
+      extra: |-
+        { "extra__google_cloud_platform__num_retries": "5" }
+
+  ## a list of initial variables to create
+  ##
+  variables:
+    - key: "environment"
+      value: "prod"
+
+  ## a list of initial pools to create
+  ##
+  pools:
+    - name: "pool_1"
+      slots: 5
+      description: "example pool with 5 slots"
+    - name: "pool_2"
+      slots: 10
+      description: "example pool with 10 slots"
 
   ## extra environment variables for the web/scheduler/worker (AND flower) Pods
   ##
@@ -98,15 +117,6 @@ airflow:
           name: airflow-cluster1-fernet-key
           key: value
 
-  ## extra configMap volumeMounts for the web/scheduler/worker Pods
-  ##
-  extraConfigmapMounts:
-    - name: airflow-cluster1-webserver-config
-      mountPath: /opt/airflow/webserver_config.py
-      configMap: airflow-cluster1-webserver-config
-      readOnly: true
-      subPath: webserver_config.py
-
 ###################################
 # Airflow - Scheduler Configs
 ###################################
@@ -116,44 +126,33 @@ scheduler:
   resources:
     requests:
       cpu: "1000m"
-      memory: "1Gi"
-
-  ## custom airflow connections for the airflow scheduler
-  ##
-  connections:
-    - id: google_cloud_airflow
-      type: google_cloud_platform
-      extra: '{"extra__google_cloud_platform__num_retries": "5"}'
-
-  ## custom airflow variables for the airflow scheduler
-  ##
-  variables: |
-    { "environment": "prod" }
-
-  ## custom airflow pools for the airflow scheduler
-  ##
-  pools: |
-    {
-      "example": {
-        "description": "This is an example pool with 2 slots.",
-        "slots": 2
-      }
-    }
+      memory: "512Mi"
 
 ###################################
 # Airflow - WebUI Configs
 ###################################
 web:
-  ## resource requests/limits for the airflow web Pods
+  ## configs to generate webserver_config.py
   ##
-  resources:
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
+  webserverConfig:
+    ## the full text value to mount as the webserver_config.py file
+    ##
+    stringOverride: |-
+      from flask_appbuilder.security.manager import AUTH_DB
+
+      # use embedded DB for auth
+      AUTH_TYPE = AUTH_DB
 
   ## the number of web Pods to run
   ##
   replicas: 1
+
+  ## resource requests/limits for the airflow web Pods
+  ##
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "900Mi"
 
   ## configs for the Service of the web Pods
   ##
@@ -165,37 +164,19 @@ web:
     loadBalancerIP: XXX.XXX.XXX.XXX
     loadBalancerSourceRanges: []
 
-  ## sets `AIRFLOW__WEBSERVER__BASE_URL`
+  ## extra VolumeMounts for the web Pods
   ##
-  baseUrl: "https://airflow-cluster1.example.com/"
+  extraVolumeMounts:
+    - name: ssl-cert
+      mountPath: /opt/airflow/ssl-cert
+      readOnly: true
 
-  ## extra pip packages to install in the web container
+  ## extra Volumes for the web Pods
   ##
-  extraPipPackages: []
-
-  ## configs for the web Service liveness probe
-  ##
-  livenessProbe:
-    ## the scheme used in the liveness probe: {HTTP,HTTPS}
-    ##
-    scheme: HTTPS
-
-    ## the number of seconds to wait before checking pod health
-    ##
-    ## NOTE:
-    ## - make larger if you are installing many packages with:
-    ##   `airflow.extraPipPackages`, `web.extraPipPackages`, or `dags.installRequirements`
-    ##
-    initialDelaySeconds: 300
-
-  ## the directory in which to mount secrets on web containers
-  ##
-  secretsDir: /var/airflow/secrets
-
-  ## secret names which will be mounted as a file at `{web.secretsDir}/<secret_name>`
-  ##
-  secrets:
-    - airflow-cluster1-cert
+  extraVolumes:
+    - name: ssl-cert
+      secret:
+        secretName: airflow-cluster1-cert
 
 ###################################
 # Airflow - Worker Configs
@@ -205,16 +186,16 @@ workers:
   ##
   enabled: true
 
+  ## the number of workers Pods to run
+  ##
+  replicas: 2
+
   ## resource requests/limits for the airflow worker Pods
   ##
   resources:
     requests:
-      cpu: "1000m"
+      cpu: "256m"
       memory: "2Gi"
-
-  ## the number of workers Pods to run
-  ##
-  replicas: 2
 
   ## configs for the PodDisruptionBudget of the worker StatefulSet
   ##
@@ -271,14 +252,6 @@ workers:
   ##
   terminationPeriod: 60
 
-  ## directory in which to mount secrets on worker containers
-  ##
-  secretsDir: /var/airflow/secrets
-
-  ## secret names which will be mounted as a file at `{workers.secretsDir}/<secret_name>`
-  ##
-  secrets: []
-
 ###################################
 # Airflow - Flower Configs
 ###################################
@@ -291,8 +264,8 @@ flower:
   ##
   resources:
     requests:
-      cpu: "100m"
-      memory: "126Mi"
+      cpu: "10m"
+      memory: "64Mi"
 
   ## configs for the Service of the flower Pods
   ##
@@ -318,57 +291,36 @@ logs:
 # Airflow - DAGs Configs
 ###################################
 dags:
-  ## configs for the DAG git repository & sync container
+  ## configs for the git-sync sidecar (https://github.com/kubernetes/git-sync)
   ##
-  git:
-    ## url of the git repository
+  gitSync:
+    ## if the git-sync sidecar container is enabled
     ##
-    url: "ssh://git@repo.example.com/my-airflow-dags.git"
+    enabled: true
 
-    ## the branch/tag/sha1 which we clone
+    ## the url of the git repo
     ##
-    ref: master
+    repo: "git@repo.example.com/my-airflow-dags.git"
 
-    ## the name of a pre-created secret containing files for ~/.ssh/
+    ## the git branch to check out
     ##
-    ## NOTE:
-    ## - this is ONLY RELEVANT for SSH git repos
-    ## - the secret commonly includes files: id_rsa, id_rsa.pub, known_hosts
-    ## - known_hosts is NOT NEEDED if `git.sshKeyscan` is true
-    ##
-    secret: airflow-cluster1-git-keys
+    branch: master
 
-    ## the name of the private key file in your `git.secret`
+    ## the git revision (tag or hash) to check out
     ##
-    ## NOTE:
-    ## - this is ONLY RELEVANT for PRIVATE SSH git repos
-    ##
-    privateKeyName: id_rsa
+    revision: HEAD
 
-    ## the host name of the git repo
+    ## the number of seconds between syncs
     ##
-    ## NOTE:
-    ## - this is ONLY REQUIRED for SSH git repos
-    ##
-    repoHost: "repo.example.com"
+    syncWait: 60
 
-    ## the port of the git repo
+    ## the name of a pre-created Secret with git ssh credentials
     ##
-    ## NOTE:
-    ## - this is ONLY REQUIRED for SSH git repos
-    ##
-    repoPort: 22
+    sshSecret: "airflow-cluster1-git-secret"
 
-    ## configs for the git-sync container
+    ## the key in `dags.gitSync.sshSecret` with your ssh-key file
     ##
-    gitSync:
-      ## enable the git-sync sidecar container
-      ##
-      enabled: true
-
-      ## the git sync interval in seconds
-      ##
-      refreshTime: 60
+    sshSecretKey: id_rsa
 
 ###################################
 # Kubernetes - RBAC
@@ -469,8 +421,8 @@ redis:
     ##
     resources:
       requests:
-        cpu: "100m"
-        memory: "256Mi"
+        cpu: "10m"
+        memory: "32Mi"
 
     ## configs for the PVC of the redis master
     ##
@@ -486,8 +438,8 @@ redis:
     ##
     resources:
       requests:
-        cpu: "100m"
-        memory: "256Mi"
+        cpu: "10m"
+        memory: "32Mi"
 
     ## configs for the PVC of the redis slaves
     ##

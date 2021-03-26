@@ -1,4 +1,4 @@
-{{- if and (.Values.flower.enabled) (eq .Values.airflow.executor "CeleryExecutor") (.Values.ingress.enabled) }}
+{{- if and (.Values.flower.enabled) (.Values.ingress.enabled) }}
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:

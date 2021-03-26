@@ -1,4 +1,5 @@
-{{- if and (.Values.flower.enabled) (eq .Values.airflow.executor "CeleryExecutor") }}
+{{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.flower.extraPipPackages }}
+{{- if .Values.flower.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,11 +19,10 @@ metadata:
     {{- end }}
 spec:
   replicas: {{ .Values.flower.replicas }}
-  minReadySeconds: {{ .Values.flower.minReadySeconds }}
   strategy:
-    # this is safe - multiple flower pods can run concurrently
     type: RollingUpdate
     rollingUpdate:
+      ## multiple flower pods can safely run concurrently
       maxSurge: 25%
       maxUnavailable: 0
   selector:
@@ -33,7 +33,10 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config-env: {{ include (print $.Template.BasePath "/config/configmap-env.yaml") . | sha256sum }}
+        checksum/secret-config: {{ include (print $.Template.BasePath "/config/secret-config.yaml") . | sha256sum }}
+        {{- if .Values.airflow.podAnnotations }}
+        {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
+        {{- end }}
         {{- if .Values.flower.podAnnotations }}
         {{- toYaml .Values.flower.podAnnotations | nindent 8 }}
         {{- end }}
@@ -48,11 +51,11 @@ spec:
         {{- toYaml .Values.flower.podLabels | nindent 8 }}
         {{- end }}
     spec:
+      restartPolicy: Always
       {{- if .Values.airflow.image.pullSecret }}
       imagePullSecrets:
         - name: {{ .Values.airflow.image.pullSecret }}
       {{- end }}
-      restartPolicy: Always
       {{- if .Values.flower.nodeSelector }}
       nodeSelector:
         {{- toYaml .Values.flower.nodeSelector | nindent 8 }}
@@ -70,91 +73,93 @@ spec:
       securityContext:
         {{- toYaml .Values.flower.securityContext | nindent 8 }}
       {{- end }}
+      initContainers:
+        {{- if $extraPipPackages }}
+        {{- include "airflow.init_container.install_pip_packages" (dict "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
+        {{- end }}
+        {{- include "airflow.init_container.check_db" . | indent 8 }}
+        {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
       containers:
-        - name: {{ .Chart.Name }}-flower
-          image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
-          imagePullPolicy: {{ .Values.airflow.image.pullPolicy }}
+        - name: airflow-flower
+          {{- include "airflow.image" . | indent 10 }}
+          resources:
+            {{- toYaml .Values.flower.resources | nindent 12 }}
           envFrom:
-            - configMapRef:
-                name: "{{ include "airflow.fullname" . }}-env"
+            {{- include "airflow.envFrom" . | indent 12 }}
           env:
-            {{- include "airflow.mapenvsecrets" . | indent 12 }}
+            {{- include "airflow.env" . | indent 12 }}
+            {{- if $extraPipPackages }}
+            - name: PYTHONPATH
+              value: /opt/python/site-packages
+            {{- end }}
+            {{- if .Values.flower.basicAuthSecret }}
+            - name: AIRFLOW__CELERY__FLOWER_BASIC_AUTH
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.flower.basicAuthSecret }}
+                  key: {{ .Values.flower.basicAuthSecretKey }}
+            {{- end }}
           ports:
             - name: flower
               containerPort: 5555
               protocol: TCP
-          {{- if .Values.flower.extraConfigmapMounts }}
-          volumeMounts:
-            {{- range .Values.flower.extraConfigmapMounts }}
-            - name: {{ .name }}
-              mountPath: {{ .mountPath }}
-              readOnly: {{ .readOnly }}
-              {{- if .subPath }}
-              subPath: {{ .subPath }}
-              {{- end }}
-            {{- end }}
-          {{- end }}
           command:
             - "/usr/bin/dumb-init"
             - "--"
-          args:
             - "bash"
             - "-c"
-            - >
-              true \
-              {{- if gt .Values.flower.initialStartupDelay 0.0 }}
-               && echo "*** waiting {{ .Values.flower.initialStartupDelay }}s..." \
-               && sleep {{ .Values.flower.initialStartupDelay }} \
-              {{- end }}
-               && mkdir -p /home/airflow/.local/bin \
-               && export PATH="/home/airflow/.local/bin:$PATH" \
-               && echo "*** running flower..." \
-              {{- if .Values.flower.oauthDomains }}
-               && exec airflow flower --auth={{ .Values.flower.oauthDomains | quote }}
-              {{- else }}
-               && exec airflow flower
-              {{- end }}
-
-          livenessProbe:
-            {{- if and (.Values.flower.basicAuthSecret) (not .Values.airflow.config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH) }}
+          args:
+            {{- if .Values.airflow.legacyCommands }}
+            - "exec airflow flower"
+            {{- else }}
+            - "exec airflow celery flower"
+            {{- end }}
+            {{- if .Values.flower.oauthDomains }}
+            - "--auth"
+            - {{ .Values.flower.oauthDomains | quote }}
+            {{- end }}
+          {{- if .Values.flower.readinessProbe.enabled }}
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.flower.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.flower.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.flower.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.flower.readinessProbe.failureThreshold }}
             exec:
               command:
-                - /bin/sh
-                - -c
-                - "curl -H 'Authorization: Basic $(echo -n $AIRFLOW__CELERY__FLOWER_BASIC_AUTH | base64)' 'http://localhost:5555
-                  {{- if .Values.ingress.flower.livenessPath -}}
-                  {{ .Values.ingress.flower.livenessPath }}
-                  {{- else -}}
-                  {{ .Values.ingress.flower.path }}/
-                  {{- end -}}
-                  '"
-            {{- else }}
-            httpGet:
-              {{- if .Values.ingress.flower.livenessPath }}
-              path: "{{ .Values.ingress.flower.livenessPath }}"
-              {{- else }}
-              path: "{{ .Values.ingress.flower.path }}/"
-              {{- end }}
-              port: flower
-              {{- if .Values.airflow.config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH }}
-              httpHeaders:
-                - name: Authorization
-                  value: Basic {{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH | b64enc }}
-              {{- end }}
-            {{- end }}
-            initialDelaySeconds: 60
-            periodSeconds: 30
-            timeoutSeconds: 1
-            successThreshold: 1
-            failureThreshold: 3
-          resources:
-            {{- toYaml .Values.flower.resources | nindent 12 }}
-      {{- if .Values.flower.extraConfigmapMounts }}
+                - "/bin/bash"
+                - "-c"
+                {{- if or (.Values.flower.basicAuthSecret) (.Values.airflow.config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH) }}
+                - "exec curl --user $AIRFLOW__CELERY__FLOWER_BASIC_AUTH 'http://localhost:5555{{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX }}'"
+                {{- else }}
+                - "exec curl 'http://localhost:5555{{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX }}'"
+                {{- end }}
+          {{- end }}
+          {{- if .Values.flower.livenessProbe.enabled }}
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.flower.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.flower.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.flower.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.flower.livenessProbe.failureThreshold }}
+            exec:
+              command:
+                - "/bin/bash"
+                - "-c"
+                {{- if or (.Values.flower.basicAuthSecret) (.Values.airflow.config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH) }}
+                - "exec curl --user $AIRFLOW__CELERY__FLOWER_BASIC_AUTH 'http://localhost:5555{{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX }}'"
+                {{- else }}
+                - "exec curl 'http://localhost:5555{{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX }}'"
+                {{- end }}
+          {{- end }}
+          {{- $extraVolumeMounts := .Values.flower.extraVolumeMounts }}
+          {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+          {{- if $volumeMounts }}
+          volumeMounts:
+            {{- $volumeMounts | indent 12 }}
+          {{- end }}
+      {{- $extraVolumes := .Values.flower.extraVolumes }}
+      {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
+      {{- if $volumes }}
       volumes:
-        {{- range .Values.flower.extraConfigmapMounts }}
-        - name: {{ .name }}
-          configMap:
-            name: {{ .configMap }}
-        {{- end }}
+        {{- $volumes | indent 8 }}
       {{- end }}
 {{- end }}

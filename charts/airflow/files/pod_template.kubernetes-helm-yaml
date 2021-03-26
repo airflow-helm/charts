@@ -1,0 +1,65 @@
+{{- $extraPipPackages := .Values.airflow.kubernetesPodTemplate.extraPipPackages }}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dummy-name
+  {{- if .Values.airflow.kubernetesPodTemplate.podAnnotations }}
+  annotations:
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.podAnnotations | nindent 4 }}
+  {{- end }}
+spec:
+  restartPolicy: Never
+  {{- if .Values.airflow.image.pullSecret }}
+  imagePullSecrets:
+    - name: {{ .Values.airflow.image.pullSecret }}
+  {{- end }}
+  serviceAccountName: {{ include "airflow.serviceAccountName" . }}
+  {{- if .Values.airflow.kubernetesPodTemplate.nodeSelector }}
+  nodeSelector:
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.nodeSelector | nindent 4 }}
+  {{- end }}
+  {{- if .Values.airflow.kubernetesPodTemplate.affinity }}
+  affinity:
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.affinity | nindent 4 }}
+  {{- end }}
+  {{- if .Values.airflow.kubernetesPodTemplate.tolerations }}
+  tolerations:
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.tolerations | nindent 4 }}
+  {{- end }}
+  {{- if .Values.airflow.kubernetesPodTemplate.securityContext }}
+  securityContext:
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.securityContext | nindent 4 }}
+  {{- end }}
+  {{- if or ($extraPipPackages) (.Values.dags.gitSync.enabled) }}
+  initContainers:
+    {{- if $extraPipPackages }}
+    {{- include "airflow.init_container.install_pip_packages" (dict "Values" .Values "extraPipPackages" $extraPipPackages) | indent 4 }}
+    {{- end }}
+    {{- include "airflow.container.git_sync" (dict "Values" .Values "sync_one_time" "true") | indent 4 }}
+  {{- end }}
+  containers:
+    - name: base
+      image: dummy_image
+      imagePullPolicy: IfNotPresent
+      envFrom:
+        - configMapRef:
+            name: "{{ include "airflow.fullname" . }}-env"
+      env:
+        {{- include "airflow.env" . | indent 8 }}
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: LocalExecutor
+      ports: []
+      command: []
+      args: []
+      {{- $extraVolumeMounts := .Values.airflow.kubernetesPodTemplate.extraVolumeMounts }}
+      {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+      {{- if $volumeMounts }}
+      volumeMounts:
+        {{- $volumeMounts | indent 8 }}
+      {{- end }}
+  {{- $extraVolumes := .Values.airflow.kubernetesPodTemplate.extraVolumes }}
+  {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
+  {{- if $volumes }}
+  volumes:
+    {{- $volumes | indent 4 }}
+  {{- end }}

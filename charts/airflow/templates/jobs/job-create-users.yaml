@@ -1,0 +1,55 @@
+{{- if .Values.airflow.users }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "airflow.fullname" . }}-create-users
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: "-1"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  labels:
+    app: {{ include "airflow.labels.app" . }}
+    component: jobs
+    chart: {{ include "airflow.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ttlSecondsAfterFinished: 300
+  template:
+    metadata:
+      labels:
+        app: {{ include "airflow.labels.app" . }}
+        component: jobs
+        chart: {{ include "airflow.labels.chart" . }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+    spec:
+      restartPolicy: OnFailure
+      {{- if .Values.airflow.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.airflow.image.pullSecret }}
+      {{- end }}
+      containers:
+        - name: create-users
+          {{- include "airflow.image" . | indent 10 }}
+          envFrom:
+            {{- include "airflow.envFrom" . | indent 12 }}
+          env:
+            {{- include "airflow.env" . | indent 12 }}
+          command:
+            - "/usr/bin/dumb-init"
+            - "--"
+          args:
+            - "python"
+            - "-Wignore"
+            - "/job_scripts/create_users.py"
+          volumeMounts:
+            - name: job-scripts
+              mountPath: /job_scripts
+              readOnly: true
+      volumes:
+        - name: job-scripts
+          secret:
+            secretName: {{ include "airflow.fullname" . }}-job-scripts
+            defaultMode: 0755
+{{- end }}

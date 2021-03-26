@@ -2,7 +2,7 @@
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ include "airflow.fullname" . }}
+  name: {{ printf "%s-dags" (include "airflow.fullname" . | trunc 58) }}
   labels:
     app: {{ include "airflow.labels.app" . }}
     chart: {{ include "airflow.labels.chart" . }}

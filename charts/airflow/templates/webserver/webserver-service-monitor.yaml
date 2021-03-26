@@ -19,7 +19,7 @@ spec:
       component: web
       release: {{ .Release.Name }}
   endpoints:
-  - port: web
-    path: {{ .Values.serviceMonitor.path }}
-    interval: {{ .Values.serviceMonitor.interval }}
+    - port: web
+      path: {{ .Values.serviceMonitor.path }}
+      interval: {{ .Values.serviceMonitor.interval }}
 {{- end }}

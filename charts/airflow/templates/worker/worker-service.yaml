@@ -1,6 +1,6 @@
 {{- if .Values.workers.enabled }}
-# Headless service for stable DNS entries of StatefulSet members.
 apiVersion: v1
+## this Service gives stable DNS entries for workers, used by webserver for logs
 kind: Service
 metadata:
   name: {{ include "airflow.fullname" . }}-worker
