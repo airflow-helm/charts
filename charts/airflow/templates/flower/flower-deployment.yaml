@@ -154,12 +154,12 @@ spec:
           {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
           {{- if $volumeMounts }}
           volumeMounts:
-            {{- $volumeMounts | nindent 12 }}
+            {{- $volumeMounts | indent 12 }}
           {{- end }}
       {{- $extraVolumes := .Values.flower.extraVolumes }}
       {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
       {{- if $volumes }}
       volumes:
-        {{- $volumes | nindent 8 }}
+        {{- $volumes | indent 8 }}
       {{- end }}
 {{- end }}

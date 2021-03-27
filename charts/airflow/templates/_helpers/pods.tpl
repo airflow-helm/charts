@@ -189,12 +189,12 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Values" .Values "extraPi
 
 {{- /* user-defined (global) */ -}}
 {{- if .Values.airflow.extraVolumeMounts }}
-{{- toYaml .Values.airflow.extraVolumeMounts }}
+{{ toYaml .Values.airflow.extraVolumeMounts }}
 {{- end }}
 
 {{- /* user-defined */ -}}
 {{- if .extraVolumeMounts }}
-{{- toYaml .extraVolumeMounts }}
+{{ toYaml .extraVolumeMounts }}
 {{- end }}
 {{- end }}
 
@@ -248,12 +248,12 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Values" .Values "extraPipPack
 
 {{- /* user-defined (global) */ -}}
 {{- if .Values.airflow.extraVolumes }}
-{{- toYaml .Values.airflow.extraVolumes }}
+{{ toYaml .Values.airflow.extraVolumes }}
 {{- end }}
 
 {{- /* user-defined */ -}}
 {{- if .extraVolumes }}
-{{- toYaml .extraVolumes }}
+{{ toYaml .extraVolumes }}
 {{- end }}
 {{- end }}
 
