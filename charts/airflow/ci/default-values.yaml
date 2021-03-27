@@ -1,0 +1,2 @@
+## must be enable because `--wait` is always passed by chart-testing
+helmWait: true

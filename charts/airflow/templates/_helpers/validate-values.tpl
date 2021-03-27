@@ -15,18 +15,18 @@
   {{ required "The `airflow.executor` must be one of: [CeleryExecutor, CeleryKubernetesExecutor, KubernetesExecutor]!" nil }}
 {{- end }}
 {{- if eq .Values.airflow.executor "CeleryExecutor" }}
-  {{- if or (not .Values.workers.enabled) (not .Values.redis.enabled) }}
-  {{ required "If `airflow.executor=CeleryExecutor`, all of [`workers.enabled`, `redis.enabled`] should be `true`!" nil }}
+  {{- if not .Values.workers.enabled }}
+  {{ required "If `airflow.executor=CeleryExecutor`, then `workers.enabled` should be `true`!" nil }}
   {{- end }}
 {{- end }}
 {{- if eq .Values.airflow.executor "CeleryKubernetesExecutor" }}
-  {{- if or (not .Values.workers.enabled) (not .Values.redis.enabled) }}
-  {{ required "If `airflow.executor=CeleryKubernetesExecutor`, all of [`workers.enabled`, `redis.enabled`] should be `true`!" nil }}
+  {{- if not .Values.workers.enabled }}
+  {{ required "If `airflow.executor=CeleryKubernetesExecutor`, then `workers.enabled` should be `true`!" nil }}
   {{- end }}
 {{- end }}
 {{- if eq .Values.airflow.executor "KubernetesExecutor" }}
   {{- if or (.Values.workers.enabled) (.Values.flower.enabled) (.Values.redis.enabled) }}
-  {{ required "If `airflow.executor=KubernetesExecutor`, none of [`workers.enabled`, `flower.enabled`, `redis.enabled`] should be `true`!" nil }}
+  {{ required "If `airflow.executor=KubernetesExecutor`, then all of [`workers.enabled`, `flower.enabled`, `redis.enabled`] should be `false`!" nil }}
   {{- end }}
 {{- end }}
 

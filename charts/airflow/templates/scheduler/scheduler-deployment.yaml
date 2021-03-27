@@ -141,7 +141,7 @@ spec:
           {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
           {{- if or ($volumeMounts) (include "airflow.executor.kubernetes_like" .) }}
           volumeMounts:
-            {{- $volumeMounts | indent 12 }}
+            {{- $volumeMounts | nindent 12 }}
             {{- if include "airflow.executor.kubernetes_like" . }}
             - name: pod-template
               mountPath: /opt/airflow/pod_templates/pod_template.yaml
@@ -159,7 +159,7 @@ spec:
       {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
       {{- if or ($volumes) (include "airflow.executor.kubernetes_like" .) }}
       volumes:
-        {{- $volumes | indent 8 }}
+        {{- $volumes | nindent 8 }}
         {{- if include "airflow.executor.kubernetes_like" . }}
         - name: pod-template
           configMap:

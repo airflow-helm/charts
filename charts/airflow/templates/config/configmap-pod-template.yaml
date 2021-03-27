@@ -13,6 +13,6 @@ data:
     {{- if .Values.airflow.kubernetesPodTemplate.stringOverride }}
     {{- .Values.airflow.kubernetesPodTemplate.stringOverride | nindent 4 }}
     {{- else }}
-    {{- tpl (.Files.Get "files/pod_template.kubernetes-helm-yaml") . | indent 4 }}
+    {{- tpl (.Files.Get "files/pod_template.kubernetes-helm-yaml") . | nindent 4 }}
     {{- end }}
 {{- end }}
