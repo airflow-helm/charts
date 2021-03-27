@@ -1,3 +1,7 @@
+## enable this value if you pass `--wait` to your `helm install`
+##
+helmWait: false
+
 ###################################
 # Airflow - Common Configs
 ###################################

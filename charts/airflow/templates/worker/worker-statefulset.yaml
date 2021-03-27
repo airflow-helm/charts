@@ -158,7 +158,7 @@ spec:
           {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
           {{- if $volumeMounts }}
           volumeMounts:
-            {{- $volumeMounts | indent 12 }}
+            {{- $volumeMounts | nindent 12 }}
           {{- end }}
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
@@ -170,6 +170,6 @@ spec:
       {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
       {{- if $volumes }}
       volumes:
-        {{- $volumes | indent 8 }}
+        {{- $volumes | nindent 8 }}
       {{- end }}
 {{- end }}

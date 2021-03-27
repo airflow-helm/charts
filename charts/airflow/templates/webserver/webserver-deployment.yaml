@@ -128,7 +128,7 @@ spec:
           {{- $extraVolumeMounts := .Values.web.extraVolumeMounts }}
           {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
           volumeMounts:
-            {{- $volumeMounts | indent 12 }}
+            {{- $volumeMounts | nindent 12 }}
             - name: webserver-config
               mountPath: /opt/airflow/webserver_config.py
               subPath: webserver_config.py
@@ -137,12 +137,12 @@ spec:
         {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
         {{- if .Values.airflow.extraContainers }}
-        {{- toYaml .Values.airflow.extraContainers | indent 8 }}
+        {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
         {{- end }}
       {{- $extraVolumes := .Values.web.extraVolumes }}
       {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
       volumes:
-        {{- $volumes | indent 8 }}
+        {{- $volumes | nindent 8 }}
         - name: webserver-config
           secret:
             {{- if .Values.web.webserverConfig.existingSecret }}

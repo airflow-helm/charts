@@ -2,9 +2,15 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "airflow.fullname" . }}-upgrade-db
-  ## this job can't be a post-install hook, because this job must run BEFORE other
-  ## resource can become ready, meaning if you use the --wait flag the install would
-  ## never finish (which is important because chart-testing uses --wait)
+  {{- /* this job can't be a post-install hook if `--wait` is passed to helm, */ -}}
+  {{- /* because this job must run BEFORE other resource can become ready, */ -}}
+  {{- /* meaning the install would never finish */ -}}
+  {{- if not .Values.helmWait }}
+  annotations:
+    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook-weight: "-10"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+  {{- end }}
   labels:
     app: {{ include "airflow.labels.app" . }}
     component: jobs
