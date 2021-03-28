@@ -45,6 +45,10 @@ spec:
         - configMapRef:
             name: "{{ include "airflow.fullname" . }}-env"
       env:
+        {{- if $extraPipPackages }}
+        - name: PYTHONPATH
+          value: /opt/python/site-packages
+        {{- end }}
         {{- include "airflow.env" . | indent 8 }}
         - name: AIRFLOW__CORE__EXECUTOR
           value: LocalExecutor
@@ -55,11 +59,11 @@ spec:
       {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
       {{- if $volumeMounts }}
       volumeMounts:
-        {{- $volumeMounts | nindent 8 }}
+        {{- $volumeMounts | indent 8 }}
       {{- end }}
   {{- $extraVolumes := .Values.airflow.kubernetesPodTemplate.extraVolumes }}
   {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
   {{- if $volumes }}
   volumes:
-    {{- $volumes | nindent 4 }}
+    {{- $volumes | indent 4 }}
   {{- end }}

@@ -91,11 +91,11 @@ spec:
           envFrom:
             {{- include "airflow.envFrom" . | indent 12 }}
           env:
-            {{- include "airflow.env" . | indent 12 }}
             {{- if $extraPipPackages }}
             - name: PYTHONPATH
               value: /opt/python/site-packages
             {{- end }}
+            {{- include "airflow.env" . | indent 12 }}
           command:
             - "/usr/bin/dumb-init"
             - "--"
@@ -128,7 +128,7 @@ spec:
           {{- $extraVolumeMounts := .Values.web.extraVolumeMounts }}
           {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
           volumeMounts:
-            {{- $volumeMounts | nindent 12 }}
+            {{- $volumeMounts | indent 12 }}
             - name: webserver-config
               mountPath: /opt/airflow/webserver_config.py
               subPath: webserver_config.py
@@ -142,7 +142,7 @@ spec:
       {{- $extraVolumes := .Values.web.extraVolumes }}
       {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
       volumes:
-        {{- $volumes | nindent 8 }}
+        {{- $volumes | indent 8 }}
         - name: webserver-config
           secret:
             {{- if .Values.web.webserverConfig.existingSecret }}
