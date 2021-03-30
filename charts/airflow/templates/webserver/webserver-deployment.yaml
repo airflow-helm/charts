@@ -140,7 +140,7 @@ spec:
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
         {{- end }}
       {{- $extraVolumes := .Values.web.extraVolumes }}
-      {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
+      {{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
       volumes:
         {{- $volumes | indent 8 }}
         - name: webserver-config

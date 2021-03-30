@@ -156,7 +156,7 @@ spec:
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
         {{- end }}
       {{- $extraVolumes := .Values.scheduler.extraVolumes }}
-      {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
+      {{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
       {{- if or ($volumes) (include "airflow.executor.kubernetes_like" .) }}
       volumes:
         {{- $volumes | indent 8 }}

@@ -200,7 +200,7 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Values" .Values "extraPi
 
 {{/*
 The list of `volumes` for web/scheduler/worker/flower Pods
-EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
+EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
 */}}
 {{- define "airflow.volumes" }}
 {{- /* dags */ -}}

@@ -157,7 +157,7 @@ spec:
             {{- $volumeMounts | indent 12 }}
           {{- end }}
       {{- $extraVolumes := .Values.flower.extraVolumes }}
-      {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
+      {{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
       {{- if $volumes }}
       volumes:
         {{- $volumes | indent 8 }}
