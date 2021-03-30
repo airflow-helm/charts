@@ -1073,6 +1073,21 @@ dags:
     ##
     sshKnownHosts: ""
 
+    ## any additional environment variables to be passed to gitsync
+    ## https://github.com/kubernetes/git-sync#parameters
+    ##
+    ## WARNING:
+    ## - any values set here may override explicit configuration
+    ##   values set above
+    ## - not all possible git-sync params have been tested with
+    ##   the airflow helm chart
+    ##
+    # extraEnv:
+    # - name: GIT_SYNC_HTTP_METRICS
+    #   value: "false"
+    # - name: GIT_SYNC_MAX_FAILURES
+    #   value: "0"
+
 ###################################
 # Kubernetes - Ingress Configs
 ###################################

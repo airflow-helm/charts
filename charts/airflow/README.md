@@ -42,7 +42,7 @@ helm install \
 
 ### 3 - Access the WebUI
 
-> ⚠️ browse to http://localhost:8080 after running the following commands 
+> ⚠️ browse to http://localhost:8080 after running the following commands
 
 ```sh
 export NAMESPACE=my-airflow-namespace # set a namespace!
@@ -63,6 +63,7 @@ __NOTE:__
 
 Old Version | New Version | Upgrade Guide
 --- | --- | ---
+v8.0.6 | v8.0.7 | [link](UPGRADE.md#v806--v807)
 v7.15.X | v8.0.0 | [link](UPGRADE.md#v715x--v800)
 v7.14.X | v7.15.0 | [link](UPGRADE.md#v714x--v7150)
 v7.13.X | v7.14.0 | [link](UPGRADE.md#v713x--v7140)

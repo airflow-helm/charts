@@ -142,6 +142,9 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
           name: {{ .Values.dags.gitSync.httpSecret }}
           key: {{ .Values.dags.gitSync.httpSecretPasswordKey }}
     {{- end }}
+    {{- if .Values.dags.gitSync.extraEnv }}
+    {{- toYaml .Values.dags.gitSync.extraEnv | nindent 4 }}
+    {{- end }}
   volumeMounts:
     - name: dags-data
       mountPath: /dags

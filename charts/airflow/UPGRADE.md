@@ -1,5 +1,13 @@
 # Upgrading Steps
 
+## `v8.0.6` → `v8.0.7`
+
+__The following IMPROVEMENTS have been made:__
+* You can now use `dags.gitsync.extraEnv` to pass arbitrary environment variables to the gitSync sidecar container (see https://github.com/kubernetes/git-sync#parameters for the full list)
+
+__The following values have been ADDED:__
+* `dags.gitSync.extraEnv`
+
 ## `v7.15.X` → `v8.0.0`
 
 > 🛑️️ this is a MAJOR update, meaning there are BREAKING changes
