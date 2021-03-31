@@ -42,8 +42,8 @@ spec:
       image: dummy_image
       imagePullPolicy: IfNotPresent
       envFrom:
-        - configMapRef:
-            name: "{{ include "airflow.fullname" . }}-env"
+        - secretRef:
+            name: "{{ include "airflow.fullname" . }}-config"
       env:
         {{- if $extraPipPackages }}
         - name: PYTHONPATH
