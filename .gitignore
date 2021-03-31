@@ -5,6 +5,8 @@ values-staging.yaml
 values-prod.yaml
 secrets/add-connections-secrets-prod.yml
 secrets/add-connections-secrets-staging.yml
+secrets/external_database_staging.yml
+secrets/external_database_prod.yml
 
 ## JetBrains
 .idea/

@@ -39,6 +39,10 @@ airflow:
     AWS_ACCESS_KEY_ID: "<>"
     AWS_SECRET_ACCESS_KEY: "<>"
     HIGH_PRIORITY: "1000"
+    AIRFLOW__CORE__PARALLELISM: "128"
+    AIRFLOW__CORE__DAG_CONCURRENCY: "128"
+    AIRFLOW__CELERY__WORKER_CONCURRENCY: "8"
+    AIRFLOW__SCHEDULER__PARSING_PROCESSES: "16"
   extraPipPackages:
     - "adal==1.2.4"
     - "alembic==1.4.2"
@@ -235,6 +239,7 @@ airflow:
     - "nh-currency==1.0.1"
     - "analytics-python==1.2.9"
     - "azure-core==1.9.0"
+    - "lifetimes==0.10.1"
 
     ###################################
 # Airflow - Scheduler Configs
@@ -281,6 +286,10 @@ web:
   ##
   service:
     type: NodePort
+  resources:
+    requests:
+      memory: "1Gi"
+  replicas: 3
 
 ###################################
 # Airflow - Worker Configs
@@ -388,7 +397,35 @@ dags:
 # Database - PostgreSQL Chart
 ###################################
 postgresql:
-  enabled: true
+  enabled: false
+externalDatabase:
+  ## the type of external database: {mysql,postgres}
+  ##
+  type: postgres
+
+  ## the host of the external database
+  ##
+  host: <>.rds.amazonaws.com
+
+  ## the port of the external database
+  ##
+  port: 5432
+
+  ## the database/scheme to use within the the external database
+  ##
+  database: airflow
+
+  ## the user of the external database
+  ##
+  user: <>
+
+  ## the name of a pre-created secret containing the external database password
+  ##
+  passwordSecret: airflow-cluster-postgres-password
+
+  ## the key within `externalDatabase.passwordSecret` containing the password string
+  ##
+  passwordSecretKey: PASSWORD
 
 ###################################
 # Database - Redis Chart
