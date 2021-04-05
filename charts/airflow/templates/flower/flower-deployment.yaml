@@ -75,7 +75,7 @@ spec:
       {{- end }}
       initContainers:
         {{- if $extraPipPackages }}
-        {{- include "airflow.init_container.install_pip_packages" (dict "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
+        {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
         {{- end }}
         {{- include "airflow.init_container.check_db" . | indent 8 }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
@@ -151,13 +151,13 @@ spec:
                 {{- end }}
           {{- end }}
           {{- $extraVolumeMounts := .Values.flower.extraVolumeMounts }}
-          {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+          {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
           {{- if $volumeMounts }}
           volumeMounts:
             {{- $volumeMounts | indent 12 }}
           {{- end }}
       {{- $extraVolumes := .Values.flower.extraVolumes }}
-      {{- $volumes := include "airflow.volumes" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
+      {{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
       {{- if $volumes }}
       volumes:
         {{- $volumes | indent 8 }}
