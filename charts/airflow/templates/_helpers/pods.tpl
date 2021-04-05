@@ -58,7 +58,7 @@ Define an init-container which waits for DB migrations
 
 {{/*
 Define an init-container which installs a list of pip packages
-EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "Values" .Values "extraPipPackages" $extraPipPackages) }}
+EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) }}
 */}}
 {{- define "airflow.init_container.install_pip_packages" }}
 - name: install-pip-packages
@@ -81,7 +81,7 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "V
 
 {{/*
 Define a container which regularly syncs a git-repo
-EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Values" .Values "sync_one_time" "true") }}
+EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") }}
 */}}
 {{- define "airflow.container.git_sync" }}
 - name: dags-git-sync
@@ -161,7 +161,7 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Values" .Values "s
 
 {{/*
 The list of `volumeMounts` for web/scheduler/worker/flower container
-EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
 */}}
 {{- define "airflow.volumeMounts" }}
 {{- /* dags */ -}}

@@ -75,7 +75,7 @@ spec:
       {{- end }}
       initContainers:
         {{- if $extraPipPackages }}
-        {{- include "airflow.init_container.install_pip_packages" (dict "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
+        {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
         {{- end }}
         {{- include "airflow.init_container.check_db" . | indent 8 }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
@@ -126,7 +126,7 @@ spec:
               port: web
           {{- end }}
           {{- $extraVolumeMounts := .Values.web.extraVolumeMounts }}
-          {{- $volumeMounts := include "airflow.volumeMounts" (dict "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+          {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
           volumeMounts:
             {{- $volumeMounts | indent 12 }}
             - name: webserver-config
