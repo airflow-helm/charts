@@ -39,10 +39,28 @@ airflow:
     AWS_ACCESS_KEY_ID: "<>"
     AWS_SECRET_ACCESS_KEY: "<>"
     HIGH_PRIORITY: "1000"
+    AIRFLOW_VAR_SNOWFLAKE_RAW_DB: "RAW</_STAGING>"
+    AIRFLOW_VAR_SNOWFLAKE_PUBLIC_SCHEMA: "FT_PUBLIC"
+    AIRFLOW_VAR_SNOWFLAKE_STAGING_SCHEMA: "FT_STAGING"
+    AIRFLOW_VAR_SNOWFLAKE_CHUNK_SIZE: "8000"
+    AIRFLOW_VAR_POSTGRES_PUBLIC_SCHEMA: "PUBLIC"
+    AIRFLOW_VAR_POSTGRES_STAGING_SCHEMA: "STAGING"
+    AIRFLOW_VAR_POSTGRES_CHUNK_SIZE: "3000"
+
+
+    # Performance related
     AIRFLOW__CORE__PARALLELISM: "128"
     AIRFLOW__CORE__DAG_CONCURRENCY: "128"
-    AIRFLOW__CELERY__WORKER_CONCURRENCY: "8"
-    AIRFLOW__SCHEDULER__PARSING_PROCESSES: "16"
+    AIRFLOW__CORE__NON_POOLED_TASK_SLOT_COUNT: "128"
+    AIRFLOW__SCHEDULER__PARSING_PROCESSES: "4"
+    AIRFLOW__WEBSERVER__WORKERS: "2" # 2 * NUM_CPU_CORES + 1
+    AIRFLOW__WEBSERVER__WEB_SERVER_WORKER_TIMEOUT: "300" #Kill workers if they don't start within 5min instead of 2min
+
+    ## AWS S3 Remote Logging
+    AIRFLOW__CORE__REMOTE_LOGGING: "True"
+    AIRFLOW__CORE__REMOTE_BASE_LOG_FOLDER: "s3://eks-airflow-<staging/prod>/airflow"
+    AIRFLOW__CORE__REMOTE_LOG_CONN_ID: "aws_s3_airflow"
+    AIRFLOW__CORE__ENCRYPT_S3_LOGS: "False"
   extraPipPackages:
     - "adal==1.2.4"
     - "alembic==1.4.2"
@@ -134,7 +152,7 @@ airflow:
     - "graphviz==0.14.1"
     - "greenlet==0.4.16"
     - "grpc-google-iam-v1==0.12.3"
-    - "grpcio==1.31.0"
+    - "grpcio==1.30.0"
     - "grpcio-gcp==0.2.2"
     - "gunicorn==20.0.4"
     - "HeapDict==1.0.1"
@@ -248,14 +266,14 @@ scheduler:
 
   ## custom airflow connections for the airflow scheduler
   ##
-  existingSecretConnections: "add-airflow-connections"
+  existingSecretConnections: "add-airflow-connections-<prod/staging>"
 
   ## custom airflow variables for the airflow scheduler
   ##
   variables: |
     {
       "SLACK_PROD_ACCESS_TOKEN": "https://<>",
-      "SLACK_PROD_CHANNEL": "etl-prod",
+      "SLACK_PROD_CHANNEL": "etl-<staging/prod>",
       "ENV": "prod",
       "KMSKEYID": "<>",
       "SNOWFLAKE_RAW_DB": "RAW",
@@ -289,7 +307,7 @@ web:
   resources:
     requests:
       memory: "1Gi"
-  replicas: 3
+  replicas: 1
 
 ###################################
 # Airflow - Worker Configs
@@ -299,7 +317,7 @@ workers:
   replicas: 2
   resources:
     requests:
-      memory: "2Gi"
+      memory: "1Gi"
 
   podDisruptionBudget:
     enabled: true
@@ -308,17 +326,17 @@ workers:
 
   autoscaling:
     enabled: true
-    maxReplicas: 16
+    maxReplicas: 128
     metrics:
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: 70
+          averageUtilization: 60
 
   celery:
-    instances: 10
+    instances: 4
 
     ## wait at most 9min for running tasks to complete before SIGTERM
     ## WARNING:
@@ -431,4 +449,59 @@ externalDatabase:
 # Database - Redis Chart
 ###################################
 redis:
+  ## if the `stable/redis` chart is used
+  ##
   enabled: true
+
+  ## configs for the redis master
+  ##
+  master:
+    ## resource requests/limits for the master Pod
+    ##
+    resources:
+      requests:
+        cpu: "300m"
+        memory: "2Gi"
+
+    ## configs for the PVC of the redis master
+    ##
+    persistence:
+      ## use a PVC to persist data
+      ##
+      enabled: false
+
+
+###################################
+# Airflow - Logs Configs
+###################################
+logs:
+  ## configs for the logs PVC
+  ##
+  persistence:
+    ## if a persistent volume is mounted at `logs.path`
+    ##
+    enabled: false
+
+###################################
+# Airflow - Flower Configs
+###################################
+flower:
+  ## if the Flower UI should be deployed
+  ##
+  enabled: true
+
+  ## resource requests/limits for the flower Pods
+  ##
+  resources:
+    requests:
+      cpu: "200m"
+      memory: "1536Mi"
+
+  ## configs for the Service of the flower Pods
+  ##
+  service:
+    annotations: {}
+    type: ClusterIP
+    externalPort: 5555
+    loadBalancerIP: ""
+    loadBalancerSourceRanges: []
