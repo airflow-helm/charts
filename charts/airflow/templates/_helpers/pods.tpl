@@ -217,11 +217,16 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
   emptyDir: {}
 {{- end }}
 
+
 {{- /* logs */ -}}
 {{- if .Values.logs.persistence.enabled }}
 - name: logs-data
-  mountPath: {{ .Values.logs.path }}
-  subPath: {{ .Values.logs.persistence.subPath }}
+  persistentVolumeClaim:
+    {{- if .Values.logs.persistence.existingClaim }}
+    claimName: {{ .Values.logs.persistence.existingClaim }}
+    {{- else }}
+    claimName: {{ printf "%s-logs" (include "airflow.fullname" . | trunc 58) }}
+    {{- end }}
 {{- end }}
 
 {{- /* git-sync */ -}}
