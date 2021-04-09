@@ -968,6 +968,7 @@ Parameter | Description | Default
 `airflow.pools` | a list of initial pools to create | `<see values.yaml>`
 `airflow.poolsUpdate` | if we update pools or just create them the first time (lookup by `name`) | `true`
 `airflow.podAnnotations` | extra annotations for the web/scheduler/worker/flower Pods | `{}`
+`airflow.secretAnnotations` | extra annotations for secrets in templates/config/* or templates/jobs/* | `{}`
 `airflow.extraPipPackages` | extra pip packages to install in the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraEnv` | extra environment variables for the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraContainers` | extra containers for the web/scheduler/worker/flower Pods | `[]`

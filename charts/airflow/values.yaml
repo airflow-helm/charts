@@ -167,6 +167,10 @@ airflow:
   ##
   podAnnotations: {}
 
+  ## extra annotations for secrets in templates/config/* or templates/jobs/*
+  ##
+  secretAnnotations: {}
+
   ## extra pip packages to install in the web/scheduler/worker/flower Pods
   ##
   ## EXAMPLE:
