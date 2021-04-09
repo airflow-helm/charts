@@ -167,6 +167,11 @@ airflow:
   ##
   podAnnotations: {}
 
+  ## extra annotations for the job Pods
+  ##
+  ## - Useful if you want to disable istio sidecar injection. ie: sidecar.istio.io/inject: "false"
+  jobPodAnnotations: {}
+
   ## extra pip packages to install in the web/scheduler/worker/flower Pods
   ##
   ## EXAMPLE:

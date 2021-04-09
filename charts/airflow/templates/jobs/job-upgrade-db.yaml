@@ -25,6 +25,10 @@ spec:
         app: {{ include "airflow.labels.app" . }}
         component: jobs
         release: {{ .Release.Name }}
+      annotations:
+        {{- if .Values.airflow.jobPodAnnotations }}
+        {{- toYaml .Values.airflow.jobPodAnnotations | nindent 8 }}
+        {{- end }}
     spec:
       restartPolicy: OnFailure
       {{- if .Values.airflow.image.pullSecret }}
