@@ -217,7 +217,6 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
   emptyDir: {}
 {{- end }}
 
-
 {{- /* logs */ -}}
 {{- if .Values.logs.persistence.enabled }}
 - name: logs-data
