@@ -23,6 +23,10 @@ spec:
         chart: {{ include "airflow.labels.chart" . }}
         release: {{ .Release.Name }}
         heritage: {{ .Release.Service }}
+      annotations:
+        {{- if .Values.airflow.jobPodAnnotations }}
+        {{- toYaml .Values.airflow.jobPodAnnotations | nindent 8 }}
+        {{- end }}
     spec:
       restartPolicy: OnFailure
       {{- if .Values.airflow.image.pullSecret }}
