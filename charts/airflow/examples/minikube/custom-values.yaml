@@ -269,7 +269,10 @@ scheduler:
   existingSecretConnections: "add-airflow-connections-<prod/staging>"
 
   ## custom airflow variables for the airflow scheduler
-  ##
+
+  ## about to deprecate:
+  # SNOWFLAKE_RAW_FT_DB
+  # SNOWFLAKE_FT_PUBLIC_SCHEMA
   variables: |
     {
       "SLACK_PROD_ACCESS_TOKEN": "https://<>",
@@ -277,13 +280,16 @@ scheduler:
       "ENV": "prod",
       "KMSKEYID": "<>",
       "SNOWFLAKE_RAW_DB": "RAW",
-      "SNOWFLAKE_PUBLIC_SCHEMA": "FT_PUBLIC",
-      "SNOWFLAKE_STAGING_SCHEMA": "FT_STAGING",
+      "SNOWFLAKE_PUBLIC_SCHEMA": "PUBLIC",
+      "SNOWFLAKE_STAGING_SCHEMA": "STAGING",
       "SNOWFLAKE_CHUNK_SIZE": "8000",
       "POSTGRES_PUBLIC_SCHEMA": "PUBLIC",
       "POSTGRES_STAGING_SCHEMA": "STAGING",
       "POSTGRES_CHUNK_SIZE": "3000",
-      "SEGMENT_KEY": "<>"
+      "SEGMENT_KEY": "<>",
+      "ENABLE_SYNC_ESP": "False",
+      "SNOWFLAKE_RAW_FT_DB": "<RAW/RAW_STAGING>",
+      "SNOWFLAKE_FT_PUBLIC_SCHEMA": "FT_PUBLIC"
     }
 
   ## custom airflow pools for the airflow scheduler
