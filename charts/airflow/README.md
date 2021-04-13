@@ -213,7 +213,7 @@ This method stores your DAGs inside the container image.
 > ⚠️ this chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images)
 
 For example, extending `airflow:2.0.1-python3.8` with some dags:
-```docker
+```dockerfile
 FROM apache/airflow:2.0.1-python3.8
 
 # NOTE: dag path is set with the `dags.path` value
@@ -269,7 +269,7 @@ You can extend the airflow container image with your pip packages.
 > ⚠️ this chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images)
 
 For example, extending `airflow:2.0.1-python3.8` with the `torch` package:
-```docker
+```dockerfile
 FROM apache/airflow:2.0.1-python3.8
 
 # install your pip packages
@@ -773,6 +773,9 @@ redis:
 
 Example values for an external Postgres database, with an existing `airflow_cluster1` database:
 ```yaml
+postgresql:
+  enabled: false
+
 externalDatabase:
   type: postgres
   host: postgres.example.org
@@ -789,6 +792,9 @@ externalDatabase:
 
 Example values for an external MySQL database, with an existing `airflow_cluster1` database:
 ```yaml
+postgresql:
+  enabled: false
+
 externalDatabase:
   type: mysql
   host: mysql.example.org
