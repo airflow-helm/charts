@@ -32,10 +32,10 @@
 
 {{/* Checks for `airflow.config` */}}
 {{- if .Values.airflow.config.AIRFLOW__CORE__EXECUTOR }}
-  {{ required "Don't define `airflow.config.AIRFLOW__CORE__EXECUTOR`, it will be automatically set by the chart!" nil }}
+  {{ required "Don't define `airflow.config.AIRFLOW__CORE__EXECUTOR`, it will be automatically set from `airflow.executor`!" nil }}
 {{- end }}
 {{- if or .Values.airflow.config.AIRFLOW__CORE__DAGS_FOLDER }}
-  {{ required "Don't define `airflow.config.AIRFLOW__CORE__DAGS_FOLDER`, it will be automatically set by the chart!" nil }}
+  {{ required "Don't define `airflow.config.AIRFLOW__CORE__DAGS_FOLDER`, it will be automatically set from `dags.path`!" nil }}
 {{- end }}
 {{- if or (.Values.airflow.config.AIRFLOW__CELERY__BROKER_URL) (.Values.airflow.config.AIRFLOW__CELERY__BROKER_URL_CMD) }}
   {{ required "Don't define `airflow.config.AIRFLOW__CELERY__BROKER_URL`, it will be automatically set by the chart!" nil }}
