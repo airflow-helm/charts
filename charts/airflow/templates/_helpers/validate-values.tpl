@@ -100,3 +100,23 @@
     {{- end }}
   {{- end }}
 {{- end }}
+
+{{/* Checks for `externalDatabase` */}}
+{{- if .Values.externalDatabase.host }}
+  {{/* default value for `externalDatabase.host` is "localhost" */}}
+  {{- if not (eq .Values.externalDatabase.host "localhost") }}
+    {{- if .Values.postgresql.enabled }}
+    {{ required "If `externalDatabase.host` is set, then `postgresql.enabled` should be `false`!" nil }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{/* Checks for `externalRedis` */}}
+{{- if .Values.externalRedis.host }}
+  {{/* default value for `externalRedis.host` is "localhost" */}}
+  {{- if not (eq .Values.externalRedis.host "localhost") }}
+    {{- if .Values.redis.enabled }}
+    {{ required "If `externalRedis.host` is set, then `redis.enabled` should be `false`!" nil }}
+    {{- end }}
+  {{- end }}
+{{- end }}
