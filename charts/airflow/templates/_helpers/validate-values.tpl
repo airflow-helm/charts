@@ -75,7 +75,7 @@
     {{- end }}
     {{- if .Values.airflow.config.AIRFLOW__WEBSERVER__BASE_URL }}
       {{- $webUrl := .Values.airflow.config.AIRFLOW__WEBSERVER__BASE_URL | urlParse }}
-      {{- if not (eq .Values.ingress.web.path (get $webUrl "path")) }}
+      {{- if not (eq (.Values.ingress.web.path | trimSuffix "*" | trimSuffix "/") (get $webUrl "path")) }}
       {{ required (printf "The `ingress.web.path` must be compatable with `airflow.config.AIRFLOW__WEBSERVER__BASE_URL`! (try setting AIRFLOW__WEBSERVER__BASE_URL to 'http://{HOSTNAME}%s', rather than '%s')" .Values.ingress.web.path .Values.airflow.config.AIRFLOW__WEBSERVER__BASE_URL) nil }}
       {{- end }}
     {{- else }}
@@ -92,7 +92,7 @@
     {{ required "The `ingress.flower.path` should NOT include a trailing '/'!" nil }}
     {{- end }}
     {{- if .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX }}
-      {{- if not (eq .Values.ingress.flower.path .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX) }}
+      {{- if not (eq (.Values.ingress.flower.path | trimSuffix "*" | trimSuffix "/") .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX) }}
       {{ required (printf "The `ingress.flower.path` must be compatable with `airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX`! (try setting AIRFLOW__CELERY__FLOWER_URL_PREFIX to '%s', rather than '%s')" .Values.ingress.flower.path .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX) nil }}
       {{- end }}
     {{- else }}
