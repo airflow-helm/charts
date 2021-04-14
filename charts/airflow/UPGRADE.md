@@ -1,4 +1,8 @@
 # Upgrading Steps
+## `v8.0.X` → `v8.1.0`
+
+__The following values have been ADDED:__
+- `jobs.resources`
 
 ## `v7.15.X` → `v8.0.0`
 

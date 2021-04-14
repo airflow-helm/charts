@@ -63,6 +63,7 @@ __NOTE:__
 
 Old Version | New Version | Upgrade Guide
 --- | --- | ---
+v8.0.X | v8.1.0 | [link](UPGRADE.md#v700x--v810)
 v7.15.X | v8.0.0 | [link](UPGRADE.md#v715x--v800)
 v7.14.X | v7.15.0 | [link](UPGRADE.md#v714x--v7150)
 v7.13.X | v7.14.0 | [link](UPGRADE.md#v713x--v7140)
@@ -1287,6 +1288,15 @@ Parameter | Description | Default
 
 <hr>
 </details>
+
+### Jobs:
+<details>
+<summary>Show More</summary>
+<hr>
+
+Parameter | Description | Default
+--- | --- | ---
+`jobs.resources` | resource requests/limits for the job containers | `{}`
 
 <br>
 <br>

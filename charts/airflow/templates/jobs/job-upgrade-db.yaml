@@ -57,3 +57,5 @@ spec:
             {{- else }}
             - "exec airflow db upgrade"
             {{- end }}
+          resources:
+            {{- toYaml .Values.jobs.resources | nindent 12 }}
