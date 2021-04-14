@@ -43,6 +43,8 @@ spec:
             - "python"
             - "-Wignore"
             - "/job_scripts/create_variables.py"
+          resources:
+            {{- toYaml .Values.jobs.resources | nindent 12 }}
           volumeMounts:
             - name: job-scripts
               mountPath: /job_scripts

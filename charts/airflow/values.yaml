@@ -1568,3 +1568,14 @@ prometheusRule:
   ## - documentation: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
   ##
   groups: []
+
+###################################
+# Job Configs
+###################################
+jobs:
+  ## resource requests/limits for the job container
+  ##
+  ## SPEC - ResourceRequirements:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ##
+  resources: {}
