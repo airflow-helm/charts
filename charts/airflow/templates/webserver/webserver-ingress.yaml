@@ -21,7 +21,9 @@ spec:
   tls:
     - hosts:
         - {{ .Values.ingress.web.host }}
+      {{- if .Values.ingress.web.tls.secretName }}
       secretName: {{ .Values.ingress.web.tls.secretName }}
+      {{- end }}
   {{- end }}
   rules:
     - http:

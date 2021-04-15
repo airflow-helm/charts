@@ -1117,9 +1117,6 @@ ingress:
 
       ## the name of a pre-created Secret containing a TLS private key and certificate
       ##
-      ## NOTE:
-      ## - this MUST be specified if `tls.enabled` is true
-      ##
       secretName: ""
 
     ## http paths to add to the web Ingress before the default path
@@ -1175,9 +1172,6 @@ ingress:
       enabled: false
 
       ## the name of a pre-created Secret containing a TLS private key and certificate
-      ##
-      ## NOTE:
-      ## - this MUST be specified if `tls.enabled` is true
       ##
       secretName: ""
 
