@@ -10,6 +10,20 @@
   {{- end }}
 {{- end }}
 
+{{/* Checks for `airflow.image` */}}
+{{- if eq .Values.airflow.image.repository "apache/airflow" }}
+  {{- if hasPrefix "1." .Values.airflow.image.tag }}
+    {{- if not .Values.airflow.legacyCommands }}
+    {{ required "When using airflow 1.10.X, `airflow.legacyCommands` must be `true`!" nil }}
+    {{- end }}
+  {{ end }}
+  {{- if hasPrefix "2." .Values.airflow.image.tag }}
+    {{- if .Values.airflow.legacyCommands }}
+    {{ required "When using airflow 2.X.X, `airflow.legacyCommands` must be `false`!" nil }}
+    {{- end }}
+  {{ end }}
+{{- end }}
+
 {{/* Checks for `airflow.executor` */}}
 {{- if not (has .Values.airflow.executor (list "CeleryExecutor" "CeleryKubernetesExecutor" "KubernetesExecutor")) }}
   {{ required "The `airflow.executor` must be one of: [CeleryExecutor, CeleryKubernetesExecutor, KubernetesExecutor]!" nil }}
