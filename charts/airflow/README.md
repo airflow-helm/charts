@@ -80,6 +80,37 @@ A __production__ starting point for GKE on Google Cloud (CeleryExecutor) | [link
 
 ## Airflow Configs
 
+### How to use a specific version of airflow?
+<details>
+<summary>Show More</summary>
+<hr>
+
+There will always be a single default version of airflow shipped with this chart, see `airflow.image.*` in [values.yaml](values.yaml) for the current one.
+
+However, given the general nature of the chart, it is likely that other versions of airflow will work too.
+
+For example, using airflow `2.0.1`, with python `3.6`:
+```yaml
+airflow:
+  image:
+    repository: apache/airflow
+    tag: 2.0.1-python3.6
+```
+
+For example, using airflow `1.10.15`, with python `3.8`:
+```yaml
+airflow:
+  # this must be "true" for airflow 1.10
+  legacyCommands: true
+  
+  image:
+    repository: apache/airflow
+    tag: 1.10.15-python3.8
+```
+
+<hr>
+</details>
+
 ### How to set airflow configs?
 <details>
 <summary>Show More</summary>
