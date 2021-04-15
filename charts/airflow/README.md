@@ -483,7 +483,7 @@ You can use the `airflow.connections` value to create airflow [Connections](http
 
 For example, to create connections called `my_aws`, `my_gcp`, `my_postgres`, and `my_ssh`:
 ```yaml
-scheduler:
+airflow:
   connections:
     ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html
     - id: my_aws
