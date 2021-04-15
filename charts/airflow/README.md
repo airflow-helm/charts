@@ -81,6 +81,37 @@ A __production__ starting point for GKE on Google Cloud (CeleryExecutor) | [link
 
 ## Airflow Configs
 
+### How to use a specific version of airflow?
+<details>
+<summary>Show More</summary>
+<hr>
+
+There will always be a single default version of airflow shipped with this chart, see `airflow.image.*` in [values.yaml](values.yaml) for the current one.
+
+However, given the general nature of the chart, it is likely that other versions of airflow will work too.
+
+For example, using airflow `2.0.1`, with python `3.6`:
+```yaml
+airflow:
+  image:
+    repository: apache/airflow
+    tag: 2.0.1-python3.6
+```
+
+For example, using airflow `1.10.15`, with python `3.8`:
+```yaml
+airflow:
+  # this must be "true" for airflow 1.10
+  legacyCommands: true
+  
+  image:
+    repository: apache/airflow
+    tag: 1.10.15-python3.8
+```
+
+<hr>
+</details>
+
 ### How to set airflow configs?
 <details>
 <summary>Show More</summary>
@@ -214,7 +245,7 @@ This method stores your DAGs inside the container image.
 > ⚠️ this chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images)
 
 For example, extending `airflow:2.0.1-python3.8` with some dags:
-```docker
+```dockerfile
 FROM apache/airflow:2.0.1-python3.8
 
 # NOTE: dag path is set with the `dags.path` value
@@ -270,7 +301,7 @@ You can extend the airflow container image with your pip packages.
 > ⚠️ this chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images)
 
 For example, extending `airflow:2.0.1-python3.8` with the `torch` package:
-```docker
+```dockerfile
 FROM apache/airflow:2.0.1-python3.8
 
 # install your pip packages
@@ -484,7 +515,7 @@ You can use the `airflow.connections` value to create airflow [Connections](http
 
 For example, to create connections called `my_aws`, `my_gcp`, `my_postgres`, and `my_ssh`:
 ```yaml
-scheduler:
+airflow:
   connections:
     ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html
     - id: my_aws
@@ -774,6 +805,9 @@ redis:
 
 Example values for an external Postgres database, with an existing `airflow_cluster1` database:
 ```yaml
+postgresql:
+  enabled: false
+
 externalDatabase:
   type: postgres
   host: postgres.example.org
@@ -790,6 +824,9 @@ externalDatabase:
 
 Example values for an external MySQL database, with an existing `airflow_cluster1` database:
 ```yaml
+postgresql:
+  enabled: false
+
 externalDatabase:
   type: mysql
   host: mysql.example.org

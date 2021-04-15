@@ -21,10 +21,16 @@ spec:
   ttlSecondsAfterFinished: 300
   template:
     metadata:
+      annotations:
+        {{- if .Values.airflow.podAnnotations }}
+        {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
+        {{- end }}
       labels:
         app: {{ include "airflow.labels.app" . }}
         component: jobs
+        chart: {{ include "airflow.labels.chart" . }}
         release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
     spec:
       restartPolicy: OnFailure
       {{- if .Values.airflow.image.pullSecret }}
