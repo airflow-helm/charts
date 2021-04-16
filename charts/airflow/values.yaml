@@ -1233,6 +1233,13 @@ serviceAccount:
   ##
   name: ""
 
+  ## if the service account token (created by this chart, preexisting, or default namespace serviceaccount) is automatically mounted in the pods
+  ##
+  ## NOTE:
+  ## - Set this to false if your airflow instance does not need k8s API access and you don't want any access token to be mounted into the airflow/flower pods
+  ##
+  automountServiceAccountToken: true
+
   ## annotations for the ServiceAccount
   ##
   ## EXAMPLE: (to use WorkloadIdentity in Google Cloud)

@@ -74,6 +74,7 @@ spec:
       securityContext:
         {{- toYaml .Values.scheduler.securityContext | nindent 8 }}
       {{- end }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       initContainers:
         {{- if $extraPipPackages }}

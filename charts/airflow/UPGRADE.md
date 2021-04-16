@@ -1,5 +1,8 @@
 # Upgrading Steps
 
+## `v8.0.X` → `v8.1.0`
+- added `serviceAccount.automountServiceAccountToken` to give users the option to not mount any service account tokens in the airflow pods if they are not needed
+
 ## `v7.15.X` → `v8.0.0`
 
 > 🛑️️ this is a MAJOR update, meaning there are BREAKING changes

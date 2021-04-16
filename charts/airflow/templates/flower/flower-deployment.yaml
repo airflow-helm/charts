@@ -68,6 +68,7 @@ spec:
       tolerations:
         {{- toYaml .Values.flower.tolerations | nindent 8 }}
       {{- end }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       {{- if .Values.flower.securityContext }}
       securityContext:

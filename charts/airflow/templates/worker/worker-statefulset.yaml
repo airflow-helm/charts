@@ -61,6 +61,7 @@ spec:
       {{- else }}
       terminationGracePeriodSeconds: {{ .Values.workers.terminationPeriod }}
       {{- end }}
+      automountServiceAccountToken: {{ .Values.serviceAccount.automountServiceAccountToken }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       {{- if .Values.workers.nodeSelector }}
       nodeSelector:
