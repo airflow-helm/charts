@@ -135,9 +135,6 @@ spec:
               mountPath: /opt/airflow/webserver_config.py
               subPath: webserver_config.py
               readOnly: true
-        {{- if .Values.dags.gitSync.enabled }}
-        {{- include "airflow.container.git_sync" . | indent 8 }}
-        {{- end }}
         {{- if .Values.airflow.extraContainers }}
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
         {{- end }}
