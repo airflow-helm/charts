@@ -35,7 +35,9 @@ spec:
     {{- if $extraPipPackages }}
     {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) | indent 4 }}
     {{- end }}
+    {{- if .Values.dags.gitSync.enabled }}
     {{- include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") | indent 4 }}
+    {{- end }}
   {{- end }}
   containers:
     - name: base
