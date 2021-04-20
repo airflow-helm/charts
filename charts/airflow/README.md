@@ -815,6 +815,9 @@ externalDatabase:
   user: airflow_cluster1
   passwordSecret: "airflow-cluster1-postgres-password"
   passwordSecretKey: "postgresql-password"
+
+  # use this for any extra connection-string settings, e.g. ?sslmode=disable
+  properties: ""
 ```
 
 <h3>Option 2 - MySQL</h3>
@@ -834,6 +837,9 @@ externalDatabase:
   user: airflow_cluster1
   passwordSecret: "airflow-cluster1-mysql-password"
   passwordSecretKey: "mysql-password"
+
+  # use this for any extra connection-string settings, e.g. ?useSSL=false
+  properties: ""
 ```
 
 <hr>
