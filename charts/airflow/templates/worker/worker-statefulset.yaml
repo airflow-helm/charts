@@ -84,6 +84,9 @@ spec:
         {{- end }}
         {{- include "airflow.init_container.check_db" . | indent 8 }}
         {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
+        {{- if .Values.dags.gitSync.enabled }}
+        {{- include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") | indent 8 }}
+        {{- end }}
       containers:
         - name: airflow-worker
           {{- include "airflow.image" . | indent 10 }}
