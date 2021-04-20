@@ -26,9 +26,9 @@ Define an init-container which checks the DB status
     - "bash"
     - "-c"
     {{- if .Values.airflow.legacyCommands }}
-    - "exec airflow checkdb"
+    - "exec timeout 16s airflow checkdb"
     {{- else }}
-    - "exec airflow db check"
+    - "exec timeout 16s airflow db check"
     {{- end }}
 {{- end }}
 
