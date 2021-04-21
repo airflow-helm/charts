@@ -520,10 +520,10 @@ airflow:
     - id: my_aws
       type: aws
       description: my AWS connection
+      login: "aws_access_key_id"
+      password: "aws_secret_access_key"
       extra: |-
-        { "aws_access_key_id": "XXXXXXXX",
-          "aws_secret_access_key": "XXXXXXXX",
-          "region_name":"eu-central-1" }
+        { "region_name":"eu-central-1" }
     ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-google/stable/connections/gcp.html
     - id: my_gcp
       type: google_cloud_platform
