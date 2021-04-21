@@ -62,6 +62,12 @@ spec:
       volumeMounts:
         {{- $volumeMounts | indent 8 }}
       {{- end }}
+      {{- $resources := .Values.airflow.kubernetesPodTemplate.resources }}
+      {{- if $resources }}
+      resources:
+        {{- toYaml $resources | nindent 8 }}
+      {{- end }}
+
   {{- $extraVolumes := .Values.airflow.kubernetesPodTemplate.extraVolumes }}
   {{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
   {{- if $volumes }}
