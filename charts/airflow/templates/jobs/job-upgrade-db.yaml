@@ -21,10 +21,10 @@ spec:
   ttlSecondsAfterFinished: 300
   template:
     metadata:
+      {{- if .Values.airflow.podAnnotations }}
       annotations:
-        {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
-        {{- end }}
+      {{- end }}
       labels:
         app: {{ include "airflow.labels.app" . }}
         component: jobs
