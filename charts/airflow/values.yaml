@@ -203,6 +203,15 @@ airflow:
   ##
   extraVolumes: []
 
+  ## resources config for initContainers
+  ##
+  ## This applies for:
+  ## - check_db
+  ## - wait_for_db_migrations
+  ## - install_pip_packages
+  initContainers:
+    resources: {}
+
   ## configs to generate the AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE
   ##
   ## NOTE:

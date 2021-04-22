@@ -30,6 +30,8 @@ Define an init-container which checks the DB status
     {{- else }}
     - "exec timeout 16s airflow db check"
     {{- end }}
+  resources:
+    {{- toYaml .Values.airflow.initContainers.resources | nindent 4 }}
 {{- end }}
 
 {{/*
@@ -54,6 +56,8 @@ Define an init-container which waits for DB migrations
     {{- else }}
     - "exec airflow db check-migrations -t 60"
     {{- end }}
+  resources:
+    {{- toYaml .Values.airflow.initContainers.resources | nindent 4 }}
 {{- end }}
 
 {{/*
@@ -74,6 +78,8 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "R
     {{- range .extraPipPackages }}
     - {{ . | quote }}
     {{- end }}
+  resources:
+    {{- toYaml .Values.airflow.initContainers.resources | nindent 4 }}
   volumeMounts:
     - name: python-site-packages
       mountPath: /opt/python/site-packages
