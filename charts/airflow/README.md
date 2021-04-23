@@ -59,6 +59,7 @@ kubectl port-forward --namespace $NAMESPACE $POD_NAME 8080:8080
 
 Old Version | New Version | Upgrade Guide
 --- | --- | ---
+v8.2.X | v8.3.0 | [link](UPGRADE.md#v82x--v830)
 v8.1.X | v8.2.0 | [link](UPGRADE.md#v81x--v820)
 v8.0.X | v8.1.0 | [link](UPGRADE.md#v80x--v810)
 v7.15.X | v8.0.0 | [link](UPGRADE.md#v715x--v800)
