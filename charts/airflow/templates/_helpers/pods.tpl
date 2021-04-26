@@ -118,6 +118,8 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
       value: {{ .Values.dags.gitSync.syncTimeout | quote }}
     - name: GIT_SYNC_ADD_USER
       value: "true"
+    - name: GIT_SYNC_HOOK_COMMAND
+      value: {{ .Values.dags.gitSync.syncHookCommand | quote }}
     {{- if .Values.dags.gitSync.sshSecret }}
     - name: GIT_SYNC_SSH
       value: "true"

@@ -1041,6 +1041,11 @@ dags:
     ##
     syncTimeout: 120
 
+    ## the command executed after syncing a new hash of the remote repository
+    ## the synced repository is the command's working directory
+    ##
+    syncHookCommand: ""
+
     ## the name of a pre-created Secret with git http credentials
     ##
     httpSecret: ""
