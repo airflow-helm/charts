@@ -67,16 +67,15 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "R
     - "/usr/bin/dumb-init"
     - "--"
   args:
-    - "pip"
-    - "install"
-    - "--target"
-    - "/opt/python/site-packages"
-    {{- range .extraPipPackages }}
-    - {{ . | quote }}
-    {{- end }}
+    - "bash"
+    - "-c"
+    - |
+      pip install --user {{ range .extraPipPackages }}{{ . | quote }} {{ end }} && \
+      echo "copying '/home/airflow/.local/*' to '/opt/home-airflow-local'..." && \
+      cp -r /home/airflow/.local/* /opt/home-airflow-local
   volumeMounts:
-    - name: python-site-packages
-      mountPath: /opt/python/site-packages
+    - name: home-airflow-local
+      mountPath: /opt/home-airflow-local
 {{- end }}
 
 {{/*
@@ -187,8 +186,8 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Value
 
 {{- /* pip-packages */ -}}
 {{- if .extraPipPackages }}
-- name: python-site-packages
-  mountPath: /opt/python/site-packages
+- name: home-airflow-local
+  mountPath: /home/airflow/.local
 {{- end }}
 
 {{- /* user-defined (global) */ -}}
@@ -250,7 +249,7 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
 
 {{- /* pip-packages */ -}}
 {{- if .extraPipPackages }}
-- name: python-site-packages
+- name: home-airflow-local
   emptyDir: {}
 {{- end }}
 
