@@ -3,6 +3,7 @@
 
 __The following values have been ADDED:__
 - `jobs.resources`
+- `jobs.podAnnotations`
 
 ## `v7.15.X` → `v8.0.0`
 
@@ -30,13 +31,13 @@ __The following values have been ADDED:__
 - added `airflow.connections` to help you create/update airflow connections:
 - added `airflow.variables` to help you create/update airflow variables:
 - added `airflow.pools` to help you create/update airflow pools:
-- flower Pods are now affected by `airflow.extraPipPackages`, `airflow.extraContainers`, `airflow.extraVolumeMounts`, `airlfow.extraVolumes`  
+- flower Pods are now affected by `airflow.extraPipPackages`, `airflow.extraContainers`, `airflow.extraVolumeMounts`, `airlfow.extraVolumes`
 - you no longer need to set `web.readinessProbe.scheme` or `web.livenessProbe.scheme`, we now only use HTTPS if `AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT` and `AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY` are set
 - airflow db upgrades are now managed with a post "helm upgrade" Job, meaning it only runs once per upgrade (rather than each time the scheduler starts)
 
 ### Removed Features
 - the `XXX.extraConfigmapMounts`, `XXX.secretsDir`, `XXX.secrets`, `XXX.secretsMap` values have been removed, and replaced with `XXX.extraVolumes` and `XXX.extraVolumeMounts`, which use typical Kubernetes volume-mount syntax
-- the `dags.installRequirements` value has been removed, please instead use the `XXX.extraPipPackages` values, this change was made for two main reasons: 
+- the `dags.installRequirements` value has been removed, please instead use the `XXX.extraPipPackages` values, this change was made for two main reasons:
   1. allowed us to move the pip-install commands into an init-container, which greatly simplifies pod-startup, and removes the need to set any kind of readiness-probe delay in Webserver/Flower Pods
   2. the installRequirements command only ran at Pod start up, meaning you would have to restart all your pods if you updated the `requirements.txt` in your git repo (which isn't very declarative)
 
@@ -134,7 +135,7 @@ __The following values have been ADDED:__
 - `dags.gitSync.sshSecret`
 - `dags.gitSync.sshSecretKey`
 - `dags.gitSync.sshKnownHosts`
-  
+
 ### VALUES - Removed:
 - `airflow.extraConfigmapMounts`
 - `scheduler.initialStartupDelay`
@@ -212,7 +213,7 @@ __The following values have CHANGED DEFAULTS:__
 ## `v7.13.X` → `v7.14.0`
 
 > ⚠️ WARNING
-> 
+>
 > We migrated to the [airflow-helm/charts](https://github.com/airflow-helm/charts) repo, after the deprecation of the [helm/charts](https://github.com/helm/charts/) repo.
 
 __There were NO CHANGES in this version__
@@ -233,7 +234,7 @@ __The following values have been ADDED:__
 ## `v7.10.X` → `v7.11.0`
 
 __The following IMPROVEMENTS have been made:__
-* You can now use `scheduler.existingSecretConnections` with an externally created Secret to store airflow connections. 
+* You can now use `scheduler.existingSecretConnections` with an externally created Secret to store airflow connections.
   (Rather than storing them in plain-text with `scheduler.connections`)
 
 __The following values have been ADDED:__
@@ -261,10 +262,10 @@ __The following values have been ADDED:__
 
 ## `v7.7.X` → `v7.8.0`
 
-> ⚠️ WARNING 
+> ⚠️ WARNING
 >
 > If you install many pip packages with: `airflow.extraPipPackages`, `web.extraPipPackages`, or `dags.installRequirements`
-> 
+>
 > Ensure you set `scheduler.livenessProbe.initialDelaySeconds` to longer than the install time
 >
 
@@ -292,7 +293,7 @@ __If you are using an INTERNAL redis database, some configs have changed:__
 > ⚠️ WARNING
 >
 > We now annotate all pods with `cluster-autoscaler.kubernetes.io/safe-to-evict` by default.
-> 
+>
 > If you want to disable this:
 >  - Set: `flower.safeToEvict`, `scheduler.safeToEvict`, `web.safeToEvict`, `workers.safeToEvict` to `false`
 >  - Set: `postgresql.master.podAnnotations`, `redis.master.podAnnotations`, `redis.slave.podAnnotations` to `{}`
@@ -300,7 +301,7 @@ __If you are using an INTERNAL redis database, some configs have changed:__
 > Note for GKE:
 >  - GKE's cluster-autoscaler will not honor a `gracefulTerminationPeriod` of more than 10min,
 >    if your jobs need more than this amount of time to finish, please set `workers.safeToEvict` to `false`
-> 
+>
 
 __The following IMPROVEMENTS have been made:__
 * The chart YAML has been refactored
@@ -390,7 +391,7 @@ __The following IMPROVEMENTS have been made:__
     * redis configs/components are no longer deployed
     * we now set `AIRFLOW__KUBERNETES__NAMESPACE`, `AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME`, and `AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF`
 * We have fixed an error caused by including a `'` in your redis/postgres/mysql password.
-* We have reverted a change in 7.0.0 which prevented the use of airflow docker images with embedded DAGs. 
+* We have reverted a change in 7.0.0 which prevented the use of airflow docker images with embedded DAGs.
   (Just ensure that `dags.initContainer.enabled` and `git.gitSync.enabled` are `false`)
 * The `AIRFLOW__CORE__SQL_ALCHEMY_CONN`, `AIRFLOW__CELERY__RESULT_BACKEND`, and `AIRFLOW__CELERY__BROKER_URL` environment variables are now available if you `kubectl exec ...` into airflow Pods.
 * We have improved the script used when `workers.celery.gracefullTermination` is `true`.
@@ -426,10 +427,10 @@ Due to the size of these changes, it may be easier to create a new [values.yaml]
 __The official image has a new `AIRFLOW_HOME`, you must change any references in your custom `values.yaml`:__
 
 | Variable | 6.x.x | 7.x.x |
-| --- | --- | --- | 
-| `AIRFLOW_HOME` | `/usr/local/airflow` | `/opt/airflow` | 
-| `dags.path` | `/usr/local/airflow/dags` | `/opt/airflow/dags` | 
-| `logs.path` | `/usr/local/airflow/logs` | `/opt/airflow/logs` | 
+| --- | --- | --- |
+| `AIRFLOW_HOME` | `/usr/local/airflow` | `/opt/airflow` |
+| `dags.path` | `/usr/local/airflow/dags` | `/opt/airflow/dags` |
+| `logs.path` | `/usr/local/airflow/logs` | `/opt/airflow/logs` |
 
 __These internal mount paths have moved, you must update any references:__
 
@@ -512,9 +513,9 @@ __The following values have NEW DEFAULTS:__
 __The following values have been REMOVED:__
 
 * `postgresql.service.port`:
-  * As there is no reason to change the port of the embedded postgresql, and we have separated the external database configs. 
+  * As there is no reason to change the port of the embedded postgresql, and we have separated the external database configs.
 * `redis.master.service.port`:
-  * As there is no reason to change the port of the embedded redis, and we have separated the external redis configs. 
+  * As there is no reason to change the port of the embedded redis, and we have separated the external redis configs.
 
 __The following values have been ADDED:__
 
@@ -558,6 +559,6 @@ __The following values have been ADDED:__
 ## `v3.X.X` → `v4.0.0`
 
 This version splits the specs for the NodeSelector, Affinity and Toleration features.
-Instead of being global, and injected in every component, they are now defined _by component_ to provide more flexibility for your deployments. 
-As such, the migration steps are really simple, just ust copy and paste your node/affinity/tolerance definitions in the four airflow components, which are `worker`, `scheduler`, `flower` and `web`. 
+Instead of being global, and injected in every component, they are now defined _by component_ to provide more flexibility for your deployments.
+As such, the migration steps are really simple, just ust copy and paste your node/affinity/tolerance definitions in the four airflow components, which are `worker`, `scheduler`, `flower` and `web`.
 The default `values.yaml` file should help you with locating those.

@@ -42,7 +42,7 @@ helm install \
 
 ### 3 - Access the WebUI
 
-> ⚠️ browse to http://localhost:8080 after running the following commands 
+> ⚠️ browse to http://localhost:8080 after running the following commands
 
 ```sh
 export NAMESPACE=my-airflow-namespace # set a namespace!
@@ -103,7 +103,7 @@ For example, using airflow `1.10.15`, with python `3.8`:
 airflow:
   # this must be "true" for airflow 1.10
   legacyCommands: true
-  
+
   image:
     repository: apache/airflow
     tag: 1.10.15-python3.8
@@ -125,11 +125,11 @@ airflow:
   config:
     ## security
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
-    
+
     ## dags
     AIRFLOW__CORE__LOAD_EXAMPLES: "False"
     AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
-    
+
     ## email
     AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"
     AIRFLOW__SMTP__SMTP_HOST: "smtpmail.example.com"
@@ -137,10 +137,10 @@ airflow:
     AIRFLOW__SMTP__SMTP_PORT: "25"
     AIRFLOW__SMTP__SMTP_SSL: "False"
     AIRFLOW__SMTP__SMTP_STARTTLS: "False"
-    
+
     ## domain used in airflow emails
     AIRFLOW__WEBSERVER__BASE_URL: "http://airflow.example.com"
-    
+
     ## ether environment variables
     HTTP_PROXY: "http://proxy.example.com:8080"
 ```
@@ -172,8 +172,8 @@ dags:
     syncWait: 60
     sshSecret: "airflow-ssh-git-secret"
     sshSecretKey: "id_rsa"
-    
-    # "known_hosts" verification can be disabled by setting to "" 
+
+    # "known_hosts" verification can be disabled by setting to ""
     sshKnownHosts: |-
       github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
 ```
@@ -223,8 +223,8 @@ With this method, you store your DAGs in a Kubernetes PersistentVolume, which is
 
 You must configure some external system to ensure this volume has your latest DAGs, for example, you could use your CI/CD pipeline system to preform a sync as changes are pushed to your DAGs git repo.
 
-> ⚠️ the PVC needs to have `accessMode` = `ReadOnlyMany` (or `ReadWriteMany`) 
-> 
+> ⚠️ the PVC needs to have `accessMode` = `ReadOnlyMany` (or `ReadWriteMany`)
+>
 > Different StorageClasses support different [access-modes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
 > For Kubernetes on public cloud, a persistent volume controller is likely built in, so check the available access-modes: [Amazon EKS](https://docs.aws.amazon.com/eks/latest/userguide/storage-classes.html), [Azure AKS](https://docs.microsoft.com/en-us/azure/aks/azure-files-dynamic-pv), [Google GKE](https://cloud.google.com/kubernetes-engine/docs/concepts/persistent-volumes)
 
@@ -319,7 +319,7 @@ airflow:
 <hr>
 </details>
 
-### How to create airflow users? 
+### How to create airflow users?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -352,7 +352,7 @@ airflow:
 <hr>
 </details>
 
-### How to authenticate airflow users with LDAP/OAUTH? 
+### How to authenticate airflow users with LDAP/OAUTH?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -378,22 +378,22 @@ web:
       from flask_appbuilder.security.manager import AUTH_LDAP
 
       SQLALCHEMY_DATABASE_URI = conf.get('core', 'SQL_ALCHEMY_CONN')
-      
+
       AUTH_TYPE = AUTH_LDAP
       AUTH_LDAP_SERVER = "ldap://ldap.example.com"
       AUTH_LDAP_USE_TLS = False
-      
+
       # registration configs
       AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB
       AUTH_USER_REGISTRATION_ROLE = "Public"  # this role will be given in addition to any AUTH_ROLES_MAPPING
       AUTH_LDAP_FIRSTNAME_FIELD = "givenName"
       AUTH_LDAP_LASTNAME_FIELD = "sn"
       AUTH_LDAP_EMAIL_FIELD = "mail"  # if null in LDAP, email is set to: "{username}@email.notfound"
-      
+
       # bind username (for password validation)
       AUTH_LDAP_USERNAME_FORMAT = "uid=%s,ou=users,dc=example,dc=com"  # %s is replaced with the provided username
       # AUTH_LDAP_APPEND_DOMAIN = "example.com"  # bind usernames will look like: {USERNAME}@example.com
-      
+
       # search configs
       AUTH_LDAP_SEARCH = "ou=users,dc=example,dc=com"  # the LDAP search base (if non-empty, a search will ALWAYS happen)
       AUTH_LDAP_UID_FIELD = "uid"  # the username field
@@ -403,13 +403,13 @@ web:
           "cn=airflow_users,ou=groups,dc=example,dc=com": ["User"],
           "cn=airflow_admins,ou=groups,dc=example,dc=com": ["Admin"],
       }
-      
+
       # the LDAP user attribute which has their role DNs
       AUTH_LDAP_GROUP_FIELD = "memberOf"
-      
+
       # if we should replace ALL the user's roles each login, or only on registration
       AUTH_ROLES_SYNC_AT_LOGIN = True
-      
+
       # force users to re-auth after 30min of inactivity (to keep roles in sync)
       PERMANENT_SESSION_LIFETIME = 1800
 ```
@@ -429,9 +429,9 @@ web:
       from flask_appbuilder.security.manager import AUTH_OAUTH
 
       SQLALCHEMY_DATABASE_URI = conf.get('core', 'SQL_ALCHEMY_CONN')
-      
+
       AUTH_TYPE = AUTH_OAUTH
-      
+
       # registration configs
       AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB
       AUTH_USER_REGISTRATION_ROLE = "Public"  # this role will be given in addition to any AUTH_ROLES_MAPPING
@@ -454,7 +454,7 @@ web:
               }
           }
       ]
-      
+
       # a mapping from the values of `userinfo["role_keys"]` to a list of FAB roles
       AUTH_ROLES_MAPPING = {
           "FAB_USERS": ["User"],
@@ -463,7 +463,7 @@ web:
 
       # if we should replace ALL the user's roles each login, or only on registration
       AUTH_ROLES_SYNC_AT_LOGIN = True
-      
+
       # force users to re-auth after 30min of inactivity (to keep roles in sync)
       PERMANENT_SESSION_LIFETIME = 1800
 ```
@@ -471,7 +471,7 @@ web:
 <hr>
 </details>
 
-### How to set a custom fernet (encryption) key? 
+### How to set a custom fernet (encryption) key?
 <details>
 <summary>Show More</summary>
 <hr>
@@ -621,7 +621,7 @@ airflow:
 The Airflow Celery Workers can be scaled using the [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/), to enable autoscaling, you must set `workers.autoscaling.enabled=true`, then provide `workers.autoscaling.maxReplicas`.
 
 Assume every task a worker executes consumes approximately `200Mi` memory, that means memory is a good metric for utilisation monitoring.
-For a worker pod you can calculate it: `WORKER_CONCURRENCY * 200Mi`, so for `10 tasks` a worker will consume `~2Gi` of memory. 
+For a worker pod you can calculate it: `WORKER_CONCURRENCY * 200Mi`, so for `10 tasks` a worker will consume `~2Gi` of memory.
 In the following config if a worker consumes `80%` of `2Gi` (which will happen if it runs 9-10 tasks at the same time), an autoscaling event will be triggered, and a new worker will be added.
 If you have many tasks in a queue, Kubernetes will keep adding workers until maxReplicas reached, in this case `16`.
 ```yaml
@@ -653,8 +653,8 @@ workers:
     instances: 10
 
     ## wait at most 9min for running tasks to complete before SIGTERM
-    ## WARNING: 
-    ## - some cloud cluster-autoscaler configs will not respect graceful termination 
+    ## WARNING:
+    ## - some cloud cluster-autoscaler configs will not respect graceful termination
     ##   longer than 10min, for example, Google Kubernetes Engine (GKE)
     gracefullTermination: true
     gracefullTerminationPeriod: 540
@@ -679,7 +679,7 @@ dags:
 <hr>
 
 > 🛑️️ you should persist logs in a production deployment using one of the following methods
-> 
+>
 > By default, logs from the airflow-web/scheduler/worker are written within the Docker container's filesystem, therefore any restart of the pod will wipe the logs.
 
 <h3>Option 1 - Kubernetes PVC</h3>
@@ -696,7 +696,7 @@ logs:
 
 <h3>Option 2 - Remote Bucket (recommended)</h3>
 
-You must give airflow credentials for it to read/write on the remote bucket, this can be achieved with `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID`, or by using something like [Workload Identity (GKE)](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity), or [IAM Roles for Service Accounts (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html). 
+You must give airflow credentials for it to read/write on the remote bucket, this can be achieved with `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID`, or by using something like [Workload Identity (GKE)](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity), or [IAM Roles for Service Accounts (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html).
 
 Example, using `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID` (can be used with S3 + AWS connection too):
 ```yaml
@@ -705,7 +705,7 @@ airflow:
     AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
     AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://<<MY-BUCKET-NAME>>/airflow/logs"
     AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "my_gcp"
-    
+
   connections:
     ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-google/stable/connections/gcp.html
     - id: my_gcp
@@ -716,7 +716,7 @@ airflow:
           "extra__google_cloud_platform__keyfile_dict: "XXXXXXXX",
           "extra__google_cloud_platform__num_retries": "5" }
 ```
-    
+
 Example, using [Workload Identity (GKE)](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity):
 ```yaml
 airflow:
@@ -925,7 +925,7 @@ Consider the situation where you already have something hosted at the root of yo
 In this example, would set these values:
 ```yaml
 airflow:
-  config: 
+  config:
     AIRFLOW__WEBSERVER__BASE_URL: "http://example.com/airflow/"
     AIRFLOW__CELERY__FLOWER_URL_PREFIX: "/airflow/flower"
 
@@ -1297,6 +1297,7 @@ Parameter | Description | Default
 Parameter | Description | Default
 --- | --- | ---
 `jobs.resources` | resource requests/limits for the job containers | `{}`
+`jobs.podAnnotations` | Pod annotations for the job containers | `{}`
 
 <br>
 <br>

@@ -1573,3 +1573,6 @@ jobs:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
   ##
   resources: {}
+  ## extra annotations for the job Pods
+  ##
+  podAnnotations: {}

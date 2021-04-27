@@ -21,6 +21,9 @@ spec:
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
+        {{- if .Values.jobs.podAnnotations }}
+        {{- toYaml .Values.jobs.podAnnotations | nindent 8 }}
+        {{- end }}
       labels:
         app: {{ include "airflow.labels.app" . }}
         component: jobs
