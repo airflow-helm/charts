@@ -662,13 +662,13 @@ workers:
 
   ## configs for the KEDA Autoscaler of the worker pods
   ##
-  ## By default, the KEDA autoscaler queries the database for tasks in 'running' or 'queued' state. 
+  ## By default, the KEDA autoscaler queries the database for tasks in 'running' or 'queued' state.
   ## The deployment is scaled up if the number of queued or running tasks is larger than the number of tasks the currently deployed workers can handle.
   ## In other words:
   ##     if (#tasks queued or running > WORKER_CONCURRENCY * deployed workers) ==> Scale Up
-  ## 
-  ## NOTE: 
-  ## - In order for the autoscaler to work, you need to have the KEDA operator installed. 
+  ##
+  ## NOTE:
+  ## - In order for the autoscaler to work, you need to have the KEDA operator installed.
   ##   https://keda.sh/docs/2.2/deploy/
   autoscaling:
 
@@ -692,8 +692,8 @@ workers:
     ##
     cooldownPeriod: 300
 
-    ## provide custom triggers that suit your needs. 
-    ## Entries here will be added to the triggers list of the autoscaler and will replace the default behaviour. 
+    ## provide custom triggers that suit your needs.
+    ## Entries here will be added to the triggers list of the autoscaler and will replace the default behaviour.
     ## DOCD:
     ##  https://keda.sh/docs/2.2/scalers/
     customTriggers: []
