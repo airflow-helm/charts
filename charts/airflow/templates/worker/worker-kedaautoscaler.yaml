@@ -1,0 +1,51 @@
+{{- if and .Values.workers.autoscaling.enabled (has .Values.airflow.executor (list "CeleryExecutor" "CeleryKubernetesExecutor")) }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: {{ include "airflow.fullname" . }}-worker
+  labels:
+    app: {{ include "airflow.labels.app" . }}
+    component: worker
+    chart: {{ include "airflow.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: {{ include "airflow.fullname" . }}-worker
+  pollingInterval:  {{ .Values.workers.autoscaling.pollingInterval }}
+  cooldownPeriod: {{ .Values.workers.autoscaling.cooldownPeriod }}
+  minReplicaCount: {{ .Values.workers.autoscaling.minReplicas }}
+  maxReplicaCount: {{ .Values.workers.autoscaling.maxReplicas }}
+  triggers:
+  {{- if .Values.workers.autoscaling.customTriggers }}
+    {{- toYaml .Values.workers.autoscaling.customTriggers | nindent 4 }}
+  {{- else }}
+    {{- if .Values.postgresql.enabled }}
+    - type: "postgresql"
+      metadata:
+        host: "{{ (include "airflow.postgresql.fullname" .) }}.{{ .Release.Namespace }}.svc.cluster.local"
+        userName: {{ .Values.postgresql.postgresqlUsername }}
+        port: "5432"
+        sslmode: "disable"
+        dbName: {{ .Values.postgresql.postgresqlDatabase }}
+    {{- else }}
+    - type: {{ ternary "postgresql" .Values.externalDatabase.type (eq .Values.externalDatabase.type "postgres") }}
+      metadata:
+        host: {{ .Values.externalDatabase.host }}
+        userName: {{ .Values.externalDatabase.user }}
+        port: {{ .Values.externalDatabase.port | quote }}
+        {{- if eq .Values.externalDatabase.type "postgres" }}
+        sslmode: {{ .Values.externalDatabase.properties | regexFind "sslmode=[^&]+" | trimPrefix "sslmode=" | default "disable" }}
+        {{- end }}
+        dbName: {{ .Values.externalDatabase.database }}
+    {{- end }}    
+        passwordFromEnv: DATABASE_PASSWORD
+        targetQueryValue: "1"
+        query: >-
+          SELECT ceil(COUNT(*)::decimal / {{ .Values.airflow.config.AIRFLOW__CELERY__WORKER_CONCURRENCY | default 16 }})
+          FROM task_instance
+          WHERE state='running' OR state='queued'
+  {{- end }}
+{{- end }}

@@ -660,27 +660,44 @@ workers:
     ##
     minAvailable: ""
 
-  ## configs for the HorizontalPodAutoscaler of the worker Pods
+  ## configs for the KEDA Autoscaler of the worker pods
   ##
-  ## NOTE:
-  ## - if using git-sync, ensure `dags.gitSync.resources` is set
-  ##
-  ## EXAMPLE:
-  ##   autoscaling:
-  ##     enabled: true
-  ##     maxReplicas: 16
-  ##     metrics:
-  ##     - type: Resource
-  ##       resource:
-  ##         name: memory
-  ##         target:
-  ##           type: Utilization
-  ##           averageUtilization: 80
-  ##
+  ## By default, the KEDA autoscaler queries the database for tasks in 'running' or 'queued' state. 
+  ## The deployment is scaled up if the number of queued or running tasks is larger than the number of tasks the currently deployed workers can handle.
+  ## In other words:
+  ##     if (#tasks queued or running > WORKER_CONCURRENCY * deployed workers) ==> Scale Up
+  ## 
+  ## NOTE: 
+  ## - In order for the autoscaler to work, you need to have the KEDA operator installed. 
+  ##   https://keda.sh/docs/2.2/deploy/
   autoscaling:
+
+    ## If the KEDA autoscaler is enabled
+    ##
     enabled: false
+
+    ## Minimum number of workers deployed. Can be 0 or higher
+    ##
+    minReplicas: 0
+
+    ## Maximum number or workers deployed.
+    ##
     maxReplicas: 2
-    metrics: []
+
+    ## The interval in seconds at which the database is polled
+    ##
+    pollingInterval: 30
+
+    ## The time in seconds KEDA waits before scaling down
+    ##
+    cooldownPeriod: 300
+
+    ## provide custom triggers that suit your needs. 
+    ## Entries here will be added to the triggers list of the autoscaler and will replace the default behaviour. 
+    ## DOCD:
+    ##  https://keda.sh/docs/2.2/scalers/
+    customTriggers: []
+
 
   ## configs for the celery worker Pods
   ##
