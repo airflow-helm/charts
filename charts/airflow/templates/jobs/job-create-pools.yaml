@@ -33,6 +33,7 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.airflow.image.pullSecret }}
       {{- end }}
+      serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       containers:
         - name: create-pools
           {{- include "airflow.image" . | indent 10 }}
