@@ -624,6 +624,10 @@ For a worker pod you can calculate it: `WORKER_CONCURRENCY * 200Mi`, so for `10 
 In the following config if a worker consumes `80%` of `2Gi` (which will happen if it runs 9-10 tasks at the same time), an autoscaling event will be triggered, and a new worker will be added.
 If you have many tasks in a queue, Kubernetes will keep adding workers until maxReplicas reached, in this case `16`.
 ```yaml
+airflow:
+  config:
+    AIRFLOW__CELERY__WORKER_CONCURRENCY: 10
+
 workers:
   # the initial/minimum number of workers
   replicas: 2
@@ -649,8 +653,6 @@ workers:
           averageUtilization: 80
 
   celery:
-    instances: 10
-
     ## wait at most 9min for running tasks to complete before SIGTERM
     ## WARNING: 
     ## - some cloud cluster-autoscaler configs will not respect graceful termination 
