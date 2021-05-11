@@ -228,13 +228,6 @@ workers:
   ## configs for the celery worker Pods
   ##
   celery:
-    ## the number of tasks each celery worker can run at a time
-    ##
-    ## NOTE:
-    ## - sets AIRFLOW__CELERY__WORKER_CONCURRENCY
-    ##
-    instances: 10
-
     ## if we should wait for tasks to finish before SIGTERM of the celery worker
     ##
     gracefullTermination: true
