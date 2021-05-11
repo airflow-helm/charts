@@ -289,6 +289,13 @@ airflow:
     ##
     extraVolumes: []
 
+    ## resources requirements for the Pod template default "base" container
+    ##
+    ## SPEC - Resources:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ##
+    resources: {}
+
 ###################################
 # Airflow - Scheduler Configs
 ###################################

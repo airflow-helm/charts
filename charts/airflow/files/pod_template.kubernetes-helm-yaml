@@ -52,6 +52,10 @@ spec:
       ports: []
       command: []
       args: []
+      {{- if .Values.airflow.kubernetesPodTemplate.resources }}
+      resources:
+        {{- toYaml .Values.airflow.kubernetesPodTemplate.resources | nindent 8 }}
+      {{- end }}
       {{- $extraVolumeMounts := .Values.airflow.kubernetesPodTemplate.extraVolumeMounts }}
       {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
       {{- if $volumeMounts }}
