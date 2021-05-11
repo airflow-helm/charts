@@ -63,6 +63,7 @@ __NOTE:__
 
 Old Version | New Version | Upgrade Guide
 --- | --- | ---
+v8.0.X | v8.1.0 | [link](UPGRADE.md#v80x--v810)
 v7.15.X | v8.0.0 | [link](UPGRADE.md#v715x--v800)
 v7.14.X | v7.15.0 | [link](UPGRADE.md#v714x--v7150)
 v7.13.X | v7.14.0 | [link](UPGRADE.md#v713x--v7140)
