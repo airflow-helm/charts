@@ -46,10 +46,6 @@ spec:
       envFrom:
         {{- include "airflow.envFrom" . | indent 8 }}
       env:
-        {{- if $extraPipPackages }}
-        - name: PYTHONPATH
-          value: /opt/python/site-packages
-        {{- end }}
         {{- include "airflow.env" . | indent 8 }}
         - name: AIRFLOW__CORE__EXECUTOR
           value: LocalExecutor

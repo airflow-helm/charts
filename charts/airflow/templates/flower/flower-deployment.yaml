@@ -87,10 +87,6 @@ spec:
           envFrom:
             {{- include "airflow.envFrom" . | indent 12 }}
           env:
-            {{- if $extraPipPackages }}
-            - name: PYTHONPATH
-              value: /opt/python/site-packages
-            {{- end }}
             {{- include "airflow.env" . | indent 12 }}
             {{- if .Values.flower.basicAuthSecret }}
             - name: AIRFLOW__CELERY__FLOWER_BASIC_AUTH
