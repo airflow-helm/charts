@@ -37,6 +37,7 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.airflow.image.pullSecret }}
       {{- end }}
+      serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       initContainers:
         {{- include "airflow.init_container.check_db" . | indent 8 }}
       containers:
