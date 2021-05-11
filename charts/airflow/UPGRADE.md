@@ -1,5 +1,21 @@
 # Upgrading Steps
 
+## `v8.X.X` → `v9.0.0`
+
+### Feature Highlights:
+- support for KEDA for better worker autoscaling
+### Removed Features
+- support for the Horizontal Pod Autoscaler has been dropped and replaced with support for the KEDA autoscaler
+
+### VALUES - New:
+- `workers.autoscaling.minReplicas`
+- `workers.autoscaling.pollingInterval`
+- `workers.autoscaling.cooldownPeriod`
+- `workers.autoscaling.customTriggers`
+
+### VALUES - Removed:
+- `workers.autoscaling.metrics`
+
 ## `v7.15.X` → `v8.0.0`
 
 > 🛑️️ this is a MAJOR update, meaning there are BREAKING changes
