@@ -1,5 +1,10 @@
 # Upgrading Steps
 
+## `v8.0.X` → `v8.1.0`
+
+### VALUES - New:
+- `airflow.kubernetesPodTemplate.resources`
+
 ## `v7.15.X` → `v8.0.0`
 
 > 🛑️️ this is a MAJOR update, meaning there are BREAKING changes
