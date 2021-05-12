@@ -9,15 +9,12 @@ __The following IMPROVEMENTS have been made:__
 __The following values have been ADDED:__
 
 * `externalRedis.properties`
-## `v8.0.9` → `v8.1.0`
 
-__The following IMPROVEMENTS have been made:__
+## `v8.0.X` → `v8.1.0`
 
-* Added an ability to setup external redis connection propertites with the value `externalRedis.properties` for TLS or other advanced parameters
+### VALUES - New:
+- `airflow.kubernetesPodTemplate.resources`
 
-__The following values have been ADDED:__
-
-* `externalRedis.properties`
 
 ## `v7.15.X` → `v8.0.0`
 
