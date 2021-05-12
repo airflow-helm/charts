@@ -15,7 +15,6 @@ __The following values have been ADDED:__
 ### VALUES - New:
 - `airflow.kubernetesPodTemplate.resources`
 
-
 ## `v7.15.X` → `v8.0.0`
 
 > 🛑️️ this is a MAJOR update, meaning there are BREAKING changes
