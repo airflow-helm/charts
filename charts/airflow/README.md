@@ -848,6 +848,28 @@ externalDatabase:
 <hr>
 </details>
 
+### How to use an external redis (recommended)?
+<details>
+<summary>Show More</summary>
+<hr>
+
+Example values for an external redis with ssl enabled:
+```yaml
+redis:
+  enabled: false
+
+externalRedis:
+  host: "example.redis.cache.windows.net"
+  port: 6380
+  databaseNumber: 15
+  passwordSecret: "redis-password"
+  passwordSecretKey: "value"
+  properties: "?ssl_cert_reqs=CERT_OPTIONAL"
+```
+
+<hr>
+</details>
+
 ## Kubernetes Configs
 
 ### How to mount ConfigMaps/Secrets as environment variables?
