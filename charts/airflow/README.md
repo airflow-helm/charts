@@ -1269,7 +1269,7 @@ Parameter | Description | Default
 `externalRedis.databaseNumber` | the database number to use within the the external redis | `1`
 `externalRedis.passwordSecret` | the name of a pre-created secret containing the external redis password | `""`
 `externalRedis.passwordSecretKey` | the key within `externalRedis.passwordSecret` containing the password string | `redis-password`
-| `externalDatabase.properties` | the connection properties eg ?ssl_cert_reqs=CERT_OPTIONAL | `""` |
+`externalDatabase.properties` | the connection properties eg ?ssl_cert_reqs=CERT_OPTIONAL | `""` 
 
 <hr>
 </details>
