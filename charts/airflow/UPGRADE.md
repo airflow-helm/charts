@@ -1,9 +1,14 @@
 # Upgrading Steps
 
-## `v8.0.X` → `v8.1.0`
+## `v8.0.9` → `v8.1.0`
 
-### VALUES - New:
-- `airflow.kubernetesPodTemplate.resources`
+__The following IMPROVEMENTS have been made:__
+
+* Added an ability to setup external redis connection propertites with the value `externalRedis.properties` for TLS or other advanced parameters
+
+__The following values have been ADDED:__
+
+* `externalRedis.properties`
 
 ## `v7.15.X` → `v8.0.0`
 
