@@ -4,7 +4,7 @@
 
 | name | description |
 | --- | --- |
-| [charts/airflow](https://github.com/airflow-helm/charts/tree/main/charts/airflow) | the continuation of [stable/airflow](https://github.com/helm/charts/tree/master/stable/airflow), by the same maintainers
+| [charts/airflow](https://github.com/airflow-helm/charts/tree/main/charts/airflow) |  the community-maintained descendant of the `stable/airflow` helm chart
 
 ## Repo Usage
 
