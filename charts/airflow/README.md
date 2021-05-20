@@ -1,48 +1,36 @@
-# Airflow Helm Chart
+> ⚠️ NOTE: this is the community-maintained descendant of the [stable/airflow](https://github.com/helm/charts/tree/master/stable/airflow) helm chart
 
-> ⚠️ this chart is the continuation of [stable/airflow](https://github.com/helm/charts/tree/master/stable/airflow), see [issue #6](https://github.com/airflow-helm/charts/issues/6) for upgrade guide from the old chart
+# Airflow Helm Chart  [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/airflow-helm)](https://artifacthub.io/packages/search?repo=airflow-helm)
 
-[Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule, and monitor workflows.
+[Apache Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule, and monitor workflows.
 
 ---
 
-### 1 - Add the Repo:
+### 1 - Add the Repo to Helm
 
 ```sh
 helm repo add airflow-stable https://airflow-helm.github.io/charts
 helm repo update
 ```
 
-### 2 - Install the Chart:
-
-> ⚠️ find values for `CHART_VERSION` under [GitHub Releases](https://github.com/airflow-helm/charts/releases)
+### 2 - Install the Chart
 
 ```sh
-export RELEASE_NAME=my-airflow-cluster # set a name!
-export NAMESPACE=my-airflow-namespace # set a namespace!
-export CHART_VERSION=8.X.X # set a version!
-export VALUES_FILE=./custom-values.yaml # set your values file path!
+export RELEASE_NAME=my-airflow-cluster # a name
+export NAMESPACE=my-airflow-namespace # a namespace
+export CHART_VERSION=8.X.X # a chart version - https://github.com/airflow-helm/charts/releases
+export VALUES_FILE=./custom-values.yaml # your values file
 
-# Helm 3
+# with Helm 3
 helm install \
   $RELEASE_NAME \
   airflow-stable/airflow \
   --namespace $NAMESPACE \
   --version $CHART_VERSION \
   --values $VALUES_FILE
-
-# Helm 2
-helm install \
-  airflow-stable/airflow \
-  --name $RELEASE_NAME \
-  --namespace $NAMESPACE \
-  --version $CHART_VERSION \
-  --values $VALUES_FILE
 ```
 
-### 3 - Access the WebUI
-
-> ⚠️ browse to http://localhost:8080 after running the following commands 
+### 3 - Expose the WebUI (with port-forward)
 
 ```sh
 export NAMESPACE=my-airflow-namespace # set a namespace!
@@ -51,11 +39,19 @@ export POD_NAME=$(kubectl get pods --namespace $NAMESPACE -l "component=web,app=
 kubectl port-forward --namespace $NAMESPACE $POD_NAME 8080:8080
 ```
 
-__NOTE:__
-- default credentials -- user: __admin__ - password: __admin__
-- [How to create airflow users?](#how-to-create-airflow-users)
-- [How to authenticate airflow users with LDAP/OAUTH?](#how-to-authenticate-airflow-users-with-ldapoauth)
+### 5 - Browse to the WebUI
 
+- http://localhost:8080 
+- user: __admin__ / password: __admin__
+
+### 6 - Review important docs
+
+- [How to use a specific version of airflow?](#how-to-use-a-specific-version-of-airflow)
+- [How to set airflow configs?](#how-to-set-airflow-configs)
+- [How to create airflow users?](#how-to-create-airflow-users) // [How to authenticate airflow users with LDAP/OAUTH?](#how-to-authenticate-airflow-users-with-ldapoauth)
+- [How to use an external database?](#how-to-use-an-external-database-recommended)
+- [How to persist Airflow logs?](#how-to-persist-airflow-logs-recommended)
+- [How to setup an Ingres?](#how-to-set-up-an-ingress)
 
 # Documentation
 
@@ -598,7 +594,7 @@ You can use the `airflow.pools` value to create airflow [Pools](https://airflow.
 For example, to create pools called `pool_1`, `pool_2`:
 ```yaml
 airflow:
-  variables:
+  pools:
     - name: "pool_1"
       slots: 5
       description: "example pool with 5 slots"
