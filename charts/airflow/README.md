@@ -844,7 +844,7 @@ externalDatabase:
 <hr>
 </details>
 
-### How to use an external redis (recommended)?
+### How to use an external redis?
 <details>
 <summary>Show More</summary>
 <hr>
