@@ -1,6 +1,6 @@
 # Upgrading Steps
 
-## `v8.1.x` → `v8.2.0`
+## `v8.1.X` → `v8.2.0`
 
 __The following IMPROVEMENTS have been made:__
 
