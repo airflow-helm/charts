@@ -44,7 +44,6 @@ kubectl port-forward --namespace $NAMESPACE $POD_NAME 8080:8080
 - http://localhost:8080 
 - user: __admin__ / password: __admin__
 
-
 ### 6 - Review important docs
 
 - [How to use a specific version of airflow?](#how-to-use-a-specific-version-of-airflow)
