@@ -59,6 +59,7 @@ kubectl port-forward --namespace $NAMESPACE $POD_NAME 8080:8080
 
 Old Version | New Version | Upgrade Guide
 --- | --- | ---
+v8.1.X | v8.2.0 | [link](UPGRADE.md#v81x--v820)
 v8.0.X | v8.1.0 | [link](UPGRADE.md#v80x--v810)
 v7.15.X | v8.0.0 | [link](UPGRADE.md#v715x--v800)
 v7.14.X | v7.15.0 | [link](UPGRADE.md#v714x--v7150)
@@ -844,6 +845,28 @@ externalDatabase:
 <hr>
 </details>
 
+### How to use an external redis?
+<details>
+<summary>Show More</summary>
+<hr>
+
+Example values for an external redis with ssl enabled:
+```yaml
+redis:
+  enabled: false
+
+externalRedis:
+  host: "example.redis.cache.windows.net"
+  port: 6380
+  databaseNumber: 15
+  passwordSecret: "redis-password"
+  passwordSecretKey: "value"
+  properties: "?ssl_cert_reqs=CERT_OPTIONAL"
+```
+
+<hr>
+</details>
+
 ## Kubernetes Configs
 
 ### How to mount ConfigMaps/Secrets as environment variables?
@@ -1265,6 +1288,7 @@ Parameter | Description | Default
 `externalRedis.databaseNumber` | the database number to use within the the external redis | `1`
 `externalRedis.passwordSecret` | the name of a pre-created secret containing the external redis password | `""`
 `externalRedis.passwordSecretKey` | the key within `externalRedis.passwordSecret` containing the password string | `redis-password`
+`externalDatabase.properties` | the connection properties eg ?ssl_cert_reqs=CERT_OPTIONAL | `""` 
 
 <hr>
 </details>

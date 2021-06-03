@@ -1,5 +1,15 @@
 # Upgrading Steps
 
+## `v8.1.X` → `v8.2.0`
+
+__The following IMPROVEMENTS have been made:__
+
+* Added an ability to setup external redis connection propertites with the value `externalRedis.properties` for TLS or other advanced parameters
+
+__The following values have been ADDED:__
+
+* `externalRedis.properties`
+
 ## `v8.0.X` → `v8.1.0`
 
 ### VALUES - New:

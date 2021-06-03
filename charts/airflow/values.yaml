@@ -1514,6 +1514,10 @@ externalRedis:
   ##
   passwordSecretKey: "redis-password"
 
+  ## the connection properties for external redis, e.g. "?ssl_cert_reqs=CERT_OPTIONAL"
+  ##
+  properties: ""
+
 ###################################
 # Prometheus Operator - ServiceMonitor
 ###################################
