@@ -1017,7 +1017,8 @@ dags:
     ##
     ## EXAMPLE - SSH:
     ##    repo: "git@github.com:USERNAME/REPOSITORY.git"
-    ##
+    ## EXAMPLE - SSH with sshSecretKey
+    ##    repo: "ssh://git@github.com/USERNAME/REPOSITORY.git"
     repo: ""
 
     ## the sub-path (within your repo) where dags are located
