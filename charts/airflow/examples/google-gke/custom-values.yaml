@@ -315,6 +315,15 @@ dags:
     ##
     sshSecretKey: id_rsa
 
+    ## resource requests/limits for the git-sync container
+    ##
+    ## WARNING:
+    ## - you MUST SPECIFY a resource request for gitSync if using `workers.autoscaling`
+    ##
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+
 ###################################
 # Kubernetes - RBAC
 ###################################

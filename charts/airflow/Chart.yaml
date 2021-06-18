@@ -1,7 +1,7 @@
 apiVersion: v1
 description: the community-maintained descendant of the stable/airflow helm chart - focused on ease-of-use
 name: airflow
-version: 8.2.0
+version: 8.2.1
 appVersion: 2.0.1
 icon: https://airflow.apache.org/_images/pin_large.png
 home: https://airflow.apache.org/
