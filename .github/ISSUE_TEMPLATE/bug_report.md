@@ -11,12 +11,12 @@ assignees: ''
 
 **What is the bug?**
 
-A clear description of the bug.
+[[A clear description of the bug]]
 
 
-**What are your Helm values?**
+**What version of the chart are you using?**:
 
-Any relevant parts of your `custom_values.yaml`
+I am using version `X.X.X`
 
 
 **What is your Kubernetes Version?**:
@@ -32,4 +32,18 @@ please put the output here
 ```console
 $ helm version
 please put the output here
+```
+
+
+**Please copy your custom Helm values file:**
+
+```yaml
+airflow:
+  ...
+
+scheduler:
+  ...
+
+webserver:
+  ...
 ```
