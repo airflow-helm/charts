@@ -1080,6 +1080,14 @@ dags:
     ##
     sshKnownHosts: ""
 
+    ## the number of consecutive failures allowed before aborting
+    ##
+    ## NOTE:
+    ##  - the first sync must succeed
+    ##  - a value of -1 will retry forever after the initial sync
+    ##
+    maxFailures: 0
+
 ###################################
 # Kubernetes - Ingress Configs
 ###################################

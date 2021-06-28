@@ -1,10 +1,17 @@
 # Upgrading Steps
 
-## `v8.1.X` → `v8.2.0`
+## `v8.2.0` → `v8.3.0`
 
 __The following IMPROVEMENTS have been made:__
 
-* Added an ability to setup external redis connection propertites with the value `externalRedis.properties` for TLS or other advanced parameters
+* Added an ability set the maximum number of sync failures that the gitSync sidecar container will tolerate before exiting
+
+__The following values have been ADDED:__
+
+* `dags.gitSync.maxFailures`
+
+## `v8.1.X` → `v8.2.0`
+
 
 __The following values have been ADDED:__
 

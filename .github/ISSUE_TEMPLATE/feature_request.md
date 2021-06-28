@@ -11,9 +11,9 @@ assignees: ''
 
 **What is your feature request?**
 
-A clear description of what you want.
+[[A clear description of what you want]]
 
 
 **What alternatives have you considered?**
 
-Any alternatives you've considered.
+[[Any alternatives you've considered]]
