@@ -4,28 +4,28 @@ All notable changes to this project will be documented in this file.
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [8.3.2] - 2021-06-30
-### Fixed
+### Docs
 - added this changelog ([#231](https://github.com/airflow-helm/charts/issues/231))
 - add description to each section of the README ([#162](https://github.com/airflow-helm/charts/issues/162))
 - add airflow <--> chart version support matrix ([#137](https://github.com/airflow-helm/charts/issues/137))
 - improve the README formatting
 
 ## [8.3.1] - 2021-06-29
-### Fixed
+### Docs
 - fix(example): hpa of gke example doesn't work ([#225](https://github.com/airflow-helm/charts/issues/225))
 
 ## [8.3.0] - 2021-06-23
 ### Added
 - Add support for GIT_SYNC_MAX_FAILURES ([#182](https://github.com/airflow-helm/charts/issues/182))
-   - `dags.gitSync.maxFailures`
+  - `dags.gitSync.maxFailures`
     
 ## [8.2.0] - 2021-06-03
 ### Added
 - Add redis properties configuration for external redis ([#200](https://github.com/airflow-helm/charts/issues/200))
-   - `externalRedis.properties`
+  - `externalRedis.properties`
 
 ## [8.1.3] - 2021-05-21
-### Fixed
+### Docs
 - Typo in docs for `airflow.pools` in README.md ([#207](https://github.com/airflow-helm/charts/issues/207))
 - README implies that Helm 2 is supported, but its not ([#184](https://github.com/airflow-helm/charts/issues/184))
 
@@ -34,7 +34,7 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 - run jobs with airflow serviceAccount ([#201](https://github.com/airflow-helm/charts/issues/201))
 
 ## [8.1.1] - 2021-05-21
-### Fixed
+### Docs
 - Remove references to workers.celery.instances (which was removed in 8.0.0) ([#202](https://github.com/airflow-helm/charts/issues/202))
 
 ## [8.1.0] - 2021-05-11
@@ -52,11 +52,12 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 - ensure dags git repo is cloned before containers start ([#124](https://github.com/airflow-helm/charts/issues/124))
 - introduce timeout for check-db init-container ([#153](https://github.com/airflow-helm/charts/issues/153))
 - only include git-sync init-container in pod_template if enabled ([#158](https://github.com/airflow-helm/charts/issues/158))
+
+### Docs
 - add docs for `externalDatabase.properties` in README
 
 ## [8.0.7] - 2021-04-16
 ### Fixed
-- fix dockerfile code blocks in README ([#150](https://github.com/airflow-helm/charts/issues/150))
 - only include `checksum/config-pod-template` annotation for kubernetes_like executors ([#150](https://github.com/airflow-helm/charts/issues/150))
 - give more information in value validation errors ([#150](https://github.com/airflow-helm/charts/issues/150))
 - prevent embedded postgres/redis being enabled at same time as external ([#150](https://github.com/airflow-helm/charts/issues/150))
@@ -65,12 +66,15 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 - add int64 to validation, so int variables set in bash work ([#136](https://github.com/airflow-helm/charts/issues/136))
 - add missing pod labels to upgrade-db job ([#150](https://github.com/airflow-helm/charts/issues/150))
 - fix validation for wildcard ingress paths ([#144](https://github.com/airflow-helm/charts/issues/144))
-- fix typo in connections example ([#148](https://github.com/airflow-helm/charts/issues/148))
 - fix incorrect variable usage for variablesUpdate ([#139](https://github.com/airflow-helm/charts/issues/139))
 - add validation for airflow version compatibility with `airflow.legacyCommands` state ([#150](https://github.com/airflow-helm/charts/issues/150))
-- add docs for using non-default airflow versions ([#150](https://github.com/airflow-helm/charts/issues/150))
 - make `ingress.web/flower.tls.secretName` optional ([#41](https://github.com/airflow-helm/charts/issues/41))
 - fix support for passwords with bash special characters ([#147](https://github.com/airflow-helm/charts/issues/147))
+
+### Docs
+- fix dockerfile code blocks in README ([#150](https://github.com/airflow-helm/charts/issues/150))
+- fix typo in connections example ([#148](https://github.com/airflow-helm/charts/issues/148))
+- add docs for using non-default airflow versions ([#150](https://github.com/airflow-helm/charts/issues/150))
 
 ## [8.0.6] - 2021-04-10
 ### Fixed
@@ -312,9 +316,6 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
    - `scheduler.secretsMap`
     
 ## [7.15.0] - 2020-12-15
-### Fixed
-- Update docs for Dag Storage option 1 ([#33](https://github.com/airflow-helm/charts/issues/33))
-
 ### Changed
 - We now use `airflow upgradedb || airflow db upgrade` instead of `airflow initdb` with the following values ([#39](https://github.com/airflow-helm/charts/issues/39))
   - `scheduler.initdb`
@@ -323,12 +324,15 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
   - `dags.git.gitSync.image.pullPolicy = IfNotPresent`
   - `dags.initContainer.image.pullPolicy = IfNotPresent`
 
+### Docs
+- Update docs for Dag Storage option 1 ([#33](https://github.com/airflow-helm/charts/issues/33))
+
 ## [7.14.3] - 2020-11-24
 ### Fixed
 - fix quoting of "$" in connections ([#18](https://github.com/airflow-helm/charts/issues/18))
 
 ## [7.14.2] - 2020-11-24
-### Fixed
+### Docs
 - improve README ([#17](https://github.com/airflow-helm/charts/issues/17))
 
 ## [7.14.1] - 2020-11-24
@@ -464,7 +468,7 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
   - we now set `AIRFLOW__KUBERNETES__NAMESPACE`, `AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME`, and `AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF`
 - We have fixed an error caused by including a `'` in your redis/postgres/mysql password.
 - We have reverted a change in 7.0.0 which prevented the use of airflow docker images with embedded DAGs.
-- (Just ensure that `dags.initContainer.enabled` and `git.gitSync.enabled` are `false`)
+  - (Just ensure that `dags.initContainer.enabled` and `git.gitSync.enabled` are `false`)
 - The `AIRFLOW__CORE__SQL_ALCHEMY_CONN`, `AIRFLOW__CELERY__RESULT_BACKEND`, and `AIRFLOW__CELERY__BROKER_URL` environment variables are now available if you `kubectl exec ...` into airflow Pods.
 - We have improved the script used when `workers.celery.gracefullTermination` is `true`.
 - We have fixed an error with pools in `scheduler.pools` not being added to the scheduler.
