@@ -72,11 +72,10 @@ Most non-patch changes will require documentation updates.
 
 If you __ADD a value__:
 - ensure the value has a descriptive docstring in `values.yaml`
-- ensure the value is listed under `#helm-chart-values` in `README.md` (if it is a top-level value, e.g. `airflow.config` or `dags.path`)
+- ensure the value is listed under `Values Reference` in [README.md](README.md#values-reference), if it's a top-level value like `airflow.level1`, but not if it's a second level value like `airflow.level1.level2`, in that case use `airflow.level1.*`
 
-If you __bump a MAJOR/MINOR version__:
-- add a heading for the new version to `UPGRADE.md` 
-- add a link to the heading under `#upgrade-steps` in `README.md` 
+If you __bump the version__:
+- add a heading for the new version to [CHANGELOG.md](CHANGELOG.md) (and comparison link, at bottom of file)
 
 ## Squash Commits
 
