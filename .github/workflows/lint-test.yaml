@@ -1,6 +1,11 @@
 name: "Lint and Test Charts"
 
-on: pull_request
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - charts/**
 
 jobs:
   lint-test:
@@ -30,7 +35,7 @@ jobs:
           fi
 
       - name: Run chart-testing (lint)
-        run: ct lint --config ct-config.yaml
+        run: ct lint --config ct-config.yaml --check-version-increment=false
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.1.0
