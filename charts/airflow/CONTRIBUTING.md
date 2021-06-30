@@ -72,7 +72,8 @@ Most non-patch changes will require documentation updates.
 
 If you __ADD a value__:
 - ensure the value has a descriptive docstring in `values.yaml`
-- ensure the value is listed under `Values Reference` in [README.md](README.md#values-reference), if it's a top-level value like `airflow.level1`, but not if it's a second level value like `airflow.level1.level2`, in that case use `airflow.level1.*`
+- ensure the value is listed under `Values Reference` in [README.md](README.md#values-reference)
+   - Note, only directly include the value if it's a top-level value like `airflow.level_1`, otherwise only include `airflow.level_1.*`
 
 If you __bump the version__:
 - add a heading for the new version to [CHANGELOG.md](CHANGELOG.md) (and comparison link, at bottom of file)
