@@ -5,107 +5,107 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 ## [8.3.2] - 2021-06-30
 ### Fixed
-- added this changelog (#231)
-- add description to each section of the README (#162)
-- add airflow <--> chart version support matrix (#137)
+- added this changelog ([#231](https://github.com/airflow-helm/charts/issues/231))
+- add description to each section of the README ([#162](https://github.com/airflow-helm/charts/issues/162))
+- add airflow <--> chart version support matrix ([#137](https://github.com/airflow-helm/charts/issues/137))
 - improve the README formatting
 
 ## [8.3.1] - 2021-06-29
 ### Fixed
-- fix(example): hpa of gke example doesn't work (#225)
+- fix(example): hpa of gke example doesn't work ([#225](https://github.com/airflow-helm/charts/issues/225))
 
 ## [8.3.0] - 2021-06-23
 ### Added
-- Add support for GIT_SYNC_MAX_FAILURES (#182)
+- Add support for GIT_SYNC_MAX_FAILURES ([#182](https://github.com/airflow-helm/charts/issues/182))
    - `dags.gitSync.maxFailures`
     
 ## [8.2.0] - 2021-06-03
 ### Added
-- Add redis properties configuration for external redis (#200)
+- Add redis properties configuration for external redis ([#200](https://github.com/airflow-helm/charts/issues/200))
    - `externalRedis.properties`
 
 ## [8.1.3] - 2021-05-21
 ### Fixed
-- Typo in docs for `airflow.pools` in README.md (#207)
-- README implies that Helm 2 is supported, but its not (#184)
+- Typo in docs for `airflow.pools` in README.md ([#207](https://github.com/airflow-helm/charts/issues/207))
+- README implies that Helm 2 is supported, but its not ([#184](https://github.com/airflow-helm/charts/issues/184))
 
 ## [8.1.2] - 2021-05-21
 ### Fixed
-- run jobs with airflow serviceAccount (#201)
+- run jobs with airflow serviceAccount ([#201](https://github.com/airflow-helm/charts/issues/201))
 
 ## [8.1.1] - 2021-05-21
 ### Fixed
-- Remove references to workers.celery.instances (which was removed in 8.0.0) (#202)
+- Remove references to workers.celery.instances (which was removed in 8.0.0) ([#202](https://github.com/airflow-helm/charts/issues/202))
 
 ## [8.1.0] - 2021-05-11
 ### Added
-- Add `airflow.kubernetesPodTemplate.resources` value (#175)
+- Add `airflow.kubernetesPodTemplate.resources` value ([#175](https://github.com/airflow-helm/charts/issues/175))
 
 ## [8.0.9] - 2021-04-27
 ### Fixed
-- make check-db timeout 60s (#181)
-- move to `pip install --user` (#168) (#169)
+- make check-db timeout 60s ([#181](https://github.com/airflow-helm/charts/issues/181))
+- move to `pip install --user` ([#168](https://github.com/airflow-helm/charts/issues/168)) ([#169](https://github.com/airflow-helm/charts/issues/169))
 
 ## [8.0.8] - 2021-04-20
 ### Fixed
-- don't include git-sync containers in webserver for airflow 2.0 (#152)
-- ensure dags git repo is cloned before containers start (#124)
-- introduce timeout for check-db init-container (#153)
-- only include git-sync init-container in pod_template if enabled (#158)
+- don't include git-sync containers in webserver for airflow 2.0 ([#152](https://github.com/airflow-helm/charts/issues/152))
+- ensure dags git repo is cloned before containers start ([#124](https://github.com/airflow-helm/charts/issues/124))
+- introduce timeout for check-db init-container ([#153](https://github.com/airflow-helm/charts/issues/153))
+- only include git-sync init-container in pod_template if enabled ([#158](https://github.com/airflow-helm/charts/issues/158))
 - add docs for `externalDatabase.properties` in README
 
 ## [8.0.7] - 2021-04-16
 ### Fixed
-- fix dockerfile code blocks in README (#150)
-- only include `checksum/config-pod-template` annotation for kubernetes_like executors (#150)
-- give more information in value validation errors (#150)
-- prevent embedded postgres/redis being enabled at same time as external (#150)
-- use _helper variable in pod_template envFrom (#150)
-- include `airflow.podAnnotations` in jobs (#140)
-- add int64 to validation, so int variables set in bash work (#136)
-- add missing pod labels to upgrade-db job (#150)
-- fix validation for wildcard ingress paths (#144)
-- fix typo in connections example (#148)
-- fix incorrect variable usage for variablesUpdate (#139)
-- add validation for airflow version compatibility with `airflow.legacyCommands` state (#150)
-- add docs for using non-default airflow versions (#150)
-- make `ingress.web/flower.tls.secretName` optional (#41)
-- fix support for passwords with bash special characters (#147)
+- fix dockerfile code blocks in README ([#150](https://github.com/airflow-helm/charts/issues/150))
+- only include `checksum/config-pod-template` annotation for kubernetes_like executors ([#150](https://github.com/airflow-helm/charts/issues/150))
+- give more information in value validation errors ([#150](https://github.com/airflow-helm/charts/issues/150))
+- prevent embedded postgres/redis being enabled at same time as external ([#150](https://github.com/airflow-helm/charts/issues/150))
+- use _helper variable in pod_template envFrom ([#150](https://github.com/airflow-helm/charts/issues/150))
+- include `airflow.podAnnotations` in jobs ([#140](https://github.com/airflow-helm/charts/issues/140))
+- add int64 to validation, so int variables set in bash work ([#136](https://github.com/airflow-helm/charts/issues/136))
+- add missing pod labels to upgrade-db job ([#150](https://github.com/airflow-helm/charts/issues/150))
+- fix validation for wildcard ingress paths ([#144](https://github.com/airflow-helm/charts/issues/144))
+- fix typo in connections example ([#148](https://github.com/airflow-helm/charts/issues/148))
+- fix incorrect variable usage for variablesUpdate ([#139](https://github.com/airflow-helm/charts/issues/139))
+- add validation for airflow version compatibility with `airflow.legacyCommands` state ([#150](https://github.com/airflow-helm/charts/issues/150))
+- add docs for using non-default airflow versions ([#150](https://github.com/airflow-helm/charts/issues/150))
+- make `ingress.web/flower.tls.secretName` optional ([#41](https://github.com/airflow-helm/charts/issues/41))
+- fix support for passwords with bash special characters ([#147](https://github.com/airflow-helm/charts/issues/147))
 
 ## [8.0.6] - 2021-04-10
 ### Fixed
-- fix volume definition for logs-data with existing claim (#128)
+- fix volume definition for logs-data with existing claim ([#128](https://github.com/airflow-helm/charts/issues/128))
 
 ## [8.0.5] - 2021-04-06
 ### Fixed
-- extract probe path from AIRFLOW__WEBSERVER__BASE_URL + ingress path validation (#120)
+- extract probe path from AIRFLOW__WEBSERVER__BASE_URL + ingress path validation ([#120](https://github.com/airflow-helm/charts/issues/120))
 
 ## [8.0.4] - 2021-04-05
 ### Fixed
-- add "Release" to template context dict (#121)
+- add "Release" to template context dict ([#121](https://github.com/airflow-helm/charts/issues/121))
 
 ## [8.0.3] - 2021-04-05
 ### Fixed
-- fix wrong value for envFrom in pod_template (#122)
+- fix wrong value for envFrom in pod_template ([#122](https://github.com/airflow-helm/charts/issues/122))
 
 ## [8.0.2] - 2021-03-28
 ### Fixed
 - properly fixes the following issues (which were not properly fixed in `8.0.1`):
-  - extraVolumeMounts and extraVolumes parsing error (#98)
-  - Flower deployment fails with airflow.extraVolumeMounts set (#101)
-- fixes some bad wording on the airflow.config.AIRFLOW__CORE__DAGS_FOLDER value validation (#108)
-- addresses an issue with our PYTHONPATH when using `*.extraPipPackages`, which was overriding anything that the user set with `airflow.extraEnv` (#106)
-- fixes the PYTHONPATH not being set when using `airflow.kubernetesPodTemplate.extraPipPackages` with `pod_template.yaml` (#108)
+  - extraVolumeMounts and extraVolumes parsing error ([#98](https://github.com/airflow-helm/charts/issues/98))
+  - Flower deployment fails with airflow.extraVolumeMounts set ([#101](https://github.com/airflow-helm/charts/issues/101))
+- fixes some bad wording on the airflow.config.AIRFLOW__CORE__DAGS_FOLDER value validation ([#108](https://github.com/airflow-helm/charts/issues/108))
+- addresses an issue with our PYTHONPATH when using `*.extraPipPackages`, which was overriding anything that the user set with `airflow.extraEnv` ([#106](https://github.com/airflow-helm/charts/issues/106))
+- fixes the PYTHONPATH not being set when using `airflow.kubernetesPodTemplate.extraPipPackages` with `pod_template.yaml` ([#108](https://github.com/airflow-helm/charts/issues/108))
 
 ## [8.0.1] - 2021-03-27
 ### Added
-- Added new value `helmWait`, which should be enabled when the `--wait` flag is used with `helm install` (#102)
+- Added new value `helmWait`, which should be enabled when the `--wait` flag is used with `helm install` ([#102](https://github.com/airflow-helm/charts/issues/102))
    - WARNING: to prevent issues like #99 ensure any previous `upgrade-db` jobs are manually removed before install when `helmWait=true` (due to the immutability of Job specs)
 
 ### Fixed
-- Flower deployment fails with airflow.extraVolumeMounts set (#101)
-- `aiflow.extraVolumeMounts` and `airflow.extraVolumes` parsing error (#98)
-- Validation helper incorrectly requires `workers.enabled=true`(#97)
+- Flower deployment fails with airflow.extraVolumeMounts set ([#101](https://github.com/airflow-helm/charts/issues/101))
+- `aiflow.extraVolumeMounts` and `airflow.extraVolumes` parsing error ([#98](https://github.com/airflow-helm/charts/issues/98))
+- Validation helper incorrectly requires `workers.enabled=true`([#97](https://github.com/airflow-helm/charts/issues/97))
 
 ## [8.0.0] - 2021-03-27
 
@@ -306,34 +306,34 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 ## [7.16.0] - 2020-12-23
 ### Added
-- scheduler kubernetes secrets (#48)
+- scheduler kubernetes secrets ([#48](https://github.com/airflow-helm/charts/issues/48))
    - `scheduler.secretsDir`
    - `scheduler.secrets`
    - `scheduler.secretsMap`
     
 ## [7.15.0] - 2020-12-15
 ### Fixed
-- Update docs for Dag Storage option 1 (#33)
+- Update docs for Dag Storage option 1 ([#33](https://github.com/airflow-helm/charts/issues/33))
 
 ### Changed
-- We now use `airflow upgradedb || airflow db upgrade` instead of `airflow initdb` with the following values (#39)
+- We now use `airflow upgradedb || airflow db upgrade` instead of `airflow initdb` with the following values ([#39](https://github.com/airflow-helm/charts/issues/39))
   - `scheduler.initdb`
   - `scheduler.preinitdb`
-- Changed image `pullPolicy` values defaults (#39)
+- Changed image `pullPolicy` values defaults ([#39](https://github.com/airflow-helm/charts/issues/39))
   - `dags.git.gitSync.image.pullPolicy = IfNotPresent`
   - `dags.initContainer.image.pullPolicy = IfNotPresent`
 
 ## [7.14.3] - 2020-11-24
 ### Fixed
-- fix quoting of "$" in connections (#18)
+- fix quoting of "$" in connections ([#18](https://github.com/airflow-helm/charts/issues/18))
 
 ## [7.14.2] - 2020-11-24
 ### Fixed
-- improve README (#17)
+- improve README ([#17](https://github.com/airflow-helm/charts/issues/17))
 
 ## [7.14.1] - 2020-11-24
 ### Fixed
-- Allow local development with Skaffold (#7)
+- Allow local development with Skaffold ([#7](https://github.com/airflow-helm/charts/issues/7))
 
 ## [7.14.0] - 2020-11-05
 
