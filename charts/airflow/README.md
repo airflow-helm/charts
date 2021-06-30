@@ -1,92 +1,117 @@
-> ⚠️ NOTE: this is the community-maintained descendant of the [stable/airflow](https://github.com/helm/charts/tree/master/stable/airflow) helm chart
+# Airflow Helm Chart (Community) [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/airflow-helm)](https://artifacthub.io/packages/search?repo=airflow-helm)
 
-# Airflow Helm Chart  [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/airflow-helm)](https://artifacthub.io/packages/search?repo=airflow-helm)
+This chart provides a standard way to deploy [Apache Airflow](https://airflow.apache.org/) on your Kubernetes cluster, and is used by many thousands of companies for their production deployments of Airflow.
 
-[Apache Airflow](https://airflow.apache.org/) is a platform to programmatically author, schedule, and monitor workflows.
+> 🟦 __Discussion__ 🟦
+> 
+> This `community` chart is an alternative to the `official` chart found in the `apache/airflow` repo.<br>
+> There are differences between the charts, so you should evaluate which is better for your organisation.
+> 
+> The goals of the `community` chart are:<br>
+> (1) be easy to use & configure<br>
+> (2) provide long-term support for older airflow versions<br>
+> (3) automatically detect bad configs - and fail the install<br>
+> (4) have useful documentation - written by people who actually use airflow in production
 
----
+## Quickstart Guide
 
-### 1 - Add the Repo to Helm
+These steps will allow you to quickly install Apache Airflow on your Kubernetes cluster using the `community` chart.
+
+### 1. Install the Chart
+
+> 🟨 __Note__ 🟨 
+> 
+> In production, we encourage using a tool like [ArgoCD](https://argoproj.github.io/argo-cd/), rather than running `helm install` manually
 
 ```sh
+# add this repo as "airflow-stable"
 helm repo add airflow-stable https://airflow-helm.github.io/charts
 helm repo update
-```
 
-### 2 - Install the Chart
-
-```sh
+# set environment variables (to make `helm install ...` cleaner)
 export RELEASE_NAME=my-airflow-cluster # a name
 export NAMESPACE=my-airflow-namespace # a namespace
-export CHART_VERSION=8.X.X # a chart version - https://github.com/airflow-helm/charts/releases
+export CHART_VERSION=8.X.X # a chart version - https://github.com/airflow-helm/charts/blob/main/charts/airflow/CHANGELOG.md
 export VALUES_FILE=./custom-values.yaml # your values file
 
-# with Helm 3
+# use helm 3+ to install
 helm install \
   $RELEASE_NAME \
   airflow-stable/airflow \
   --namespace $NAMESPACE \
   --version $CHART_VERSION \
   --values $VALUES_FILE
+  
+# wait until the above command returns (there are some post-install Jobs which may take a while)
 ```
 
-### 3 - Expose the WebUI (with port-forward)
+### 2. Login to the WebUI
 
 ```sh
 export NAMESPACE=my-airflow-namespace # set a namespace!
 
 export POD_NAME=$(kubectl get pods --namespace $NAMESPACE -l "component=web,app=airflow" -o jsonpath="{.items[0].metadata.name}")
 kubectl port-forward --namespace $NAMESPACE $POD_NAME 8080:8080
+
+# open the web-ui in your browser: http://localhost:8080 
+# default user login: admin/admin
 ```
 
-### 5 - Browse to the WebUI
+## Important Documentation
 
-- http://localhost:8080 
-- user: __admin__ / password: __admin__
+### Changelog
 
-### 6 - Review important docs
+The [CHANGELOG.md](CHANGELOG.md) is found at the root of this chart folder.
+
+### Airflow Version Support
+
+. | `1.10.X`  | `2.0.X` | `2.1.X`
+--- | --- | --- | ---
+chart - `7.X.X` | ✅ | ❌ | ❌
+chart - `8.X.X` | ✅ [1] | ✅ | ✅
+
+[0] [see here](#how-to-use-a-specific-version-of-airflow) for a guide on how to set your airflow version<br>
+[1] you must set `airflow.legacyCommands = true` to use airflow `1.10.X` with chart `8.X.X`
+
+### Airflow Executor Support
+
+. | `CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor`
+--- | --- | --- | --- 
+chart - `7.X.X` | ✅ | ✅ | ❌
+chart - `8.X.X` | ✅ | ✅ [1] | ✅ [1]
+
+[0] you can set the executor using the `airflow.executor` value<br>
+[1] we encourage you to use airflow `2.X.X` with chart `8.X.X`, and make use of the new `airflow.kubernetesPodTemplate.*` values
+
+### Examples
+
+We provide some example `values.yaml` files for common configurations:
+
+- [Minikube/Kind - CeleryExecutor](examples/minikube/custom-values.yaml)
+- [Google Kubernetes Engine (GKE) - CeleryExecutor](examples/google-gke/custom-values.yaml)
+
+### Further Reading
+
+We recommend you review the following questions from the FAQ:
 
 - [How to use a specific version of airflow?](#how-to-use-a-specific-version-of-airflow)
 - [How to set airflow configs?](#how-to-set-airflow-configs)
-- [How to create airflow users?](#how-to-create-airflow-users) // [How to authenticate airflow users with LDAP/OAUTH?](#how-to-authenticate-airflow-users-with-ldapoauth)
-- [How to use an external database?](#how-to-use-an-external-database-recommended)
-- [How to persist Airflow logs?](#how-to-persist-airflow-logs-recommended)
+- [How to create airflow users?](#how-to-create-airflow-users)
+- [How to authenticate airflow users with LDAP/OAUTH?](#how-to-authenticate-airflow-users-with-ldapoauth)
+- [How to use an external database?](#how-to-use-an-external-database)
+- [How to persist airflow logs?](#how-to-persist-airflow-logs)
 - [How to setup an Ingres?](#how-to-set-up-an-ingress)
 
-# Documentation
+## FAQ - Airflow
 
-## Upgrade Guides
-
-Old Version | New Version | Upgrade Guide
---- | --- | ---
-v8.2.X | v8.3.0 | [link](UPGRADE.md#v82x--v830)
-v8.1.X | v8.2.0 | [link](UPGRADE.md#v81x--v820)
-v8.0.X | v8.1.0 | [link](UPGRADE.md#v80x--v810)
-v7.15.X | v8.0.0 | [link](UPGRADE.md#v715x--v800)
-v7.14.X | v7.15.0 | [link](UPGRADE.md#v714x--v7150)
-v7.13.X | v7.14.0 | [link](UPGRADE.md#v713x--v7140)
-v7.12.X | v7.13.0 | [link](UPGRADE.md#v712x--v7130)
-v7.11.X | v7.12.0 | [link](UPGRADE.md#v711x--v7120)
-v7.10.X | v7.11.0 | [link](UPGRADE.md#v710x--v7110)
-v7.9.X | v7.10.0 | [link](UPGRADE.md#v79x--v7100)
-
-## Examples
-
-Description | Example `values.yaml`
---- | ---
-A __non-production__ starting point for use with minikube (CeleryExecutor) | [link](examples/minikube/custom-values.yaml)
-A __production__ starting point for GKE on Google Cloud (CeleryExecutor) | [link](examples/google-gke/custom-values.yaml)
-
-## Airflow Configs
+> These are some frequently asked questions related to airflow configs:
 
 ### How to use a specific version of airflow?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
-There will always be a single default version of airflow shipped with this chart, see `airflow.image.*` in [values.yaml](values.yaml) for the current one.
-
-However, given the general nature of the chart, it is likely that other versions of airflow will work too.
+There will always be a single default version of airflow shipped with this chart, see `airflow.image.*` in [values.yaml](values.yaml) for the current one, but other versions are supported, please see the [Airflow Version Support](#airflow-version-support) matrix.
 
 For example, using airflow `2.0.1`, with python `3.6`:
 ```yaml
@@ -112,7 +137,7 @@ airflow:
 
 ### How to set airflow configs?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 While we don't expose the "airflow.cfg" file directly, you can use [environment variables](https://airflow.apache.org/docs/stable/howto/set-config.html) to set Airflow configs.
@@ -148,14 +173,14 @@ airflow:
 
 ### How to store DAGs?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 <h3>Option 1a - SSH git-sync sidecar (recommended)</h3>
 
 This method uses an SSH git-sync sidecar to sync your git repo into the dag folder every `dags.gitSync.syncWait` seconds.
 
-For example:
+Example values defining an SSH git repo:
 ```yaml
 airflow:
   config:
@@ -188,7 +213,7 @@ kubectl create secret generic \
 
 This method uses an HTTP git sidecar to sync your git repo into the dag folder every `dags.gitSync.syncWait` seconds.
 
-For example:
+Example values defining an HTTP git repo:
 ```yaml
 airflow:
   config:
@@ -217,16 +242,15 @@ kubectl create secret generic \
 
 <h3>Option 2 - shared volume</h3>
 
-With this method, you store your DAGs in a Kubernetes PersistentVolume, which is mounted to all scheduler/web/worker Pods.
-
-You must configure some external system to ensure this volume has your latest DAGs, for example, you could use your CI/CD pipeline system to preform a sync as changes are pushed to your DAGs git repo.
-
-> ⚠️ the PVC needs to have `accessMode` = `ReadOnlyMany` (or `ReadWriteMany`) 
+> 🟨 __Note__ 🟨 
 > 
-> Different StorageClasses support different [access-modes](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes).
-> For Kubernetes on public cloud, a persistent volume controller is likely built in, so check the available access-modes: [Amazon EKS](https://docs.aws.amazon.com/eks/latest/userguide/storage-classes.html), [Azure AKS](https://docs.microsoft.com/en-us/azure/aks/azure-files-dynamic-pv), [Google GKE](https://cloud.google.com/kubernetes-engine/docs/concepts/persistent-volumes)
+> Your chosen `persistence.storageClass` needs to support `ReadOnlyMany` or `ReadWriteMany` for `persistence.accessMode`<br>
 
-Example values to use a StorageClass called `default`:
+With this method, you store your DAGs in a Kubernetes PersistentVolume, which is mounted to all scheduler/web/worker Pods.
+You must configure some external system to ensure this volume has your latest DAGs.
+For example, you could use your CI/CD pipeline system to preform a sync as changes are pushed to your DAGs git repo.
+
+Example values to use a `storageClass` called `default` with `1Gi` initial `size`:
 ```yaml
 dags:
   persistence:
@@ -238,11 +262,13 @@ dags:
 
 <h3>Option 3 - embedded into container image</h3>
 
+> 🟨 __Note__ 🟨 
+> 
+> This chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images)
+
 This method stores your DAGs inside the container image.
 
-> ⚠️ this chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images)
-
-For example, extending `airflow:2.0.1-python3.8` with some dags:
+Example extending `airflow:2.0.1-python3.8` with some dags:
 ```dockerfile
 FROM apache/airflow:2.0.1-python3.8
 
@@ -250,7 +276,7 @@ FROM apache/airflow:2.0.1-python3.8
 COPY ./my_dag_folder /opt/airflow/dags
 ```
 
-Then use this container image with the chart:
+Example values to use `MY_REPO:MY_TAG` container image with the chart:
 ```yaml
 airflow:
   image:
@@ -263,25 +289,26 @@ airflow:
 
 ### How to install extra pip packages?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 <h3>Option 1 - use init-containers</h3>
 
-> 🛑️️️ seriously consider the implications of having each Pod run `pip install` before using this feature in production
+> 🟥 __Warning__ 🟥 
+> 
+> We strongly advice that you DO NOT TO USE this feature in production, instead please use "Option 2"
 
 You can use the `airflow.extraPipPackages` value to install pip packages on all Pods, you can also use the more specific `scheduler.extraPipPackages`, `web.extraPipPackages`, `worker.extraPipPackages` and `flower.extraPipPackages`.
-
 Packages defined with the more specific values will take precedence over `airflow.extraPipPackages`, as they are listed at the end of the `pip install ...` command, and pip takes the package version which is __defined last__.
 
-For example, installing the `airflow-exporter` package on all scheduler/web/worker/flower Pods:
+Example values for installing the `airflow-exporter` package on all scheduler/web/worker/flower Pods:
 ```yaml
 airflow:
   extraPipPackages:
     - "airflow-exporter~=1.4.1"
 ```
 
-For example, installing PyTorch on the scheduler/worker Pods only:
+Example values for installing PyTorch on the scheduler/worker Pods only:
 ```yaml
 scheduler:
   extraPipPackages:
@@ -294,9 +321,7 @@ worker:
 
 <h3>Option 2 - embedded into container image (recommended)</h3>
 
-You can extend the airflow container image with your pip packages.
-
-> ⚠️ this chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images)
+This chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images), you can extend the airflow container image with your pip packages.
 
 For example, extending `airflow:2.0.1-python3.8` with the `torch` package:
 ```dockerfile
@@ -306,7 +331,7 @@ FROM apache/airflow:2.0.1-python3.8
 RUN pip install torch~=1.8.0
 ```
 
-Then use this container image with the chart:
+Example values to use your `MY_REPO:MY_TAG` container image:
 ```yaml
 airflow:
   image:
@@ -319,14 +344,16 @@ airflow:
 
 ### How to create airflow users? 
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 You can use the `airflow.users` value to create airflow users with a post-install/post-update helm hook Job.
 
-> ⚠️ if you need to edit the users in the web-ui (for example, to change their password), you should set `airflow.usersUpdate` to `false`
+> 🟨 __Note__ 🟨
+>
+> If you need to edit the users in the web-ui (for example, to change their password), you should set `airflow.usersUpdate = false`
 
-For example, to create `admin` (with "Admin" RBAC role) and `user` (with "User" RBAC role):
+Example values to create `admin` (with "Admin" RBAC role) and `user` (with "User" RBAC role):
 ```yaml
 airflow:
   users:
@@ -352,18 +379,21 @@ airflow:
 
 ### How to authenticate airflow users with LDAP/OAUTH? 
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
+
+> 🟥 __Warning__ 🟥 
+> 
+> If you set up LDAP/OAUTH, you should set `airflow.users = []` (and delete any previously created users)
+> 
+> The version of Flask-Builder installed might not be the latest, see [How to install extra pip packages?](#how-to-install-extra-pip-packages)
 
 You can use the `web.webserverConfig.*` values to adjust the Flask-Appbuilder `webserver_config.py` file, you can read Flask-builder's security docs [here](https://flask-appbuilder.readthedocs.io/en/latest/security.html).
 
-> 🛑️️ if you set up LDAP/OAUTH, you should set `airflow.users` to `[]` (and delete any previously created users)
-
-> ⚠️ the version of Flask-Builder installed by airflow might not be the latest, but you can use `web.extraPipPackages` to install a newer version, if needed
-
-For example, to integrate with a typical Microsoft Active Directory using `AUTH_LDAP`:
+Example values to integrate with a typical Microsoft Active Directory using `AUTH_LDAP`:
 ```yaml
 web:
+  # WARNING: for production usage, create your own image with these packages installed rather than using `extraPipPackages`
   extraPipPackages:
     ## the following configs require Flask-AppBuilder 3.2.0 (or later)
     - "Flask-AppBuilder~=3.2.0"
@@ -412,7 +442,7 @@ web:
       PERMANENT_SESSION_LIFETIME = 1800
 ```
 
-For example, to integrate with Okta using `AUTH_OAUTH`:
+Example values to integrate with Okta using `AUTH_OAUTH`:
 ```yaml
 web:
   extraPipPackages:
@@ -471,14 +501,18 @@ web:
 
 ### How to set a custom fernet (encryption) key? 
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
+
+> 🟥 __Warning__ 🟥 
+> 
+> We strongly recommend that you change the default encryption key, otherwise the encryption is somewhat pointless
 
 <h3>Option 1 - using value</h3>
 
 You can customize the fernet encryption key using the `airflow.fernetKey` value, which sets the `AIRFLOW__CORE__FERNET_KEY` environment variable.
 
-For example:
+Example values to define a fernet key in plain-text:
 ```yaml
 aiflow:
   fernetKey: "7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc="
@@ -488,7 +522,7 @@ aiflow:
 
 You can customize the fernet encryption key by pre-creating a Secret, and specifying it with the `airflow.extraEnv` value.
 
-For example, if the Secret `airflow-fernet-key` already exist, and contains a key called `value`:
+Example values to use the `value` key from the existing Secret `airflow-fernet-key`:
 ```yaml
 airflow:
   extraEnv:
@@ -504,14 +538,16 @@ airflow:
 
 ### How to create airflow connections?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
+
+> 🟨 __Note__ 🟨
+> 
+> If you need to edit the connections in the web-ui (for example, to add a sensitive password), you should set `airflow.connectionsUpdate = false`
 
 You can use the `airflow.connections` value to create airflow [Connections](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#connections) with a post-install/post-update helm hook Job.
 
-> ⚠️ if you need to edit the connections in the web-ui (for example, to add a sensitive password), you should set `airflow.connectionsUpdate` to `false`
-
-For example, to create connections called `my_aws`, `my_gcp`, `my_postgres`, and `my_ssh`:
+Example values to create connections called `my_aws`, `my_gcp`, `my_postgres`, and `my_ssh`:
 ```yaml
 airflow:
   connections:
@@ -561,14 +597,16 @@ airflow:
 
 ### How to create airflow variables?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
+
+> 🟨 __Note__ 🟨
+> 
+> If you need to edit the variables in the web-ui, you should set `airflow.variablesUpdate = false`
 
 You can use the `airflow.variables` value to create airflow [Variables](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#variables) with a post-install/post-update helm hook Job.
 
-> ⚠️ if you need to edit the variables in the web-ui, you should set `airflow.variablesUpdate` to `false`
-
-For example, to create variables called `var_1`, `var_2`:
+Example values to create variables called `var_1`, `var_2`:
 ```yaml
 airflow:
   variables:
@@ -586,14 +624,16 @@ airflow:
 
 ### How to create airflow pools?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
+
+> 🟨 __Note__ 🟨
+>
+> If you need to edit the variables in the web-ui, you should set `airflow.poolsUpdate = false`
 
 You can use the `airflow.pools` value to create airflow [Pools](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#pools) with a post-install/post-update helm hook Job.
 
-> ⚠️ if you need to edit the variables in the web-ui, you should set `airflow.poolsUpdate` to `false`
-
-For example, to create pools called `pool_1`, `pool_2`:
+Example values to create pools called `pool_1`, `pool_2`:
 ```yaml
 airflow:
   pools:
@@ -613,8 +653,12 @@ airflow:
 
 ### How to set up celery worker autoscaling?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
+
+> 🟨 __Note__ 🟨
+> 
+> This method of autoscaling is not ideal. There is not necessarily a link between RAM usage, and the number of pending tasks, meaning you could have a situation where your workers don't scale up despite having pending tasks.
 
 The Airflow Celery Workers can be scaled using the [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/), to enable autoscaling, you must set `workers.autoscaling.enabled=true`, then provide `workers.autoscaling.maxReplicas`.
 
@@ -673,18 +717,19 @@ dags:
 <hr>
 </details>
 
-### How to persist Airflow logs (recommended)?
+### How to persist airflow logs?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
-> 🛑️️ you should persist logs in a production deployment using one of the following methods
+> 🟥 __Warning__ 🟥 
 > 
-> By default, logs from the airflow-web/scheduler/worker are written within the Docker container's filesystem, therefore any restart of the pod will wipe the logs.
+> For production, you should persist logs in a production deployment using one of these methods.<br>
+> By default, logs are stored within the container's filesystem, therefore any restart of the pod will wipe your DAG logs.
 
 <h3>Option 1 - Kubernetes PVC</h3>
 
-Example using a 1Gb Kubernetes PVC:
+Example values to create a PVC with the default `storage` class, and `1Gb` initial `size`:
 ```yaml
 logs:
   persistence:
@@ -698,7 +743,7 @@ logs:
 
 You must give airflow credentials for it to read/write on the remote bucket, this can be achieved with `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID`, or by using something like [Workload Identity (GKE)](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity), or [IAM Roles for Service Accounts (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html). 
 
-Example, using `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID` (can be used with S3 + AWS connection too):
+Example values using `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID` (can be used with S3 + AWS connection too):
 ```yaml
 airflow:
   config:
@@ -716,8 +761,8 @@ airflow:
           "extra__google_cloud_platform__keyfile_dict: "XXXXXXXX",
           "extra__google_cloud_platform__num_retries": "5" }
 ```
-    
-Example, using [Workload Identity (GKE)](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity):
+
+Example values using [Workload Identity (GKE)](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity):
 ```yaml
 airflow:
   config:
@@ -730,7 +775,7 @@ serviceAccount:
     iam.gke.io/gcp-service-account: "<<MY-ROLE-NAME>>@<<MY-PROJECT-NAME>>.iam.gserviceaccount.com"
 ```
 
-Example, using [IAM Roles for Service Accounts (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html):
+Example values using [IAM Roles for Service Accounts (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html):
 ```yaml
 airflow:
   config:
@@ -758,14 +803,18 @@ serviceAccount:
 <hr>
 </details>
 
-## Database Configs
+## FAQ - Databases
+
+> These are some frequently asked questions related to database configs:
 
 ### How to use the embedded Postgres?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
-> 🛑️️ the embedded Postgres is NOT SUITABLE for production, you should configure one of the external databases
+> 🟥 __Warning__ 🟥 
+> 
+> The embedded Postgres is NOT SUITABLE for production, you should follow [How to use an external database?](#how-to-use-an-external-database)
 
 The embedded Postgres database has an insecure username/password by default, you should create secure credentials before using it.
 
@@ -784,7 +833,7 @@ kubectl create secret generic \
   --namespace my-airflow-namespace
 ```
 
-Example `values.yaml`, to use those secrets:
+Example values to use those secrets:
 ```yaml
 postgresql:
   existingSecret: airflow-postgresql
@@ -796,9 +845,9 @@ redis:
 <hr>
 </details>
 
-### How to use an external database (recommended)?
+### How to use an external database?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 <h3>Option 1 - Postgres</h3>
@@ -823,7 +872,9 @@ externalDatabase:
 
 <h3>Option 2 - MySQL</h3>
 
-> ⚠️ you must set `explicit_defaults_for_timestamp=1` in your MySQL instance, [see here](https://airflow.apache.org/docs/stable/howto/initialize-database.html)
+> 🟨 __Note__ 🟨 
+> 
+> You must set `explicit_defaults_for_timestamp=1` in your MySQL instance, [see here](https://airflow.apache.org/docs/stable/howto/initialize-database.html)
 
 Example values for an external MySQL database, with an existing `airflow_cluster1` database:
 ```yaml
@@ -848,7 +899,7 @@ externalDatabase:
 
 ### How to use an external redis?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Example values for an external redis with ssl enabled:
@@ -868,18 +919,22 @@ externalRedis:
 <hr>
 </details>
 
-## Kubernetes Configs
+## FAQ - Kubernetes
+
+> These are some frequently asked questions related to kubernetes configs:
 
 ### How to mount ConfigMaps/Secrets as environment variables?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
+
+> 🟨 __Note__ 🟨 
+> 
+> This method can be used to pass sensitive configs to Airflow
 
 You can use the `airflow.extraEnv` value to mount extra environment variables with the same structure as [EnvVar in ContainerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#envvar-v1-core).
 
-This method can be used to pass sensitive configs to Airflow.
-
-For example, if the Secret `airflow-fernet-key` already exist, and contains a key called `value`:
+Example values to use the `value` key from the existing Secret `airflow-fernet-key` to define `AIRFLOW__CORE__FERNET_KEY`:
 ```yaml
 airflow:
   extraEnv:
@@ -895,7 +950,7 @@ airflow:
 
 ### How to mount Secrets/Configmaps as files on workers?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 You can use the `workers.extraVolumeMounts` and `workers.extraVolumes` values to mount Secretes as files.
@@ -935,7 +990,7 @@ kubectl create secret generic \
 
 ### How to set up an Ingress?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 The chart provides the `ingress.*` values for deploying a Kubernetes Ingress to allow access to airflow outside the cluster.
@@ -961,7 +1016,9 @@ ingress:
 
 We expose the `ingress.web.precedingPaths` and `ingress.web.succeedingPaths` values, which are __before__ and __after__ the default path respectively.
 
-> ⚠️ A common use-case is [enabling SSL with the aws-alb-ingress-controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/tasks/ssl_redirect/), which needs a redirect path to be hit before the airflow-webserver one.
+> 🟦 __Discussion__ 🟦
+> 
+> A common use-case is [enabling SSL with the aws-alb-ingress-controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/tasks/ssl_redirect/), which needs a redirect path to be hit before the airflow-webserver one
 
 For example, setting `ingress.web.precedingPaths` for an aws-alb-ingress-controller with SSL:
 ```yaml
@@ -978,7 +1035,7 @@ ingress:
 
 ### How to integrate airflow with Prometheus?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 To be able to expose Airflow metrics to Prometheus you will need install a plugin, one option is [epoch8/airflow-exporter](https://github.com/epoch8/airflow-exporter) which exports DAG and task metrics from Airflow.
@@ -990,12 +1047,12 @@ A [ServiceMonitor](https://github.com/prometheus-operator/prometheus-operator/bl
 
 ### How to add extra manifests?
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 You can use the `extraManifests.[]` value to add custom Kubernetes manifests to the chart.
 
-For example, adding a `BackendConfig` resource for GKE:
+Example values to add a `BackendConfig` resource (for GKE):
 ```yaml
 extraManifests:
   - apiVersion: cloud.google.com/v1beta1
@@ -1010,11 +1067,13 @@ extraManifests:
 <hr>
 </details>
 
-## Chart Values
+## Values Reference
 
-### Global:
+> The list of values provided by this chart (see the [values.yaml](values.yaml) file for more details):
+
+### `airflow.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1044,9 +1103,9 @@ Parameter | Description | Default
 <hr>
 </details>
 
-### Airflow Scheduler:
+### `scheduler.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1073,9 +1132,9 @@ Parameter | Description | Default
 <hr>
 </details>
 
-### Airflow Webserver:
+### `web.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1103,9 +1162,9 @@ Parameter | Description | Default
 <hr>
 </details>
 
-### Airflow Celery Worker:
+### `workers.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1133,9 +1192,9 @@ Parameter | Description | Default
 <hr>
 </details>
 
-### Airflow Flower:
+### `flower.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1163,9 +1222,9 @@ Parameter | Description | Default
 <hr>
 </details>
 
-### Logs:
+### `logs.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1176,9 +1235,9 @@ Parameter | Description | Default
 <hr>
 </details>
 
-### DAGs:
+### `dags.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1190,9 +1249,9 @@ Parameter | Description | Default
 <hr>
 </details>
 
-### Kubernetes (Ingress):
+### `ingress.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1204,26 +1263,48 @@ Parameter | Description | Default
 <hr>
 </details>
 
-### Kubernetes (Other):
+### `rbac.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
 --- | --- | ---
 `rbac.create` | if Kubernetes RBAC resources are created | `true`
 `rbac.events` | if the created RBAR role has GET/LIST access to Event resources | `false`
+
+<hr>
+</details>
+
+### `serviceAccount.*`
+<details>
+<summary>Expand</summary>
+<hr>
+
+Parameter | Description | Default
+--- | --- | ---
 `serviceAccount.create` | if a Kubernetes ServiceAccount is created | `true`
 `serviceAccount.name` | the name of the ServiceAccount | `""`
 `serviceAccount.annotations` | annotations for the ServiceAccount | `{}`
+
+<hr>
+</details>
+
+### `extraManifests`
+<details>
+<summary>Expand</summary>
+<hr>
+
+Parameter | Description | Default
+--- | --- | ---
 `extraManifests` | extra Kubernetes manifests to include alongside this chart | `[]`
 
 <hr>
 </details>
 
-### Database (Embedded - Postgres):
+### `postgresql.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1240,9 +1321,9 @@ Parameter | Description | Default
 <hr>
 </details>
 
-### Database (External - Postgres/MySQL):
+### `externalDatabase.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1259,9 +1340,9 @@ Parameter | Description | Default
 <hr>
 </details>
 
-### Redis (Embedded):
+### `redis.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1277,9 +1358,9 @@ Parameter | Description | Default
 <hr>
 </details>
 
-### Redis (External):
+### `externalRedis.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1294,9 +1375,9 @@ Parameter | Description | Default
 <hr>
 </details>
 
-### Prometheus:
+### `serviceMonitor.*`
 <details>
-<summary>Show More</summary>
+<summary>Expand</summary>
 <hr>
 
 Parameter | Description | Default
@@ -1305,12 +1386,20 @@ Parameter | Description | Default
 `serviceMonitor.selector` | labels for ServiceMonitor, so that Prometheus can select it | `{ prometheus: "kube-prometheus" }`
 `serviceMonitor.path` | the ServiceMonitor web endpoint path | `/admin/metrics`
 `serviceMonitor.interval` | the ServiceMonitor web endpoint path | `30s`
+
+<hr>
+</details>
+
+### `prometheusRule.*`
+<details>
+<summary>Expand</summary>
+<hr>
+
+Parameter | Description | Default
+--- | --- | ---
 `prometheusRule.enabled` | if the PrometheusRule resources should be deployed | `false`
 `prometheusRule.additionalLabels` | labels for PrometheusRule, so that Prometheus can select it | `{}`
 `prometheusRule.groups` | alerting rules for Prometheus | `[]`
 
 <hr>
 </details>
-
-<br>
-<br>
