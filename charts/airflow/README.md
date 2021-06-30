@@ -68,20 +68,20 @@ The [CHANGELOG.md](CHANGELOG.md) is found at the root of this chart folder.
 . | `1.10.X`  | `2.0.X` | `2.1.X`
 --- | --- | --- | ---
 chart - `7.X.X` | ✅ | ❌ | ❌
-chart - `8.X.X` | ✅ [1] | ✅ | ✅
+chart - `8.X.X` | ✅ <sub>[1]</sub> | ✅ | ✅
 
-[0] [see here](#how-to-use-a-specific-version-of-airflow) for a guide on how to set your airflow version<br>
-[1] you must set `airflow.legacyCommands = true` to use airflow `1.10.X` with chart `8.X.X`
+<sub>[0] [see here](#how-to-use-a-specific-version-of-airflow) for a guide on how to set your airflow version<br></sub>
+<sub>[1] you must set `airflow.legacyCommands = true` to use airflow `1.10.X` with chart `8.X.X`
 
 ### Airflow Executor Support
 
 . | `CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor`
 --- | --- | --- | --- 
 chart - `7.X.X` | ✅ | ✅ | ❌
-chart - `8.X.X` | ✅ | ✅ [1] | ✅ [1]
+chart - `8.X.X` | ✅ | ✅ <sub>[1]</sub> | ✅ <sub>[1]</sub>
 
-[0] you can set the executor using the `airflow.executor` value<br>
-[1] we encourage you to use airflow `2.X.X` with chart `8.X.X`, and make use of the new `airflow.kubernetesPodTemplate.*` values
+<sub>[0] you can set the executor using the `airflow.executor` value<br></sub>
+<sub>[1] we encourage you to use airflow `2.X.X` with chart `8.X.X`, and make use of the new `airflow.kubernetesPodTemplate.*` values</sub>
 
 ### Examples
 
