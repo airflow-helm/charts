@@ -1,4 +1,8 @@
 {{- $extraPipPackages := .Values.airflow.kubernetesPodTemplate.extraPipPackages }}
+{{- $extraVolumeMounts := .Values.airflow.kubernetesPodTemplate.extraVolumeMounts }}
+{{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+{{- $extraVolumes := .Values.airflow.kubernetesPodTemplate.extraVolumes }}
+{{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -56,14 +60,10 @@ spec:
       resources:
         {{- toYaml .Values.airflow.kubernetesPodTemplate.resources | nindent 8 }}
       {{- end }}
-      {{- $extraVolumeMounts := .Values.airflow.kubernetesPodTemplate.extraVolumeMounts }}
-      {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
       {{- if $volumeMounts }}
       volumeMounts:
         {{- $volumeMounts | indent 8 }}
       {{- end }}
-  {{- $extraVolumes := .Values.airflow.kubernetesPodTemplate.extraVolumes }}
-  {{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
   {{- if $volumes }}
   volumes:
     {{- $volumes | indent 4 }}

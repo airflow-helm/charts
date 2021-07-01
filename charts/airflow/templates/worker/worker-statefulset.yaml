@@ -1,5 +1,9 @@
-{{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.workers.extraPipPackages }}
 {{- if .Values.workers.enabled }}
+{{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.workers.extraPipPackages }}
+{{- $extraVolumeMounts := .Values.workers.extraVolumeMounts }}
+{{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+{{- $extraVolumes := .Values.workers.extraVolumes }}
+{{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
 apiVersion: apps/v1
 ## StatefulSet gives workers consistent DNS names, allowing webserver access to log files
 kind: StatefulSet
@@ -82,8 +86,8 @@ spec:
         {{- if $extraPipPackages }}
         {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
         {{- end }}
-        {{- include "airflow.init_container.check_db" . | indent 8 }}
-        {{- include "airflow.init_container.wait_for_db_migrations" . | indent 8 }}
+        {{- include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
+        {{- include "airflow.init_container.wait_for_db_migrations" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") | indent 8 }}
         {{- end }}
@@ -153,8 +157,6 @@ spec:
             {{- else }}
             - "exec airflow celery worker"
             {{- end }}
-          {{- $extraVolumeMounts := .Values.workers.extraVolumeMounts }}
-          {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
           {{- if $volumeMounts }}
           volumeMounts:
             {{- $volumeMounts | indent 12 }}
@@ -165,8 +167,6 @@ spec:
         {{- if .Values.airflow.extraContainers }}
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
         {{- end }}
-      {{- $extraVolumes := .Values.workers.extraVolumes }}
-      {{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
       {{- if $volumes }}
       volumes:
         {{- $volumes | indent 8 }}

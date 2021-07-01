@@ -11,6 +11,7 @@ securityContext:
 
 {{/*
 Define an init-container which checks the DB status
+EXAMPLE USAGE: {{ include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) }}
 */}}
 {{- define "airflow.init_container.check_db" }}
 - name: check-db
@@ -30,10 +31,15 @@ Define an init-container which checks the DB status
     {{- else }}
     - "exec timeout 60s airflow db check"
     {{- end }}
+  {{- if .volumeMounts }}
+  volumeMounts:
+    {{- .volumeMounts | indent 4 }}
+  {{- end }}
 {{- end }}
 
 {{/*
 Define an init-container which waits for DB migrations
+EXAMPLE USAGE: {{ include "airflow.init_container.wait_for_db_migrations" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) }}
 */}}
 {{- define "airflow.init_container.wait_for_db_migrations" }}
 - name: wait-for-db-migrations
@@ -54,6 +60,10 @@ Define an init-container which waits for DB migrations
     {{- else }}
     - "exec airflow db check-migrations -t 60"
     {{- end }}
+  {{- if .volumeMounts }}
+  volumeMounts:
+    {{- .volumeMounts | indent 4 }}
+  {{- end }}
 {{- end }}
 
 {{/*
