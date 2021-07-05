@@ -3,6 +3,21 @@ All notable changes to this project will be documented in this file.
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+- _see [Unreleased]_
+
+### Fixed
+- _see [Unreleased]_
+
+### Removed
+- _see [Unreleased]_
+
+### Docs
+- _see [Unreleased]_
+
+
 ## [8.3.2] - 2021-06-30
 ### Docs
 - added this changelog ([#231](https://github.com/airflow-helm/charts/issues/231))
@@ -496,6 +511,7 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 > To read more about versions `7.0.0` and before, please see the legacy repo:<br>
 > https://github.com/helm/charts/tree/master/stable/airflow
 
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.3.2...HEAD
 [8.3.2]: https://github.com/airflow-helm/charts/compare/airflow-8.3.1...airflow-8.3.2
 [8.3.1]: https://github.com/airflow-helm/charts/compare/airflow-8.3.0...airflow-8.3.1
 [8.3.0]: https://github.com/airflow-helm/charts/compare/airflow-8.2.0...airflow-8.3.0
