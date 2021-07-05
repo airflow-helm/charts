@@ -25,9 +25,15 @@ spec:
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      ## multiple scheduler pods can safely run concurrently (in airflow 2.0+)
+      {{- if .Values.airflow.legacyCommands }}
+      ## only one scheduler can run concurrently (Airflow 1.10)
+      maxSurge: 0
+      maxUnavailable: 100%
+      {{- else }}
+      ## multiple schedulers can run concurrently (Airflow 2.0)
       maxSurge: 25%
       maxUnavailable: 0
+      {{- end }}
   selector:
     matchLabels:
       app: {{ include "airflow.labels.app" . }}
