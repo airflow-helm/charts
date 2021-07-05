@@ -92,7 +92,7 @@
 {{- end }}
 
 {{/* Checks for `ingress` */}}
-{{- if .Values.ingress }}
+{{- if .Values.ingress.enabled }}
   {{/* Checks for `ingress.web.path` */}}
   {{- if .Values.ingress.web.path }}
     {{- if not (.Values.ingress.web.path | hasPrefix "/") }}
