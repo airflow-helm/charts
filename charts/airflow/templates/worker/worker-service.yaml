@@ -19,4 +19,5 @@ spec:
   selector:
     app: {{ include "airflow.labels.app" . }}
     component: worker
+    release: {{ .Release.Name }}
 {{- end }}
