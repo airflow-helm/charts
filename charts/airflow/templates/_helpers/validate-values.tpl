@@ -61,6 +61,20 @@
   {{ required "Don't define `airflow.config.AIRFLOW__CORE__SQL_ALCHEMY_CONN`, it will be automatically set by the chart!" nil }}
 {{- end }}
 
+{{/* Checks for `logs.persistence` */}}
+{{- if .Values.logs.persistence.enabled }}
+  {{- if not (eq .Values.logs.persistence.accessMode "ReadWriteMany") }}
+  {{ required "The `logs.persistence.accessMode` must be `ReadWriteMany`!" nil }}
+  {{- end }}
+{{- end }}
+
+{{/* Checks for `dags.persistence` */}}
+{{- if .Values.dags.persistence.enabled }}
+  {{- if not (has .Values.dags.persistence.accessMode (list "ReadOnlyMany" "ReadWriteMany")) }}
+  {{ required "The `dags.persistence.accessMode` must be one of: [ReadOnlyMany, ReadWriteMany]!" nil }}
+  {{- end }}
+{{- end }}
+
 {{/* Checks for `dags.gitSync` */}}
 {{- if .Values.dags.gitSync.enabled }}
   {{- if .Values.dags.persistence.enabled }}
