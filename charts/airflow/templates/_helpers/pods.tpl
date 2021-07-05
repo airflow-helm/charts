@@ -184,6 +184,9 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Value
 - name: dags-data
   mountPath: {{ .Values.dags.path }}
   subPath: {{ .Values.dags.persistence.subPath }}
+  {{- if eq .Values.dags.persistence.accessMode "ReadOnlyMany" }}
+  readOnly: true
+  {{- end }}
 {{- else if .Values.dags.gitSync.enabled }}
 - name: dags-data
   mountPath: {{ .Values.dags.path }}
