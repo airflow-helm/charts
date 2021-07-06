@@ -70,7 +70,10 @@ airflow:
   ##
   config: {}
 
-  ## a list of initial users to create
+  ## a list of users to create
+  ##
+  ## NOTE:
+  ## - `usersTemplates` can ONLY be used in: `password`, `email`, `firstName`, `lastName`
   ##
   users:
     - username: admin
@@ -80,15 +83,27 @@ airflow:
       firstName: admin
       lastName: admin
 
-  ## if we update users or just create them the first time (lookup by `username`)
+  ## bash-like templates to be used in `airflow.users`
   ##
-  ## NOTE:
-  ## - if enabled, the chart will revert any changes made in the web-ui to users defined
-  ##   in `users` (including passwords)
+  ## (See `airflow.connectionsTemplates` for docs)
+  ##
+  usersTemplates: {}
+
+  ## if we create a Deployment to perpetually sync `airflow.users`
+  ##
+  ## WARNING:
+  ## - when `true`:
+  ##   - users are updated as ConfigMaps/Secrets change values
+  ##   - changes from the WebUI will be reverted (only applies to users defined in `airflow.users`)
+  ## - when `false`:
+  ##   - users will only update once (after each `helm upgrade ...`)
   ##
   usersUpdate: true
 
-  ## a list of initial connections to create
+  ## a list airflow connections to create
+  ##
+  ## NOTE:
+  ## - `connectionsTemplates` can ONLY be used in: `host`, `login`, `password`, `schema`, `extra`
   ##
   ## EXAMPLE:
   ##   connections:
@@ -97,29 +112,54 @@ airflow:
   ##       type: aws
   ##       description: my AWS connection
   ##       extra: |-
-  ##         { "aws_access_key_id": "XXXXXXXX",
-  ##           "aws_secret_access_key": "XXXXXXXX",
+  ##         { "aws_access_key_id": "${AWS_ACCESS_KEY_ID}",
+  ##           "aws_secret_access_key": "${AWS_SECRET_ACCESS_KEY}",
   ##           "region_name":"eu-central-1" }
   ##     ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-google/stable/connections/gcp.html
   ##     - id: my_gcp
   ##       type: google_cloud_platform
   ##       description: my GCP connection
   ##       extra: |-
-  ##         { "extra__google_cloud_platform__keyfile_dict": "XXXXXXXX",
-  ##           "extra__google_cloud_platform__keyfile_dict: "XXXXXXXX",
+  ##         { "extra__google_cloud_platform__keyfile_dict": "${GCP_KEYFILE_DICT}",
   ##           "extra__google_cloud_platform__num_retries": "5" }
   ##
   connections: []
 
-  ## if we update connections or just create them the first time (lookup by `id`)
+  ## bash-like templates to be used in `airflow.connections`
   ##
   ## NOTE:
-  ## - if enabled, the chart will revert any changes made in the web-ui to connections
-  ##   defined in `connections`
+  ## - if a referenced Secrets/ConfigMaps is missing, the sync Pod will crash
+  ## - all keys must match the regex: ^[a-zA-Z_][a-zA-Z0-9_]*$
+  ## - templates are used in `airflow.connections` with bash-like syntax: ${MY_USERNAME} or $MY_PASSWORD
+  ##
+  ## EXAMPLE:
+  ##   connectionsTemplates
+  ##     MY_USERNAME:
+  ##       kind: configmap
+  ##       name: my-configmap
+  ##       key: username
+  ##     MY_PASSWORD:
+  ##       kind: secret
+  ##       name: my-secret
+  ##       key: password
+  ##
+  connectionsTemplates: {}
+
+  ## if we create a Deployment to perpetually sync `airflow.connections`
+  ##
+  ## WARNING:
+  ## - when `true`:
+  ##   - connections are updated as ConfigMaps/Secrets change values
+  ##   - changes from the WebUI will be reverted (only applies to connections defined in `airflow.connections`)
+  ## - when `false`:
+  ##   - connections will only update once (after each `helm upgrade ...`)
   ##
   connectionsUpdate: true
 
-  ## a list of initial variables to create
+  ## a list airflow variables to create
+  ##
+  ## NOTE:
+  ## - `variablesTemplates` can ONLY be used in: `value`
   ##
   ## EXAMPLE:
   ##   variables:
@@ -130,32 +170,43 @@ airflow:
   ##
   variables: []
 
-  ## if we update variables or just create them the first time (lookup by `key`)
+  ## bash-like templates to be used in `airflow.variables`
   ##
-  ## NOTE:
-  ## - if enabled, the chart will revert any changes made in the web-ui to variables
-  ##   defined in `variables`
+  ## (See `airflow.connectionsTemplates` for docs)
+  ##
+  variablesTemplates: {}
+
+  ## if we create a Deployment to perpetually sync `airflow.variables`
+  ##
+  ## WARNING:
+  ## - when `true`:
+  ##   - variables are updated as ConfigMaps/Secrets change values
+  ##   - changes from the WebUI will be reverted (only applies to variables defined in `airflow.variables`)
+  ## - when `false`:
+  ##   - variables will only update once (after each `helm upgrade ...`)
   ##
   variablesUpdate: true
 
-  ## a list of initial pools to create
+  ## a list airflow pools to create
   ##
   ## EXAMPLE:
   ##   pools:
   ##     - name: "pool_1"
-  ##       slots: 5
   ##       description: "example pool with 5 slots"
+  ##       slots: 5
   ##     - name: "pool_2"
-  ##       slots: 10
   ##       description: "example pool with 10 slots"
+  ##       slots: 10
   ##
   pools: []
 
-  ## if we update pools or just create them the first time (lookup by `name`)
+  ## if we create a Deployment to perpetually sync `airflow.pools`
   ##
-  ## NOTE:
-  ## - if enabled, the chart will revert any changes made in the web-ui to pools
-  ##   defined in `pools`
+  ## WARNING:
+  ## - when `true`:
+  ##   - changes from the WebUI will be reverted (only applies to variables defined in `airflow.pools`)
+  ## - when `false`:
+  ##   - pools will only update once (after each `helm upgrade ...`)
   ##
   poolsUpdate: true
 
@@ -291,6 +342,60 @@ airflow:
     ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
     ##
     resources: {}
+
+  ## configs for the `airflow.{connections, pools, users, variables}` Deployments/Jobs
+  ##
+  sync:
+    ## resource requests/limits for the sync Pods
+    ##
+    ## SPEC - ResourceRequirements:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ##
+    resources: {}
+
+    ## the nodeSelector configs for the sync Pods
+    ##
+    ## DOCS:
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+    ##
+    nodeSelector: {}
+
+    ## the affinity configs for the sync Pods
+    ##
+    ## SPEC - Affinity:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+    ##
+    affinity: {}
+
+    ## the toleration configs for the sync Pods
+    ##
+    ## SPEC - Toleration:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+    ##
+    tolerations: []
+
+    ## the security context for the sync Pods
+    ##
+    ## SPEC - SecurityContext:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
+    ##
+    securityContext: {}
+
+    ## Pod labels for the sync Deployments/Jobs
+    ##
+    podLabels: {}
+
+    ## annotations for the sync Deployments/Jobs
+    ##
+    annotations: {}
+
+    ## Pod annotations for the sync Deployments/Jobs
+    ##
+    podAnnotations: {}
+
+    ## if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true"
+    ##
+    safeToEvict: true
 
 ###################################
 # Airflow - Scheduler Configs

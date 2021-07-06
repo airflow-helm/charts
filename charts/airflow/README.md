@@ -347,11 +347,7 @@ airflow:
 <summary>Expand</summary>
 <hr>
 
-You can use the `airflow.users` value to create airflow users with a post-install/post-update helm hook Job.
-
-> 🟨 __Note__ 🟨
->
-> If you need to edit the users in the web-ui (for example, to change their password), you should set `airflow.usersUpdate = false`
+You can use the `airflow.users` value to create airflow users in a declarative way.
 
 Example values to create `admin` (with "Admin" RBAC role) and `user` (with "User" RBAC role):
 ```yaml
@@ -370,7 +366,39 @@ airflow:
       firstName: user
       lastName: user
 
-  ## if we update users or just create them the first time (lookup by `username`)
+  ## if we create a Deployment to perpetually sync `airflow.users`
+  usersUpdate: true
+```
+
+Additionally, you can use `airflow.usersTemplates` to extract templates from keys in Secrets or Configmaps.
+
+> 🟨 __Note__ 🟨
+>
+> If `airflow.usersUpdate = true`, the users which use `airflow.usersTemplates` will be updated in real-time, allowing tools like [external-secrets](https://github.com/external-secrets/kubernetes-external-secrets) to be used.
+
+Example values to use templates from `Secret/my-secret` and `ConfigMap/my-configmap` in parts of the `admin` user.
+```yaml
+airflow:
+  users:
+    - username: admin
+      password: ${ADMIN_PASSWORD}
+      role: Admin
+      email: ${ADMIN_EMAIL}
+      firstName: admin
+      lastName: admin
+        
+  ## bash-like templates to be used in `airflow.users`
+  usersTemplates:
+    ADMIN_PASSWORD:
+      kind: secret
+      name: my-secret
+      key: password
+    ADMIN_EMAIL:
+      kind: configmap
+      name: my-configmap
+      key: email
+        
+  ## if we create a Deployment to perpetually sync `airflow.users`
   usersUpdate: true
 ```
 
@@ -541,15 +569,11 @@ airflow:
 <summary>Expand</summary>
 <hr>
 
-> 🟨 __Note__ 🟨
-> 
-> If you need to edit the connections in the web-ui (for example, to add a sensitive password), you should set `airflow.connectionsUpdate = false`
-
-You can use the `airflow.connections` value to create airflow [Connections](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#connections) with a post-install/post-update helm hook Job.
+You can use the `airflow.connections` value to create airflow [Connections](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#connections) in a declarative way.
 
 Example values to create connections called `my_aws`, `my_gcp`, `my_postgres`, and `my_ssh`:
 ```yaml
-airflow:
+airflow: 
   connections:
     ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html
     - id: my_aws
@@ -588,7 +612,40 @@ airflow:
       extra: |-
         { "timeout": "15" }
 
-  ## if we update connections or just create them the first time (lookup by `id`)
+  ## if we create a Deployment to perpetually sync `airflow.connections`
+  connectionsUpdate: true
+```
+
+Additionally, you can use `airflow.connectionsTemplates` to extract templates from keys in Secrets or Configmaps.
+
+> 🟨 __Note__ 🟨
+>
+> If `airflow.connectionsUpdate = true`, the connections which use `airflow.connectionsTemplates` will be updated in real-time, allowing tools like [external-secrets](https://github.com/external-secrets/kubernetes-external-secrets) to be used.
+
+Example values to use templates from `Secret/my-secret` and `ConfigMap/my-configmap` in parts of the `my_aws` connection:
+```yaml
+airflow: 
+  connections:
+    - id: my_aws
+      type: aws
+      description: my AWS connection
+      extra: |-
+        { "aws_access_key_id": "${AWS_ACCESS_KEY_ID}",
+          "aws_secret_access_key": "${AWS_ACCESS_KEY}",
+          "region_name":"eu-central-1" }
+
+  ## bash-like templates to be used in `airflow.connections`
+  connectionsTemplates:
+    AWS_ACCESS_KEY_ID:
+      kind: configmap
+      name: my-configmap
+      key: username
+    AWS_ACCESS_KEY:
+      kind: secret
+      name: my-secret
+      key: password
+
+  ## if we create a Deployment to perpetually sync `airflow.connections`
   connectionsUpdate: true
 ```
 
@@ -600,11 +657,7 @@ airflow:
 <summary>Expand</summary>
 <hr>
 
-> 🟨 __Note__ 🟨
-> 
-> If you need to edit the variables in the web-ui, you should set `airflow.variablesUpdate = false`
-
-You can use the `airflow.variables` value to create airflow [Variables](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#variables) with a post-install/post-update helm hook Job.
+You can use the `airflow.variables` value to create airflow [Variables](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#variables) in a declarative way.
 
 Example values to create variables called `var_1`, `var_2`:
 ```yaml
@@ -615,8 +668,39 @@ airflow:
     - key: "var_2"
       value: "my_value_2"
 
-  ## if we update variables or just create them the first time (lookup by `key`)
+  ## if we create a Deployment to perpetually sync `airflow.variables`
   variablesUpdate: true
+```
+
+Additionally, you can use `airflow.variablesTemplates` to extract templates from keys in Secrets or Configmaps.
+
+> 🟨 __Note__ 🟨
+>
+> If `airflow.variablesTemplates = true`, the connections which use `airflow.variablesTemplates` will be updated in real-time, allowing tools like [external-secrets](https://github.com/external-secrets/kubernetes-external-secrets) to be used.
+
+Example values to use templates from `Secret/my-secret` and `ConfigMap/my-configmap` in the `var_1` and `var_2` variables:
+```yaml
+airflow:
+  variables:
+    - key: "var_1"
+      value: "${MY_VALUE_1}"
+    - key: "var_2"
+      value: "${MY_VALUE_2}"
+
+  ## bash-like templates to be used in `airflow.variables`
+  variablesTemplates:
+    MY_VALUE_1:
+      kind: configmap
+      name: my-configmap
+      key: value1
+    MY_VALUE_2:
+      kind: secret
+      name: my-secret
+      key: value2
+
+  ## if we create a Deployment to perpetually sync `airflow.variables`
+  ##
+  variablesUpdate: false
 ```
 
 <hr>
@@ -627,24 +711,20 @@ airflow:
 <summary>Expand</summary>
 <hr>
 
-> 🟨 __Note__ 🟨
->
-> If you need to edit the variables in the web-ui, you should set `airflow.poolsUpdate = false`
-
-You can use the `airflow.pools` value to create airflow [Pools](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#pools) with a post-install/post-update helm hook Job.
+You can use the `airflow.pools` value to create airflow [Pools](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#pools) in a declarative way.
 
 Example values to create pools called `pool_1`, `pool_2`:
 ```yaml
 airflow:
   pools:
     - name: "pool_1"
-      slots: 5
       description: "example pool with 5 slots"
+      slots: 5
     - name: "pool_2"
-      slots: 10
       description: "example pool with 10 slots"
+      slots: 10
 
-  ## if we update pools or just create them the first time (lookup by `name`)
+  ## if we create a Deployment to perpetually sync `airflow.pools`
   poolsUpdate: true
 ```
 
@@ -1083,15 +1163,17 @@ Parameter | Description | Default
 `airflow.executor` | the airflow executor type to use | `CeleryExecutor`
 `airflow.fernetKey` | the fernet key used to encrypt the connections/variables in the database | `7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc=`
 `airflow.config` | environment variables for airflow configs | `{}`
-`airflow.users` | a list of initial users to create | `<see values.yaml>`
-`airflow.usersUpdate` | if we update users or just create them the first time (lookup by `username`) | `true`
-`airflow.users` | a list of initial users to create | `<see values.yaml>`
-`airflow.connections` | a list of initial connections to create | `<see values.yaml>`
-`airflow.connectionsUpdate` | if we update connections or just create them the first time (lookup by `id`) | `true`
-`airflow.variables` | a list of initial variables to create | `<see values.yaml>`
-`airflow.variablesUpdate` | if we update variables or just create them the first time (lookup by `key`) | `true`
-`airflow.pools` | a list of initial pools to create | `<see values.yaml>`
-`airflow.poolsUpdate` | if we update pools or just create them the first time (lookup by `name`) | `true`
+`airflow.users` | a list of users to create | `<see values.yaml>`
+`airflow.usersTemplates` | bash-like templates to be used in `airflow.users` | `<see values.yaml>`
+`airflow.usersUpdate` | if we create a Deployment to perpetually sync `airflow.users` | `true`
+`airflow.connections` | a list airflow connections to create | `<see values.yaml>`
+`airflow.connectionsTemplates` | bash-like templates to be used in `airflow.connections` | `<see values.yaml>`
+`airflow.connectionsUpdate` | if we create a Deployment to perpetually sync `airflow.connections` | `true`
+`airflow.variables` | a list airflow variables to create | `<see values.yaml>`
+`airflow.variablesTemplates` | bash-like templates to be used in `airflow.variables` | `<see values.yaml>`
+`airflow.variablesUpdate` | if we create a Deployment to perpetually sync `airflow.variables` | `true`
+`airflow.pools` | a list airflow pools to create | `<see values.yaml>`
+`airflow.poolsUpdate` | if we create a Deployment to perpetually sync `airflow.pools` | `true`
 `airflow.podAnnotations` | extra annotations for the web/scheduler/worker/flower Pods | `{}`
 `airflow.extraPipPackages` | extra pip packages to install in the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraEnv` | extra environment variables for the web/scheduler/worker/flower Pods | `[]`
@@ -1099,6 +1181,7 @@ Parameter | Description | Default
 `airflow.extraVolumeMounts` | extra VolumeMounts for the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraVolumes` | extra Volumes for the web/scheduler/worker/flower Pods | `[]`
 `airflow.kubernetesPodTemplate.*` | configs to generate the AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE | `<see values.yaml>`
+`airflow.sync.*` | configs for the `airflow.{connections, pools, users, variables}` Deployments/Jobs | `<see values.yaml>`
 
 <hr>
 </details>
