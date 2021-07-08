@@ -6,7 +6,7 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 ## [Unreleased]
 
 ### Added
-- _see [Unreleased]_
+- Add extraEnvFrom to values.yaml ([#117](https://github.com/airflow-helm/charts/issues/117))
 
 ### Fixed
 - _see [Unreleased]_

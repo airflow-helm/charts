@@ -334,6 +334,11 @@ The list of `envFrom` for web/scheduler/worker/flower Pods
 {{- define "airflow.envFrom" }}
 - secretRef:
     name: "{{ include "airflow.fullname" . }}-config"
+{{- /* user-defined environment variables */ -}}
+{{- if .Values.airflow.extraEnvFrom }}
+{{ toYaml .Values.airflow.extraEnvFrom }}
+{{- end }}
+
 {{- end }}
 
 {{/*
