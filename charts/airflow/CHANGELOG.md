@@ -231,8 +231,9 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 </details>
 
 ### Changed
-- if you were using `dags.persistence.enabled` but not explicitly setting `dags.persistence.existingClaim`, the name of the PVC will change (meaning your dags will disappear)
-  - to fix this, set `dags.persistence.existingClaim` to the value of the previous dags PVC (which will be your Helm RELEASE_NAME)
+- the name of the `dags.persistence` PVC has changed from `HELM_RELEASE` to `HELM_RELEASE-dags`:
+   - __WARNING:__ you must manually migrate your dags to the new PVC if you had `dags.persistence.enabled = true` (but were not explicitly setting `dags.persistence.existingClaim`)
+   - __WARNING:__ be sure to download your dags from the `HELM_RELEASE` volume __BEFORE__ doing the upgrade (as helm may delete the old PVC, during the upgrade)
 
 #### VALUES - Changed Defaults:
 <details>
