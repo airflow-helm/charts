@@ -1095,6 +1095,7 @@ Parameter | Description | Default
 `airflow.podAnnotations` | extra annotations for the web/scheduler/worker/flower Pods | `{}`
 `airflow.extraPipPackages` | extra pip packages to install in the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraEnv` | extra environment variables for the web/scheduler/worker/flower Pods | `[]`
+`airflow.extraEnvFrom` | extra "envfroms" for the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraContainers` | extra containers for the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraVolumeMounts` | extra VolumeMounts for the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraVolumes` | extra Volumes for the web/scheduler/worker/flower Pods | `[]`

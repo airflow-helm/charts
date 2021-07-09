@@ -178,6 +178,13 @@ airflow:
   ##
   extraEnv: []
 
+  ## extra "envfroms" for the web/scheduler/worker/flower Pods
+  ##
+  ## SPEC - EnvFromSource:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#envfromsource-v1-core
+  ##
+  extraEnvFrom: []
+
   ## extra containers for the web/scheduler/worker/flower Pods
   ##
   ## SPEC - Container:
