@@ -8,15 +8,62 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 ### Added
 - _see [Unreleased]_
 
-### Fixed
+### Changed
 - _see [Unreleased]_
 
 ### Removed
 - _see [Unreleased]_
 
-### Docs
+### Fixed
 - _see [Unreleased]_
 
+
+## [8.4.0] - 2021-07-09
+
+### Added
+- allow referencing Secrets/ConfigMaps in `airflow.{users,connections,pools,variables}` ([#281](https://github.com/airflow-helm/charts/pull/281))
+  - __WARNING:__ the meaning of `airflow.{usersUpdate,connectionsUpdate,poolsUpdate,variablesUpdate}` have changed, 
+      they now configure if a Deployment is created to perpetually sync `airflow.{users,connections,pools,variables}`, 
+      or if a single Job is created on each `helm upgrade ...`
+  - __Docs:__
+    - [How to create airflow users?](https://github.com/airflow-helm/charts/tree/main/charts/airflow#how-to-create-airflow-users)
+    - [How to create airflow connections?](https://github.com/airflow-helm/charts/tree/main/charts/airflow#how-to-create-airflow-connections)
+    - [How to create airflow variables?](https://github.com/airflow-helm/charts/tree/main/charts/airflow#how-to-create-airflow-variables)
+    - [How to create airflow pools?](https://github.com/airflow-helm/charts/tree/main/charts/airflow#how-to-create-airflow-pools)
+  - __New Values:__
+    - `airflow.usersTemplates`
+    - `airflow.connectionsTemplates`
+    - `airflow.variablesTemplates`
+    - `airflow.sync`:
+      - `airflow.sync.resources`
+      - `airflow.sync.nodeSelector`
+      - `airflow.sync.affinity`
+      - `airflow.sync.tolerations`
+      - `airflow.sync.securityContext`
+      - `airflow.sync.podLabels`
+      - `airflow.sync.annotations`
+      - `airflow.sync.podAnnotations`
+      - `airflow.sync.safeToEvict`
+- removed the need for `helmWait` value ([#266](https://github.com/airflow-helm/charts/pull/266))
+  - __NOTE__: this is great for users of the `--wait` flag with `helm install ...` (which is common in tools like [argo-cd](https://github.com/argoproj/argo-cd/))
+
+### Changed
+- the default `airflow.image` is now `apache/airflow:2.1.1-python3.8` ([#286](https://github.com/airflow-helm/charts/issues/286))
+  - __NOTE:__ this does not affect support for older versions, see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
+- the `Chart.yaml` now explicitly specifies `apiVersion=v2` (requiring helm 3) ([#278](https://github.com/airflow-helm/charts/issues/278))
+- the `requirements.yaml` file was removed in preference of the `v2` dependencies method (specifying in `Chart.yaml`) ([#278](https://github.com/airflow-helm/charts/issues/278))
+- git-sync containers are now deployed in webserver, regardless of `airflow.legacyCommands` ([#288](https://github.com/airflow-helm/charts/pull/288))
+  - __NOTE:__ this allows users who store airflow plugins in their git repo to see them in the webserver
+- `wait-for-db-migrations` init-containers now work properly when `airflow.legacyCommands=true` ([#271](https://github.com/airflow-helm/charts/pull/271))
+  - __NOTE:__ this is important for airflow `1.10.X`, as previously Pods would not actually wait, and so would CrashLoopBackoff until the `upgrade-db` Job had finished
+- improve validation of `{logs,dags}.persistence.accessMode` ([#269](https://github.com/airflow-helm/charts/pull/269))
+
+### Fixed
+- include volumeMounts in init-containers ([#255](https://github.com/airflow-helm/charts/pull/255))
+- add `release` to worker Service selector ([#267](https://github.com/airflow-helm/charts/pull/267))
+- mount `dags-data` with `readOnly=true` if `accessMode=ReadOnlyMany` ([#268](https://github.com/airflow-helm/charts/pull/268))
+- only validate `ingress.{web,flower}.path` if `ingress.enabled=true` ([#270](https://github.com/airflow-helm/charts/pull/270))
+- multiple Schedulers could run if `legacyCommands=true` (due to rollingUpdate) ([#272](https://github.com/airflow-helm/charts/pull/272))
 
 ## [8.3.2] - 2021-06-30
 ### Docs
@@ -513,6 +560,7 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 > https://github.com/helm/charts/tree/master/stable/airflow
 
 [Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.3.2...HEAD
+[8.4.0]: https://github.com/airflow-helm/charts/compare/airflow-8.3.2...airflow-8.4.0
 [8.3.2]: https://github.com/airflow-helm/charts/compare/airflow-8.3.1...airflow-8.3.2
 [8.3.1]: https://github.com/airflow-helm/charts/compare/airflow-8.3.0...airflow-8.3.1
 [8.3.0]: https://github.com/airflow-helm/charts/compare/airflow-8.2.0...airflow-8.3.0
