@@ -1,0 +1,105 @@
+{{- if and (.Values.airflow.pools) (.Values.airflow.poolsUpdate) }}
+{{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values) }}
+{{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "airflow.fullname" . }}-sync-pools
+  labels:
+    app: {{ include "airflow.labels.app" . }}
+    component: sync-pools
+    chart: {{ include "airflow.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  {{- if .Values.airflow.sync.annotations }}
+  annotations:
+    {{- toYaml .Values.airflow.sync.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: 1
+  strategy:
+    ## only 1 replica should run at a time
+    type: Recreate
+  selector:
+    matchLabels:
+      app: {{ include "airflow.labels.app" . }}
+      component: sync-pools
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret-config: {{ include (print $.Template.BasePath "/config/secret-config.yaml") . | sha256sum }}
+        checksum/sync-pools-script: {{ include "airflow.snyc.sync_pools.py" . | sha256sum }}
+        {{- if .Values.airflow.podAnnotations }}
+        {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
+        {{- end }}
+        {{- if .Values.airflow.sync.podAnnotations }}
+        {{- toYaml .Values.airflow.sync.podAnnotations | nindent 8 }}
+        {{- end }}
+        {{- if .Values.airflow.sync.safeToEvict }}
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        {{- end }}
+      labels:
+        app: {{ include "airflow.labels.app" . }}
+        component: sync-pools
+        release: {{ .Release.Name }}
+        {{- if .Values.airflow.sync.podLabels }}
+        {{- toYaml .Values.airflow.sync.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- if .Values.airflow.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.airflow.image.pullSecret }}
+      {{- end }}
+      {{- if .Values.airflow.sync.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.airflow.sync.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.airflow.sync.affinity }}
+      affinity:
+        {{- toYaml .Values.airflow.sync.affinity | nindent 8 }}
+      {{- end }}
+      {{- if .Values.airflow.sync.tolerations }}
+      tolerations:
+        {{- toYaml .Values.airflow.sync.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.airflow.sync.securityContext }}
+      securityContext:
+        {{- toYaml .Values.airflow.sync.securityContext | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "airflow.serviceAccountName" . }}
+      initContainers:
+        {{- if .Values.dags.gitSync.enabled }}
+        {{- /* we include git-sync so `check_db` & `wait_for_db_migrations` have access to any plugins stored there (note, `sync_one_time=true`) */ -}}
+        {{- include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") | indent 8 }}
+        {{- end }}
+        {{- include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
+        {{- include "airflow.init_container.wait_for_db_migrations" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
+      containers:
+        - name: sync-airflow-pools
+          {{- include "airflow.image" . | indent 10 }}
+          resources:
+            {{- toYaml .Values.airflow.sync.resources | nindent 12 }}
+          envFrom:
+            {{- include "airflow.envFrom" . | indent 12 }}
+          env:
+            {{- include "airflow.env" . | indent 12 }}
+          command:
+            - "/usr/bin/dumb-init"
+            - "--"
+          args:
+            - "python"
+            - "-u"
+            - "/mnt/scripts/sync_pools.py"
+          volumeMounts:
+            {{- $volumeMounts | indent 12 }}
+            - name: scripts
+              mountPath: /mnt/scripts
+              readOnly: true
+      volumes:
+        {{- $volumes | indent 8 }}
+        - name: scripts
+          secret:
+            secretName: {{ include "airflow.fullname" . }}-sync-pools
+{{- end }}
