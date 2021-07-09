@@ -1,17 +1,22 @@
-# Airflow Helm Chart (Community) [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/airflow-helm)](https://artifacthub.io/packages/search?repo=airflow-helm)
+# Airflow Helm Chart (User Community)
 
-This chart provides a standard way to deploy [Apache Airflow](https://airflow.apache.org/) on your Kubernetes cluster, and is used by many thousands of companies for their production deployments of Airflow.
+[![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/airflow-helm)](https://artifacthub.io/packages/search?repo=airflow-helm)
+
+This chart provides a standard way to deploy [Apache Airflow](https://airflow.apache.org/) on your Kubernetes cluster,
+and is used by thousands of companies for their production deployments of Airflow.
 
 > 🟦 __Discussion__ 🟦
-> 
-> This `community` chart is an alternative to the `official` chart found in the `apache/airflow` repo.<br>
+>
+> The `user community` chart is an alternative to the `official` chart found in the `apache/airflow` repo.<br>
 > There are differences between the charts, so you should evaluate which is better for your organisation.
-> 
-> The goals of the `community` chart are:<br>
-> (1) be easy to use & configure<br>
-> (2) provide long-term support for older airflow versions<br>
-> (3) automatically detect bad configs - and fail the install<br>
-> (4) have useful documentation - written by people who actually use airflow in production
+>
+> The `user community` chart has existed since 2018 and was previously called `stable/airflow` on the official [helm/charts](https://github.com/helm/charts/tree/master/stable/airflow) repo.
+>
+> The goals of the `user community` chart are:<br>
+> (1) be easy to configure<br>
+> (2) support older airflow versions<br>
+> (3) provide great documentation<br>
+> (4) automatically detect bad configs<br>
 
 ## Quickstart Guide
 
@@ -19,8 +24,8 @@ These steps will allow you to quickly install Apache Airflow on your Kubernetes 
 
 ### 1. Install the Chart
 
-> 🟨 __Note__ 🟨 
-> 
+> 🟨 __Note__ 🟨
+>
 > In production, we encourage using a tool like [ArgoCD](https://argoproj.github.io/argo-cd/), rather than running `helm install` manually
 
 ```sh
@@ -65,23 +70,25 @@ The [CHANGELOG.md](CHANGELOG.md) is found at the root of this chart folder.
 
 ### Airflow Version Support
 
+See [the guide here](#how-to-use-a-specific-version-of-airflow) on how to explicitly set your airflow version.
+
 . | `1.10.X`  | `2.0.X` | `2.1.X`
 --- | --- | --- | ---
 chart - `7.X.X` | ✅ | ❌ | ❌
 chart - `8.X.X` | ✅ <sub>[1]</sub> | ✅ | ✅
 
-<sub>[0] [see here](#how-to-use-a-specific-version-of-airflow) for a guide on how to set your airflow version<br></sub>
 <sub>[1] you must set `airflow.legacyCommands = true` to use airflow `1.10.X` with chart `8.X.X`
 
 ### Airflow Executor Support
 
+Set your airflow executor-type using the `airflow.executor` value.
+
 . | `CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor`
 --- | --- | --- | --- 
-chart - `7.X.X` | ✅ | ✅ | ❌
-chart - `8.X.X` | ✅ | ✅ <sub>[1]</sub> | ✅ <sub>[1]</sub>
+chart - `7.X.X` | ✅ | ✅ <sub>[1]</sub> | ❌
+chart - `8.X.X` | ✅ | ✅ | ✅
 
-<sub>[0] you can set the executor using the `airflow.executor` value<br></sub>
-<sub>[1] we encourage you to use airflow `2.X.X` with chart `8.X.X`, and make use of the new `airflow.kubernetesPodTemplate.*` values</sub>
+<sub>[1] we encourage you to upgrade the chart to `8.X.X`, so you can use the `airflow.kubernetesPodTemplate` values (which require airflow `2.X.X`)</sub>
 
 ### Examples
 
