@@ -117,11 +117,15 @@ EXAMPLE USAGE: {{ include "airflow.init_container.wait_for_db_migrations" (dict 
 
 {{/*
 Define an init-container which installs a list of pip packages
-EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) }}
+EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "volumeMounts" $volumeMounts) }}
 */}}
 {{- define "airflow.init_container.install_pip_packages" }}
 - name: install-pip-packages
   {{- include "airflow.image" . | indent 2 }}
+  envFrom:
+    {{- include "airflow.envFrom" . | indent 4 }}
+  env:
+    {{- include "airflow.env" . | indent 4 }}
   command:
     - "/usr/bin/dumb-init"
     - "--"
@@ -135,6 +139,16 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "R
   volumeMounts:
     - name: home-airflow-local
       mountPath: /opt/home-airflow-local
+
+{{- /* user-defined (global) */ -}}
+{{- if .Values.airflow.extraVolumeMounts }}
+{{ toYaml .Values.airflow.extraVolumeMounts | indent 4 }}
+{{- end }}
+
+{{- /* user-defined */ -}}
+{{- if .extraVolumeMounts }}
+{{ toYaml .extraVolumeMounts | indent 4 }}
+{{- end }}
 {{- end }}
 
 {{/*

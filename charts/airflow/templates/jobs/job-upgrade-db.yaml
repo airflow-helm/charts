@@ -1,4 +1,5 @@
 {{- $extraPipPackages := .Values.airflow.extraPipPackages }}
+{{- $extraVolumeMounts := .Values.web.extraVolumeMounts }}
 {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) }}
 {{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) }}
 apiVersion: batch/v1
@@ -33,7 +34,7 @@ spec:
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       initContainers:
         {{- if $extraPipPackages }}
-        {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
+        {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) | indent 8 }}
         {{- end }}
         {{- include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
         {{- if .Values.dags.gitSync.enabled }}

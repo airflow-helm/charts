@@ -326,6 +326,48 @@ worker:
     - "torch~=1.8.0"
 ```
 
+> __You can pip resolve dependencies from a private pip `--index-url` by following these steps:__
+1. Create a `pip-config` Secret that includes your `pip.conf` file:
+
+```yaml
+cat <<EOF | kubectl apply -f -
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pip-config
+type: Opaque
+stringData:
+  pip.conf: |-
+    [global]
+    timeout = 60
+    index-url = https://<username>:<password>@example.com/repository/ni-pypi/simple
+    trusted-host = example.com
+EOF
+```
+
+2. Mount the `pip-config` Secret on all pods under `/etc/pip/pip.conf`:
+```yaml
+airflow:
+  extraVolumeMounts:
+    - name: pip-config
+      mountPath: /etc/pip
+      subPath: pip.conf
+      readOnly: true
+  extraVolumes:
+    - name: pip-config
+      secret:
+        secretName: pip-config
+        defaultMode: 0644
+```
+
+3. Define the location of the `pip.conf` file using the `PIP_CONFIG_FILE` environment variable:
+```yaml
+airflow:
+  config:
+    PIP_CONFIG_FILE: "/etc/pip/pip.conf"
+```
+
 <h3>Option 2 - embedded into container image (recommended)</h3>
 
 This chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images), you can extend the airflow container image with your pip packages.
