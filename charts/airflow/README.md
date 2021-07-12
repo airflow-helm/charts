@@ -1,6 +1,6 @@
-# Airflow Helm Chart (`User Community` version)
+# Airflow Helm Chart
 
-(Formerly known as, `stable/airflow`)
+__`User Community` version, previously known as `stable/airflow`__
 
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/airflow-helm)](https://artifacthub.io/packages/helm/airflow-helm/airflow)
 
