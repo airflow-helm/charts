@@ -103,8 +103,8 @@ We recommend you review the following questions from the FAQ:
 
 - [How to use a specific version of airflow?](#how-to-use-a-specific-version-of-airflow)
 - [How to set airflow configs?](#how-to-set-airflow-configs)
-- [How to create airflow users?](#how-to-create-airflow-users)
-- [How to authenticate airflow users with LDAP/OAUTH?](#how-to-authenticate-airflow-users-with-ldapoauth)
+- [How to create airflow users?](#how-to-create-airflow-users) or [How to authenticate airflow users with LDAP/OAUTH?](#how-to-authenticate-airflow-users-with-ldapoauth)
+- [How to create airflow connections?](#how-to-create-airflow-connections)
 - [How to use an external database?](#how-to-use-an-external-database)
 - [How to persist airflow logs?](#how-to-persist-airflow-logs)
 - [How to setup an Ingres?](#how-to-set-up-an-ingress)
@@ -354,6 +354,8 @@ airflow:
 <summary>Expand</summary>
 <hr>
 
+<h3>Option 1 - use plain-text</h3>
+
 You can use the `airflow.users` value to create airflow users in a declarative way.
 
 Example values to create `admin` (with "Admin" RBAC role) and `user` (with "User" RBAC role):
@@ -377,13 +379,15 @@ airflow:
   usersUpdate: true
 ```
 
-Additionally, you can use `airflow.usersTemplates` to extract templates from keys in Secrets or Configmaps.
+<h3>Option 2 - use templates from Secrets/ConfigMaps</h3>
 
 > 🟨 __Note__ 🟨
 >
 > If `airflow.usersUpdate = true`, the users which use `airflow.usersTemplates` will be updated in real-time, allowing tools like [external-secrets](https://github.com/external-secrets/kubernetes-external-secrets) to be used.
 
-Example values to use templates from `Secret/my-secret` and `ConfigMap/my-configmap` in parts of the `admin` user.
+You can use `airflow.usersTemplates` to extract string templates from keys in Secrets or Configmaps.
+
+Example values to use templates from `Secret/my-secret` and `ConfigMap/my-configmap` in parts of the `admin` user:
 ```yaml
 airflow:
   users:
@@ -576,6 +580,8 @@ airflow:
 <summary>Expand</summary>
 <hr>
 
+<h3>Option 1 - use plain-text</h3>
+
 You can use the `airflow.connections` value to create airflow [Connections](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#connections) in a declarative way.
 
 Example values to create connections called `my_aws`, `my_gcp`, `my_postgres`, and `my_ssh`:
@@ -623,11 +629,13 @@ airflow:
   connectionsUpdate: true
 ```
 
-Additionally, you can use `airflow.connectionsTemplates` to extract templates from keys in Secrets or Configmaps.
+<h3>Option 2 - use templates from Secrets/ConfigMaps</h3>
 
 > 🟨 __Note__ 🟨
 >
 > If `airflow.connectionsUpdate = true`, the connections which use `airflow.connectionsTemplates` will be updated in real-time, allowing tools like [external-secrets](https://github.com/external-secrets/kubernetes-external-secrets) to be used.
+
+You can use `airflow.connectionsTemplates` to extract string templates from keys in Secrets or Configmaps.
 
 Example values to use templates from `Secret/my-secret` and `ConfigMap/my-configmap` in parts of the `my_aws` connection:
 ```yaml
@@ -664,6 +672,8 @@ airflow:
 <summary>Expand</summary>
 <hr>
 
+<h3>Option 1 - use plain-text</h3>
+
 You can use the `airflow.variables` value to create airflow [Variables](https://airflow.apache.org/docs/apache-airflow/stable/concepts.html#variables) in a declarative way.
 
 Example values to create variables called `var_1`, `var_2`:
@@ -679,11 +689,13 @@ airflow:
   variablesUpdate: true
 ```
 
-Additionally, you can use `airflow.variablesTemplates` to extract templates from keys in Secrets or Configmaps.
+<h3>Option 2 - use templates from Secrets/Configmaps</h3>
 
 > 🟨 __Note__ 🟨
 >
 > If `airflow.variablesTemplates = true`, the connections which use `airflow.variablesTemplates` will be updated in real-time, allowing tools like [external-secrets](https://github.com/external-secrets/kubernetes-external-secrets) to be used.
+
+You can use `airflow.variablesTemplates` to extract string templates from keys in Secrets or Configmaps.
 
 Example values to use templates from `Secret/my-secret` and `ConfigMap/my-configmap` in the `var_1` and `var_2` variables:
 ```yaml
