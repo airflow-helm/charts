@@ -1,7 +1,7 @@
 apiVersion: v2
 description: the community Apache Airflow Helm Chart - used to deploy Apache Airflow on Kubernetes
 name: airflow
-version: 8.4.0
+version: 8.4.1
 appVersion: 2.1.1
 icon: https://airflow.apache.org/_images/pin_large.png
 home: https://airflow.apache.org/
