@@ -818,6 +818,37 @@ dags:
 
 Example values to create a PVC with the default `storage` class, and `1Gb` initial `size`:
 ```yaml
+airflow:
+  kubernetesPodTemplate:
+    # chown mounted volumes to gid=65534, and give processes gid=65534
+    securityContext:
+      fsGroup: 65534
+
+  sync:
+    # chown mounted volumes to gid=65534, and give processes gid=65534
+    securityContext:
+      fsGroup: 65534
+
+scheduler:
+  # chown mounted volumes to gid=65534, and give processes gid=65534
+  securityContext:
+    fsGroup: 65534
+
+web:
+  # chown mounted volumes to gid=65534, and give processes gid=65534
+  securityContext:
+    fsGroup: 65534
+
+workers:
+  # chown mounted volumes to gid=65534, and give processes gid=65534
+  securityContext:
+    fsGroup: 65534
+
+flower:
+  # chown mounted volumes to gid=65534, and give processes gid=65534
+  securityContext:
+    fsGroup: 65534
+
 logs:
   persistence:
     enabled: true
@@ -870,15 +901,33 @@ airflow:
     AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "s3://<<MY-BUCKET-NAME>>/airflow/logs"
     AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "aws_default"
 
+  kubernetesPodTemplate:
+    # chown mounted volumes to gid=65534, and give processes gid=65534
+    securityContext:
+      fsGroup: 65534
+
+  sync:
+    # chown mounted volumes to gid=65534, and give processes gid=65534
+    securityContext:
+      fsGroup: 65534
+
 scheduler:
+  # chown mounted volumes to gid=65534, and give processes gid=65534
   securityContext:
     fsGroup: 65534
 
 web:
+  # chown mounted volumes to gid=65534, and give processes gid=65534
   securityContext:
     fsGroup: 65534
 
 workers:
+  # chown mounted volumes to gid=65534, and give processes gid=65534
+  securityContext:
+    fsGroup: 65534
+
+flower:
+  # chown mounted volumes to gid=65534, and give processes gid=65534
   securityContext:
     fsGroup: 65534
 
