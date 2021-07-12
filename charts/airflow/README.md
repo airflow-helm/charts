@@ -88,7 +88,7 @@ Set your airflow executor-type using the `airflow.executor` value.
 chart - `7.X.X` | ✅ | ✅ <sub>[1]</sub> | ❌
 chart - `8.X.X` | ✅ | ✅ | ✅
 
-<sub>[1] we encourage you to upgrade the chart to `8.X.X`, so you can use the `airflow.kubernetesPodTemplate` values (which require airflow `2.X.X`)</sub>
+<sub>[1] we encourage you to upgrade the chart to `8.X.X`, so you can use the `airflow.kubernetesPodTemplate` values (which require airflow `1.10.11+`, as they set [AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE](https://airflow.apache.org/docs/apache-airflow/2.1.0/configurations-ref.html#pod-template-file)) </sub>
 
 ### Examples
 
