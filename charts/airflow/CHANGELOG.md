@@ -18,6 +18,16 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 - _see [Unreleased]_
 
 
+## [8.4.1] - 2021-07-12
+
+> 🟨 __NOTE__ 🟨
+>
+> Upgrade to this patch if you use a tool like [argo-cd](https://github.com/argoproj/argo-cd/) which runs `helm template ...` rather than `helm install ...`
+
+### Fixed
+- remove Job dependency on `.Release.Revision` to prevent immutability errors ([#298](https://github.com/airflow-helm/charts/pull/298))
+  - __NOTE:__ this is important for tools like argo-cd which never run `helm install ...`, causing `.Release.Revision` to never be incremented
+
 ## [8.4.0] - 2021-07-09
 
 ### Added
@@ -559,7 +569,8 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 > To read more about versions `7.0.0` and before, please see the legacy repo:<br>
 > https://github.com/helm/charts/tree/master/stable/airflow
 
-[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.3.2...HEAD
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.4.1...HEAD
+[8.4.1]: https://github.com/airflow-helm/charts/compare/airflow-8.4.0...airflow-8.4.1
 [8.4.0]: https://github.com/airflow-helm/charts/compare/airflow-8.3.2...airflow-8.4.0
 [8.3.2]: https://github.com/airflow-helm/charts/compare/airflow-8.3.1...airflow-8.3.2
 [8.3.1]: https://github.com/airflow-helm/charts/compare/airflow-8.3.0...airflow-8.3.1
