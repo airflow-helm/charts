@@ -1,6 +1,8 @@
-# Airflow Helm Chart (User Community)
+# Airflow Helm Chart (`User Community`, formerly `stable/airflow`)
 
-[![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/airflow-helm)](https://artifacthub.io/packages/search?repo=airflow-helm)
+[![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/airflow-helm)](https://artifacthub.io/packages/helm/airflow-helm/airflow)
+
+---
 
 This chart provides a standard way to deploy [Apache Airflow](https://airflow.apache.org/) on your Kubernetes cluster,
 and is used by thousands of companies for their production deployments of Airflow.
@@ -427,7 +429,7 @@ airflow:
 > 
 > The version of Flask-Builder installed might not be the latest, see [How to install extra pip packages?](#how-to-install-extra-pip-packages)
 
-You can use the `web.webserverConfig.*` values to adjust the Flask-Appbuilder `webserver_config.py` file, you can read Flask-builder's security docs [here](https://flask-appbuilder.readthedocs.io/en/latest/security.html).
+You can use the `web.webserverConfig.*` values to adjust the Flask-Appbuilder `webserver_config.py` file, read [Flask-builder's security docs](https://flask-appbuilder.readthedocs.io/en/latest/security.html) for further reference.
 
 Example values to integrate with a typical Microsoft Active Directory using `AUTH_LDAP`:
 ```yaml
