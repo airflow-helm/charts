@@ -187,7 +187,7 @@ airflow:
 <summary>Expand</summary>
 <hr>
 
-<h3>Option 1a - SSH git-sync sidecar (recommended)</h3>
+<h3>Option 1a - git-sync sidecar (SSH auth)</h3>
 
 This method uses an SSH git-sync sidecar to sync your git repo into the dag folder every `dags.gitSync.syncWait` seconds.
 
@@ -220,7 +220,7 @@ kubectl create secret generic \
   --namespace my-airflow-namespace
 ```
 
-<h3>Option 1b - HTTP git-sync sidecar</h3>
+<h3>Option 1b - git-sync sidecar (HTTP auth)</h3>
 
 This method uses an HTTP git sidecar to sync your git repo into the dag folder every `dags.gitSync.syncWait` seconds.
 
@@ -251,17 +251,13 @@ kubectl create secret generic \
   --namespace my-airflow-namespace
 ```
 
-<h3>Option 2 - shared volume</h3>
-
-> 🟨 __Note__ 🟨 
-> 
-> Your chosen `persistence.storageClass` needs to support `ReadOnlyMany` or `ReadWriteMany` for `persistence.accessMode`<br>
+<h3>Option 2a - PersistentVolumeClaim (chart-managed)</h3>
 
 With this method, you store your DAGs in a Kubernetes PersistentVolume, which is mounted to all scheduler/web/worker Pods.
 You must configure some external system to ensure this volume has your latest DAGs.
 For example, you could use your CI/CD pipeline system to preform a sync as changes are pushed to your DAGs git repo.
 
-Example values to use a `storageClass` called `default` with `1Gi` initial `size`:
+Example values to create a PVC with the `storageClass` called `default` and 1Gi initial `size`:
 ```yaml
 dags:
   persistence:
@@ -269,6 +265,21 @@ dags:
     storageClass: default
     accessMode: ReadOnlyMany
     size: 1Gi
+```
+
+<h3>Option 2b - PersistentVolumeClaim (existing / user-managed)</h3>
+
+> 🟨 __Note__ 🟨
+>
+> Your `dags.persistence.existingClaim` PVC must support `ReadOnlyMany` or `ReadWriteMany` for `accessMode`
+
+Example values to use an existing PVC called `my-dags-pvc`:
+```yaml
+dags:
+  persistence:
+    enabled: true
+    existingClaim: my-dags-pvc
+    accessMode: ReadOnlyMany
 ```
 
 <h3>Option 3 - embedded into container image</h3>
@@ -830,10 +841,17 @@ dags:
 > For production, you should persist logs in a production deployment using one of these methods.<br>
 > By default, logs are stored within the container's filesystem, therefore any restart of the pod will wipe your DAG logs.
 
-<h3>Option 1 - Kubernetes PVC</h3>
+<h3>Option 1a - PersistentVolumeClaim (chart-managed)</h3>
 
-Example values to create a PVC with the default `storage` class, and `1Gb` initial `size`:
+Example values to create a PVC with the cluster-default `storageClass` and 1Gi initial `size`:
 ```yaml
+logs:
+  persistence:
+    enabled: true
+    storageClass: "" ## empty string means cluster-default
+    accessMode: ReadWriteMany
+    size: 1Gi
+
 airflow:
   kubernetesPodTemplate:
     # chown mounted volumes to gid=65534, and give processes gid=65534
@@ -864,13 +882,53 @@ flower:
   # chown mounted volumes to gid=65534, and give processes gid=65534
   securityContext:
     fsGroup: 65534
+```
 
+<h3>Option 1b - PersistentVolumeClaim (existing / user-managed)</h3>
+
+> 🟨 __Note__ 🟨
+>
+> Your `logs.persistence.existingClaim` PVC must support `ReadWriteMany` for `accessMode`
+
+Example values to use an existing PVC called `my-logs-pvc`:
+
+```yaml
 logs:
   persistence:
     enabled: true
-    storageClass: "" ## WARNING: your StorageClass MUST SUPPORT `ReadWriteMany`
+    existingClaim: my-logs-pvc
     accessMode: ReadWriteMany
-    size: 1Gi
+
+airflow:
+  kubernetesPodTemplate:
+    # chown mounted volumes to gid=65534, and give processes gid=65534
+    securityContext:
+      fsGroup: 65534
+
+  sync:
+    # chown mounted volumes to gid=65534, and give processes gid=65534
+    securityContext:
+      fsGroup: 65534
+
+scheduler:
+  # chown mounted volumes to gid=65534, and give processes gid=65534
+  securityContext:
+    fsGroup: 65534
+
+web:
+  # chown mounted volumes to gid=65534, and give processes gid=65534
+  securityContext:
+    fsGroup: 65534
+
+workers:
+  # chown mounted volumes to gid=65534, and give processes gid=65534
+  securityContext:
+    fsGroup: 65534
+
+flower:
+  # chown mounted volumes to gid=65534, and give processes gid=65534
+  securityContext:
+    fsGroup: 65534
 ```
 
 <h3>Option 2 - Remote Bucket (recommended)</h3>
