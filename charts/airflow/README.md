@@ -341,6 +341,46 @@ worker:
     - "torch~=1.8.0"
 ```
 
+<h3>Option 1a - Private PyPI Cloud Server</h3>
+
+You can use in a private PyPI Cloud server. You can achieve it by the following steps:
+1. Create a pip-conf secret in the k8s cluster:
+```yaml
+cat <<EOF | kubectl apply -f -
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pip-conf
+  labels:
+    app: nexus-password
+data:
+  text: <authentication-credentials>
+type: Opaque
+EOF
+```
+
+2. Mount the pip-conf secret it on all pods:
+```yaml
+airflow:
+  extraVolumeMounts:
+    - mountPath: /etc/pip-conf
+      name: pip-conf-volume
+      readOnly: true
+  extraVolumes:
+    - name: pip-conf-volume
+      secret:
+        defaultMode: 420
+        secretName: pip-conf
+```
+
+3. Define the location of the pip-conf file in the environment variables of all pods:
+```yaml
+airflow:
+  config:
+    PIP_CONFIG_FILE: "/etc/pip-conf/text"
+```
+
 <h3>Option 2 - embedded into container image (recommended)</h3>
 
 This chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images), you can extend the airflow container image with your pip packages.
