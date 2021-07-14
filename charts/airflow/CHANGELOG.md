@@ -18,6 +18,12 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 - _see [Unreleased]_
 
 
+## [8.4.2] - 2021-07-14
+
+### Fixed
+- ensure git-sync is the first init-container ([#276](https://github.com/airflow-helm/charts/issues/276))
+
+
 ## [8.4.1] - 2021-07-12
 
 > 🟨 __NOTE__ 🟨
@@ -569,7 +575,8 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 > To read more about versions `7.0.0` and before, please see the legacy repo:<br>
 > https://github.com/helm/charts/tree/master/stable/airflow
 
-[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.4.1...HEAD
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.4.2...HEAD
+[8.4.2]: https://github.com/airflow-helm/charts/compare/airflow-8.4.1...airflow-8.4.2
 [8.4.1]: https://github.com/airflow-helm/charts/compare/airflow-8.4.0...airflow-8.4.1
 [8.4.0]: https://github.com/airflow-helm/charts/compare/airflow-8.3.2...airflow-8.4.0
 [8.3.2]: https://github.com/airflow-helm/charts/compare/airflow-8.3.1...airflow-8.3.2
