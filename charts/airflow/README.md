@@ -1277,6 +1277,63 @@ extraManifests:
 <hr>
 </details>
 
+### How to use `KubernetesExecutor`?
+<details>
+<summary>Expand</summary>
+<hr>
+The KubernetesExecutor is significantly different from the previously supported CeleryExecutor in that it runs all tasks using a KubernetesPods
+via the Kubernetes Control plane instead of using wrapped Python code in Worker pods. For details please see the official airflow documentation (here)[https://airflow.apache.org/docs/apache-airflow/stable/executor/kubernetes.html]. Of particular importance are the mounted **pod_template_file** variables. A default one is included
+in this chart, see [here](https://github.com/airflow-helm/charts/blob/main/charts/airflow/files/pod_template.kubernetes-helm-yaml) for content.
+
+There will be a working example made available in the repository. Meanwhile experiment with these values.
+
+```
+airflow:
+  executor: KubernetesExecutor
+
+  kubernetesPodTemplate:
+    ...
+
+workers:
+  enabled: false
+
+flower:
+  enabled: false
+
+redis:
+  enabled: false
+
+```
+</hr>
+</details>
+
+### How to use `CeleryKubernetesExecutor`?
+<details>
+<summary>Expand</summary>
+<hr>
+The `CeleryKubernetesExecutor` uses Kubernetes to execute all tasks just like the `KubernetesExecutor` as well as supporting the more mainstream `CeleryExecutor`. Please
+see details [here](https://airflow.apache.org/docs/apache-airflow/stable/executor/celery_kubernetes.html) in the main Airflow documentation.
+
+```
+airflow:
+  executor: CeleryKubernetesExecutor
+
+  kubernetesPodTemplate:
+    ...
+
+workers:
+  enabled: true
+
+flower:
+  enabled: true
+
+redis:
+  enabled: true
+```
+
+</hr>
+</details>
+
 ## Values Reference
 
 > The list of values provided by this chart (see the [values.yaml](values.yaml) file for more details):
