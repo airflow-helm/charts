@@ -556,6 +556,7 @@ web:
   ##
   ## NOTE:
   ## - if you set this >1 we recommend defining a `web.podDisruptionBudget`
+  ## - if this is greater than one, then `AIRFLOW__WEBSERVER__SECRET_KEY` is required to be configured
   ##
   replicas: 1
 
