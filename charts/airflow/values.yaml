@@ -554,6 +554,10 @@ web:
 
   ## the number of web Pods to run
   ##
+  ## WARNING:
+  ##  - if set greater than `1`, you MUST set `AIRFLOW__WEBSERVER__SECRET_KEY`,
+  ##    this prevents "CSRF session token is missing" errors when users are served by multiple web pods
+  ##
   ## NOTE:
   ## - if you set this >1 we recommend defining a `web.podDisruptionBudget`
   ##

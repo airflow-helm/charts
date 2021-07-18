@@ -61,6 +61,21 @@
   {{ required "Don't define `airflow.config.AIRFLOW__CORE__SQL_ALCHEMY_CONN`, it will be automatically set by the chart!" nil }}
 {{- end }}
 
+{{/* Checks for `web` */}}
+{{- if gt .Values.web.replicas 1. }}
+  {{- if not .Values.airflow.config.AIRFLOW__WEBSERVER__SECRET_KEY }}
+    {{- $foundKey := false }}
+    {{- range $env := .Values.airflow.extraEnv }}
+      {{- if eq $env.name "AIRFLOW__WEBSERVER__SECRET_KEY" }}
+        {{- $foundKey = true }}
+      {{- end }}
+    {{- end }}
+    {{- if not $foundKey }}
+      {{ required "If `web.replicas > 1`, you must define `AIRFLOW__WEBSERVER__SECRET_KEY`!" nil }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
 {{/* Checks for `logs.persistence` */}}
 {{- if .Values.logs.persistence.enabled }}
   {{- if not (eq .Values.logs.persistence.accessMode "ReadWriteMany") }}
