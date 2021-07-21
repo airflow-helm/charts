@@ -18,11 +18,12 @@ import sys
 from flask_appbuilder.security.sqla.models import User, Role
 from werkzeug.security import check_password_hash, generate_password_hash
 {{- if .Values.airflow.legacyCommands }}
-from airflow.www_rbac.app import cached_appbuilder
-appbuilder = cached_appbuilder()
+import airflow.www_rbac.app as www_app
+flask_app, flask_appbuilder = www_app.create_app()
 {{- else }}
-from airflow.www.app import cached_app
-appbuilder = cached_app().appbuilder
+import airflow.www.app as www_app
+flask_app = www_app.create_app()
+flask_appbuilder = flask_app.appbuilder
 {{- end }}
 
 
@@ -104,11 +105,11 @@ def find_role(role_name: str) -> Role:
     """
     Get the FAB Role model associated with a `role_name`.
     """
-    found_role = appbuilder.sm.find_role(role_name)
+    found_role = flask_appbuilder.sm.find_role(role_name)
     if found_role:
         return found_role
     else:
-        valid_roles = appbuilder.sm.get_all_roles()
+        valid_roles = flask_appbuilder.sm.get_all_roles()
         logging.error(f"Failed to find role=`{role_name}`, valid roles are: {valid_roles}")
         sys.exit(1)
 
@@ -133,11 +134,11 @@ def sync_user(user_wrapper: UserWrapper) -> None:
     """
     username = user_wrapper.username
     u_new = user_wrapper.as_dict()
-    u_old = appbuilder.sm.find_user(username=username)
+    u_old = flask_appbuilder.sm.find_user(username=username)
 
     if not u_old:
         logging.info(f"User=`{username}` is missing, adding...")
-        if appbuilder.sm.add_user(
+        if flask_appbuilder.sm.add_user(
                 username=u_new["username"],
                 first_name=u_new["first_name"],
                 last_name=u_new["last_name"],
@@ -161,7 +162,7 @@ def sync_user(user_wrapper: UserWrapper) -> None:
             u_old.password = generate_password_hash(u_new["password"])
             # strange check for False is because update_user() returns None for success
             # but in future might return the User model
-            if not (appbuilder.sm.update_user(u_old) is False):
+            if not (flask_appbuilder.sm.update_user(u_old) is False):
                 logging.info(f"User=`{username}` was successfully updated.")
             else:
                 logging.error(f"Failed to update User=`{username}`")
@@ -176,6 +177,9 @@ def sync_all_users(user_wrappers: Dict[str, UserWrapper]) -> None:
     for user_wrapper in user_wrappers.values():
         sync_user(user_wrapper)
     logging.info("END: airflow users sync")
+
+    # ensures than any SQLAlchemy sessions are closed (so we don't hold a connection to the database)
+    flask_app.do_teardown_appcontext()
 
 
 def sync_with_airflow() -> None:
