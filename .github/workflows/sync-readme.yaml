@@ -1,4 +1,4 @@
-name: "Sync README to gh-pages"
+name: "Sync README.md to gh-pages Branch"
 
 on:
   push:
@@ -8,26 +8,29 @@ on:
       - "README.md"
 
 jobs:
-  build:
+  sync-readme:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout (main)
+      - name: Checkout `main` Branch
         uses: actions/checkout@v2
 
-      - name: Copy README.md to temp
+      - name: Copy `README.md` to Runner
         run: |
           cp -f README.md ${{ runner.temp }}/README.md
 
-      - name: Checkout (gh-pages)
+      - name: Checkout `gh-pages` Branch
         uses: actions/checkout@v2
         with:
           ref: gh-pages
 
-      - name: Git Push (gh-pages)
+      - name: Configure Git
         run: |
-          cp -f ${{ runner.temp }}/README.md .
           git config user.name "$GITHUB_ACTOR"
           git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Commit new `README.md` to `gh-pages` Branch
+        run: |
+          cp -f ${{ runner.temp }}/README.md .
           git add README.md
-          git commit --signoff -m "sync README.md from main branch"
+          git commit --signoff -m "chore: sync README.md from main branch"
           git push

@@ -1,11 +1,11 @@
-name: "Release Charts"
+name: "Charts | Release"
 
 on:
   push:
     branches:
       - main
     paths:
-      - charts/*/Chart.yaml
+      - "charts/*/Chart.yaml"
 
 jobs:
   release:
