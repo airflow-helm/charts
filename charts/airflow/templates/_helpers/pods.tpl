@@ -4,6 +4,9 @@ Define the image configs for airflow containers
 {{- define "airflow.image" }}
 image: {{ .Values.airflow.image.repository }}:{{ .Values.airflow.image.tag }}
 imagePullPolicy: {{ .Values.airflow.image.pullPolicy }}
+{{- if .Values.airflow.image.pullSecret }}
+imagePullSecrets: {{ .Values.airflow.image.pullSecret }}
+{{- end }}
 securityContext:
   runAsUser: {{ .Values.airflow.image.uid }}
   runAsGroup: {{ .Values.airflow.image.gid }}
