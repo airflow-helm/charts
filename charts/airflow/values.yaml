@@ -1330,6 +1330,12 @@ rbac:
   ##
   events: true
 
+  ## if the created RBAC role has GET/LIST/WATCH/CREATE/UPDATE/PATCH/DELETE access to Jobs resources
+  ##
+  ## NOTE:
+  ## - this is needed for KubernetesJobOperator() to work correctly.
+  jobs: false
+
 ###################################
 # Kubernetes - Service Account
 ###################################
