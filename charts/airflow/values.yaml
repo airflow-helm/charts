@@ -22,22 +22,22 @@ airflow:
   ## NOTE:
   ## - allowed values: "CeleryExecutor", "CeleryKubernetesExecutor", "KubernetesExecutor"
   ## - if you set KubernetesExecutor or CeleryKubernetesExecutor, we automatically set:
-  ##   - AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF [unused from Airflow 2.0+]
+  ##   - AIRFLOW__KUBERNETES__ENV_FROM_CONFIGMAP_REF      [if `airflow.legacyCommands` is `true`]
   ##   - AIRFLOW__KUBERNETES__NAMESPACE
-  ##   - AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE
+  ##   - AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE           [see `airflow.kubernetesPodTemplate.*`]
   ##   - AIRFLOW__KUBERNETES__WORKER_CONTAINER_REPOSITORY
   ##   - AIRFLOW__KUBERNETES__WORKER_CONTAINER_TAG
-  ##   - AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME [unused from Airflow 2.0+]
+  ##   - AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME [if `airflow.legacyCommands` is `true`]
   ##
   executor: CeleryExecutor
 
-  ## the fernet key used to encrypt the connections/variables in the database
+  ## the fernet encryption key for connections/variables, sets `AIRFLOW__CORE__FERNET_KEY`
   ##
   ## WARNING:
-  ## - you MUST customise this value, otherwise the encryption will be somewhat pointless
-  ## - consider using `airflow.extraEnv` with a pre-created Secret rather than this config
+  ## - you MUST CHANGE THIS to ensure the security of your airflow
+  ## - use `airflow.extraEnv` with a Secret to avoid storing this value in plain-text
   ##
-  ## GENERATE:
+  ## HOW TO GENERATE A CUSTOM VALUE:
   ##   python -c "from cryptography.fernet import Fernet; FERNET_KEY = Fernet.generate_key().decode(); print(FERNET_KEY)"
   ##
   fernetKey: "7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc="

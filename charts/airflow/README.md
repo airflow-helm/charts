@@ -553,28 +553,28 @@ web:
 <hr>
 </details>
 
-### How to set a custom fernet (encryption) key? 
+### How to set a custom fernet encryption key? 
 <details>
 <summary>Expand</summary>
 <hr>
 
-> 🟥 __Warning__ 🟥 
-> 
-> We strongly recommend that you change the default encryption key, otherwise the encryption is somewhat pointless
+<h3>Option 1 - using the value</h3>
 
-<h3>Option 1 - using value</h3>
+> 🟥 __Warning__ 🟥
+>
+> We strongly recommend that you DO NOT USE the default `airflow.fernetKey` in production.
 
-You can customize the fernet encryption key using the `airflow.fernetKey` value, which sets the `AIRFLOW__CORE__FERNET_KEY` environment variable.
+You can set the fernet encryption key using the `airflow.fernetKey` value, which sets the `AIRFLOW__CORE__FERNET_KEY` environment variable.
 
-Example values to define a fernet key in plain-text:
+Example values to define the fernet key with `airflow.fernetKey`:
 ```yaml
 aiflow:
   fernetKey: "7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc="
 ```
 
-<h3>Option 2 - using secret (recommended)</h3>
+<h3>Option 2 - using a secret (recommended)</h3>
 
-You can customize the fernet encryption key by pre-creating a Secret, and specifying it with the `airflow.extraEnv` value.
+You can set the fernet encryption key from a Kubernetes Secret by referencing it with the `airflow.extraEnv` value.
 
 Example values to use the `value` key from the existing Secret `airflow-fernet-key`:
 ```yaml
@@ -1291,7 +1291,7 @@ Parameter | Description | Default
 `airflow.legacyCommands` | if we use legacy 1.10 airflow commands | `false`
 `airflow.image.*` | configs for the airflow container image | `<see values.yaml>`
 `airflow.executor` | the airflow executor type to use | `CeleryExecutor`
-`airflow.fernetKey` | the fernet key used to encrypt the connections/variables in the database | `7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc=`
+`airflow.fernetKey` | the fernet encryption key for connections/variables, sets `AIRFLOW__CORE__FERNET_KEY` | `7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc=`
 `airflow.config` | environment variables for airflow configs | `{}`
 `airflow.users` | a list of users to create | `<see values.yaml>`
 `airflow.usersTemplates` | bash-like templates to be used in `airflow.users` | `<see values.yaml>`
