@@ -125,6 +125,7 @@ spec:
                 - "-Wignore"
                 - "-c"
                 - |
+                  import sys
                   from typing import List
                   from airflow.jobs.scheduler_job import SchedulerJob
                   from airflow.utils.db import create_session
@@ -142,11 +143,12 @@ spec:
                       count_alive_jobs = len(alive_jobs)
 
                   if count_alive_jobs == 1:
-                      print(f"HEALTHY - {count_alive_jobs} alive SchedulerJob for: {hostname}")
+                      # scheduler is healthy - we expect one SchedulerJob per scheduler
+                      pass
                   elif count_alive_jobs == 0:
-                      SystemExit(f"UNHEALTHY - 0 alive SchedulerJob for: {hostname}")
+                      sys.exit(f"UNHEALTHY - 0 alive SchedulerJob for: {hostname}")
                   else:
-                      SystemExit(f"UNHEALTHY - {count_alive_jobs} (more than 1) alive SchedulerJob for: {hostname}")
+                      sys.exit(f"UNHEALTHY - {count_alive_jobs} (more than 1) alive SchedulerJob for: {hostname}")
           {{- end }}
           {{- if or ($volumeMounts) (include "airflow.executor.kubernetes_like" .) }}
           volumeMounts:
