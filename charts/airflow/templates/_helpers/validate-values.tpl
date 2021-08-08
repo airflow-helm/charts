@@ -131,17 +131,20 @@
 
 {{/* Checks for `externalDatabase` */}}
 {{- if .Values.externalDatabase.host }}
-  {{/* default value for `externalDatabase.host` is "localhost" */}}
+  {{/* check if they are using externalDatabase (the default value for `externalDatabase.host` is "localhost") */}}
   {{- if not (eq .Values.externalDatabase.host "localhost") }}
     {{- if .Values.postgresql.enabled }}
     {{ required "If `externalDatabase.host` is set, then `postgresql.enabled` should be `false`!" nil }}
+    {{- end }}
+    {{- if not (has .Values.externalDatabase.type (list "mysql" "postgres")) }}
+    {{ required "The `externalDatabase.type` must be one of: [mysql, postgres]!" nil }}
     {{- end }}
   {{- end }}
 {{- end }}
 
 {{/* Checks for `externalRedis` */}}
 {{- if .Values.externalRedis.host }}
-  {{/* default value for `externalRedis.host` is "localhost" */}}
+  {{/* check if they are using externalRedis (the default value for `externalRedis.host` is "localhost") */}}
   {{- if not (eq .Values.externalRedis.host "localhost") }}
     {{- if .Values.redis.enabled }}
     {{ required "If `externalRedis.host` is set, then `redis.enabled` should be `false`!" nil }}
