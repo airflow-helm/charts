@@ -45,8 +45,7 @@ spec:
   {{- end }}
   containers:
     - name: base
-      image: dummy_image
-      imagePullPolicy: IfNotPresent
+      {{- include "airflow.image" . | indent 6 }}
       envFrom:
         {{- include "airflow.envFrom" . | indent 8 }}
       env:
