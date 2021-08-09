@@ -1,6 +1,7 @@
 {{- if and (.Values.airflow.connections) (.Values.airflow.connectionsUpdate) }}
-{{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values) }}
-{{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values) }}
+{{- $extraPipPackages := .Values.airflow.extraPipPackages }}
+{{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) }}
+{{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -70,6 +71,9 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       initContainers:
+        {{- if $extraPipPackages }}
+        {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
+        {{- end }}
         {{- if .Values.dags.gitSync.enabled }}
         {{- /* we include git-sync so `check_db` & `wait_for_db_migrations` have access to any plugins stored there (note, `sync_one_time=true`) */ -}}
         {{- include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") | indent 8 }}
