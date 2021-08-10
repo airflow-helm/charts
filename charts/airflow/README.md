@@ -590,6 +590,43 @@ airflow:
 <hr>
 </details>
 
+### How to set a custom webserver secret_key?
+<details>
+<summary>Expand</summary>
+<hr>
+
+<h3>Option 1 - using the value</h3>
+
+> 🟥 __Warning__ 🟥
+>
+> We strongly recommend that you DO NOT USE the default `airflow.webserverSecretKey` in production.
+
+You can set the webserver secret_key using the `airflow.webserverSecretKey` value, which sets the `AIRFLOW__WEBSERVER__SECRET_KEY` environment variable.
+
+Example values to define the secret_key with `airflow.webserverSecretKey`:
+```yaml
+aiflow:
+  webserverSecretKey: "THIS IS UNSAFE!"
+```
+
+<h3>Option 2 - using a secret (recommended)</h3>
+
+You can set the webserver secret_key from a Kubernetes Secret by referencing it with the `airflow.extraEnv` value.
+
+Example values to use the `value` key from the existing Secret `airflow-webserver-secret-key`:
+```yaml
+airflow:
+  extraEnv:
+    - name: AIRFLOW__WEBSERVER__SECRET_KEY
+      valueFrom:
+        secretKeyRef:
+          name: airflow-webserver-secret-key
+          key: value
+```
+
+<hr>
+</details>
+
 ### How to create airflow connections?
 <details>
 <summary>Expand</summary>
@@ -1292,6 +1329,7 @@ Parameter | Description | Default
 `airflow.image.*` | configs for the airflow container image | `<see values.yaml>`
 `airflow.executor` | the airflow executor type to use | `CeleryExecutor`
 `airflow.fernetKey` | the fernet encryption key for connections/variables, sets `AIRFLOW__CORE__FERNET_KEY` | `7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc=`
+`airflow.webserverSecretKey` | the secret_key for flask, sets `AIRFLOW__WEBSERVER__SECRET_KEY` | `THIS IS UNSAFE!`
 `airflow.config` | environment variables for airflow configs | `{}`
 `airflow.users` | a list of users to create | `<see values.yaml>`
 `airflow.usersTemplates` | bash-like templates to be used in `airflow.users` | `<see values.yaml>`

@@ -42,6 +42,14 @@ airflow:
   ##
   fernetKey: "7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc="
 
+  ## the secret_key for flask, sets `AIRFLOW__WEBSERVER__SECRET_KEY`
+  ##
+  ## WARNING:
+  ## - you MUST CHANGE THIS to ensure the security of your airflow
+  ## - use `airflow.extraEnv` with a Secret to avoid storing this value in plain-text
+  ##
+  webserverSecretKey: "THIS IS UNSAFE!"
+
   ## environment variables for airflow configs
   ##
   ## NOTE:
