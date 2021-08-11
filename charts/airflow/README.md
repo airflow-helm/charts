@@ -444,13 +444,15 @@ airflow:
 
 You can use the `web.webserverConfig.*` values to adjust the Flask-Appbuilder `webserver_config.py` file, read [Flask-builder's security docs](https://flask-appbuilder.readthedocs.io/en/latest/security.html) for further reference.
 
+<h3>Option 1 - use LDAP</h3>
+
 Example values to integrate with a typical Microsoft Active Directory using `AUTH_LDAP`:
 ```yaml
 web:
   # WARNING: for production usage, create your own image with these packages installed rather than using `extraPipPackages`
   extraPipPackages:
     ## the following configs require Flask-AppBuilder 3.2.0 (or later)
-    - "Flask-AppBuilder~=3.2.0"
+    - "Flask-AppBuilder~=3.3.0"
     ## the following configs require python-ldap
     - "python-ldap~=3.3.1"
 
@@ -496,12 +498,14 @@ web:
       PERMANENT_SESSION_LIFETIME = 1800
 ```
 
+<h3>Option 2 - use OAUTH</h3>
+
 Example values to integrate with Okta using `AUTH_OAUTH`:
 ```yaml
 web:
   extraPipPackages:
     ## the following configs require Flask-AppBuilder 3.2.0 (or later)
-    - "Flask-AppBuilder~=3.2.0"
+    - "Flask-AppBuilder~=3.3.0"
     ## the following configs require Authlib
     - "Authlib~=0.15.3"
 
