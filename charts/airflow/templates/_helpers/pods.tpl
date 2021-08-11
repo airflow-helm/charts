@@ -122,6 +122,10 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "R
 {{- define "airflow.init_container.install_pip_packages" }}
 - name: install-pip-packages
   {{- include "airflow.image" . | indent 2 }}
+  envFrom:
+    {{- include "airflow.envFrom" . | indent 4 }}
+  env:
+    {{- include "airflow.env" . | indent 4 }}
   command:
     - "/usr/bin/dumb-init"
     - "--"
@@ -129,6 +133,7 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "R
     - "bash"
     - "-c"
     - |
+      unset PYTHONUSERBASE && \
       pip install --user {{ range .extraPipPackages }}{{ . | quote }} {{ end }} && \
       echo "copying '/home/airflow/.local/*' to '/opt/home-airflow-local'..." && \
       cp -r /home/airflow/.local/* /opt/home-airflow-local
