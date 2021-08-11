@@ -341,6 +341,19 @@ worker:
     - "torch~=1.8.0"
 ```
 
+Example values to install pip packages from a private pip `--index-url`:
+```yaml
+airflow:
+  config:
+    ## pip configs can be set with environment variables
+    PIP_TIMEOUT: 60
+    PIP_INDEX_URL: https://<username>:<password>@example.com/packages/simple/
+    PIP_TRUSTED_HOST: example.com
+  
+  extraPipPackages:
+    - "my-internal-package==1.0.0"
+```
+
 <h3>Option 2 - embedded into container image (recommended)</h3>
 
 This chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images), you can extend the airflow container image with your pip packages.
