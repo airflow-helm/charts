@@ -24,7 +24,7 @@ spec:
     metadata:
       annotations:
         checksum/secret-config: {{ include (print $.Template.BasePath "/config/secret-config.yaml") . | sha256sum }}
-        checksum/sync-users-script: {{ include "airflow.snyc.sync_users.py" . | sha256sum }}
+        checksum/sync-users-script: {{ include "airflow.sync.sync_users.py" . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
