@@ -1,11 +1,11 @@
 {{/*
 The python sync script for variables.
 */}}
-{{- define "airflow.snyc.sync_variables.py" }}
+{{- define "airflow.sync.sync_variables.py" }}
 ############################
 #### BEGIN: GLOBAL CODE ####
 ############################
-{{- include "airflow.snyc.global_code" . }}
+{{- include "airflow.sync.global_code" . }}
 ##########################
 #### END: GLOBAL CODE ####
 ##########################

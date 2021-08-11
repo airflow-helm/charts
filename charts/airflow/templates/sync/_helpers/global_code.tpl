@@ -1,7 +1,7 @@
 {{/*
 Code which is included in all python sync scripts.
 */}}
-{{- define "airflow.snyc.global_code" }}
+{{- define "airflow.sync.global_code" }}
 ####################
 ## Global Imports ##
 ####################

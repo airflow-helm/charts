@@ -1,11 +1,11 @@
 {{/*
 The python sync script for users.
 */}}
-{{- define "airflow.snyc.sync_users.py" }}
+{{- define "airflow.sync.sync_users.py" }}
 ############################
 #### BEGIN: GLOBAL CODE ####
 ############################
-{{- include "airflow.snyc.global_code" . }}
+{{- include "airflow.sync.global_code" . }}
 ##########################
 #### END: GLOBAL CODE ####
 ##########################

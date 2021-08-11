@@ -1,11 +1,11 @@
 {{/*
 The python sync script for connections.
 */}}
-{{- define "airflow.snyc.sync_connections.py" }}
+{{- define "airflow.sync.sync_connections.py" }}
 ############################
 #### BEGIN: GLOBAL CODE ####
 ############################
-{{- include "airflow.snyc.global_code" . }}
+{{- include "airflow.sync.global_code" . }}
 ##########################
 #### END: GLOBAL CODE ####
 ##########################
