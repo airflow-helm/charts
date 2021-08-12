@@ -22,6 +22,14 @@ Define the command/entrypoint configs for airflow containers
 {{- end }}
 
 {{/*
+Define the PodSecurityContext for airflow pods
+EXAMPLE USAGE: {{ include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" $securityContext) }}
+*/}}
+{{- define "airflow.podSecurityContext" }}
+{{- .securityContext | default .Values.airflow.defaultSecurityContext | toYaml }}
+{{- end }}
+
+{{/*
 Define an init-container which checks the DB status
 EXAMPLE USAGE: {{ include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) }}
 */}}

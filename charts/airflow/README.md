@@ -899,43 +899,18 @@ dags:
 
 Example values to create a PVC with the cluster-default `storageClass` and 1Gi initial `size`:
 ```yaml
+airflow:
+  defaultSecurityContext:
+    ## sets the filesystem owner group of files/folders in mounted volumes
+    ## gid=0 specifies the "root" group (NOTE: this does NOT give root permissions to Pods)
+    fsGroup: 0
+
 logs:
   persistence:
     enabled: true
     storageClass: "" ## empty string means cluster-default
     accessMode: ReadWriteMany
     size: 1Gi
-
-airflow:
-  kubernetesPodTemplate:
-    # chown mounted volumes to gid=65534, and give processes gid=65534
-    securityContext:
-      fsGroup: 65534
-
-  sync:
-    # chown mounted volumes to gid=65534, and give processes gid=65534
-    securityContext:
-      fsGroup: 65534
-
-scheduler:
-  # chown mounted volumes to gid=65534, and give processes gid=65534
-  securityContext:
-    fsGroup: 65534
-
-web:
-  # chown mounted volumes to gid=65534, and give processes gid=65534
-  securityContext:
-    fsGroup: 65534
-
-workers:
-  # chown mounted volumes to gid=65534, and give processes gid=65534
-  securityContext:
-    fsGroup: 65534
-
-flower:
-  # chown mounted volumes to gid=65534, and give processes gid=65534
-  securityContext:
-    fsGroup: 65534
 ```
 
 <h3>Option 1b - PersistentVolumeClaim (existing / user-managed)</h3>
@@ -947,49 +922,56 @@ flower:
 Example values to use an existing PVC called `my-logs-pvc`:
 
 ```yaml
+airflow:
+  defaultSecurityContext:
+    ## sets the filesystem owner group of files/folders in mounted volumes
+    ## gid=0 specifies the "root" group (NOTE: this does NOT give root permissions to Pods)
+    fsGroup: 0
+
 logs:
   persistence:
     enabled: true
     existingClaim: my-logs-pvc
     accessMode: ReadWriteMany
-
-airflow:
-  kubernetesPodTemplate:
-    # chown mounted volumes to gid=65534, and give processes gid=65534
-    securityContext:
-      fsGroup: 65534
-
-  sync:
-    # chown mounted volumes to gid=65534, and give processes gid=65534
-    securityContext:
-      fsGroup: 65534
-
-scheduler:
-  # chown mounted volumes to gid=65534, and give processes gid=65534
-  securityContext:
-    fsGroup: 65534
-
-web:
-  # chown mounted volumes to gid=65534, and give processes gid=65534
-  securityContext:
-    fsGroup: 65534
-
-workers:
-  # chown mounted volumes to gid=65534, and give processes gid=65534
-  securityContext:
-    fsGroup: 65534
-
-flower:
-  # chown mounted volumes to gid=65534, and give processes gid=65534
-  securityContext:
-    fsGroup: 65534
 ```
 
-<h3>Option 2 - Remote Bucket (recommended)</h3>
+<h3>Option 2a - Remote S3 Bucket (recommended on AWS)</h3>
 
-You must give airflow credentials for it to read/write on the remote bucket, this can be achieved with `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID`, or by using something like [Workload Identity (GKE)](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity), or [IAM Roles for Service Accounts (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html). 
+Example values to use a remote S3 bucket for logging, with an `airflow.connection` called `my_aws` for authorization:
+```yaml
+airflow:
+  config:
+    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "s3://<<MY-BUCKET-NAME>>/airflow/logs"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "my_aws"
+    
+  connections:
+    ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html
+    - id: my_aws
+      type: aws
+      description: my AWS connection
+      extra: |-
+        { "aws_access_key_id": "XXXXXXXX",
+          "aws_secret_access_key": "XXXXXXXX",
+          "region_name":"eu-central-1" }
+```
 
-Example values using `AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID` (can be used with S3 + AWS connection too):
+Example values to use a remote S3 bucket for logging, with [EKS - IAM Roles for Service Accounts](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html) for authorization:
+```yaml
+airflow:
+  config:
+    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "s3://<<MY-BUCKET-NAME>>/airflow/logs"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "aws_default"
+
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: "arn:aws:iam::XXXXXXXXXX:role/<<MY-ROLE-NAME>>"
+```
+
+<h3>Option 2b - Remote GCS Bucket (recommended on GCP)</h3>
+
+Example values to use a remote GCS bucket for logging, with an `airflow.connection` called `my_gcp` for authorization:
 ```yaml
 airflow:
   config:
@@ -1004,11 +986,10 @@ airflow:
       description: my GCP connection
       extra: |-
         { "extra__google_cloud_platform__keyfile_dict": "XXXXXXXX",
-          "extra__google_cloud_platform__keyfile_dict: "XXXXXXXX",
           "extra__google_cloud_platform__num_retries": "5" }
 ```
 
-Example values using [Workload Identity (GKE)](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity):
+Example values to use a remote GCS bucket for logging, with [GKE - Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) for authorization:
 ```yaml
 airflow:
   config:
@@ -1019,49 +1000,6 @@ airflow:
 serviceAccount:
   annotations:
     iam.gke.io/gcp-service-account: "<<MY-ROLE-NAME>>@<<MY-PROJECT-NAME>>.iam.gserviceaccount.com"
-```
-
-Example values using [IAM Roles for Service Accounts (EKS)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html):
-```yaml
-airflow:
-  config:
-    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
-    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "s3://<<MY-BUCKET-NAME>>/airflow/logs"
-    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "aws_default"
-
-  kubernetesPodTemplate:
-    # chown mounted volumes to gid=65534, and give processes gid=65534
-    securityContext:
-      fsGroup: 65534
-
-  sync:
-    # chown mounted volumes to gid=65534, and give processes gid=65534
-    securityContext:
-      fsGroup: 65534
-
-scheduler:
-  # chown mounted volumes to gid=65534, and give processes gid=65534
-  securityContext:
-    fsGroup: 65534
-
-web:
-  # chown mounted volumes to gid=65534, and give processes gid=65534
-  securityContext:
-    fsGroup: 65534
-
-workers:
-  # chown mounted volumes to gid=65534, and give processes gid=65534
-  securityContext:
-    fsGroup: 65534
-
-flower:
-  # chown mounted volumes to gid=65534, and give processes gid=65534
-  securityContext:
-    fsGroup: 65534
-
-serviceAccount:
-  annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::XXXXXXXXXX:role/<<MY-ROLE-NAME>>"
 ```
 
 <hr>
@@ -1378,6 +1316,7 @@ Parameter | Description | Default
 `airflow.extraContainers` | extra containers for the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraVolumeMounts` | extra VolumeMounts for the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraVolumes` | extra Volumes for the web/scheduler/worker/flower Pods | `[]`
+`airflow.defaultSecurityContext` | default securityContext configs for Pods (is overridden by pod-specific values) | `{fsGroup: 0}`
 `airflow.kubernetesPodTemplate.*` | configs to generate the AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE | `<see values.yaml>`
 `airflow.sync.*` | configs for the `airflow.{connections, pools, users, variables}` Deployments/Jobs | `<see values.yaml>`
 

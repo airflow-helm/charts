@@ -1,3 +1,4 @@
+{{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.airflow.kubernetesPodTemplate.securityContext) }}
 {{- $extraPipPackages := .Values.airflow.kubernetesPodTemplate.extraPipPackages }}
 {{- $extraVolumeMounts := .Values.airflow.kubernetesPodTemplate.extraVolumeMounts }}
 {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
@@ -30,9 +31,9 @@ spec:
   tolerations:
     {{- toYaml .Values.airflow.kubernetesPodTemplate.tolerations | nindent 4 }}
   {{- end }}
-  {{- if .Values.airflow.kubernetesPodTemplate.securityContext }}
+  {{- if $podSecurityContext }}
   securityContext:
-    {{- toYaml .Values.airflow.kubernetesPodTemplate.securityContext | nindent 4 }}
+    {{- $podSecurityContext | nindent 4 }}
   {{- end }}
   {{- if or ($extraPipPackages) (.Values.dags.gitSync.enabled) }}
   initContainers:
