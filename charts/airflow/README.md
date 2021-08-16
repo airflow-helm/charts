@@ -1492,7 +1492,6 @@ Parameter | Description | Default
 `flower.podAnnotations` | Pod annotations for the flower Deployment | `{}`
 `flower.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
 `flower.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the flower Deployment | `<see values.yaml>`
-`flower.oauthDomains` | the value of the flower `--auth` argument | `""`
 `flower.basicAuthSecret` | the name of a pre-created secret containing the basic authentication value for flower | `""`
 `flower.basicAuthSecretKey` | the key within `flower.basicAuthSecret` containing the basic authentication string | `""`
 `flower.service.*` | configs for the Service of the flower Pods | `<see values.yaml>`
