@@ -1,5 +1,5 @@
-{{- if and (.Values.flower.enabled) (.Values.ingress.enabled) (eq .Values.ingress.apiVersion "networking.k8s.io/v1") }}
-apiVersion: networking.k8s.io/v1
+{{- if and (.Values.flower.enabled) (.Values.ingress.enabled) (eq .Values.ingress.apiVersion "networking.k8s.io/v1beta1") }}
+apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: {{ include "airflow.fullname" . }}-flower
@@ -31,27 +31,18 @@ spec:
         paths:
           {{- range .Values.ingress.flower.precedingPaths }}
           - path: {{ .path }}
-            pathType: ImplementationSpecific
             backend:
-              service:
-                name: {{ .serviceName }}
-                port:
-                  number: {{ .servicePort }}
+              serviceName: {{ .serviceName }}
+              servicePort: {{ .servicePort }}
           {{- end }}
           - path: {{ .Values.ingress.flower.path }}
-            pathType: ImplementationSpecific
             backend:
-              service:
-                name: {{ include "airflow.fullname" . }}-flower
-                port:
-                  name: flower
+              serviceName: {{ include "airflow.fullname" . }}-flower
+              servicePort: flower
           {{- range .Values.ingress.flower.succeedingPaths }}
           - path: {{ .path }}
-            pathType: ImplementationSpecific
             backend:
-              service:
-                name: {{ .serviceName }}
-                port:
-                  number: {{ .servicePort }}
+              serviceName: {{ .serviceName }}
+              servicePort: {{ .servicePort }}
           {{- end }}
 {{- end }}

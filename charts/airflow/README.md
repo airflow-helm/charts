@@ -1272,9 +1272,22 @@ airflow:
 
 ingress:
   enabled: true
+  
+  ## WARNING: set as "networking.k8s.io/v1beta1" for Kubernetes 1.18 and earlier
+  apiVersion: networking.k8s.io/v1
+  
+  ## airflow webserver ingress configs
   web:
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    host: "example.com"
     path: "/airflow"
+    
+  ## flower ingress configs
   flower:
+    annotations:
+      kubernetes.io/ingress.class: nginx
+    host: "example.com"
     path: "/airflow/flower"
 ```
 
@@ -1525,6 +1538,7 @@ Parameter | Description | Default
 Parameter | Description | Default
 --- | --- | ---
 `ingress.enabled` | if we should deploy Ingress resources | `false`
+`ingress.apiVersion` | the `apiVersion` to use for Ingress resources | `networking.k8s.io/v1`
 `ingress.web.*` | configs for the Ingress of the web Service | `<see values.yaml>`
 `ingress.flower.*` | configs for the Ingress of the flower Service | `<see values.yaml>`
 
