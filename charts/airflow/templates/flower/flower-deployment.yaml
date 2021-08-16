@@ -154,6 +154,9 @@ spec:
           volumeMounts:
             {{- $volumeMounts | indent 12 }}
           {{- end }}
+        {{- if .Values.airflow.extraContainers }}
+        {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
+        {{- end }}
       {{- if $volumes }}
       volumes:
         {{- $volumes | indent 8 }}

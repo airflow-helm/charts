@@ -211,7 +211,7 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 - added `airflow.connections` to help you create/update airflow connections:
 - added `airflow.variables` to help you create/update airflow variables:
 - added `airflow.pools` to help you create/update airflow pools:
-- flower Pods are now affected by `airflow.extraPipPackages`, `airflow.extraContainers`, `airflow.extraVolumeMounts`, `airlfow.extraVolumes`
+- flower Pods are now affected by `airflow.extraPipPackages`, `airflow.extraVolumeMounts`, `airlfow.extraVolumes`
 - you no longer need to set `web.readinessProbe.scheme` or `web.livenessProbe.scheme`, we now only use HTTPS if `AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT` and `AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY` are set
 - airflow db upgrades are now managed with a post "helm upgrade" Job, meaning it only runs once per upgrade (rather than each time the scheduler starts)
 
