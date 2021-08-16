@@ -93,6 +93,11 @@
 
 {{/* Checks for `ingress` */}}
 {{- if .Values.ingress.enabled }}
+  {{/* Checks for `ingress.apiVersion` */}}
+  {{- if not (has .Values.ingress.apiVersion (list "networking.k8s.io/v1" "networking.k8s.io/v1beta1")) }}
+  {{ required "The `ingress.apiVersion` must be one of: [networking.k8s.io/v1, networking.k8s.io/v1beta1]!" nil }}
+  {{- end }}
+
   {{/* Checks for `ingress.web.path` */}}
   {{- if .Values.ingress.web.path }}
     {{- if not (.Values.ingress.web.path | hasPrefix "/") }}
