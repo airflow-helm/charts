@@ -106,17 +106,13 @@ spec:
           command:
             - "/usr/bin/dumb-init"
             - "--"
+          args:
             - "bash"
             - "-c"
-          args:
             {{- if .Values.airflow.legacyCommands }}
             - "exec airflow flower"
             {{- else }}
             - "exec airflow celery flower"
-            {{- end }}
-            {{- if .Values.flower.oauthDomains }}
-            - "--auth"
-            - {{ .Values.flower.oauthDomains | quote }}
             {{- end }}
           {{- if .Values.flower.readinessProbe.enabled }}
           readinessProbe:
