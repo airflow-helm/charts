@@ -159,7 +159,11 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
     runAsGroup: {{ .Values.dags.gitSync.image.gid }}
   resources:
     {{- toYaml .Values.dags.gitSync.resources | nindent 4 }}
+  envFrom:
+    {{- include "airflow.envFrom" . | indent 4 }}
   env:
+    {{- include "airflow.env" . | indent 4 }}
+    {{- /* we define our GIT_XXXX configs BELOW any user configs (so ours take precidence) */ -}}
     {{- if .sync_one_time }}
     - name: GIT_SYNC_ONE_TIME
       value: "true"
