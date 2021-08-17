@@ -1,4 +1,7 @@
 {{- if .Values.workers.enabled }}
+{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.workers.nodeSelector) }}
+{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.workers.affinity) }}
+{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.workers.tolerations) }}
 {{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.workers.securityContext) }}
 {{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.workers.extraPipPackages }}
 {{- $extraVolumeMounts := .Values.workers.extraVolumeMounts }}
@@ -67,17 +70,17 @@ spec:
       terminationGracePeriodSeconds: {{ .Values.workers.terminationPeriod }}
       {{- end }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
-      {{- if .Values.workers.nodeSelector }}
+      {{- if $podNodeSelector }}
       nodeSelector:
-        {{- toYaml .Values.workers.nodeSelector | nindent 8 }}
+        {{- $podNodeSelector | nindent 8 }}
       {{- end }}
-      {{- if .Values.workers.affinity }}
+      {{- if $podAffinity }}
       affinity:
-        {{- toYaml .Values.workers.affinity | nindent 8 }}
+        {{- $podAffinity | nindent 8 }}
       {{- end }}
-      {{- if .Values.workers.tolerations }}
+      {{- if $podTolerations }}
       tolerations:
-        {{- toYaml .Values.workers.tolerations | nindent 8 }}
+        {{- $podTolerations | nindent 8 }}
       {{- end }}
       {{- if $podSecurityContext }}
       securityContext:

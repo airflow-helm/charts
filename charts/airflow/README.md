@@ -1248,6 +1248,111 @@ ingress:
 <hr>
 </details>
 
+### How to use Pod affinity, nodeSelector, and tolerations?
+<details>
+<summary>Expand</summary>
+<hr>
+
+If your environment needs to use Pod [affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity), [nodeSelector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector), or [tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/), we provide many values that allow fine-grained control over the Pod definitions.
+
+To set affinity, nodeSelector, and tolerations for all airflow Pods, you can use the `airflow.{defaultNodeSelector,defaultAffinity,defaultTolerations}` values:
+```yaml
+airflow:
+  ## https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  defaultNodeSelector: {}
+    # my_node_label_1: value1
+    # my_node_label_2: value2
+
+  ## https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+  defaultAffinity: {}
+    # podAffinity:
+    #   requiredDuringSchedulingIgnoredDuringExecution:
+    #     - labelSelector:
+    #         matchExpressions:
+    #           - key: security
+    #             operator: In
+    #             values:
+    #               - S1
+    #       topologyKey: topology.kubernetes.io/zone
+    # podAntiAffinity:
+    #   preferredDuringSchedulingIgnoredDuringExecution:
+    #     - weight: 100
+    #       podAffinityTerm:
+    #         labelSelector:
+    #           matchExpressions:
+    #             - key: security
+    #               operator: In
+    #               values:
+    #                 - S2
+    #         topologyKey: topology.kubernetes.io/zone
+
+  ## https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+  defaultTolerations: []
+    # - key: "key1"
+    #   operator: "Exists"
+    #   effect: "NoSchedule"
+    # - key: "key2"
+    #   operator: "Exists"
+    #   effect: "NoSchedule"
+
+## if using the embedded postgres chart, you will also need to define these
+postgresql:
+  master:
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+
+## if using the embedded redis chart, you will also need to define these
+redis:
+  master:
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+```
+
+The `airflow.{defaultNodeSelector,defaultAffinity,defaultTolerations}` values are overridden by the per-resource values like `scheduler.{nodeSelector,affinity,tolerations}`:
+```yaml
+airflow:
+  ## airflow KubernetesExecutor pod_template
+  kubernetesPodTemplate:
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+
+  ## sync deployments
+  sync:
+    nodeSelector: {}
+    affinity: {}
+    tolerations: []
+
+## airflow schedulers
+scheduler:
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+
+## airflow webserver
+web:
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+
+## airflow workers
+workers:
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+
+## airflow workers
+flower:
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+```
+
+<hr>
+</details>
+
 ### How to integrate airflow with Prometheus?
 <details>
 <summary>Expand</summary>
@@ -1316,6 +1421,9 @@ Parameter | Description | Default
 `airflow.extraContainers` | extra containers for the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraVolumeMounts` | extra VolumeMounts for the web/scheduler/worker/flower Pods | `[]`
 `airflow.extraVolumes` | extra Volumes for the web/scheduler/worker/flower Pods | `[]`
+`airflow.defaultNodeSelector` | default nodeSelector configs for Pods (is overridden by pod-specific values) | `{}`
+`airflow.defaultAffinity` | default affinity configs for Pods (is overridden by pod-specific values) | `{}`
+`airflow.defaultTolerations` | default toleration configs for Pods (is overridden by pod-specific values) | `[]`
 `airflow.defaultSecurityContext` | default securityContext configs for Pods (is overridden by pod-specific values) | `{fsGroup: 0}`
 `airflow.kubernetesPodTemplate.*` | configs to generate the AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE | `<see values.yaml>`
 `airflow.sync.*` | configs for the `airflow.{connections, pools, users, variables}` Deployments/Jobs | `<see values.yaml>`
@@ -1572,8 +1680,8 @@ Parameter | Description | Default
 `redis.existingSecret` | the name of a pre-created secret containing the redis password | `""`
 `redis.existingSecretPasswordKey` | the key within `redis.existingSecret` containing the password string | `redis-password`
 `redis.cluster.*` | configs for redis cluster mode | `<see values.yaml>`
-`redis.master.*` | configs for the redis master | `<see values.yaml>`
-`redis.slave.*` | configs for the redis slaves | `<see values.yaml>`
+`redis.master.*` | configs for the redis master StatefulSet | `<see values.yaml>`
+`redis.slave.*` | configs for the redis slave StatefulSet | `<see values.yaml>`
 
 <hr>
 </details>

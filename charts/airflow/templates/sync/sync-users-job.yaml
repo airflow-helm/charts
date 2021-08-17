@@ -1,4 +1,7 @@
 {{- if and (.Values.airflow.users) (not .Values.airflow.usersUpdate) }}
+{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.airflow.sync.nodeSelector) }}
+{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.airflow.sync.affinity) }}
+{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.airflow.sync.tolerations) }}
 {{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.airflow.sync.securityContext) }}
 {{- $extraPipPackages := .Values.airflow.extraPipPackages }}
 {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) }}
@@ -48,17 +51,17 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.airflow.image.pullSecret }}
       {{- end }}
-      {{- if .Values.airflow.sync.nodeSelector }}
+      {{- if $podNodeSelector }}
       nodeSelector:
-        {{- toYaml .Values.airflow.sync.nodeSelector | nindent 8 }}
+        {{- $podNodeSelector | nindent 8 }}
       {{- end }}
-      {{- if .Values.airflow.sync.affinity }}
+      {{- if $podAffinity }}
       affinity:
-        {{- toYaml .Values.airflow.sync.affinity | nindent 8 }}
+        {{- $podAffinity | nindent 8 }}
       {{- end }}
-      {{- if .Values.airflow.sync.tolerations }}
+      {{- if $podTolerations }}
       tolerations:
-        {{- toYaml .Values.airflow.sync.tolerations | nindent 8 }}
+        {{- $podTolerations | nindent 8 }}
       {{- end }}
       {{- if $podSecurityContext }}
       securityContext:
