@@ -97,8 +97,7 @@ spec:
               containerPort: 5555
               protocol: TCP
           command:
-            - "/usr/bin/dumb-init"
-            - "--"
+            {{- include "airflow.command" . | indent 12 }}
           args:
             - "bash"
             - "-c"
@@ -115,7 +114,7 @@ spec:
             failureThreshold: {{ .Values.flower.readinessProbe.failureThreshold }}
             exec:
               command:
-                - "/bin/bash"
+                - "bash"
                 - "-c"
                 {{- if or (.Values.flower.basicAuthSecret) (.Values.airflow.config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH) }}
                 - "exec curl --user $AIRFLOW__CELERY__FLOWER_BASIC_AUTH 'http://localhost:5555{{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX }}'"
@@ -131,7 +130,7 @@ spec:
             failureThreshold: {{ .Values.flower.livenessProbe.failureThreshold }}
             exec:
               command:
-                - "/bin/bash"
+                - "bash"
                 - "-c"
                 {{- if or (.Values.flower.basicAuthSecret) (.Values.airflow.config.AIRFLOW__CELERY__FLOWER_BASIC_AUTH) }}
                 - "exec curl --user $AIRFLOW__CELERY__FLOWER_BASIC_AUTH 'http://localhost:5555{{ .Values.airflow.config.AIRFLOW__CELERY__FLOWER_URL_PREFIX }}'"

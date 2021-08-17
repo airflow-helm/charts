@@ -49,6 +49,12 @@ spec:
       envFrom:
         {{- include "airflow.envFrom" . | indent 8 }}
       env:
+        {{- if not .Values.airflow.legacyCommands }}
+        ## enable the `/entrypoint` db connection check
+        - name: CONNECTION_CHECK_MAX_COUNT
+          value: "20"
+        {{- end }}
+        ## KubernetesExecutor Pods use LocalExecutor internally
         - name: AIRFLOW__CORE__EXECUTOR
           value: LocalExecutor
         {{- /* this has user-defined variables, so must be included BELOW (so the ABOVE `env` take precedence) */ -}}

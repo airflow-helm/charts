@@ -10,6 +10,18 @@ securityContext:
 {{- end }}
 
 {{/*
+Define the command/entrypoint configs for airflow containers
+*/}}
+{{- define "airflow.command" }}
+- "/usr/bin/dumb-init"
+- "--"
+{{- /* only use `/entrypoint` for airflow 2.0+ (older images dont pass "bash" & "python") */ -}}
+{{- if not .Values.airflow.legacyCommands }}
+- "/entrypoint"
+{{- end }}
+{{- end }}
+
+{{/*
 Define an init-container which checks the DB status
 EXAMPLE USAGE: {{ include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) }}
 */}}
@@ -21,8 +33,7 @@ EXAMPLE USAGE: {{ include "airflow.init_container.check_db" (dict "Release" .Rel
   env:
     {{- include "airflow.env" . | indent 4 }}
   command:
-    - "/usr/bin/dumb-init"
-    - "--"
+    {{- include "airflow.command" . | indent 4 }}
   args:
     - "bash"
     - "-c"
@@ -49,8 +60,7 @@ EXAMPLE USAGE: {{ include "airflow.init_container.wait_for_db_migrations" (dict 
   env:
     {{- include "airflow.env" . | indent 4 }}
   command:
-    - "/usr/bin/dumb-init"
-    - "--"
+    {{- include "airflow.command" . | indent 4 }}
   args:
     {{- if .Values.airflow.legacyCommands }}
     - "python"
@@ -127,8 +137,7 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "R
   env:
     {{- include "airflow.env" . | indent 4 }}
   command:
-    - "/usr/bin/dumb-init"
-    - "--"
+    {{- include "airflow.command" . | indent 4 }}
   args:
     - "bash"
     - "-c"
@@ -403,6 +412,12 @@ The list of `env` for web/scheduler/worker/flower Pods
 - name: REDIS_PASSWORD
   value: ""
 {{- end }}
+{{- end }}
+
+{{- /* disable the `/entrypoint` db connection check */ -}}
+{{- if not .Values.airflow.legacyCommands }}
+- name: CONNECTION_CHECK_MAX_COUNT
+  value: "0"
 {{- end }}
 
 {{- /* set AIRFLOW__CELERY__FLOWER_BASIC_AUTH */ -}}

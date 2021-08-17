@@ -47,8 +47,7 @@ spec:
           env:
             {{- include "airflow.env" . | indent 12 }}
           command:
-            - "/usr/bin/dumb-init"
-            - "--"
+            {{- include "airflow.command" . | indent 12 }}
           args:
             - "bash"
             - "-c"
