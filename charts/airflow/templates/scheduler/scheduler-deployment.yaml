@@ -1,3 +1,4 @@
+{{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.scheduler.securityContext) }}
 {{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.scheduler.extraPipPackages }}
 {{- $extraVolumeMounts := .Values.scheduler.extraVolumeMounts }}
 {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
@@ -80,9 +81,9 @@ spec:
       tolerations:
         {{- toYaml .Values.scheduler.tolerations | nindent 8 }}
       {{- end }}
-      {{- if .Values.scheduler.securityContext }}
+      {{- if $podSecurityContext }}
       securityContext:
-        {{- toYaml .Values.scheduler.securityContext | nindent 8 }}
+        {{- $podSecurityContext | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       initContainers:

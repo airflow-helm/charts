@@ -1,4 +1,5 @@
 {{- if .Values.workers.enabled }}
+{{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.workers.securityContext) }}
 {{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.workers.extraPipPackages }}
 {{- $extraVolumeMounts := .Values.workers.extraVolumeMounts }}
 {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
@@ -78,9 +79,9 @@ spec:
       tolerations:
         {{- toYaml .Values.workers.tolerations | nindent 8 }}
       {{- end }}
-      {{- if .Values.workers.securityContext }}
+      {{- if $podSecurityContext }}
       securityContext:
-        {{- toYaml .Values.workers.securityContext | nindent 8 }}
+        {{- $podSecurityContext | nindent 8 }}
       {{- end }}
       initContainers:
         {{- if $extraPipPackages }}

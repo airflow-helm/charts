@@ -258,6 +258,16 @@ airflow:
   ##
   extraVolumes: []
 
+  ## default securityContext configs for Pods (is overridden by pod-specific values)
+  ##
+  ## SPEC - PodSecurityContext:
+  ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
+  ##
+  defaultSecurityContext:
+    ## sets the filesystem owner group of files/folders in mounted volumes
+    ## gid=0 specifies the "root" group (NOTE: this does NOT give root permissions to Pods)
+    fsGroup: 0
+
   ## configs to generate the AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE
   ##
   ## NOTE:
@@ -317,8 +327,8 @@ airflow:
 
     ## the security context for the Pod template
     ##
-    ## SPEC - SecurityContext:
-    ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
+    ## SPEC - PodSecurityContext:
+    ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
     ##
     securityContext: {}
 
@@ -384,8 +394,8 @@ airflow:
 
     ## the security context for the sync Pods
     ##
-    ## SPEC - SecurityContext:
-    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
+    ## SPEC - PodSecurityContext:
+    ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
     ##
     securityContext: {}
 
@@ -446,8 +456,8 @@ scheduler:
 
   ## the security context for the scheduler Pods
   ##
-  ## SPEC - SecurityContext:
-  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
+  ## SPEC - PodSecurityContext:
+  ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
   ##
   securityContext: {}
 
@@ -597,8 +607,8 @@ web:
 
   ## the security context for the web Pods
   ##
-  ## SPEC - SecurityContext:
-  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
+  ## SPEC - PodSecurityContext:
+  ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
   ##
   securityContext: {}
 
@@ -736,8 +746,8 @@ workers:
 
   ## the security context for the worker Pods
   ##
-  ## SPEC - SecurityContext:
-  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
+  ## SPEC - PodSecurityContext:
+  ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
   ##
   securityContext: {}
 
@@ -895,8 +905,8 @@ flower:
 
   ## the security context for the flower Pods
   ##
-  ## SPEC - SecurityContext:
-  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
+  ## SPEC - PodSecurityContext:
+  ##  https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
   ##
   securityContext: {}
 
