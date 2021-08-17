@@ -15,7 +15,7 @@ airflow:
     pullPolicy: IfNotPresent
     pullSecret: ""
     uid: 50000
-    gid: 50000
+    gid: 0
 
   ## the airflow executor type to use
   ##
