@@ -1,3 +1,6 @@
+{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.airflow.kubernetesPodTemplate.nodeSelector) }}
+{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.airflow.kubernetesPodTemplate.affinity) }}
+{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.airflow.kubernetesPodTemplate.tolerations) }}
 {{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.airflow.kubernetesPodTemplate.securityContext) }}
 {{- $extraPipPackages := .Values.airflow.kubernetesPodTemplate.extraPipPackages }}
 {{- $extraVolumeMounts := .Values.airflow.kubernetesPodTemplate.extraVolumeMounts }}
@@ -19,17 +22,17 @@ spec:
     - name: {{ .Values.airflow.image.pullSecret }}
   {{- end }}
   serviceAccountName: {{ include "airflow.serviceAccountName" . }}
-  {{- if .Values.airflow.kubernetesPodTemplate.nodeSelector }}
+  {{- if $podNodeSelector }}
   nodeSelector:
-    {{- toYaml .Values.airflow.kubernetesPodTemplate.nodeSelector | nindent 4 }}
+    {{- $podNodeSelector | nindent 4 }}
   {{- end }}
-  {{- if .Values.airflow.kubernetesPodTemplate.affinity }}
+  {{- if $podAffinity }}
   affinity:
-    {{- toYaml .Values.airflow.kubernetesPodTemplate.affinity | nindent 4 }}
+    {{- $podAffinity | nindent 4 }}
   {{- end }}
-  {{- if .Values.airflow.kubernetesPodTemplate.tolerations }}
+  {{- if $podTolerations }}
   tolerations:
-    {{- toYaml .Values.airflow.kubernetesPodTemplate.tolerations | nindent 4 }}
+    {{- $podTolerations | nindent 4 }}
   {{- end }}
   {{- if $podSecurityContext }}
   securityContext:

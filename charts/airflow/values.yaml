@@ -258,6 +258,27 @@ airflow:
   ##
   extraVolumes: []
 
+  ## default nodeSelector configs for Pods (is overridden by pod-specific values)
+  ##
+  ## DOCS:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  ##
+  defaultNodeSelector: {}
+
+  ## default affinity configs for Pods (is overridden by pod-specific values)
+  ##
+  ## SPEC - Affinity:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+  ##
+  defaultAffinity: {}
+
+  ## default toleration configs for Pods (is overridden by pod-specific values)
+  ##
+  ## SPEC - Toleration:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+  ##
+  defaultTolerations: []
+
   ## default securityContext configs for Pods (is overridden by pod-specific values)
   ##
   ## SPEC - PodSecurityContext:
@@ -1460,8 +1481,30 @@ postgresql:
     size: 8Gi
 
   ## configs for the postgres StatefulSet
+  ##
   master:
-    ## annotations for the postgres Pod
+    ## the nodeSelector configs for the postgres Pods
+    ##
+    ## DOCS:
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+    ##
+    nodeSelector: {}
+
+    ## the affinity configs for the postgres Pods
+    ##
+    ## SPEC - Affinity:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+    ##
+    affinity: {}
+
+    ## the toleration configs for the postgres Pods
+    ##
+    ## SPEC - Toleration:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+    ##
+    tolerations: []
+
+    ## annotations for the postgres Pods
     ##
     podAnnotations:
       cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
@@ -1541,10 +1584,10 @@ redis:
     ##
     slaveCount: 1
 
-  ## configs for the redis master
+  ## configs for the redis master StatefulSet
   ##
   master:
-    ## resource requests/limits for the master Pod
+    ## resource requests/limits for the redis master Pods
     ##
     ## EXAMPLE:
     ##   resources:
@@ -1554,12 +1597,33 @@ redis:
     ##
     resources: {}
 
-    ## annotations for the master Pod
+    ## the nodeSelector configs for the redis master Pods
+    ##
+    ## DOCS:
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+    ##
+    nodeSelector: {}
+
+    ## the affinity configs for the redis master Pods
+    ##
+    ## SPEC - Affinity:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+    ##
+    affinity: {}
+
+    ## the toleration configs for the redis master Pods
+    ##
+    ## SPEC - Toleration:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+    ##
+    tolerations: []
+
+    ## annotations for the redis master Pods
     ##
     podAnnotations:
       cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
 
-    ## configs for the PVC of the redis master
+    ## configs for the PVC of the redis master Pods
     ##
     persistence:
       ## use a PVC to persist data
@@ -1579,7 +1643,10 @@ redis:
       ##
       size: 8Gi
 
-  ## configs for the redis slaves
+  ## configs for the redis slave StatefulSet
+  ##
+  ## NOTE:
+  ## - only used if `redis.cluster.enabled` is `true`
   ##
   slave:
     ## resource requests/limits for the slave Pods
@@ -1592,12 +1659,33 @@ redis:
     ##
     resources: {}
 
+    ## the nodeSelector configs for the redis slave Pods
+    ##
+    ## DOCS:
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+    ##
+    nodeSelector: {}
+
+    ## the affinity configs for the redis slave Pods
+    ##
+    ## SPEC - Affinity:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+    ##
+    affinity: {}
+
+    ## the toleration configs for the redis slave Pods
+    ##
+    ## SPEC - Toleration:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+    ##
+    tolerations: []
+
     ## annotations for the slave Pods
     ##
     podAnnotations:
       cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
 
-    ## configs for the PVC of the redis slaves
+    ## configs for the PVC of the redis slave Pods
     ##
     persistence:
       ## use a PVC to persist data
