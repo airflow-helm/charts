@@ -162,8 +162,6 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
   envFrom:
     {{- include "airflow.envFrom" . | indent 4 }}
   env:
-    {{- include "airflow.env" . | indent 4 }}
-    {{- /* we define our GIT_XXXX configs BELOW any user configs (so ours take precidence) */ -}}
     {{- if .sync_one_time }}
     - name: GIT_SYNC_ONE_TIME
       value: "true"
@@ -215,6 +213,8 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
           name: {{ .Values.dags.gitSync.httpSecret }}
           key: {{ .Values.dags.gitSync.httpSecretPasswordKey }}
     {{- end }}
+    {{- /* this has user-defined variables, so must be included BELOW (so the ABOVE `env` take precedence) */ -}}
+    {{- include "airflow.env" . | indent 4 }}
   volumeMounts:
     - name: dags-data
       mountPath: /dags
@@ -403,6 +403,15 @@ The list of `env` for web/scheduler/worker/flower Pods
 - name: REDIS_PASSWORD
   value: ""
 {{- end }}
+{{- end }}
+
+{{- /* set AIRFLOW__CELERY__FLOWER_BASIC_AUTH */ -}}
+{{- if .Values.flower.basicAuthSecret }}
+- name: AIRFLOW__CELERY__FLOWER_BASIC_AUTH
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.flower.basicAuthSecret }}
+      key: {{ .Values.flower.basicAuthSecretKey }}
 {{- end }}
 
 {{- /* user-defined environment variables */ -}}

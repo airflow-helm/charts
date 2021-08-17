@@ -49,9 +49,10 @@ spec:
       envFrom:
         {{- include "airflow.envFrom" . | indent 8 }}
       env:
-        {{- include "airflow.env" . | indent 8 }}
         - name: AIRFLOW__CORE__EXECUTOR
           value: LocalExecutor
+        {{- /* this has user-defined variables, so must be included BELOW (so the ABOVE `env` take precedence) */ -}}
+        {{- include "airflow.env" . | indent 8 }}
       ports: []
       command: []
       args: []
