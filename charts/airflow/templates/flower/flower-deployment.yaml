@@ -92,13 +92,6 @@ spec:
             {{- include "airflow.envFrom" . | indent 12 }}
           env:
             {{- include "airflow.env" . | indent 12 }}
-            {{- if .Values.flower.basicAuthSecret }}
-            - name: AIRFLOW__CELERY__FLOWER_BASIC_AUTH
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.flower.basicAuthSecret }}
-                  key: {{ .Values.flower.basicAuthSecretKey }}
-            {{- end }}
           ports:
             - name: flower
               containerPort: 5555
