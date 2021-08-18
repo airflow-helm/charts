@@ -329,6 +329,73 @@ airflow:
     extraVolumes: []
 
   ########################################
+  ## COMPONENT | db-migrations Deployment
+  ########################################
+  dbMigrations:
+    ## if the db-migrations Deployment/Job is created
+    ## - [WARNING] if `false`, you have to MANUALLY run `airflow db upgrade` when required
+    ##
+    enabled: true
+
+    ## if a post-install helm Job should be used (instead of a Deployment)
+    ## - [WARNING] setting `true` will NOT work with the helm `--wait` flag,
+    ##   this is because post-install helm Jobs run AFTER the main resources become Ready,
+    ##   which will cause a deadlock, as other resources require db-migrations to become Ready
+    ##
+    runAsJob: false
+
+    ## resource requests/limits for the db-migrations Pods
+    ## - spec for ResourceRequirements:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ##
+    resources: {}
+
+    ## the nodeSelector configs for the db-migrations Pods
+    ## - docs for nodeSelector:
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+    ##
+    nodeSelector: {}
+
+    ## the affinity configs for the db-migrations Pods
+    ## - spec for Affinity:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+    ##
+    affinity: {}
+
+    ## the toleration configs for the db-migrations Pods
+    ## - spec for Toleration:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+    ##
+    tolerations: []
+
+    ## the security context for the db-migrations Pods
+    ## - spec for PodSecurityContext:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
+    ##
+    securityContext: {}
+
+    ## Pod labels for the db-migrations Deployment
+    ##
+    podLabels: {}
+
+    ## annotations for the db-migrations Deployment/Job
+    ##
+    annotations: {}
+
+    ## Pod annotations for the db-migrations Deployment/Job
+    ##
+    podAnnotations: {}
+
+    ## if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true"
+    ##
+    safeToEvict: true
+
+    ## the number of seconds between checks for unapplied db migrations
+    ## - only applies if `airflow.dbMigrations.runAsJob` is `false`
+    ##
+    checkInterval: 300
+
+  ########################################
   ## COMPONENT | Sync Deployments
   ########################################
   ## - used by the Deployments/Jobs used by `airflow.{connections,pools,users,variables}`
