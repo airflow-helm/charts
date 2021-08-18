@@ -1351,6 +1351,177 @@ serviceAccount:
 extraManifests: []
 
 ###################################
+## DATABASE | PgBouncer
+###################################
+pgbouncer:
+  ## if the pgbouncer Deployment is created
+  ##
+  enabled: true
+
+  ## configs for the pgbouncer container image
+  ##
+  image:
+    repository: ghcr.io/airflow-helm/pgbouncer
+    tag: 1.15.0-patch.0
+    pullPolicy: IfNotPresent
+    uid: 1001
+    gid: 1001
+
+  ## resource requests/limits for the pgbouncer Pods
+  ## - spec for ResourceRequirements:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ##
+  resources: {}
+
+  ## the nodeSelector configs for the pgbouncer Pods
+  ## - docs for nodeSelector:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  ##
+  nodeSelector: {}
+
+  ## the affinity configs for the pgbouncer Pods
+  ## - spec for Affinity:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+  ##
+  affinity: {}
+
+  ## the toleration configs for the pgbouncer Pods
+  ## - spec for Toleration:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+  ##
+  tolerations: []
+
+  ## the security context for the pgbouncer Pods
+  ## - spec for PodSecurityContext:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
+  ##
+  securityContext: {}
+
+  ## labels for the pgbouncer Deployment
+  ##
+  labels: {}
+
+  ## Pod labels for the pgbouncer Deployment
+  ##
+  podLabels: {}
+
+  ## annotations for the pgbouncer Deployment
+  ##
+  annotations: {}
+
+  ## Pod annotations for the pgbouncer Deployment
+  ##
+  podAnnotations: {}
+
+  ## if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true"
+  ##
+  safeToEvict: true
+
+  ## configs for the PodDisruptionBudget of the pgbouncer Deployment
+  ##
+  podDisruptionBudget:
+    ## if a PodDisruptionBudget resource is created for the pgbouncer Deployment
+    ##
+    enabled: false
+
+    ## the maximum unavailable pods/percentage for the pgbouncer Deployment
+    ##
+    maxUnavailable:
+
+    ## the minimum available pods/percentage for the pgbouncer Deployment
+    ##
+    minAvailable:
+
+  ## configs for the pgbouncer Pods' liveness probe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 30
+    timeoutSeconds: 15
+    failureThreshold: 3
+
+  ## the maximum number of seconds to wait for queries upon pod termination, before force killing
+  ##
+  terminationGracePeriodSeconds: 120
+
+  ## sets pgbouncer config: `max_client_conn`
+  ##
+  maxClientConnections: 100
+
+  ## sets pgbouncer config: `default_pool_size`
+  ##
+  poolSize: 20
+
+  ## sets pgbouncer config: `log_disconnections`
+  ##
+  logDisconnections: 0
+
+  ## sets pgbouncer config: `log_connections`
+  ##
+  logConnections: 0
+
+  ## ssl configs for: clients -> pgbouncer
+  ## - if `caFile`, `keyFile`, `certFile` are not provided, we auto generate self-signed certificates
+  ##
+  clientSSL:
+    ## sets pgbouncer config: `client_tls_sslmode`
+    ##
+    mode: prefer
+
+    ## sets pgbouncer config: `client_tls_ciphers`
+    ##
+    ciphers: normal
+
+    ## sets pgbouncer config: `client_tls_ca_file`
+    ##
+    caFile:
+      existingSecret: ""
+      existingSecretKey: root.crt
+
+    ## sets pgbouncer config: `client_tls_key_file`
+    ##
+    keyFile:
+      existingSecret: ""
+      existingSecretKey: client.key
+
+    ## sets pgbouncer config: `client_tls_cert_file`
+    ##
+    certFile:
+      existingSecret: ""
+      existingSecretKey: client.crt
+
+  ## ssl configs for: pgbouncer -> postgres
+  ## - if `caFile`, `keyFile`, `certFile` are not provided, we auto generate self-signed certificates
+  ##
+  serverSSL:
+    ## sets pgbouncer config: `server_tls_sslmode`
+    ##
+    mode: prefer
+
+    ## sets pgbouncer config: `server_tls_ciphers`
+    ##
+    ciphers: normal
+
+    ## sets pgbouncer config: `server_tls_ca_file`
+    ##
+    caFile:
+      existingSecret: ""
+      existingSecretKey: root.crt
+
+    ## sets pgbouncer config: `server_tls_key_file`
+    ##
+    keyFile:
+      existingSecret: ""
+      existingSecretKey: server.key
+
+    ## sets pgbouncer config: `server_tls_cert_file`
+    ##
+    certFile:
+      existingSecret: ""
+      existingSecretKey: server.crt
+
+###################################
 ## DATABASE | Embedded Postgres
 ###################################
 postgresql:
