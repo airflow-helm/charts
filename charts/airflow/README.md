@@ -179,6 +179,21 @@ airflow:
     HTTP_PROXY: "http://proxy.example.com:8080"
 ```
 
+If you want to set [cluster policies](https://airflow.apache.org/docs/apache-airflow/stable/concepts/cluster-policies.html) with an `airflow_local_settings.py` file, you can use the `airflow.localSettings.*` values:
+```yaml
+airflow:
+  localSettings:
+    ## the full content of the `airflow_local_settings.py` file (as a string)
+    stringOverride: |
+      # use a custom `xcom_sidecar` image for KubernetesPodOperator()
+      from airflow.kubernetes.pod_generator import PodDefaults
+      PodDefaults.SIDECAR_CONTAINER.image = "gcr.io/PROJECT-ID/custom-sidecar-image"
+      
+    ## the name of a Secret containing a `airflow_local_settings.py` key
+    ## (if set, this disables `airflow.localSettings.stringOverride`)
+    #existingSecret: "my-airflow-local-settings"
+```
+
 <hr>
 </details>
 
@@ -1425,6 +1440,7 @@ Parameter | Description | Default
 `airflow.extraContainers` | extra containers for the airflow Pods | `[]`
 `airflow.extraVolumeMounts` | extra VolumeMounts for the airflow Pods | `[]`
 `airflow.extraVolumes` | extra Volumes for the airflow Pods | `[]`
+`airflow.localSettings.*` | airflow_local_settings.py | `<see values.yaml>`
 `airflow.kubernetesPodTemplate.*` | pod_template.yaml | `<see values.yaml>`
 `airflow.sync.*` | Sync Deployments | `<see values.yaml>`
 

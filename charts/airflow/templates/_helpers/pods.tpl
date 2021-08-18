@@ -278,6 +278,14 @@ The list of `volumeMounts` for web/scheduler/worker/flower container
 EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
 */}}
 {{- define "airflow.volumeMounts" }}
+{{- /* airflow_local_settings.py */ -}}
+{{- if or (.Values.airflow.localSettings.stringOverride) (.Values.airflow.localSettings.existingSecret) }}
+- name: airflow-local-settings
+  mountPath: /opt/airflow/config/airflow_local_settings.py
+  subPath: airflow_local_settings.py
+  readOnly: true
+{{- end }}
+
 {{- /* dags */ -}}
 {{- if .Values.dags.persistence.enabled }}
 - name: dags-data
@@ -320,6 +328,18 @@ The list of `volumes` for web/scheduler/worker/flower Pods
 EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
 */}}
 {{- define "airflow.volumes" }}
+{{- /* airflow_local_settings.py */ -}}
+{{- if or (.Values.airflow.localSettings.stringOverride) (.Values.airflow.localSettings.existingSecret) }}
+- name: airflow-local-settings
+  secret:
+    {{- if .Values.airflow.localSettings.existingSecret }}
+    secretName: {{ .Values.airflow.localSettings.existingSecret }}
+    {{- else }}
+    secretName: {{ include "airflow.fullname" . }}-local-settings
+    {{- end }}
+    defaultMode: 0644
+{{- end }}
+
 {{- /* dags */ -}}
 {{- if .Values.dags.persistence.enabled }}
 - name: dags-data
