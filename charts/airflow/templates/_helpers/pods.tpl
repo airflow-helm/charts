@@ -403,7 +403,7 @@ The list of `envFrom` for web/scheduler/worker/flower Pods
 */}}
 {{- define "airflow.envFrom" }}
 - secretRef:
-    name: "{{ include "airflow.fullname" . }}-config"
+    name: {{ include "airflow.fullname" . }}-config-envs
 {{- end }}
 
 {{/*
