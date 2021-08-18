@@ -1442,6 +1442,7 @@ Parameter | Description | Default
 `airflow.extraVolumes` | extra Volumes for the airflow Pods | `[]`
 `airflow.localSettings.*` | airflow_local_settings.py | `<see values.yaml>`
 `airflow.kubernetesPodTemplate.*` | pod_template.yaml | `<see values.yaml>`
+`airflow.dbMigrations.*` | db-migrations Deployment | `<see values.yaml>`
 `airflow.sync.*` | Sync Deployments | `<see values.yaml>`
 
 <hr>
