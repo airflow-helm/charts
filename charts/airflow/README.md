@@ -902,7 +902,7 @@ Example values to create a PVC with the cluster-default `storageClass` and 1Gi i
 airflow:
   defaultSecurityContext:
     ## sets the filesystem owner group of files/folders in mounted volumes
-    ## gid=0 specifies the "root" group (NOTE: this does NOT give root permissions to Pods)
+    ## this does NOT give root permissions to Pods, only the "root" group
     fsGroup: 0
 
 logs:
@@ -925,7 +925,7 @@ Example values to use an existing PVC called `my-logs-pvc`:
 airflow:
   defaultSecurityContext:
     ## sets the filesystem owner group of files/folders in mounted volumes
-    ## gid=0 specifies the "root" group (NOTE: this does NOT give root permissions to Pods)
+    ## this does NOT give root permissions to Pods, only the "root" group
     fsGroup: 0
 
 logs:
@@ -1401,8 +1401,8 @@ Parameter | Description | Default
 `airflow.legacyCommands` | if we use legacy 1.10 airflow commands | `false`
 `airflow.image.*` | configs for the airflow container image | `<see values.yaml>`
 `airflow.executor` | the airflow executor type to use | `CeleryExecutor`
-`airflow.fernetKey` | the fernet encryption key for connections/variables, sets `AIRFLOW__CORE__FERNET_KEY` | `7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc=`
-`airflow.webserverSecretKey` | the secret_key for flask, sets `AIRFLOW__WEBSERVER__SECRET_KEY` | `THIS IS UNSAFE!`
+`airflow.fernetKey` | the fernet encryption key (sets `AIRFLOW__CORE__FERNET_KEY`) | `7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc=`
+`airflow.webserverSecretKey` | the secret_key for flask (sets `AIRFLOW__WEBSERVER__SECRET_KEY`) | `THIS IS UNSAFE!`
 `airflow.config` | environment variables for airflow configs | `{}`
 `airflow.users` | a list of users to create | `<see values.yaml>`
 `airflow.usersTemplates` | bash-like templates to be used in `airflow.users` | `<see values.yaml>`
@@ -1415,18 +1415,18 @@ Parameter | Description | Default
 `airflow.variablesUpdate` | if we create a Deployment to perpetually sync `airflow.variables` | `true`
 `airflow.pools` | a list airflow pools to create | `<see values.yaml>`
 `airflow.poolsUpdate` | if we create a Deployment to perpetually sync `airflow.pools` | `true`
-`airflow.podAnnotations` | extra annotations for the web/scheduler/worker/flower Pods | `{}`
-`airflow.extraPipPackages` | extra pip packages to install in the web/scheduler/worker/flower Pods | `[]`
-`airflow.extraEnv` | extra environment variables for the web/scheduler/worker/flower Pods | `[]`
-`airflow.extraContainers` | extra containers for the web/scheduler/worker/flower Pods | `[]`
-`airflow.extraVolumeMounts` | extra VolumeMounts for the web/scheduler/worker/flower Pods | `[]`
-`airflow.extraVolumes` | extra Volumes for the web/scheduler/worker/flower Pods | `[]`
-`airflow.defaultNodeSelector` | default nodeSelector configs for Pods (is overridden by pod-specific values) | `{}`
-`airflow.defaultAffinity` | default affinity configs for Pods (is overridden by pod-specific values) | `{}`
-`airflow.defaultTolerations` | default toleration configs for Pods (is overridden by pod-specific values) | `[]`
+`airflow.defaultNodeSelector` | default nodeSelector for airflow Pods (is overridden by pod-specific values) | `{}`
+`airflow.defaultAffinity` | default affinity configs for airflow Pods (is overridden by pod-specific values) | `{}`
+`airflow.defaultTolerations` | default toleration configs for airflow Pods (is overridden by pod-specific values) | `[]`
 `airflow.defaultSecurityContext` | default securityContext configs for Pods (is overridden by pod-specific values) | `{fsGroup: 0}`
-`airflow.kubernetesPodTemplate.*` | configs to generate the AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE | `<see values.yaml>`
-`airflow.sync.*` | configs for the `airflow.{connections, pools, users, variables}` Deployments/Jobs | `<see values.yaml>`
+`airflow.podAnnotations` | extra annotations for airflow Pods | `{}`
+`airflow.extraPipPackages` | extra pip packages to install in airflow Pods | `[]`
+`airflow.extraEnv` | extra environment variables for the airflow Pods | `[]`
+`airflow.extraContainers` | extra containers for the airflow Pods | `[]`
+`airflow.extraVolumeMounts` | extra VolumeMounts for the airflow Pods | `[]`
+`airflow.extraVolumes` | extra Volumes for the airflow Pods | `[]`
+`airflow.kubernetesPodTemplate.*` | pod_template.yaml | `<see values.yaml>`
+`airflow.sync.*` | Sync Deployments | `<see values.yaml>`
 
 <hr>
 </details>
@@ -1656,14 +1656,14 @@ Parameter | Description | Default
 
 Parameter | Description | Default
 --- | --- | ---
-`externalDatabase.type` | the type of external database: {mysql,postgres} | `postgres`
+`externalDatabase.type` | the type of external database | `postgres`
 `externalDatabase.host` | the host of the external database | `localhost`
 `externalDatabase.port` | the port of the external database | `5432`
 `externalDatabase.database` | the database/scheme to use within the the external database | `airflow`
 `externalDatabase.user` | the user of the external database | `airflow`
 `externalDatabase.passwordSecret` | the name of a pre-created secret containing the external database password | `""`
 `externalDatabase.passwordSecretKey` | the key within `externalDatabase.passwordSecret` containing the password string | `postgresql-password`
-`externalDatabase.properties` | the connection properties e.g. "?sslmode=require" | `""`
+`externalDatabase.properties` | extra connection-string properties for the external database | `""`
 
 <hr>
 </details>
@@ -1698,7 +1698,7 @@ Parameter | Description | Default
 `externalRedis.databaseNumber` | the database number to use within the the external redis | `1`
 `externalRedis.passwordSecret` | the name of a pre-created secret containing the external redis password | `""`
 `externalRedis.passwordSecretKey` | the key within `externalRedis.passwordSecret` containing the password string | `redis-password`
-`externalDatabase.properties` | the connection properties eg ?ssl_cert_reqs=CERT_OPTIONAL | `""` 
+`externalDatabase.properties` | extra connection-string properties for the external redis | `""` 
 
 <hr>
 </details>

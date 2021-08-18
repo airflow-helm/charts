@@ -145,7 +145,7 @@ Use these commands to port-forward the Services to your localhost:
 {{ end }}
 
 {{- if $extra_pip_warning }}
-[HIGH] using `extraPipPackages` can cause unexpected runtime errors!
+[HIGH] using `extraPipPackages` can cause unexpected runtime errors if external PyPi packages change between Pod restarts
   * HELP: create a Docker image with your pip packages installed and use it with `airflow.image.*`
 {{ end }}
 
