@@ -39,6 +39,7 @@ spec:
     metadata:
       annotations:
         checksum/secret-config: {{ include (print $.Template.BasePath "/config/secret-config.yaml") . | sha256sum }}
+        checksum/secret-local-settings: {{ include (print $.Template.BasePath "/config/secret-local-settings.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
