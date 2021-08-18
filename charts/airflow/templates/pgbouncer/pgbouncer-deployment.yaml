@@ -32,7 +32,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secret-config: {{ include (print $.Template.BasePath "/config/secret-config.yaml") . | sha256sum }}
+        checksum/secret-config-envs: {{ include (print $.Template.BasePath "/config/secret-config-envs.yaml") . | sha256sum }}
         checksum/secret-pgbouncer: {{ include (print $.Template.BasePath "/pgbouncer/pgbouncer-secret.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
