@@ -1033,6 +1033,10 @@ serviceAccount:
 > 
 > The embedded Postgres is NOT SUITABLE for production, you should follow [How to use an external database?](#how-to-use-an-external-database)
 
+> 🟨 __Note__ 🟨
+>
+> If `pgbouncer.enabled=true` (the default), we will deploy [PgBouncer](https://www.pgbouncer.org/) to pool connections to your external database 
+
 The embedded Postgres database has an insecure username/password by default, you should create secure credentials before using it.
 
 For example, to create the required Kubernetes Secrets:
@@ -1068,6 +1072,10 @@ redis:
 <hr>
 
 <h3>Option 1 - Postgres</h3>
+
+> 🟨 __Note__ 🟨
+>
+> If `pgbouncer.enabled=true` (the default), we will deploy [PgBouncer](https://www.pgbouncer.org/) to pool connections to your external database
 
 Example values for an external Postgres database, with an existing `airflow_cluster1` database:
 ```yaml
@@ -1643,6 +1651,38 @@ Parameter | Description | Default
 Parameter | Description | Default
 --- | --- | ---
 `extraManifests` | extra Kubernetes manifests to include alongside this chart | `[]`
+
+<hr>
+</details>
+
+### `pgbouncer.*`
+<details>
+<summary>Expand</summary>
+<hr>
+
+Parameter | Description | Default
+--- | --- | ---
+`pgbouncer.enabled` | if the pgbouncer Deployment is created | `true`
+`pgbouncer.image.*` | configs for the pgbouncer container image | `<see values.yaml>`
+`pgbouncer.resources` | resource requests/limits for the pgbouncer Pods | `{}`
+`pgbouncer.nodeSelector` | the nodeSelector configs for the pgbouncer Pods | `{}`
+`pgbouncer.affinity` | the affinity configs for the pgbouncer Pods | `{}`
+`pgbouncer.tolerations` | the toleration configs for the pgbouncer Pods | `[]`
+`pgbouncer.securityContext` | the security context for the pgbouncer Pods | `{}`
+`pgbouncer.labels` | labels for the pgbouncer Deployment | `{}`
+`pgbouncer.podLabels` | Pod labels for the pgbouncer Deployment | `{}`
+`pgbouncer.annotations` | annotations for the pgbouncer Deployment | `{}`
+`pgbouncer.podAnnotations` | Pod annotations for the pgbouncer Deployment | `{}`
+`pgbouncer.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
+`pgbouncer.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the pgbouncer | `<see values.yaml>`
+`pgbouncer.livenessProbe.*` | configs for the pgbouncer Pods' liveness probe | `<see values.yaml>`
+`pgbouncer.terminationGracePeriodSeconds` | the maximum number of seconds to wait for queries upon pod termination, before force killing | `120`
+`pgbouncer.maxClientConnections` | sets pgbouncer config: `max_client_conn` | `100`
+`pgbouncer.poolSize` | sets pgbouncer config: `default_pool_size` | `20`
+`pgbouncer.logDisconnections` | sets pgbouncer config: `log_disconnections` | `0`
+`pgbouncer.logConnections` | sets pgbouncer config: `log_connections` | `0`
+`pgbouncer.clientSSL.*` | ssl configs for: clients -> pgbouncer | `<see values.yaml>`
+`pgbouncer.serverSSL.*` | ssl configs for: pgbouncer -> postgres | `<see values.yaml>`
 
 <hr>
 </details>
