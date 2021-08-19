@@ -3,20 +3,68 @@ All notable changes to this project will be documented in this file.
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [Unreleased] - TBD
+
+TBD
+
+## [8.5.0] - 2021-08-19
+
+
+> 🟨 __NOTE__ 🟨
+>
+> This is an important upgrade for Postgres users, as it implements [PgBouncer](https://www.pgbouncer.org/) support, which should  eliminate Postgres "too many connections" errors. 
+> 
+> If you are using `ingress.enabled` and Kubernetes `1.18` or earlier, you MUST set `ingress.apiVersion` to `networking.k8s.io/v1beta1`.
+> 
+> If you are using the `XXXX.securityContext` values, consider using the new global `airflow.defaultSecurityContext` value, so that you don't have to update your values in future.
+>
+> If you are using the `XXXX.{nodeSelector,affinity,tolerations}` values, consider using the new global `airflow.{defaultNodeSelector,defaultAffinity,defaultTolerations}` values, so that you don't have to update your values in future.
+
 
 ### Added
-- _see [Unreleased]_
+- PgBouncer is now supported (and enabled by default), see the new `pgbouncer.*` values ([#341](https://github.com/airflow-helm/charts/pull/341), [#330](https://github.com/airflow-helm/charts/pull/330))
+  - __NOTE:__ this should eliminate Postgres "too many connections" errors
+- created a new Deployment called `db-migrations` to manage airflow database schema upgrades ([#345](https://github.com/airflow-helm/charts/pull/345))
+  - __NOTE:__ to go back to a post-install Job, set `airflow.dbMigrations.runAsJob` to `true`
+- added the `airflow.webserverSecretKey` value with default `"THIS IS UNSAFE!"` ([#346](https://github.com/airflow-helm/charts/pull/346))
+  - __WARNING:__ you should CHANGE this value for security
+- added the `airflow.defaultSecurityContext` value with default `{fsGroup: 0}` ([#367](https://github.com/airflow-helm/charts/pull/367))
+  - __NOTE:__ the default of `{fsGroup: 0}` should prevent filesystem permission errors in mounted volumes
+- added `airflow.{defaultNodeSelector,defaultAffinity,defaultTolerations}` values ([#372](https://github.com/airflow-helm/charts/pull/372))
+- added `airflow.localSettings.*` values to make specifying `airflow_local_settings.py` easier ([#374](https://github.com/airflow-helm/charts/pull/374))
 
 ### Changed
-- _see [Unreleased]_
+- the Kubernetes Ingress now uses `networking.k8s.io/v1` for `apiVersion` by default ([#381](https://github.com/airflow-helm/charts/pull/381))
+  - __WARNING:__ if using Kubernetes 1.18 or earlier, you MUST set `ingress.apiVersion` to `networking.k8s.io/v1beta1`
+  - __WARNING:__ if using Kubernetes 1.22+, you MUST set `ingress.apiVersion` to `networking.k8s.io/v1` (this is default)
+- we now include git-sync containers in all Deployments ([#390](https://github.com/airflow-helm/charts/pull/390))
+  - __NOTE:__ this allows "airflow plugins" and "python packages" to be stored in the DAGs repo
+- we now use the official `/entrypoint` of the airflow container ([#386](https://github.com/airflow-helm/charts/pull/386))
+  - __NOTE:__ this should fix OpenShift support
+- the default `airflow.image` is now `apache/airflow:2.1.2-python3.8`
+  - __NOTE:__ this does not affect support for older airflow versions, see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
+- the default `airflow.image.gid` is now `0` ([#388](https://github.com/airflow-helm/charts/pull/388))
+- any `airflow.extraPipPackages` are now installed in snyc Jobs/Deployments ([#354](https://github.com/airflow-helm/charts/pull/354))
+- we now include `airflow.{config,extraEnv}` in the pip-install containers ([#365](https://github.com/airflow-helm/charts/pull/365))
+- we now include `airflow.{config,extraEnv}` in the git-sync containers ([#380](https://github.com/airflow-helm/charts/pull/380))
+- we now include `airflow.extraContainers` in the flower Deployment ([#379](https://github.com/airflow-helm/charts/pull/379))
+- the KubernetesExecutor pod-template now respects the `airflow.image.*` values ([#352](https://github.com/airflow-helm/charts/pull/352))
+- added values validation for `externalDatabase.type` ([#348](https://github.com/airflow-helm/charts/pull/348))
 
-### Removed
-- _see [Unreleased]_
 
 ### Fixed
-- _see [Unreleased]_
+- fixed the scheduler livenessProbe command ([#351](https://github.com/airflow-helm/charts/pull/351))
+- made the sync-users deployment close its db connection after each loop ([#320](https://github.com/airflow-helm/charts/pull/320))
+- stopped using `stringData` in Kubernetes Secrets ([#356](https://github.com/airflow-helm/charts/pull/356), [#391](https://github.com/airflow-helm/charts/pull/391))
+- fixed typos in sync/_helpers templates ([#366](https://github.com/airflow-helm/charts/pull/366), [#387](https://github.com/airflow-helm/charts/pull/387))
+- always include `airflow.env` last ([#385](https://github.com/airflow-helm/charts/pull/385))
 
+### Removed
+- removed the broken `flower.oauthDomains` value ([#383](https://github.com/airflow-helm/charts/pull/383))
+
+### Docs
+- significant rewrite of the post-install NOTES.txt ([#358](https://github.com/airflow-helm/charts/pull/358))
+- general cleanup of `values.yaml` docstrings ([#389](https://github.com/airflow-helm/charts/pull/389))
 
 ## [8.4.1] - 2021-07-12
 
@@ -569,7 +617,8 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 > To read more about versions `7.0.0` and before, please see the legacy repo:<br>
 > https://github.com/helm/charts/tree/master/stable/airflow
 
-[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.4.1...HEAD
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.5.0...HEAD
+[8.5.0]: https://github.com/airflow-helm/charts/compare/airflow-8.4.1...airflow-8.5.0
 [8.4.1]: https://github.com/airflow-helm/charts/compare/airflow-8.4.0...airflow-8.4.1
 [8.4.0]: https://github.com/airflow-helm/charts/compare/airflow-8.3.2...airflow-8.4.0
 [8.3.2]: https://github.com/airflow-helm/charts/compare/airflow-8.3.1...airflow-8.3.2
