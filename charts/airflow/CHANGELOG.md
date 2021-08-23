@@ -7,8 +7,12 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
-## [8.5.0] - 2021-08-19
+## [8.5.1] - 2021-08-23
 
+### Fixed
+- fixed PgBouncer not working if `externalDatabase.database` or `postgresql.postgresqlDatabase` is not `"airflow"` ([#398](https://github.com/airflow-helm/charts/pull/398))
+
+## [8.5.0] - 2021-08-19
 
 > 🟨 __NOTE__ 🟨
 >
@@ -19,7 +23,6 @@ TBD
 > If you are using the `XXXX.securityContext` values, consider using the new global `airflow.defaultSecurityContext` value, so that you don't have to update your values in future.
 >
 > If you are using the `XXXX.{nodeSelector,affinity,tolerations}` values, consider using the new global `airflow.{defaultNodeSelector,defaultAffinity,defaultTolerations}` values, so that you don't have to update your values in future.
-
 
 ### Added
 - PgBouncer is now supported (and enabled by default), see the new `pgbouncer.*` values ([#341](https://github.com/airflow-helm/charts/pull/341), [#330](https://github.com/airflow-helm/charts/pull/330))
@@ -50,7 +53,6 @@ TBD
 - we now include `airflow.extraContainers` in the flower Deployment ([#379](https://github.com/airflow-helm/charts/pull/379))
 - the KubernetesExecutor pod-template now respects the `airflow.image.*` values ([#352](https://github.com/airflow-helm/charts/pull/352))
 - added values validation for `externalDatabase.type` ([#348](https://github.com/airflow-helm/charts/pull/348))
-
 
 ### Fixed
 - fixed the scheduler livenessProbe command ([#351](https://github.com/airflow-helm/charts/pull/351))
@@ -617,7 +619,8 @@ TBD
 > To read more about versions `7.0.0` and before, please see the legacy repo:<br>
 > https://github.com/helm/charts/tree/master/stable/airflow
 
-[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.5.0...HEAD
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.5.1...HEAD
+[8.5.1]: https://github.com/airflow-helm/charts/compare/airflow-8.5.0...airflow-8.5.1
 [8.5.0]: https://github.com/airflow-helm/charts/compare/airflow-8.4.1...airflow-8.5.0
 [8.4.1]: https://github.com/airflow-helm/charts/compare/airflow-8.4.0...airflow-8.4.1
 [8.4.0]: https://github.com/airflow-helm/charts/compare/airflow-8.3.2...airflow-8.4.0
