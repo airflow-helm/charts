@@ -4,9 +4,9 @@ Define the content of the `pgbouncer.ini` config file.
 {{- define "airflow.pgbouncer.pgbouncer.ini" }}
 [databases]
 {{- if .Values.postgresql.enabled }}
-airflow = host={{ printf "%s.%s.svc.cluster.local" (include "airflow.postgresql.fullname" .) (.Release.Namespace) }} port=5432
+* = host={{ printf "%s.%s.svc.cluster.local" (include "airflow.postgresql.fullname" .) (.Release.Namespace) }} port=5432
 {{- else }}
-airflow = host={{ .Values.externalDatabase.host }} port={{ .Values.externalDatabase.port }}
+* = host={{ .Values.externalDatabase.host }} port={{ .Values.externalDatabase.port }}
 {{- end }}
 
 [pgbouncer]
