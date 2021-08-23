@@ -4,118 +4,129 @@ __Previously known as `stable/airflow`__
 
 [![Artifact HUB](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/airflow-helm)](https://artifacthub.io/packages/helm/airflow-helm/airflow)
 
----
+## About
 
-This chart provides a standard way to deploy [Apache Airflow](https://airflow.apache.org/) on your Kubernetes cluster,
-and is used by thousands of companies for their production deployments of Airflow.
+The `Airflow Helm Chart (User Community)` provides a standard way to deploy [Apache Airflow](https://airflow.apache.org/) on Kubernetes with Helm, and is used by thousands of companies for production deployments of Airflow.
 
-> 🟦 __Discussion__ 🟦
->
-> The `user community` chart is an alternative to the `official` chart found in the `apache/airflow` repo.<br>
-> There are differences between the charts, so you should evaluate which is better for your organisation.
->
-> The `user community` chart has existed since 2018 and was previously called `stable/airflow` on the official [helm/charts](https://github.com/helm/charts/tree/master/stable/airflow) repo.
->
-> The goals of the `user community` chart are:<br>
-> (1) be easy to configure<br>
-> (2) support older airflow versions<br>
-> (3) provide great documentation<br>
-> (4) automatically detect bad configs<br>
+### Goals:
+
+(1) Ease of Use<br>
+(2) Great Documentation<br>
+(3) Support for older Airflow Versions<br>
+(4) Support for Kubernetes GitOps Tools (like ArgoCD)
+
+### History:
+
+The `Airflow Helm Chart (User Community)` is a popular alternative to the official chart released in 2021 inside the `apache/airflow` git repository.
+It was created in 2018 and was previously called `stable/airflow` when it lived in the (now end-of-life) [helm/charts](https://github.com/helm/charts/tree/master/stable/airflow) repository.
+
+### Airflow Version Support:
+
+Chart Version → <br> Airflow Version ↓  | `7.X.X` | `8.X.X`  |
+--- | --- | ---
+`1.10.X` | ✅ | ✅️ <sub>[1]</sub>
+`2.0.X`| ❌ | ✅
+`2.1.X`| ❌ | ✅
+
+<sub>[1] you must set `airflow.legacyCommands = true` to use airflow version `1.10.X` with chart version `8.X.X`
+
+### Airflow Executor Support:
+
+Chart Version → <br> Airflow Executor ↓ | `7.X.X` | `8.X.X` | 
+--- | --- | ---
+`CeleryExecutor` | ✅ | ✅
+`KubernetesExecutor` | ✅️ <sub>[1]</sub> | ✅
+`CeleryKubernetesExecutor` | ❌ | ✅
+
+<sub>[1] we encourage you to use chart version `8.X.X`, so you can use the `airflow.kubernetesPodTemplate.*` values (note, requires airflow `1.10.11+`, as it uses [AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE](https://airflow.apache.org/docs/apache-airflow/2.1.0/configurations-ref.html#pod-template-file))
+
 
 ## Quickstart Guide
 
-These steps will allow you to quickly install Apache Airflow on your Kubernetes cluster using the `community` chart.
+### Install:
 
-### 1. Install the Chart
-
-> 🟨 __Note__ 🟨
->
-> In production, we encourage using a tool like [ArgoCD](https://argoproj.github.io/argo-cd/), rather than running `helm install` manually
-
+__(Step 1) - Add this helm repository:__
 ```sh
-# add this repo as "airflow-stable"
+## add this helm repository & pull updates from it
 helm repo add airflow-stable https://airflow-helm.github.io/charts
 helm repo update
-
-# set environment variables (to make `helm install ...` cleaner)
-export RELEASE_NAME=my-airflow-cluster # a name
-export NAMESPACE=my-airflow-namespace # a namespace
-export CHART_VERSION=8.X.X # a chart version - https://github.com/airflow-helm/charts/blob/main/charts/airflow/CHANGELOG.md
-export VALUES_FILE=./custom-values.yaml # your values file
-
-# use helm 3+ to install
-helm install \
-  $RELEASE_NAME \
-  airflow-stable/airflow \
-  --namespace $NAMESPACE \
-  --version $CHART_VERSION \
-  --values $VALUES_FILE
-  
-# wait until the above command returns (there are some post-install Jobs which may take a while)
 ```
 
-### 2. Login to the WebUI
-
+__(Step 2) - Install this chart:__
 ```sh
-export NAMESPACE=my-airflow-namespace # set a namespace!
+## set the release-name & namespace
+export AIRFLOW_NAME="airflow-cluster"
+export AIRFLOW_NAMESPACE="airflow-cluster"
 
-export POD_NAME=$(kubectl get pods --namespace $NAMESPACE -l "component=web,app=airflow" -o jsonpath="{.items[0].metadata.name}")
-kubectl port-forward --namespace $NAMESPACE $POD_NAME 8080:8080
-
-# open the web-ui in your browser: http://localhost:8080 
-# default user login: admin/admin
+## install using helm 3
+helm install \
+  $AIRFLOW_NAME \
+  airflow-stable/airflow \
+  --namespace $AIRFLOW_NAMESPACE \
+  --version "8.X.X" \
+  --values ./custom-values.yaml
+  
+## wait until the above command returns (may take a while)
 ```
 
-## Important Documentation
+__(Step 3) - Locally expose the airflow webserver:__
+```sh
+## port-forward the airflow webserver
+kubectl port-forward svc/${AIRFLOW_NAME}-web 8080:8080 --namespace $AIRFLOW_NAMESPACE
 
-### Changelog
+## open your browser to: http://localhost:8080 
+## default login: admin/admin
+```
 
-The [CHANGELOG.md](CHANGELOG.md) is found at the root of this chart folder.
+### Upgrade:
 
-### Airflow Version Support
+> __WARNING__: always consult the [CHANGELOG](CHANGELOG.md) before upgrading chart versions
 
-See [the guide here](#how-to-use-a-specific-version-of-airflow) on how to explicitly set your airflow version.
+```yaml
+## pull updates from the helm repository
+helm repo update
 
-. | `1.10.X`  | `2.0.X` | `2.1.X`
---- | --- | --- | ---
-chart - `7.X.X` | ✅ | ❌ | ❌
-chart - `8.X.X` | ✅ <sub>[1]</sub> | ✅ | ✅
+## apply any new values // upgrade chart version to 8.X.X
+helm upgrade \
+  $AIRFLOW_NAME \
+  airflow-stable/airflow \
+  --namespace $AIRFLOW_NAMESPACE \
+  --version "8.X.X" \
+  --values ./custom-values.yaml
+```
 
-<sub>[1] you must set `airflow.legacyCommands = true` to use airflow `1.10.X` with chart `8.X.X`
+### Uninstall:
 
-### Airflow Executor Support
+```yaml
+## uninstall the chart
+helm uninstall $AIRFLOW_NAME --namespace $AIRFLOW_NAMESPACE
+```
 
-Set your airflow executor-type using the `airflow.executor` value.
+### Examples:
 
-. | `CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor`
---- | --- | --- | --- 
-chart - `7.X.X` | ✅ | ✅ <sub>[1]</sub> | ❌
-chart - `8.X.X` | ✅ | ✅ | ✅
+To help you create your `custom-values.yaml` file, we provide some examples for common situations:
 
-<sub>[1] we encourage you to upgrade the chart to `8.X.X`, so you can use the `airflow.kubernetesPodTemplate` values (which require airflow `1.10.11+`, as they set [AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE](https://airflow.apache.org/docs/apache-airflow/2.1.0/configurations-ref.html#pod-template-file)) </sub>
+- ["Minikube - CeleryExecutor"](examples/minikube/custom-values.yaml)
+- ["Google (GKE) - CeleryExecutor"](examples/google-gke/custom-values.yaml)
 
-### Examples
+### Frequently Asked Questions:
 
-We provide some example `values.yaml` files for common configurations:
+> __NOTE:__ some values are not discussed in the `FAQ`, you can view the default [values.yaml](values.yaml) file for a full list of values
 
-- [Minikube/Kind - CeleryExecutor](examples/minikube/custom-values.yaml)
-- [Google Kubernetes Engine (GKE) - CeleryExecutor](examples/google-gke/custom-values.yaml)
+Review the FAQ to understand how the chart functions, here are some good starting points:
 
-### Further Reading
-
-We recommend you review the following questions from the FAQ:
-
-- [How to use a specific version of airflow?](#how-to-use-a-specific-version-of-airflow)
-- [How to set airflow configs?](#how-to-set-airflow-configs)
-- [How to create airflow users?](#how-to-create-airflow-users) or [How to authenticate airflow users with LDAP/OAUTH?](#how-to-authenticate-airflow-users-with-ldapoauth)
-- [How to create airflow connections?](#how-to-create-airflow-connections)
-- [How to use an external database?](#how-to-use-an-external-database)
-- [How to persist airflow logs?](#how-to-persist-airflow-logs)
-- [How to setup an Ingres?](#how-to-set-up-an-ingress)
+- ["How to use a specific version of airflow?"](#how-to-use-a-specific-version-of-airflow)
+- ["How to set airflow configs?"](#how-to-set-airflow-configs)
+- ["How to create airflow users?"](#how-to-create-airflow-users)
+- ["How to authenticate airflow users with LDAP/OAUTH?"](#how-to-authenticate-airflow-users-with-ldapoauth)
+- ["How to create airflow connections?"](#how-to-create-airflow-connections)
+- ["How to use an external database?"](#how-to-use-an-external-database)
+- ["How to persist airflow logs?"](#how-to-persist-airflow-logs)
+- ["How to set up an Ingress?"](#how-to-set-up-an-ingress)
 
 ## FAQ - Airflow
 
-> These are some frequently asked questions related to airflow configs:
+> __Frequently asked questions related to airflow configs__
 
 ### How to use a specific version of airflow?
 <details>
@@ -1022,7 +1033,7 @@ serviceAccount:
 
 ## FAQ - Databases
 
-> These are some frequently asked questions related to database configs:
+> __Frequently asked questions related to database configs__
 
 ### How to use the embedded Postgres?
 <details>
@@ -1146,7 +1157,7 @@ externalRedis:
 
 ## FAQ - Kubernetes
 
-> These are some frequently asked questions related to kubernetes configs:
+> __Frequently asked questions related to kubernetes configs__
 
 ### How to mount ConfigMaps/Secrets as environment variables?
 <details>
@@ -1254,7 +1265,7 @@ ingress:
 
 We expose the `ingress.web.precedingPaths` and `ingress.web.succeedingPaths` values, which are __before__ and __after__ the default path respectively.
 
-> 🟦 __Discussion__ 🟦
+> 🟦 __Tip__ 🟦 
 > 
 > A common use-case is [enabling SSL with the aws-alb-ingress-controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/tasks/ssl_redirect/), which needs a redirect path to be hit before the airflow-webserver one
 
@@ -1412,7 +1423,7 @@ extraManifests:
 
 ## Values Reference
 
-> The list of values provided by this chart (see the [values.yaml](values.yaml) file for more details):
+> __Values provided by this chart (for more info see [values.yaml](values.yaml))__
 
 ### `airflow.*`
 <details>
