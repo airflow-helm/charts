@@ -27,16 +27,24 @@ log_connections = {{ .Values.pgbouncer.logConnections }}
 ## CLIENT TLS SETTINGS ##
 client_tls_sslmode = {{ .Values.pgbouncer.clientSSL.mode }}
 client_tls_ciphers = {{ .Values.pgbouncer.clientSSL.ciphers }}
+{{- if .Values.pgbouncer.clientSSL.caFile.existingSecret }}
 client_tls_ca_file = /home/pgbouncer/certs/client-ca.crt
+{{- end }}
 client_tls_key_file = /home/pgbouncer/certs/client.key
 client_tls_cert_file = /home/pgbouncer/certs/client.crt
 
 ## SERVER TLS SETTINGS ##
 server_tls_sslmode = {{ .Values.pgbouncer.serverSSL.mode }}
 server_tls_ciphers = {{ .Values.pgbouncer.serverSSL.ciphers }}
+{{- if .Values.pgbouncer.serverSSL.caFile.existingSecret }}
 server_tls_ca_file = /home/pgbouncer/certs/server-ca.crt
+{{- end }}
+{{- if .Values.pgbouncer.serverSSL.keyFile.existingSecret }}
 server_tls_key_file = /home/pgbouncer/certs/server.key
+{{- end }}
+{{- if .Values.pgbouncer.serverSSL.certFile.existingSecret }}
 server_tls_cert_file = /home/pgbouncer/certs/server.crt
+{{- end }}
 
 {{- end }}
 

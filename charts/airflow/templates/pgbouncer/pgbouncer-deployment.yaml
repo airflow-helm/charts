@@ -143,15 +143,11 @@ spec:
         - name: pgbouncer-certs
           projected:
             sources:
-              {{- if or (not .Values.pgbouncer.clientSSL.caFile.existingSecret) (not .Values.pgbouncer.clientSSL.keyFile.existingSecret) (not .Values.pgbouncer.clientSSL.certFile.existingSecret) }}
-              ## CLIENT TLS FILES (AUTO GENERATED)
+              {{- if or (not .Values.pgbouncer.clientSSL.keyFile.existingSecret) (not .Values.pgbouncer.clientSSL.certFile.existingSecret) }}
+              ## CLIENT TLS FILES (CHART GENERATED)
               - secret:
                   name: {{ include "airflow.fullname" . }}-pgbouncer-certs
                   items:
-                    {{- if not .Values.pgbouncer.clientSSL.caFile.existingSecret }}
-                    - key: client-ca.crt
-                      path: client-ca.crt
-                    {{- end }}
                     {{- if not .Values.pgbouncer.clientSSL.keyFile.existingSecret }}
                     - key: client.key
                       path: client.key
@@ -162,27 +158,8 @@ spec:
                     {{- end }}
               {{- end }}
 
-              {{- if or (not .Values.pgbouncer.serverSSL.caFile.existingSecret) (not .Values.pgbouncer.serverSSL.keyFile.existingSecret) (not .Values.pgbouncer.serverSSL.certFile.existingSecret) }}
-              ## SERVER TLS FILES (AUTO GENERATED)
-              - secret:
-                  name: {{ include "airflow.fullname" . }}-pgbouncer-certs
-                  items:
-                    {{- if not .Values.pgbouncer.serverSSL.caFile.existingSecret }}
-                    - key: server-ca.crt
-                      path: server-ca.crt
-                    {{- end }}
-                    {{- if not .Values.pgbouncer.serverSSL.keyFile.existingSecret }}
-                    - key: server.key
-                      path: server.key
-                    {{- end }}
-                    {{- if not .Values.pgbouncer.serverSSL.certFile.existingSecret }}
-                    - key: server.crt
-                      path: server.crt
-                    {{- end }}
-              {{- end }}
-
               {{- if or (.Values.pgbouncer.clientSSL.caFile.existingSecret) (.Values.pgbouncer.clientSSL.keyFile.existingSecret) (.Values.pgbouncer.clientSSL.certFile.existingSecret) }}
-              ## CLIENT TLS FILES (USER CUSTOM)
+              ## CLIENT TLS FILES (USER PROVIDED)
               {{- if .Values.pgbouncer.clientSSL.caFile.existingSecret }}
               - secret:
                   name: {{ .Values.pgbouncer.clientSSL.caFile.existingSecret }}
@@ -207,7 +184,7 @@ spec:
               {{- end }}
 
               {{- if or (.Values.pgbouncer.serverSSL.caFile.existingSecret) (.Values.pgbouncer.serverSSL.keyFile.existingSecret) (.Values.pgbouncer.serverSSL.certFile.existingSecret) }}
-              ## SERVER TLS FILES (USER CUSTOM)
+              ## SERVER TLS FILES (USER PROVIDED)
               {{- if .Values.pgbouncer.serverSSL.caFile.existingSecret }}
               - secret:
                   name: {{ .Values.pgbouncer.serverSSL.caFile.existingSecret }}

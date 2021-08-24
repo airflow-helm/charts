@@ -1462,7 +1462,6 @@ pgbouncer:
   logConnections: 0
 
   ## ssl configs for: clients -> pgbouncer
-  ## - if `caFile`, `keyFile`, `certFile` are not provided, we auto generate self-signed certificates
   ##
   clientSSL:
     ## sets pgbouncer config: `client_tls_sslmode`
@@ -1480,19 +1479,20 @@ pgbouncer:
       existingSecretKey: root.crt
 
     ## sets pgbouncer config: `client_tls_key_file`
+    ## - [WARNING] a self-signed cert & key are generated if left empty
     ##
     keyFile:
       existingSecret: ""
       existingSecretKey: client.key
 
     ## sets pgbouncer config: `client_tls_cert_file`
+    ## - [WARNING] a self-signed cert & key are generated if left empty
     ##
     certFile:
       existingSecret: ""
       existingSecretKey: client.crt
 
   ## ssl configs for: pgbouncer -> postgres
-  ## - if `caFile`, `keyFile`, `certFile` are not provided, we auto generate self-signed certificates
   ##
   serverSSL:
     ## sets pgbouncer config: `server_tls_sslmode`
