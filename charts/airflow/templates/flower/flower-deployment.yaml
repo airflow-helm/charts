@@ -1,4 +1,7 @@
 {{- if .Values.flower.enabled }}
+{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.flower.nodeSelector) }}
+{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.flower.affinity) }}
+{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.flower.tolerations) }}
 {{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.flower.securityContext) }}
 {{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.flower.extraPipPackages }}
 {{- $extraVolumeMounts := .Values.flower.extraVolumeMounts }}
@@ -62,23 +65,23 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.airflow.image.pullSecret }}
       {{- end }}
-      {{- if .Values.flower.nodeSelector }}
+      {{- if $podNodeSelector }}
       nodeSelector:
-        {{- toYaml .Values.flower.nodeSelector | nindent 8 }}
+        {{- $podNodeSelector | nindent 8 }}
       {{- end }}
-      {{- if .Values.flower.affinity }}
+      {{- if $podAffinity }}
       affinity:
-        {{- toYaml .Values.flower.affinity | nindent 8 }}
+        {{- $podAffinity | nindent 8 }}
       {{- end }}
-      {{- if .Values.flower.tolerations }}
+      {{- if $podTolerations }}
       tolerations:
-        {{- toYaml .Values.flower.tolerations | nindent 8 }}
+        {{- $podTolerations | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       {{- if $podSecurityContext }}
       securityContext:
         {{- $podSecurityContext | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       initContainers:
         {{- if $extraPipPackages }}
         {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
