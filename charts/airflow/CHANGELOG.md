@@ -7,6 +7,23 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
+## [8.5.2] - 2021-08-25
+
+> 🟥 __Warning__ 🟥
+>
+> You must stop URL-encoding special characters in `externalDatabase.user`, the chart will now automatically do this for you.<br>
+> (For example, don't replace `@` with `%40` anymore)
+> 
+
+### Changed
+- special characters in `externalDatabase.user` are now automatically url-encoded ([#407](https://github.com/airflow-helm/charts/pull/407))
+  - __WARNING:__ you must stop URL-encoding special characters in `externalDatabase.user`
+
+### Fixed
+- self-signed certificates are now only generated for `client_tls_key_file` and `client_tls_cert_file` PgBouncer configs ([#404](https://github.com/airflow-helm/charts/pull/404))
+  - __NOTE:__ solves `routines:ssl3_read_bytes:tlsv1 alert unknown ca`, caused by incorrectly trying to verify remote Postgres servers with a self-signed CA `server_tls_ca_file`
+- flower pods are now correctly affected by default: nodeSelector, affinity, tolerations ([#405](https://github.com/airflow-helm/charts/pull/405))
+
 ## [8.5.1] - 2021-08-23
 
 ### Fixed
@@ -619,7 +636,8 @@ TBD
 > To read more about versions `7.0.0` and before, please see the legacy repo:<br>
 > https://github.com/helm/charts/tree/master/stable/airflow
 
-[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.5.1...HEAD
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.5.2...HEAD
+[8.5.2]: https://github.com/airflow-helm/charts/compare/airflow-8.5.1...airflow-8.5.2
 [8.5.1]: https://github.com/airflow-helm/charts/compare/airflow-8.5.0...airflow-8.5.1
 [8.5.0]: https://github.com/airflow-helm/charts/compare/airflow-8.4.1...airflow-8.5.0
 [8.4.1]: https://github.com/airflow-helm/charts/compare/airflow-8.4.0...airflow-8.4.1
