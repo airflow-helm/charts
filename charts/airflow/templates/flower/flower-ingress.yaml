@@ -17,6 +17,7 @@ metadata:
     {{- toYaml .Values.ingress.flower.labels | nindent 4 }}
     {{- end }}
 spec:
+  ingressClassName: {{ .Values.ingress.ingressClassName }}
   {{- if .Values.ingress.flower.tls.enabled }}
   tls:
     - hosts:

@@ -7,13 +7,19 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
+## [8.6.0] - 2021-09-10
+
+### Changed
+- add `ingress.ingressClassName` - required since kubernetes 1.19+ ([#411](https://github.com/airflow-helm/charts/pull/411))
+
+
 ## [8.5.2] - 2021-08-25
 
 > 🟥 __Warning__ 🟥
 >
 > You must stop URL-encoding special characters in `externalDatabase.user`, the chart will now automatically do this for you.<br>
 > (For example, don't replace `@` with `%40` anymore)
-> 
+>
 
 ### Changed
 - special characters in `externalDatabase.user` are now automatically url-encoded ([#407](https://github.com/airflow-helm/charts/pull/407))
@@ -33,10 +39,10 @@ TBD
 
 > 🟨 __NOTE__ 🟨
 >
-> This is an important upgrade for Postgres users, as it implements [PgBouncer](https://www.pgbouncer.org/) support, which should  eliminate Postgres "too many connections" errors. 
-> 
+> This is an important upgrade for Postgres users, as it implements [PgBouncer](https://www.pgbouncer.org/) support, which should  eliminate Postgres "too many connections" errors.
+>
 > If you are using `ingress.enabled` and Kubernetes `1.18` or earlier, you MUST set `ingress.apiVersion` to `networking.k8s.io/v1beta1`.
-> 
+>
 > If you are using the `XXXX.securityContext` values, consider using the new global `airflow.defaultSecurityContext` value, so that you don't have to update your values in future.
 >
 > If you are using the `XXXX.{nodeSelector,affinity,tolerations}` values, consider using the new global `airflow.{defaultNodeSelector,defaultAffinity,defaultTolerations}` values, so that you don't have to update your values in future.
@@ -99,8 +105,8 @@ TBD
 
 ### Added
 - allow referencing Secrets/ConfigMaps in `airflow.{users,connections,pools,variables}` ([#281](https://github.com/airflow-helm/charts/pull/281))
-  - __WARNING:__ the meaning of `airflow.{usersUpdate,connectionsUpdate,poolsUpdate,variablesUpdate}` have changed, 
-      they now configure if a Deployment is created to perpetually sync `airflow.{users,connections,pools,variables}`, 
+  - __WARNING:__ the meaning of `airflow.{usersUpdate,connectionsUpdate,poolsUpdate,variablesUpdate}` have changed,
+      they now configure if a Deployment is created to perpetually sync `airflow.{users,connections,pools,variables}`,
       or if a single Job is created on each `helm upgrade ...`
   - __Docs:__
     - [How to create airflow users?](https://github.com/airflow-helm/charts/tree/main/charts/airflow#how-to-create-airflow-users)
@@ -157,7 +163,7 @@ TBD
 ### Added
 - Add support for GIT_SYNC_MAX_FAILURES ([#182](https://github.com/airflow-helm/charts/issues/182))
   - `dags.gitSync.maxFailures`
-    
+
 ## [8.2.0] - 2021-06-03
 ### Added
 - Add redis properties configuration for external redis ([#200](https://github.com/airflow-helm/charts/issues/200))
@@ -252,8 +258,8 @@ TBD
 
 ## [8.0.0] - 2021-03-27
 
-> 🟥 __Warning__ 🟥 
-> 
+> 🟥 __Warning__ 🟥
+>
 > This is a MAJOR update, meaning there are BREAKING changes
 >
 > Upgrading Tips:
@@ -454,7 +460,7 @@ TBD
    - `scheduler.secretsDir`
    - `scheduler.secrets`
    - `scheduler.secretsMap`
-    
+
 ## [7.15.0] - 2020-12-15
 ### Changed
 - We now use `airflow upgradedb || airflow db upgrade` instead of `airflow initdb` with the following values ([#39](https://github.com/airflow-helm/charts/issues/39))
@@ -481,11 +487,11 @@ TBD
 
 ## [7.14.0] - 2020-11-05
 
-> 🟥 __Warning__ 🟥 
-> 
+> 🟥 __Warning__ 🟥
+>
 > This is the first version after migrating to the new repo:<br>
 > https://github.com/airflow-helm/charts/tree/main/charts/airflow
-> 
+>
 > All versions before `7.14.0` are ONLY available in the legacy repo:<br>
 > https://github.com/helm/charts/tree/master/stable/airflow
 
@@ -536,7 +542,7 @@ TBD
 - Upgraded to Airflow: 1.10.12
 
 ## 7.7.0 - 20XX-XX-XX
-### Fixed 
+### Fixed
 - `redis.existingSecretKey` in `values.yaml` was corrected to `redis.existingSecretPasswordKey` (to align with [stable/redis](https://github.com/helm/charts/tree/master/stable/redis))
 
 ## 7.6.0 - 20XX-XX-XX
@@ -561,7 +567,7 @@ TBD
    - `flower.replicas`
 - You can now specify minReadySeconds for flower
    - `flower.minReadySeconds`
-    
+
 ### Changed
 - The chart YAML has been refactored
 - Default values of embedded charts (postgres, redis) have been set with `safe-to-evit` annotations:
@@ -637,6 +643,7 @@ TBD
 > https://github.com/helm/charts/tree/master/stable/airflow
 
 [Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.5.2...HEAD
+[8.6.0]: https://github.com/airflow-helm/charts/compare/airflow-8.5.2...airflow-8.6.0
 [8.5.2]: https://github.com/airflow-helm/charts/compare/airflow-8.5.1...airflow-8.5.2
 [8.5.1]: https://github.com/airflow-helm/charts/compare/airflow-8.5.0...airflow-8.5.1
 [8.5.0]: https://github.com/airflow-helm/charts/compare/airflow-8.4.1...airflow-8.5.0
