@@ -232,6 +232,10 @@ airflow:
   ##
   extraVolumes: []
 
+  ## kubernetes cluster domain name configured in the kubelet with clusterDomain option
+  ##
+  clusterDomain: "cluster.local"
+
   ########################################
   ## FILE | airflow_local_settings.py
   ########################################

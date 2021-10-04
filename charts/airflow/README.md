@@ -1459,6 +1459,7 @@ Parameter | Description | Default
 `airflow.extraContainers` | extra containers for the airflow Pods | `[]`
 `airflow.extraVolumeMounts` | extra VolumeMounts for the airflow Pods | `[]`
 `airflow.extraVolumes` | extra Volumes for the airflow Pods | `[]`
+`airflow.clusterDomain` | kubernetes cluster domain name | `cluster.local`
 `airflow.localSettings.*` | airflow_local_settings.py | `<see values.yaml>`
 `airflow.kubernetesPodTemplate.*` | pod_template.yaml | `<see values.yaml>`
 `airflow.dbMigrations.*` | db-migrations Deployment | `<see values.yaml>`
