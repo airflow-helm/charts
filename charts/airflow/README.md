@@ -27,6 +27,7 @@ Chart Version → <br> Airflow Version ↓  | `7.X.X` | `8.X.X`  |
 `1.10.X` | ✅ | ✅️ <sub>[1]</sub>
 `2.0.X`| ❌ | ✅
 `2.1.X`| ❌ | ✅
+`2.2.X`| ❌ | ✅
 
 <sub>[1] you must set `airflow.legacyCommands = true` to use airflow version `1.10.X` with chart version `8.X.X`
 

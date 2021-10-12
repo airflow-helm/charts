@@ -10,7 +10,7 @@ airflow:
   ##
   image:
     repository: apache/airflow
-    tag: 2.1.2-python3.8
+    tag: 2.2.0-python3.8
     pullPolicy: IfNotPresent
     pullSecret: ""
     uid: 50000
