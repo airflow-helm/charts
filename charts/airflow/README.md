@@ -1264,7 +1264,8 @@ helm upgrade --install cert-manager --create-namespace --namespace cert-manager 
 Here you'll want to install ingress in a separate namespace. For this, you can just do : 
 
 ```console
-
+## Install the ingress
+helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --create-namespace --namespace ingress-nginx
 ```
 
 <h4>Issuer and certificate</h4>
@@ -1312,8 +1313,6 @@ spec:
 You can do : 
 
 ```console
-## Install the ingress
-helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --create-namespace --namespace ingress-nginx
 ## Install issuer & certificate
 kubectl apply -f issuer.yaml -n ingress-nginx
 ## Be careful, the certificate must be installed in your application namespace here airflow-ns
@@ -1387,6 +1386,117 @@ ingress:
 ```
 
 <h3>Option 2 - Use one ingress by namespace</h3>
+
+<h4>Setup ingress</h4>
+
+Here you'll want to install ingress in the exact namespace that you will install Airflow. For this, you can just do :
+
+```console
+## Install the ingress
+helm upgrade --install namespace-ingress ingress-nginx/ingress-nginx --namespace airflow-ns --set controller.ingressClassResource.name=airflow-ns --set controller.ingressClassResource.controllerValue="k8s.io/airflow-ns" --set controller.ingressClassResource.enabled=true --set controller.ingressClassByName=true
+```
+
+<h4>Issuer and certificate</h4>
+
+Based on the following files :
+
+- issuer.yaml
+
+```yaml
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: airflow-ns-issuer
+spec:
+  acme:
+    ## For tests, you'll probably want to use https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: your_email
+    privateKeySecretRef:
+      name: airflow-ns-account-key
+    solvers:
+    - http01:
+       ingress:
+         class: airflow-ns
+```
+
+- certificate.yaml
+
+```yaml
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: airflow-ns-certificate
+spec:
+  secretName: airflow-ns-certificate
+  issuerRef:
+    kind: Issuer
+    name: airflow-ns-issuer
+  dnsNames:
+    - your_dns
+```
+
+You can do :
+
+```console
+## Install issuer & certificate
+## Be careful, both issuer & certificate must be installed in your application namespace here airflow-ns
+kubectl apply -n airflow-ns -f issuer.yaml
+kubectl apply -n airflow-ns -f certificate.yaml
+```
+
+<h4>Ingress</h4>
+
+Because of #425, you'll need to create your ingress manually
+
+- ingress.yaml
+
+```yaml
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: airflow-ns-ingress
+  annotations:
+    cert-manager.io/issuer: airflow-ns-issuer
+spec:
+  ## This is the specific configuration that allows you to have a specific ingress per installation
+  ingressClassName: "airflow-ns"
+  tls:
+    - hosts:
+        - your_dns
+      secretName: airflow-ns-certificate
+  rules:
+    - host: your_dns
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                ## Helm install name dependendant
+                name: airflow-web
+                port:
+                  number: 8080
+```
+
+You can do :
+
+```console
+## Install ingress
+kubectl apply -n airflow-ns -f ingress.yaml
+```
+
+<h4>Chart configuration</h4>
+
+Here, because you'll set up one DNS per server, you'll don't need to override the airflow webserver configuration and you'll need to disable the ingress creation within the charts
+
+```yaml
+ingress:
+  enabled: false
+```
 
 <hr>
 </details>
