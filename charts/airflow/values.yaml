@@ -374,6 +374,10 @@ airflow:
     ##
     securityContext: {}
 
+    ## Labels for the db-migrations Deployment
+    ##
+    labels: {}
+
     ## Pod labels for the db-migrations Deployment
     ##
     podLabels: {}
@@ -430,6 +434,10 @@ airflow:
     ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
     ##
     securityContext: {}
+
+    ## Labels for the sync Deployments/Jobs
+    ##
+    labels: {}
 
     ## Pod labels for the sync Deployments/Jobs
     ##

@@ -13,6 +13,9 @@ metadata:
     chart: {{ include "airflow.labels.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    {{- if .Values.pgbouncer.labels }}
+    {{- toYaml .Values.pgbouncer.labels | nindent 4 }}
+    {{- end }}
   {{- if .Values.pgbouncer.annotations }}
   annotations:
   {{- toYaml .Values.pgbouncer.annotations | nindent 4 }}

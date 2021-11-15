@@ -16,6 +16,9 @@ metadata:
     chart: {{ include "airflow.labels.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    {{- if .Values.airflow.sync.labels }}
+    {{- toYaml .Values.airflow.sync.labels | nindent 4 }}
+    {{- end }}
   {{- if .Values.airflow.sync.annotations }}
   annotations:
     {{- toYaml .Values.airflow.sync.annotations | nindent 4 }}
