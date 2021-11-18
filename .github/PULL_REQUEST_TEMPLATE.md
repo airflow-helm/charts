@@ -17,6 +17,7 @@ This PR makes the following changes...
 ### For all Pull Requests
 
 - [ ] Commits are [signed off](https://github.com/airflow-helm/charts/tree/main/charts/airflow/CONTRIBUTING.md#sign-your-work)
+- [ ] Commits have [semantic messages](https://github.com/airflow-helm/charts/tree/main/charts/airflow/CONTRIBUTING.md#semantic-commit-messages)
 - [ ] Documentation [updated](https://github.com/airflow-helm/charts/tree/main/charts/airflow/CONTRIBUTING.md#documentation)
 - [ ] Passes [ct linting](https://github.com/airflow-helm/charts/tree/main/charts/airflow/CONTRIBUTING.md#linting)
 

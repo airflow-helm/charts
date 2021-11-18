@@ -8,6 +8,10 @@ assignees: ''
 
 <!-- ⚠️ BEFORE you submit an issue, please check if a similar issue already exists -->
 
+## What is the bug?
+
+The bug is...
+
 
 ## What version of the chart are you using?
 

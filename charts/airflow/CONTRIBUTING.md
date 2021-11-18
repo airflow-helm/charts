@@ -2,14 +2,6 @@
 
 Contributions are welcome via GitHub pull requests.
 
-## Requirements
-
-1. Must pass [DCO check](#sign-your-work)
-1. Must pass [Versioning check](#versioning)
-1. Must pass [Documentation check](#documentation)
-1. Must pass [Squashing check](#squash-commits)
-1. Must pass [Lint check](#linting)
-
 ## Sign Your Work
 
 To certify you agree to the [Developer Certificate of Origin](https://developercertificate.org/) you must sign-off each commit message using `git commit --signoff`, or manually write the following:
@@ -59,12 +51,20 @@ By making a contribution to this project, I certify that:
     this project or the open source license(s) involved.
 ```
 
-## Versioning
+## Semantic Commit Messages
 
-The chart `version` should follow [SemVer](https://semver.org/):
-- If you __REMOVE/CHANGE a value__ → bump a MAJOR version
-- If you __ADD a value__ → bump a MINOR version
-- If you __fix a bug__ → bump a PATCH version
+All commit messages and PR names must pass the [zeke/semantic-pull-requests](https://github.com/zeke/semantic-pull-requests) check.
+
+Here are some example semantic commit messages:
+- `feat: a new feature`
+- `fix: a bug fix`
+- `docs: documentation only change`
+- `style: fix formatting/white-space/etc`
+- `refactor: code change that neither fixes a bug nor adds a feature`
+- `test: add or update tests`
+- `ci: changes to CI configs`
+- `chore: other changes that dont modify code`
+- `revert: revert a commit`
 
 ## Documentation
 
@@ -78,10 +78,13 @@ If you __ADD a value__:
 If you __bump the version__:
 - add a heading for the new version to [CHANGELOG.md](CHANGELOG.md) (and comparison link, at bottom of file)
 
-## Squash Commits
-
-Unless having multiple commits makes the PR more clear, please squash your commits and force push your branch.
-
 ## Linting
 
 Please ensure `ct lint` from [chart-testing](https://github.com/helm/chart-testing) succeeds.
+
+## Versioning
+
+The chart `version` should follow [SemVer](https://semver.org/):
+- If you __REMOVE/CHANGE a value__ → bump a MAJOR version
+- If you __ADD a value__ → bump a MINOR version
+- If you __fix a bug__ → bump a PATCH version
