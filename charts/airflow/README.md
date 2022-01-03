@@ -1155,6 +1155,120 @@ externalRedis:
 <hr>
 </details>
 
+### How to use airflow plugins?
+<details>
+<summary>Expand</summary>
+<hr>
+
+<h3>Option 1 - using the git-sync sidecar</h3>
+
+Store your plugins in a dedicated directory in your DAGs repo. Then configure your chart to use the git-sync sidecar to (See section _How to store DAGs?_, options 1a and 1b for more details). Finally, set the variable `AIRFLOW__CORE__PLUGINS_FOLDER` to the path to your plugins.
+
+Example values to use airflow plugins using the git-sync sidecar with HTTP auth configuration:
+```yaml
+airflow:
+  config:
+    AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: 60
+    AIRFLOW__CORE__PLUGINS_FOLDER: "/opt/airflow/dags/repo/PATH_TO_PLUGINS"
+
+dags:
+  gitSync:
+    enabled: true
+    repo: "https://github.com/USERNAME/REPOSITORY.git"
+    branch: "master"
+    revision: "HEAD"
+    syncWait: 60
+    # GitSync configuration can either use SSH or HTTP auth.
+    httpSecret: "airflow-http-git-secret"
+    httpSecretUsernameKey: username
+    httpSecretPasswordKey: password
+```
+
+<h3>Option 2 - embedded into container image</h3>
+
+> 🟨 __Note__ 🟨
+>
+> This chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images)
+
+This method stores your plugins inside the container image.
+
+Example extending `airflow:2.0.1-python3.8` with some plugins:
+```dockerfile
+FROM apache/airflow:2.0.1-python3.8
+
+# NOTE: plugins path is set with the `airflow.config.AIRFLOW__CORE__PLUGINS_FOLDER` value
+COPY ./my_plugins_folder /opt/airflow/plugins
+```
+
+Example values to use `MY_REPO:MY_TAG` container image with the chart:
+```yaml
+airflow:
+  image:
+    repository: MY_REPO
+    tag: MY_TAG
+
+  config:
+    AIRFLOW__CORE__PLUGINS_FOLDER: "/opt/airflow/plugins"
+```
+
+<h3>Option 3 - PersistentVolumeClaim/Secret/ConfigMap (existing / user-managed)</h3>
+
+Manually store your plugins in either a PVC, Secret or ConfigMap. Then mount it by adding a new `airflow.extraVolumeMounts` and `airflow.extraVolumes`. Finally, set `AIRFLOW__CORE__PLUGINS_FOLDER` to the mount point.
+
+Example values to use a PersistentVolumeClaim (`airflow-plugins-pvc`) for your plugins:
+```yaml
+airflow:
+  config:
+    AIRFLOW__CORE__PLUGINS_FOLDER: "/opt/airflow/plugins"
+
+  extraVolumeMounts:
+    - name: airflow-plugins
+      mountPath: /opt/airflow/plugins
+      readOnly: true
+
+  extraVolumes:
+    - name: airflow-plugins
+      persistentVolumeClaim:
+        claimName: airflow-plugins-pvc
+```
+
+Example values to use a Secret (`airflow-plugins-secret`) for your plugins:
+```yaml
+airflow:
+  config:
+    AIRFLOW__CORE__PLUGINS_FOLDER: "/opt/airflow/plugins"
+
+  extraVolumeMounts:
+    - name: airflow-plugins
+      mountPath: /opt/airflow/plugins
+      readOnly: true
+
+  extraVolumes:
+    - name: airflow-plugins
+      secret:
+        secretName: airflow-plugins-secret
+```
+
+Example values to use a Configmap (`airflow-plugins-configmap`) for your plugins:
+```yaml
+airflow:
+  config:
+    AIRFLOW__CORE__PLUGINS_FOLDER: "/opt/airflow/plugins"
+
+  extraVolumeMounts:
+    - name: airflow-plugins
+      mountPath: /opt/airflow/plugins
+      readOnly: true
+
+  extraVolumes:
+    - name: airflow-plugins
+      configMap:
+        name: airflow-plugins-configmap
+```
+
+<hr>
+</details>
+
 ## FAQ - Kubernetes
 
 > __Frequently asked questions related to kubernetes configs__
