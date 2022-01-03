@@ -1392,9 +1392,69 @@ flower:
 <summary>Expand</summary>
 <hr>
 
+<h3>Option 1 - prometheus statsd-exporter</h3>
+
+This method uses the [official prometheus statsd-exporter](https://github.com/prometheus/statsd_exporter) to expose metrics for Prometheus.
+
+First, you will need to [enable metrics](https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/metrics.html) using [statsd](https://github.com/statsd/statsd) which is natively supported by Airflow by setting the `airflow.config.AIRFLOW__METRICS__STATSD_*` variables and installing the extra Pip package `apache-airflow[statsd]`.
+
+Then, you will need an extra container running the prometheus statsd-exporter to convert StatsD-style metrics and exports them as Prometheus metrics.
+
+(Optionnal) You can use the [Databand-AI statsd config file](https://github.com/databand-ai/airflow-dashboards/blob/main/statsd/statsd.conf) to leverage their convenient metric mappings. Store the file in a configMap and reference it in the `extraVolumes` and `extraContainers.volumeMounts`.
+
+Finally, configure the chart to create `ServiceMonitor` which will help Prometheus determing the set of targets to be monitored.
+
+(Optionnal) Use the [Databand-AI Grafana dashboards](https://github.com/databand-ai/airflow-dashboards/tree/main/grafana).
+
+Example values to configure metrics export to Prometheus using the Prometheus statsd-exporter:
+```yaml
+airflow:
+  config:
+    AIRFLOW__METRICS__STATSD_ON: "True"
+    AIRFLOW__METRICS__STATSD_HOST: localhost
+    AIRFLOW__METRICS__STATSD_PORT: "9125"
+    AIRFLOW__METRICS__STATSD_PREFIX: airflow
+
+  extraPipPackages:
+      - apache-airflow[statsd]
+
+  extraVolumes:
+      - name: statsd-conf
+        configMap:
+          name: airflow-statsd-conf
+
+  extraContainers:
+      - name: statsd-exporter
+        image: prom/statsd-exporter
+        imagePullPolicy: IfNotPresent
+        args:
+          - --statsd.mapping-config=/opt/airflow/statsd/statsd.conf
+        volumeMounts:
+          - name: statsd-conf
+            mountPath: /opt/airflow/statsd/
+        ports:
+          - containerPort: 9102
+            protocol: TCP
+          - containerPort: 8125
+            protocol: TCP
+        resources:
+          requests:
+              cpu: 10m
+              memory: 128Mi
+
+serviceMonitor:
+    enabled: true
+    selector:
+        prometheus: kube-prometheus-kube-prome-prometheus
+    path: /metrics
+    interval: 30s
+```
+
+<h3>Option 2 - epoch8/airflow-exporter</h3>
+
 To be able to expose Airflow metrics to Prometheus you will need install a plugin, one option is [epoch8/airflow-exporter](https://github.com/epoch8/airflow-exporter) which exports DAG and task metrics from Airflow.
 
-A [ServiceMonitor](https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#servicemonitor) is a resource introduced by the [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator), ror more information, see the `serviceMonitor` section of `values.yaml`.
+A [ServiceMonitor](https://github.com/prometheus-operator/prometheus-operator/blob/master/Documentation/api.md#servicemonitor) is a resource introduced by the [Prometheus Operator](https://github.com/prometheus-operator/prometheus-operator), for more information, see the `serviceMonitor` section of `values.yaml`.
 
 <hr>
 </details>
