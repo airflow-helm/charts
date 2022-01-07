@@ -12,7 +12,7 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   ports:
-    - name: worker
+    - name: {{ .Values.workers.service.portName | default "workers" }}
       protocol: TCP
       port: 8793
   clusterIP: None
