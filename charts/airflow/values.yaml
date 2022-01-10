@@ -10,7 +10,7 @@ airflow:
   ##
   image:
     repository: apache/airflow
-    tag: 2.1.2-python3.8
+    tag: 2.1.4-python3.8
     pullPolicy: IfNotPresent
     pullSecret: ""
     uid: 50000
@@ -532,7 +532,7 @@ scheduler:
     enabled: true
     initialDelaySeconds: 10
     periodSeconds: 30
-    timeoutSeconds: 10
+    timeoutSeconds: 60
     failureThreshold: 5
 
   ## extra pip packages to install in the scheduler Pods
@@ -1443,7 +1443,7 @@ pgbouncer:
     enabled: true
     initialDelaySeconds: 5
     periodSeconds: 30
-    timeoutSeconds: 15
+    timeoutSeconds: 60
     failureThreshold: 3
 
   ## the maximum number of seconds to wait for queries upon pod termination, before force killing
