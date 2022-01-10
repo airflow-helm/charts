@@ -1313,9 +1313,16 @@ postgresql:
   ## to use the external db, the embedded one must be disabled
   enabled: false
 
+## for full list of PgBouncer configs, see values.yaml
 pgbouncer:
-  ## for other PgBouncer configs, see the `pgbouncer.*` values
   enabled: true
+
+  ## WARNING: you must set "scram-sha-256" if using Azure PostgreSQL (single server mode)
+  authType: md5
+
+  serverSSL:
+    ## WARNING: you must set "verify-ca" if using Azure PostgreSQL
+    mode: prefer
 
 externalDatabase:
   type: postgres
@@ -2009,6 +2016,7 @@ Parameter | Description | Default
 `pgbouncer.livenessProbe.*` | configs for the pgbouncer Pods' liveness probe | `<see values.yaml>`
 `pgbouncer.startupProbe.*` | configs for the pgbouncer Pods' startup probe | `<see values.yaml>`
 `pgbouncer.terminationGracePeriodSeconds` | the maximum number of seconds to wait for queries upon pod termination, before force killing | `120`
+`pgbouncer.authType` | sets pgbouncer config: `auth_type` | `md5`
 `pgbouncer.maxClientConnections` | sets pgbouncer config: `max_client_conn` | `1000`
 `pgbouncer.poolSize` | sets pgbouncer config: `default_pool_size` | `20`
 `pgbouncer.logDisconnections` | sets pgbouncer config: `log_disconnections` | `0`

@@ -1611,6 +1611,10 @@ pgbouncer:
   ##
   terminationGracePeriodSeconds: 120
 
+  ## sets pgbouncer config: `auth_type`
+  ##
+  authType: md5
+
   ## sets pgbouncer config: `max_client_conn`
   ##
   maxClientConnections: 1000

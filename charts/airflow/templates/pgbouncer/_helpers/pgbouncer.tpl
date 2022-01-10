@@ -18,7 +18,7 @@ ignore_startup_parameters = extra_float_digits
 listen_port = 6432
 listen_addr = *
 
-auth_type = md5
+auth_type = {{ .Values.pgbouncer.authType }}
 auth_file = /home/pgbouncer/users.txt
 
 log_disconnections = {{ .Values.pgbouncer.logDisconnections }}
