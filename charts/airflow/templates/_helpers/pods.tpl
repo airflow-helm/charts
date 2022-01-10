@@ -225,7 +225,7 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
       value: {{ .Values.dags.gitSync.syncTimeout | quote }}
     - name: GIT_SYNC_ADD_USER
       value: "true"
-    - name: GIT_SYNC_MAX_FAILURES
+    - name: GIT_SYNC_MAX_SYNC_FAILURES
       value: {{ .Values.dags.gitSync.maxFailures | quote }}
     {{- if .Values.dags.gitSync.sshSecret }}
     - name: GIT_SYNC_SSH
