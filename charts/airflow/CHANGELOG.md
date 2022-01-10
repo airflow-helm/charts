@@ -7,13 +7,28 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
+## [8.5.3] - 2022-01-10
+
+> 🟥 __Warning__ 🟥
+>
+> Update to this version if you are using Kubernetes 1.20+ to prevent the scheduler's liveness probe causing a restart loop (issue:[#484](https://github.com/airflow-helm/charts/issues/484)).
+> 
+> If you currently set `scheduler.livenessProbe.timeoutSeconds` or `pgbouncer.livenessProbe.timeoutSeconds` in your values, ensure you update them to the new default of `60`.
+
+### Changed
+- the default `airflow.image` is now `apache/airflow:2.1.4-python3.8`
+  - __NOTE:__ this does not affect support for older airflow versions, see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
+
+### Fixed
+- increase default `timeoutSeconds` for liveness probes ([#496](https://github.com/airflow-helm/charts/pull/496))
+- typo in `GIT_SYNC_MAX_SYNC_FAILURES` environment variable name ([#462](https://github.com/airflow-helm/charts/pull/462))
+
 ## [8.5.2] - 2021-08-25
 
 > 🟥 __Warning__ 🟥
 >
 > You must stop URL-encoding special characters in `externalDatabase.user`, the chart will now automatically do this for you.<br>
 > (For example, don't replace `@` with `%40` anymore)
-> 
 
 ### Changed
 - special characters in `externalDatabase.user` are now automatically url-encoded ([#407](https://github.com/airflow-helm/charts/pull/407))
@@ -637,6 +652,7 @@ TBD
 > https://github.com/helm/charts/tree/master/stable/airflow
 
 [Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.5.2...HEAD
+[8.5.3]: https://github.com/airflow-helm/charts/compare/airflow-8.5.2...airflow-8.5.3
 [8.5.2]: https://github.com/airflow-helm/charts/compare/airflow-8.5.1...airflow-8.5.2
 [8.5.1]: https://github.com/airflow-helm/charts/compare/airflow-8.5.0...airflow-8.5.1
 [8.5.0]: https://github.com/airflow-helm/charts/compare/airflow-8.4.1...airflow-8.5.0
