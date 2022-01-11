@@ -13,40 +13,49 @@ assignees: ''
 The bug is...
 
 
-## What version of the chart are you using?
+## What version of the chart?
 
 I am using version `X.X.X` of this chart.
 
 
-## What version of Kubernetes are you using?
+## What version of Kubernetes?
 
 ```console
-######## PASTE `kubectl version` BELOW ########
+
+# output of `kubectl version` command
 Client Version: ...
 Server Version: ...
-######## PASTE `kubectl version` ABOVE ########
+
 ```
 
 
-## What version of Helm are you using?
+## What version of Helm?
 
 ```console
-######## PASTE `helm version` BELOW ########
+
+# output of `helm version` command
 version.BuildInfo{....
-######## PASTE `helm version` ABOVE ########
+
 ```
 
 
-## What are your custom helm values?
+## Any non-default Helm values?
 
 <details>
 <summary>click to expand</summary>
 
 ```yaml
-######## PASTE values.yaml BELOW ########
-airflow:
+## PASTE BELOW THIS LINE
+## --------------------------------------------------
+
+## non-default helm values (in YAML format)
+airflow: 
   ...
-######## PASTE values.yaml ABOVE ########
+workers: 
+  ...
+  
+## --------------------------------------------------
+## PASTE ABOVE THIS LINE
 ```
 
 </details>

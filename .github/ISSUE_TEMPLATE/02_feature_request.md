@@ -8,12 +8,11 @@ assignees: ''
 
 <!-- ⚠️ BEFORE you submit an issue, please check if a similar issue already exists -->
 
-
 ## What is your feature request?
 
 I would like the chart to...
 
 
-## What alternatives have you considered?
+## Have you considered any alternatives?
 
 Alternatively the chart could...
