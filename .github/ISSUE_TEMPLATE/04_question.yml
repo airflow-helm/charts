@@ -1,0 +1,24 @@
+name: Question
+description: Ask something about the project!
+labels: [ "question" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Question
+  - type: checkboxes
+    attributes:
+      label: Checks
+      options:
+        - label: I have checked for [existing issues](https://github.com/airflow-helm/charts/issues).
+          required: true
+        - label: I have looked through the [FAQ](https://github.com/airflow-helm/charts/tree/main/charts/airflow#faq---airflow).
+          required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      placeholder: |
+        I would like to understand...
+    validations:
+      required: true

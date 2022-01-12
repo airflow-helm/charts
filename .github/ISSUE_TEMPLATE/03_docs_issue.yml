@@ -1,0 +1,29 @@
+name: Docs Issue
+description: Raise an issue about documentation!
+labels: [ "documentation" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Docs Issue
+        
+        Thanks for helping make the docs better!
+  - type: checkboxes
+    attributes:
+      label: Checks
+      options:
+        - label: I have checked for [existing issues](https://github.com/airflow-helm/charts/issues).
+          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: An overview of the documentation issue.
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Are you willing & able to help?
+      options:
+        - label: I am able to submit a PR!
+        - label: I can provide feedback!

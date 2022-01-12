@@ -1,0 +1,82 @@
+name: Bug Report
+description: Report something not working properly!
+labels: [ "bug" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Bug Report
+        
+        Thanks for helping make the project better!
+  - type: checkboxes
+    attributes:
+      label: Checks
+      options:
+        - label: I have checked for [existing issues](https://github.com/airflow-helm/charts/issues).
+          required: true
+        - label: This report is about the [user-community Airflow Helm Chart](https://github.com/airflow-helm/charts/tree/main/charts/airflow).
+          required: true
+  - type: input
+    id: chart-version
+    attributes:
+      label: Chart Version
+      placeholder: X.X.X
+    validations:
+      required: true
+  - type: textarea
+    id: kubernetes-version
+    attributes:
+      label: Kubernetes Version
+      description: Output of `kubectl version` command.
+      placeholder: |
+        Client Version: version.Info{Major:"X", Minor:"XX", GitVersion:"vX.X.X", ...}
+        Server Version: version.Info{Major:"X", Minor:"XX", GitVersion:"vX.X.X", ...}
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: helm-version
+    attributes:
+      label: Helm Version
+      description: Output of `helm version` command.
+      placeholder: version.BuildInfo{Version:"vX.X.X", GitCommit:"XXXXXXXXXXXXXXX", ...}
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: The __context__ the problem occurred in, and an __overview__ of what went wrong.
+      placeholder: I was trying to... but then...
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: Outputs of commands like `kubectl logs my-pod` or `kubectl describe pods my-pod`.
+      placeholder: |
+        * Include any relevant log outputs here *
+      render: shell
+  - type: textarea
+    id: custom-helm-values
+    attributes:
+      label: Custom Helm Values
+      description: Your non-default Helm values (in YAML format).
+      placeholder: |
+        ###################################
+        ## CONFIG | Airflow Configs
+        ###################################
+        airflow:
+          image:
+            ...
+          config:
+            ...
+        
+        ###################################
+        ## COMPONENT | Airflow Scheduler
+        ###################################
+        scheduler:
+          ...
+      render: yaml
