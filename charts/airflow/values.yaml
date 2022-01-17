@@ -19,7 +19,7 @@ airflow:
   ## the airflow executor type to use
   ## - allowed values: "CeleryExecutor", "KubernetesExecutor", "CeleryKubernetesExecutor"
   ## - customize the "KubernetesExecutor" pod-template with `airflow.kubernetesPodTemplate.*`
-  ##
+  ## TODO:Brody, I would guess we want to use CeleryKubernetesExecutor instead of just celery but need to understand how the dag is written.
   executor: CeleryExecutor
 
   ## the fernet encryption key (sets `AIRFLOW__CORE__FERNET_KEY`)
@@ -45,6 +45,7 @@ airflow:
   ##   config:
   ##     # dag configs
   ##     AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+  ##     # TODO: Brody sense we only have one dag we could make this smaller or longer this would affect when we deploy how quickly it would update th dag bag
   ##     AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
   ##
   ##     # email configs
@@ -451,6 +452,7 @@ airflow:
 ## COMPONENT | Airflow Scheduler
 ###################################
 scheduler:
+  ## TODO: Brody, thinking to set this to 2 to help with when the schedule gets moved durring a dag run it causes problems. 
   ## the number of scheduler Pods to run
   ## - if you set this >1 we recommend defining a `scheduler.podDisruptionBudget`
   ##
