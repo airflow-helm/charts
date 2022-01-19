@@ -1130,6 +1130,30 @@ externalDatabase:
   properties: ""
 ```
 
+<h3>Option 3 - MsSQL</h3>
+
+> 🟨 __Note__ 🟨 
+> 
+> You must set `explicit_defaults_for_timestamp=1` in your MySQL instance, [see here](https://airflow.apache.org/docs/stable/howto/initialize-database.html)
+
+Example values for an external MsSQL database, with an existing `airflow_cluster1` database:
+```yaml
+postgresql:
+  enabled: false
+
+externalDatabase:
+  type: mssql
+  host: mssql.example.org
+  port: 1433
+  database: airflow_cluster1
+  user: airflow_cluster1
+  passwordSecret: "airflow-cluster1-mysql-password"
+  passwordSecretKey: "mysql-password"
+
+  # use this for any extra connection-string settings, e.g. ?useSSL=false
+  properties: "?driver=ODBC+Driver+17+for+SQL+Server"
+```
+
 <hr>
 </details>
 

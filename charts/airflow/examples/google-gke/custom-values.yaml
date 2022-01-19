@@ -361,7 +361,7 @@ postgresql:
 # Database - External Database
 ###################################
 externalDatabase:
-  ## the type of external database: {mysql,postgres}
+  ## the type of external database: {mysql,postgres, mssql}
   ##
   type: mysql
 

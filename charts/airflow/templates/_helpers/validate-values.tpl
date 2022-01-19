@@ -165,8 +165,8 @@
     {{- if .Values.postgresql.enabled }}
     {{ required "If `externalDatabase.host` is set, then `postgresql.enabled` should be `false`!" nil }}
     {{- end }}
-    {{- if not (has .Values.externalDatabase.type (list "mysql" "postgres")) }}
-    {{ required "The `externalDatabase.type` must be one of: [mysql, postgres]!" nil }}
+    {{- if not (has .Values.externalDatabase.type (list "mysql" "postgres" "mssql")) }}
+    {{ required "The `externalDatabase.type` must be one of: [mysql, postgres, mssql]!" nil }}
     {{- end }}
   {{- end }}
 {{- end }}
