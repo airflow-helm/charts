@@ -29,7 +29,7 @@ airflow:
   ##   python -c "from cryptography.fernet import Fernet; FERNET_KEY = Fernet.generate_key().decode(); print(FERNET_KEY)"
   ##
   ## if setting the AIRFLOW__CORE__FERNET_KEY_CMD or AIRFLOW__CORE__FERNET_KEY_SECRET environment variables
-  ## set the value to an empty string to avoid the setting of the AIRFLOW__CORE__FERNET_KEY value before setting the 
+  ## set the value to an empty string to avoid the setting of the AIRFLOW__CORE__FERNET_KEY value before setting the
   ## desired environment variable.
   fernetKey: "7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc="
 
@@ -38,7 +38,7 @@ airflow:
   ## - set `AIRFLOW__WEBSERVER__SECRET_KEY` with `airflow.extraEnv` from a Secret to avoid storing this in your values
   ##
   ## if setting the AIRFLOW__WEBSERVER__SECRET_KEY_CMD or AIRFLOW__WEBSERVER__SECRET_KEY_SECRET environment variables
-  ## set the value to an empty string to avoid the setting of the AIRFLOW__WEBSERVER__SECRET_KEY value before setting the 
+  ## set the value to an empty string to avoid the setting of the AIRFLOW__WEBSERVER__SECRET_KEY value before setting the
   ## desired environment variable.
   webserverSecretKey: "THIS IS UNSAFE!"
 

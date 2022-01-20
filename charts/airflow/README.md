@@ -611,7 +611,7 @@ You can set the fernet encryption key using the `airflow.fernetKey` value, which
 
 Example values to define the fernet key with `airflow.fernetKey`:
 ```yaml
-aiflow:
+airflow:
   fernetKey: "7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc="
 ```
 
@@ -671,7 +671,7 @@ You can set the webserver secret_key using the `airflow.webserverSecretKey` valu
 
 Example values to define the secret_key with `airflow.webserverSecretKey`:
 ```yaml
-aiflow:
+airflow:
   webserverSecretKey: "THIS IS UNSAFE!"
 ```
 
@@ -727,7 +727,7 @@ You can use the `airflow.connections` value to create airflow [Connections](http
 
 Example values to create connections called `my_aws`, `my_gcp`, `my_postgres`, and `my_ssh`:
 ```yaml
-airflow: 
+airflow:
   connections:
     ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html
     - id: my_aws
@@ -780,7 +780,7 @@ You can use `airflow.connectionsTemplates` to extract string templates from keys
 
 Example values to use templates from `Secret/my-secret` and `ConfigMap/my-configmap` in parts of the `my_aws` connection:
 ```yaml
-airflow: 
+airflow:
   connections:
     - id: my_aws
       type: aws
