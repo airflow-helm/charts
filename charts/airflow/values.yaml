@@ -214,6 +214,11 @@ airflow:
   ##
   extraEnv: []
 
+  ## extra environment variables for the airflow pods using the envFrom field
+  ## - spec for EnvFrom:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#envfromsource-v1-core
+  extraEnvFrom: []
+
   ## extra containers for the airflow Pods
   ## - spec for Container:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
