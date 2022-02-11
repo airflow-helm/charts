@@ -858,6 +858,119 @@ workers:
   extraVolumes: []
 
 ###################################
+## COMPONENT | Triggerer
+###################################
+triggerer:
+  ## if the airflow triggerer should be deployed
+  ## - [WARNING] the triggerer component was added in airflow 2.2.0
+  ## - [WARNING] if `airflow.legacyCommands` is `true` the triggerer will NOT be deployed
+  ##
+  enabled: true
+
+  ## the number of triggerer Pods to run
+  ## - if you set this >1 we recommend defining a `triggerer.podDisruptionBudget`
+  ##
+  replicas: 1
+
+  ## resource requests/limits for the triggerer Pods
+  ## - spec for ResourceRequirements:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ##
+  resources: {}
+
+  ## the nodeSelector configs for the triggerer Pods
+  ## - docs for nodeSelector:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  ##
+  nodeSelector: {}
+
+  ## the affinity configs for the triggerer Pods
+  ## - spec for Affinity:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+  ##
+  affinity: {}
+
+  ## the toleration configs for the triggerer Pods
+  ## - spec for Toleration:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+  ##
+  tolerations: []
+
+  ## the security context for the triggerer Pods
+  ## - spec for PodSecurityContext:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
+  ##
+  securityContext: {}
+
+  ## labels for the triggerer Deployment
+  ##
+  labels: {}
+
+  ## Pod labels for the triggerer Deployment
+  ##
+  podLabels: {}
+
+  ## annotations for the triggerer Deployment
+  ##
+  annotations: {}
+
+  ## Pod annotations for the triggerer Deployment
+  ##
+  podAnnotations: {}
+
+  ## if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true"
+  ##
+  safeToEvict: true
+
+  ## configs for the PodDisruptionBudget of the triggerer Deployment
+  ##
+  podDisruptionBudget:
+    ## if a PodDisruptionBudget resource is created for the triggerer Deployment
+    ##
+    enabled: false
+
+    ## the maximum unavailable pods/percentage for the triggerer Deployment
+    ##
+    maxUnavailable: ""
+
+    ## the minimum available pods/percentage for the triggerer Deployment
+    ##
+    minAvailable: ""
+
+  ## maximum number of triggers each triggerer will run at once (sets `AIRFLOW__TRIGGERER__DEFAULT_CAPACITY`)
+  ##
+  capacity: 1000
+
+  ## configs for the triggerer Pods' liveness probe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 30
+    timeoutSeconds: 60
+    failureThreshold: 5
+
+  ## extra pip packages to install in the triggerer Pod
+  ##
+  ## ____ EXAMPLE _______________
+  ##   extraPipPackages:
+  ##     - "SomeProject==1.0.0"
+  ##
+  extraPipPackages: []
+
+  ## extra VolumeMounts for the triggerer Pods
+  ## - spec for VolumeMount:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+  ##
+  extraVolumeMounts: []
+
+  ## extra Volumes for the triggerer Pods
+  ## - spec for Volume:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+  ##
+  extraVolumes: []
+
+###################################
 ## COMPONENT | Flower
 ###################################
 flower:

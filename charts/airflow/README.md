@@ -1377,6 +1377,12 @@ workers:
   affinity: {}
   tolerations: []
 
+## airflow triggerer
+triggerer:
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+
 ## airflow workers
 flower:
   nodeSelector: {}
@@ -1552,6 +1558,35 @@ Parameter | Description | Default
 `workers.extraPipPackages` | extra pip packages to install in the worker Pods | `[]`
 `workers.extraVolumeMounts` | extra VolumeMounts for the worker Pods | `[]`
 `workers.extraVolumes` | extra Volumes for the worker Pods | `[]`
+
+<hr>
+</details>
+
+### `triggerer.*`
+<details>
+<summary>Expand</summary>
+<hr>
+
+Parameter | Description | Default
+--- | --- | ---
+`triggerer.enabled` | if the triggerer should be deployed | `true`
+`triggerer.replicas` | the number of triggerer Pods to run | `1`
+`triggerer.resources` | resource requests/limits for the airflow triggerer Pods | `{}`
+`triggerer.nodeSelector` | the nodeSelector configs for the triggerer Pods | `{}`
+`triggerer.affinity` | the affinity configs for the triggerer Pods | `{}`
+`triggerer.tolerations` | the toleration configs for the triggerer Pods | `[]`
+`triggerer.securityContext` | the security context for the triggerer Pods | `{}`
+`triggerer.labels` | labels for the triggerer Deployment | `{}`
+`triggerer.podLabels` | Pod labels for the triggerer Deployment | `{}`
+`triggerer.annotations` | annotations for the triggerer Deployment | `{}`
+`triggerer.podAnnotations` | Pod annotations for the triggerer Deployment | `{}`
+`triggerer.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
+`triggerer.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the triggerer Deployment | `<see values.yaml>`
+`triggerer.capacity` | maximum number of triggers each triggerer will run at once (sets `AIRFLOW__TRIGGERER__DEFAULT_CAPACITY`) | 1000
+`triggerer.livenessProbe.*` | liveness probe for the triggerer Pods | `<see values.yaml>`
+`triggerer.extraPipPackages` | extra pip packages to install in the triggerer Pods | `[]`
+`triggerer.extraVolumeMounts` | extra VolumeMounts for the triggerer Pods | `[]`
+`triggerer.extraVolumes` | extra Volumes for the triggerer Pods | `[]`
 
 <hr>
 </details>
