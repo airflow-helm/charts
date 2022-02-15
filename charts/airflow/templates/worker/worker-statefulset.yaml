@@ -162,7 +162,39 @@ spec:
             {{- else }}
             - "exec airflow celery worker"
             {{- end }}
-          {{- if $volumeMounts }}
+          {{- if .Values.workers.livenessProbe.enabled }}
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.workers.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.workers.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.workers.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.workers.livenessProbe.failureThreshold }}
+            exec:
+              command:
+              - celery
+              - --app
+              - airflow.executors.celery_executor.app
+              - inspect
+              - ping
+              - -d
+              - celery@${HOSTNAME}
+          {{- end }}
+          {{- if .Values.workers.readinessProbe.enabled }}
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.workers.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.workers.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.workers.readinessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.workers.readinessProbe.failureThreshold }}
+            exec:
+              command:
+              - celery
+              - --app
+              - airflow.executors.celery_executor.app
+              - inspect
+              - ping
+              - -d
+              - celery@${HOSTNAME}
+          {{- end }}
+         {{- if $volumeMounts }}
           volumeMounts:
             {{- $volumeMounts | indent 12 }}
           {{- end }}

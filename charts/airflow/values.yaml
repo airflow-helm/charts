@@ -791,6 +791,25 @@ workers:
     ##
     minAvailable: ""
 
+  ## configs for the worker Pods' readinessProbe probe
+  ##
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 120
+    periodSeconds: 120
+    timeoutSeconds: 20
+    failureThreshold: 5
+
+  ## configs for the worker Pods' liveness probe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 30
+    timeoutSeconds: 15
+    failureThreshold: 5
+
+
   ## configs for the HorizontalPodAutoscaler of the worker Pods
   ## - [WARNING] if using git-sync, ensure `dags.gitSync.resources` is set
   ##
