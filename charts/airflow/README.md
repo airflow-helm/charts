@@ -611,7 +611,7 @@ You can set the fernet encryption key using the `airflow.fernetKey` value, which
 
 Example values to define the fernet key with `airflow.fernetKey`:
 ```yaml
-airflow:
+aiflow:
   fernetKey: "7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc="
 ```
 
@@ -630,23 +630,27 @@ airflow:
           key: value
 ```
 
-<h3>Option 3 - using the AIRFLOW__CORE__FERNET_KEY_CMD or AIRFLOW__CORE__FERNET_KEY_SECRET environment variables</h3>
+<h3>Option 3 - using `_CMD` or `_SECRET` configs</h3>
 
-You can also set the fernet key by specifying either the `AIRFLOW__CORE__FERNET_KEY_CMD` or `AIRFLOW__CORE__FERNET_KEY_SECRET`
-environment variables. The correct use of these is detailed as part of the Airflow documentation on [Setting Configuration Options](https://airflow.apache.org/docs/apache-airflow/stable/howto/set-config.html) but when using either variable, the `airflow.fernetKey` value must be set to an empty string.
+You can also set the fernet key by specifying either the `AIRFLOW__CORE__FERNET_KEY_CMD` or `AIRFLOW__CORE__FERNET_KEY_SECRET` environment variables.
+Read about how the `_CMD` or `_SECRET` configs work in the ["Setting Configuration Options"](https://airflow.apache.org/docs/apache-airflow/stable/howto/set-config.html) section of the Airflow documentation.
 
-The following example mounts the `airflow-fernet-key` secret to a file which is then read to provide the desired fernet key:
+Example values for using `AIRFLOW__CORE__FERNET_KEY_CMD`:
 
 ```yaml
 airflow:
+  ## WARNING: you must set `fernetKey` to "", otherwise it will take precedence
   fernetKey: ""
-  extraEnv:
-    - name: AIRFLOW__CORE__FERNET_KEY_CMD
-      value: "cat /opt/airflow/fernet-key/value"
+
+  ## NOTE: this is only an example, if your value lives in a Secret, you probably want to use "Option 2" above
+  config:
+    AIRFLOW__CORE__FERNET_KEY_CMD: "cat /opt/airflow/fernet-key/value"
+      
   extraVolumeMounts:
     - name: fernet-key
       mountPath: /opt/airflow/fernet-key
       readOnly: true
+      
   extraVolumes:
     - name: fernet-key
       secret:
@@ -671,7 +675,7 @@ You can set the webserver secret_key using the `airflow.webserverSecretKey` valu
 
 Example values to define the secret_key with `airflow.webserverSecretKey`:
 ```yaml
-airflow:
+aiflow:
   webserverSecretKey: "THIS IS UNSAFE!"
 ```
 
@@ -690,23 +694,27 @@ airflow:
           key: value
 ```
 
-<h3>Option 3 - using the AIRFLOW__WEBSERVER__SECRET_KEY_CMD or AIRFLOW__WEBSERVER__SECRET_KEY_SECRET environment variables</h3>
+<h3>Option 3 - using `_CMD` or `_SECRET` configs</h3>
 
-You can also set the webserver secret key by specifying either the `AIRFLOW__WEBSERVER__SECRET_KEY_CMD` or `AIRFLOW__WEBSERVER__SECRET_KEY_SECRET`
-environment variables. The correct use of these is detailed as part of the Airflow documentation on [Setting Configuration Options](https://airflow.apache.org/docs/apache-airflow/stable/howto/set-config.html) but when using either variable, the `airflow.webserverSecretKey` value must be set to an empty string.
+You can also set the webserver secret key by specifying either the `AIRFLOW__WEBSERVER__SECRET_KEY_CMD` or `AIRFLOW__WEBSERVER__SECRET_KEY_SECRET` environment variables. 
+Read about how the `_CMD` or `_SECRET` configs work in the ["Setting Configuration Options"](https://airflow.apache.org/docs/apache-airflow/stable/howto/set-config.html) section of the Airflow documentation.
 
-The following example mounts the `airflow-webserver-secret-key` secret to a file which is then read to provide the desired webserver secret key:
+Example values for using `AIRFLOW__WEBSERVER__SECRET_KEY_CMD`:
 
 ```yaml
 airflow:
-  fernetKey: ""
-  extraEnv:
-    - name: AIRFLOW__WEBSERVER__SECRET_KEY_CMD
-      value: "cat /opt/airflow/webserver-secret-key/value"
+  ## WARNING: you must set `webserverSecretKey` to "", otherwise it will take precedence
+  webserverSecretKey: ""
+
+  ## NOTE: this is only an example, if your value lives in a Secret, you probably want to use "Option 2" above
+  config:
+    AIRFLOW__WEBSERVER__SECRET_KEY_CMD: "cat /opt/airflow/webserver-secret-key/value"
+      
   extraVolumeMounts:
     - name: webserver-secret-key
       mountPath: /opt/airflow/webserver-secret-key
       readOnly: true
+      
   extraVolumes:
     - name: webserver-secret-key
       secret:
@@ -727,7 +735,7 @@ You can use the `airflow.connections` value to create airflow [Connections](http
 
 Example values to create connections called `my_aws`, `my_gcp`, `my_postgres`, and `my_ssh`:
 ```yaml
-airflow:
+airflow: 
   connections:
     ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html
     - id: my_aws
@@ -780,7 +788,7 @@ You can use `airflow.connectionsTemplates` to extract string templates from keys
 
 Example values to use templates from `Secret/my-secret` and `ConfigMap/my-configmap` in parts of the `my_aws` connection:
 ```yaml
-airflow:
+airflow: 
   connections:
     - id: my_aws
       type: aws
