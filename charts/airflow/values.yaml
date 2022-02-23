@@ -1203,6 +1203,11 @@ ingress:
     ##
     host: ""
 
+    ## the Ingress Class for the web Ingress
+    ## - [WARNING] requires Kubernetes 1.18 or later, use "kubernetes.io/ingress.class" annotation for older versions
+    ##
+    ingressClassName: ""
+
     ## configs for web Ingress TLS
     ##
     tls:
@@ -1257,6 +1262,11 @@ ingress:
     ## the hostname for the flower Ingress
     ##
     host: ""
+
+    ## the Ingress Class for the flower Ingress
+    ## - [WARNING] requires Kubernetes 1.18 or later, use "kubernetes.io/ingress.class" annotation for older versions
+    ##
+    ingressClassName: ""
 
     ## configs for flower Ingress TLS
     ##

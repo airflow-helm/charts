@@ -25,6 +25,9 @@ spec:
       secretName: {{ .Values.ingress.flower.tls.secretName }}
       {{- end }}
   {{- end }}
+  {{- if .Values.ingress.flower.ingressClassName }}
+  ingressClassName: {{ .Values.ingress.flower.ingressClassName }}
+  {{- end }}  
   rules:
     - host: {{ .Values.ingress.flower.host }}
       http:

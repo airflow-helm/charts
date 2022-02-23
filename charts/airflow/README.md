@@ -1235,7 +1235,7 @@ Consider the situation where you already have something hosted at the root of yo
 - http://example.com/airflow/
 - http://example.com/airflow/flower
 
-In this example, would set these values:
+In this example, you would set these values, assuming you have an Ingress Controller with an IngressClass named "nginx" deployed:
 ```yaml
 airflow:
   config: 
@@ -1250,17 +1250,19 @@ ingress:
   
   ## airflow webserver ingress configs
   web:
-    annotations:
-      kubernetes.io/ingress.class: nginx
+    annotations: {}
     host: "example.com"
     path: "/airflow"
+    ## WARNING: requires Kubernetes 1.18 or later, use "kubernetes.io/ingress.class" annotation for older versions
+    ingressClassName: "nginx"
     
   ## flower ingress configs
   flower:
-    annotations:
-      kubernetes.io/ingress.class: nginx
+    annotations: {}
     host: "example.com"
     path: "/airflow/flower"
+    ## WARNING: requires Kubernetes 1.18 or later, use "kubernetes.io/ingress.class" annotation for older versions
+    ingressClassName: "nginx"
 ```
 
 We expose the `ingress.web.precedingPaths` and `ingress.web.succeedingPaths` values, which are __before__ and __after__ the default path respectively.
