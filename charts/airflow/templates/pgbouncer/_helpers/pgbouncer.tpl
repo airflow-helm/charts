@@ -24,6 +24,10 @@ auth_file = /home/pgbouncer/users.txt
 log_disconnections = {{ .Values.pgbouncer.logDisconnections }}
 log_connections = {{ .Values.pgbouncer.logConnections }}
 
+# locks will never be released when `pool_mode=transaction` (airflow initdb/upgradedb scripts create locks)
+server_reset_query = SELECT pg_advisory_unlock_all()
+server_reset_query_always = 1
+
 ## CLIENT TLS SETTINGS ##
 client_tls_sslmode = {{ .Values.pgbouncer.clientSSL.mode }}
 client_tls_ciphers = {{ .Values.pgbouncer.clientSSL.ciphers }}
