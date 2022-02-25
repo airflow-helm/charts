@@ -408,6 +408,7 @@ The list of `envFrom` for web/scheduler/worker/flower Pods
 
 {{/*
 The list of `env` for web/scheduler/worker/flower Pods
+EXAMPLE USAGE: {{ include "airflow.env" (dict "Release" .Release "Values" .Values "CONNECTION_CHECK_MAX_COUNT" "0") }}
 */}}
 {{- define "airflow.env" }}
 {{- /* postgres environment variables */ -}}
@@ -469,7 +470,11 @@ The list of `env` for web/scheduler/worker/flower Pods
 {{- /* disable the `/entrypoint` db connection check */ -}}
 {{- if not .Values.airflow.legacyCommands }}
 - name: CONNECTION_CHECK_MAX_COUNT
+  {{- if .CONNECTION_CHECK_MAX_COUNT }}
+  value: {{ .CONNECTION_CHECK_MAX_COUNT | quote }}
+  {{- else }}
   value: "0"
+  {{- end }}
 {{- end }}
 
 {{- /* set AIRFLOW__CELERY__FLOWER_BASIC_AUTH */ -}}
