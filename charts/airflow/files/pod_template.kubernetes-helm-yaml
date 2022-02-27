@@ -15,6 +15,10 @@ metadata:
   annotations:
     {{- toYaml .Values.airflow.kubernetesPodTemplate.podAnnotations | nindent 4 }}
   {{- end }}
+  {{- if .Values.airflow.kubernetesPodTemplate.podLabels }}
+  labels:
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.podLabels | nindent 4 }}
+  {{- end }}
 spec:
   restartPolicy: Never
   {{- if .Values.airflow.image.pullSecret }}

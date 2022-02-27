@@ -299,7 +299,12 @@ airflow:
     ##
     tolerations: []
 
+    ## labels for the Pod template
+    ##
+    podLabels: {}
+
     ## annotations for the Pod template
+    ##
     podAnnotations: {}
 
     ## the security context for the Pod template
