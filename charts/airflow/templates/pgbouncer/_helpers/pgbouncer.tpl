@@ -6,7 +6,7 @@ Define the content of the `pgbouncer.ini` config file.
 {{- if .Values.postgresql.enabled }}
 * = host={{ printf "%s.%s.svc.cluster.local" (include "airflow.postgresql.fullname" .) (.Release.Namespace) }} port=5432
 {{- else }}
-* = host={{ .Values.externalDatabase.host }} port={{ .Values.externalDatabase.port }}
+* = host={{ tpl .Values.externalDatabase.host . }} port={{ .Values.externalDatabase.port }}
 {{- end }}
 
 [pgbouncer]

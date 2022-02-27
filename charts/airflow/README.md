@@ -1155,6 +1155,33 @@ externalRedis:
 <hr>
 </details>
 
+### How to use with [postgres-operator](https://opensource.zalando.com/postgres-operator/)?
+<details>
+<summary>Expand</summary>
+<hr>
+
+Example values for a PostgreSQL instance managed by [postgres-operator](https://opensource.zalando.com/postgres-operator/):
+```yaml
+postgresql:
+  enabled: false
+
+externalDatabase:
+  type: postgres
+  host: postgres-cluster.default
+  port: 5432
+  database: airflow
+  user: ""
+  userSecret: "airflow-airflow-owner-user.postgres-cluster.credentials.postgresql.acid.zalan.do"
+  userSecretKey: "username"
+  passwordSecret: "airflow-airflow-owner-user.postgres-cluster.credentials.postgresql.acid.zalan.do"
+  passwordSecretKey: "password"
+
+  # use this for any extra connection-string settings, e.g. ?useSSL=false
+  properties: ""
+```
+
+<hr>
+</details>
 ## FAQ - Kubernetes
 
 > __Frequently asked questions related to kubernetes configs__

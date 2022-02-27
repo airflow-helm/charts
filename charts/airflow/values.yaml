@@ -1624,6 +1624,14 @@ externalDatabase:
   ##
   user: airflow
 
+  ## the name of a pre-created secret containing the external database username
+  ##
+  userSecret: ""
+
+  ## the key within `externalDatabase.userSecret` containing the user string
+  ##
+  userSecretKey: "postgresql-user"
+
   ## the name of a pre-created secret containing the external database password
   ##
   passwordSecret: ""

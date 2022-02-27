@@ -55,7 +55,7 @@ EXAMPLE USAGE: {{ include "airflow.podSecurityContext" (dict "Release" .Release 
 
 {{/*
 Define an init-container which checks the DB status
-EXAMPLE USAGE: {{ include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) }}
+EXAMPLE USAGE: {{ include "airflow.init_container.check_db" (dict "Template" .Template "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) }}
 */}}
 {{- define "airflow.init_container.check_db" }}
 - name: check-db
@@ -82,7 +82,7 @@ EXAMPLE USAGE: {{ include "airflow.init_container.check_db" (dict "Release" .Rel
 
 {{/*
 Define an init-container which waits for DB migrations
-EXAMPLE USAGE: {{ include "airflow.init_container.wait_for_db_migrations" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) }}
+EXAMPLE USAGE: {{ include "airflow.init_container.wait_for_db_migrations" (dict "Template" .Template "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) }}
 */}}
 {{- define "airflow.init_container.wait_for_db_migrations" }}
 - name: wait-for-db-migrations
@@ -406,6 +406,10 @@ The list of `envFrom` for web/scheduler/worker/flower Pods
     name: {{ include "airflow.fullname" . }}-config-envs
 {{- end }}
 
+{{- define "magda.var_dump" -}}
+{{- . | mustToPrettyJson | printf "\nThe JSON output of the dumped var is: \n%s" }}
+{{- end -}}
+
 {{/*
 The list of `env` for web/scheduler/worker/flower Pods
 */}}
@@ -426,11 +430,19 @@ The list of `env` for web/scheduler/worker/flower Pods
       key: postgresql-password
 {{- end }}
 {{- else }}
+{{- if and (.Values.externalDatabase.userSecret) (not .Values.externalDatabase.user) }}
+- name: DATABASE_USER
+  valueFrom:  
+    secretKeyRef:
+      name: {{ tpl .Values.externalDatabase.userSecret . }}
+      key: {{ .Values.externalDatabase.userSecretKey }}
+{{- else }}
+{{- end }}
 {{- if .Values.externalDatabase.passwordSecret }}
 - name: DATABASE_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: {{ .Values.externalDatabase.passwordSecret }}
+      name: {{ tpl .Values.externalDatabase.passwordSecret . }}
       key: {{ .Values.externalDatabase.passwordSecretKey }}
 {{- else }}
 - name: DATABASE_PASSWORD
