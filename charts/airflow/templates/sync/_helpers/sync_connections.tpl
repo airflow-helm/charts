@@ -103,7 +103,7 @@ VAR__CONNECTION_WRAPPERS = {
     description={{ .description | quote }},
     {{- end }}
     {{- if .host }}
-    host={{ .host | quote }},
+    host={{ tpl .host $ | quote }},
     {{- end }}
     {{- if .login }}
     login={{ .login | quote }},
@@ -122,7 +122,7 @@ VAR__CONNECTION_WRAPPERS = {
     port={{ .port }},
     {{- end }}
     {{- if .extra }}
-    extra={{ .extra | quote }},
+    extra={{ tpl .extra $ | quote }},
     {{- end }}
   ),
   {{- end }}

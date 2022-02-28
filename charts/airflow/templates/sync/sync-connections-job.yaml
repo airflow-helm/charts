@@ -119,13 +119,13 @@ spec:
               {{- end }}
               {{- if eq ($v.kind | lower) "configmap" }}
               - configMap:
-                  name: {{ $v.name | quote }}
+                  name: {{ tpl $v.name $ | quote }}
                   items:
                     - key: {{ $v.key | quote }}
                       path: {{ $k | quote }}
               {{- else if eq ($v.kind | lower) "secret" }}
               - secret:
-                  name: {{ $v.name | quote }}
+                  name: {{ tpl $v.name $ | quote }}
                   items:
                     - key: {{ $v.key | quote }}
                       path: {{ $k | quote }}
