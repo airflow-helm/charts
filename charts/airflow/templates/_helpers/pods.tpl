@@ -406,10 +406,6 @@ The list of `envFrom` for web/scheduler/worker/flower Pods
     name: {{ include "airflow.fullname" . }}-config-envs
 {{- end }}
 
-{{- define "magda.var_dump" -}}
-{{- . | mustToPrettyJson | printf "\nThe JSON output of the dumped var is: \n%s" }}
-{{- end -}}
-
 {{/*
 The list of `env` for web/scheduler/worker/flower Pods
 */}}
