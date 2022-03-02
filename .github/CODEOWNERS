@@ -1,5 +1,8 @@
 ## Global Admins
 * @thesuperzapper @gsemet
 
-## Airflow Chart Admins
-/charts/airflow @thesuperzapper @gsemet
+## Chart Admins
+/charts/ @thesuperzapper
+
+## Images Admins
+/images/ @thesuperzapper
