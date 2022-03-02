@@ -119,6 +119,7 @@ Review the FAQ to understand how the chart functions, here are some good startin
 - ["How to set airflow configs?"](#how-to-set-airflow-configs)
 - ["How to create airflow users?"](#how-to-create-airflow-users)
 - ["How to authenticate airflow users with LDAP/OAUTH?"](#how-to-authenticate-airflow-users-with-ldapoauth)
+- ["How to create airflow roles?"](#how-to-create-airflow-roles)
 - ["How to create airflow connections?"](#how-to-create-airflow-connections)
 - ["How to use an external database?"](#how-to-use-an-external-database)
 - ["How to persist airflow logs?"](#how-to-persist-airflow-logs)
@@ -592,6 +593,31 @@ web:
       # force users to re-auth after 30min of inactivity (to keep roles in sync)
       PERMANENT_SESSION_LIFETIME = 1800
 ```
+
+<hr>
+</details>
+
+### How to create airflow roles? 
+<details>
+<summary>Expand</summary>
+<hr>
+
+You can use the `airflow.roles` value to create airflow roles in a declarative way.
+
+Example values to create roles `RoleA` and `RoleB` with some permissions:
+```yaml
+airflow:
+  roles:
+    - name: RoleA
+      permissions: [['can_read', 'My Profile'], ['can_read', 'Website']]
+    - name: RoleB
+      permissions: [['can_read', 'My Profile']]
+
+  ## if we create a Deployment to perpetually sync `airflow.roles`
+  rolesUpdate: true
+```
+
+Note: sync process will not remove DAG-level permissions, in order not to override permissions assigned by `access_control` attribute in DAG definition.
 
 <hr>
 </details>
@@ -1441,6 +1467,8 @@ Parameter | Description | Default
 `airflow.users` | a list of users to create | `<see values.yaml>`
 `airflow.usersTemplates` | bash-like templates to be used in `airflow.users` | `<see values.yaml>`
 `airflow.usersUpdate` | if we create a Deployment to perpetually sync `airflow.users` | `true`
+`airflow.roles` | a list of roles to create | `<see values.yaml>`
+`airflow.rolesUpdate` | if we create a Deployment to perpetually sync `airflow.roles` | `true`
 `airflow.connections` | a list airflow connections to create | `<see values.yaml>`
 `airflow.connectionsTemplates` | bash-like templates to be used in `airflow.connections` | `<see values.yaml>`
 `airflow.connectionsUpdate` | if we create a Deployment to perpetually sync `airflow.connections` | `true`
