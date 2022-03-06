@@ -15,6 +15,7 @@ The python sync script for users.
 ## Imports ##
 #############
 import sys
+from typing import Union
 from flask_appbuilder.security.sqla.models import User, Role
 from werkzeug.security import check_password_hash, generate_password_hash
 {{- if .Values.airflow.legacyCommands }}
@@ -37,14 +38,14 @@ class UserWrapper(object):
             first_name: Optional[str] = None,
             last_name: Optional[str] = None,
             email: Optional[str] = None,
-            role: Optional[str] = None,
+            role: Optional[Union[str,List[str]]] = None,
             password: Optional[str] = None
     ):
         self.username = username
         self._first_name = first_name
         self._last_name = last_name
         self._email = email
-        self.role = role
+        self.role = role if isinstance(role, list) else [role]
         self._password = password
 
     @property
@@ -69,7 +70,7 @@ class UserWrapper(object):
             "first_name": self.first_name,
             "last_name": self.last_name,
             "email": self.email,
-            "role": find_role(role_name=self.role),
+            "role": [find_role(role_name=r) for r in self.role],
             "password": self.password
         }
 
@@ -91,7 +92,13 @@ VAR__USER_WRAPPERS = {
     first_name={{ (required "each `firstName` in `airflow.users` must be non-empty!" .firstName) | quote }},
     last_name={{ (required "each `lastName` in `airflow.users` must be non-empty!" .lastName) | quote }},
     email={{ (required "each `email` in `airflow.users` must be non-empty!" .email) | quote }},
-    role={{ (required "each `role` in `airflow.users` must be non-empty!" .role) | quote }},
+    role={{ if eq "string" (printf "%T" (required "each `role` in `airflow.users` must be non-empty!" .role)) -}}
+             [{{ .role | quote }}]
+         {{- else -}}
+             [{{ range .role }}
+                 {{- . | quote -}},
+             {{- end }}]
+         {{- end }},
     password={{ (required "each `password` in `airflow.users` must be non-empty!" .password) | quote }},
   ),
   {{- end }}
@@ -123,7 +130,7 @@ def compare_users(user_dict: Dict, user_model: User) -> bool:
             and user_dict["first_name"] == user_model.first_name
             and user_dict["last_name"] == user_model.last_name
             and user_dict["email"] == user_model.email
-            and [user_dict["role"]] == user_model.roles
+            and user_dict["role"] == user_model.roles
             and check_password_hash(pwhash=user_model.password, password=user_dict["password"])
     )
 
@@ -158,7 +165,7 @@ def sync_user(user_wrapper: UserWrapper) -> None:
             u_old.first_name = u_new["first_name"]
             u_old.last_name = u_new["last_name"]
             u_old.email = u_new["email"]
-            u_old.roles = [u_new["role"]]
+            u_old.roles = u_new["role"]
             u_old.password = generate_password_hash(u_new["password"])
             # strange check for False is because update_user() returns None for success
             # but in future might return the User model
