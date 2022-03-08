@@ -8,6 +8,9 @@
   {{- if not (eq "1" (.Values.scheduler.replicas | toString)) }}
   {{ required "If `airflow.legacyCommands=true`, then `scheduler.replicas` must be set to `1`!" nil }}
   {{- end }}
+  {{- if eq "mssql" .Values.externalDatabase.type }}
+  {{ required "If `airflow.legacyCommands=true`, then `externalDatabase.type` cannot be set to `mssql`!" nil }}
+  {{- end }}
 {{- end }}
 
 {{/* Checks for `airflow.image` */}}
