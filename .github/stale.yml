@@ -21,13 +21,16 @@ staleLabel: lifecycle/stale
 markComment: |
   This issue has been automatically marked as stale because it has not had activity in __60 days__.
   It will be closed in __7 days__ if no further activity occurs.
+  
   Thank you for your contributions.
   
-  Issues never become stale if they:
+  ---
   
-  1. are added to a __Project__
-  2. are added to a __Milestone__
-  3. have the `lifecycle/frozen` label
+  Issues never become stale if any of the following is true:
+  
+  1. they are added to a __Project__
+  2. they are added to a __Milestone__
+  3. they have the `lifecycle/frozen` label
 
 # Comment to post when closing a stale issue. Set to `false` to disable
 closeComment: false
