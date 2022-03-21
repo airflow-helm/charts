@@ -129,30 +129,34 @@ spec:
                 - "-Wignore"
                 - "-c"
                 - |
+                  import os
                   import sys
-                  from typing import List
+
+                  # suppress logs triggered from importing airflow packages
+                  # (logs are unneeded because K8S probes don't expose them)
+                  {{- if .Values.airflow.legacyCommands }}
+                  os.environ["AIRFLOW__CORE__LOGGING_LEVEL"] = "ERROR"
+                  {{- else }}
+                  os.environ["AIRFLOW__LOGGING__LOGGING_LEVEL"] = "ERROR"
+                  {{- end }}
+
                   from airflow.jobs.scheduler_job import SchedulerJob
                   from airflow.utils.db import create_session
                   from airflow.utils.net import get_hostname
-                  from airflow.utils.state import State
 
                   with create_session() as session:
                       hostname = get_hostname()
-                      query = session \
+                      job = session \
                           .query(SchedulerJob) \
-                          .filter_by(state=State.RUNNING, hostname=hostname) \
-                          .order_by(SchedulerJob.latest_heartbeat.desc())
-                      jobs: List[SchedulerJob] = query.all()
-                      alive_jobs = [job for job in jobs if job.is_alive()]
-                      count_alive_jobs = len(alive_jobs)
+                          .filter_by(hostname=hostname) \
+                          .order_by(SchedulerJob.latest_heartbeat.desc()) \
+                          .limit(1) \
+                          .first()
 
-                  if count_alive_jobs == 1:
-                      # scheduler is healthy - we expect one SchedulerJob per scheduler
+                  if job.is_alive():
                       pass
-                  elif count_alive_jobs == 0:
-                      sys.exit(f"UNHEALTHY - 0 alive SchedulerJob for: {hostname}")
                   else:
-                      sys.exit(f"UNHEALTHY - {count_alive_jobs} (more than 1) alive SchedulerJob for: {hostname}")
+                      sys.exit(f"SchedulerJob for '{hostname}' is not alive")
           {{- end }}
           {{- if or ($volumeMounts) (include "airflow.executor.kubernetes_like" .) }}
           volumeMounts:
