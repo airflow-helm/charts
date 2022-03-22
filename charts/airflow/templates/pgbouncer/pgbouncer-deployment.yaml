@@ -104,6 +104,7 @@ spec:
             - |-
               /home/pgbouncer/config/gen_auth_file.sh && \
               exec pgbouncer /home/pgbouncer/config/pgbouncer.ini
+          {{- if .Values.pgbouncer.livenessProbe.enabled }}
           livenessProbe:
             initialDelaySeconds: {{ .Values.pgbouncer.livenessProbe.initialDelaySeconds }}
             periodSeconds: {{ .Values.pgbouncer.livenessProbe.periodSeconds }}
@@ -116,6 +117,7 @@ spec:
                 ## this check is intended to fail when the DATABASE_PASSWORD secret is updated,
                 ## which would cause `gen_auth_file.sh` to run again on container start
                 - psql $(eval $DATABASE_PSQL_CMD) --tuples-only --command="SELECT 1;" | grep -q "1"
+          {{- end }}
           readinessProbe:
             initialDelaySeconds: 5
             periodSeconds: 10
