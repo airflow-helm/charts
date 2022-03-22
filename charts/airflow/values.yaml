@@ -1080,7 +1080,7 @@ dags:
     ##
     image:
       repository: k8s.gcr.io/git-sync/git-sync
-      tag: v3.2.2
+      tag: v3.5.0
       pullPolicy: IfNotPresent
       uid: 65533
       gid: 65533
