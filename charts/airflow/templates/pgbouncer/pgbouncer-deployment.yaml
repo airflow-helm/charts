@@ -118,13 +118,15 @@ spec:
                 ## which would cause `gen_auth_file.sh` to run again on container start
                 - psql $(eval $DATABASE_PSQL_CMD) --tuples-only --command="SELECT 1;" | grep -q "1"
           {{- end }}
-          readinessProbe:
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 3
+          {{- if .Values.pgbouncer.startupProbe.enabled }}
+          startupProbe:
+            initialDelaySeconds: {{ .Values.pgbouncer.startupProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.pgbouncer.startupProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.pgbouncer.startupProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.pgbouncer.startupProbe.failureThreshold }}
             tcpSocket:
               port: 6432
+          {{- end }}
           volumeMounts:
             - name: pgbouncer-config
               mountPath: /home/pgbouncer/config

@@ -1788,6 +1788,7 @@ Parameter | Description | Default
 `pgbouncer.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
 `pgbouncer.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the pgbouncer | `<see values.yaml>`
 `pgbouncer.livenessProbe.*` | configs for the pgbouncer Pods' liveness probe | `<see values.yaml>`
+`pgbouncer.startupProbe.*` | configs for the pgbouncer Pods' startup probe | `<see values.yaml>`
 `pgbouncer.terminationGracePeriodSeconds` | the maximum number of seconds to wait for queries upon pod termination, before force killing | `120`
 `pgbouncer.maxClientConnections` | sets pgbouncer config: `max_client_conn` | `100`
 `pgbouncer.poolSize` | sets pgbouncer config: `default_pool_size` | `20`
