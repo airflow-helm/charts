@@ -1,6 +1,6 @@
 name: Docs Issue
 description: Raise an issue about documentation!
-labels: [ "documentation" ]
+labels: [ "kind/docs" ]
 body:
   - type: markdown
     attributes:
@@ -13,6 +13,8 @@ body:
       label: Checks
       options:
         - label: I have checked for [existing issues](https://github.com/airflow-helm/charts/issues).
+          required: true
+        - label: This report is about the [user-community Airflow Helm Chart](https://github.com/airflow-helm/charts/tree/main/charts/airflow).
           required: true
   - type: textarea
     id: description
