@@ -32,7 +32,7 @@ Chart Version → <br> Airflow Version ↓  | `7.X.X` | `8.X.X`  |
 
 ### Airflow Executor Support:
 
-Chart Version → <br> Airflow Executor ↓ | `7.X.X` | `8.X.X` | 
+Chart Version → <br> Airflow Executor ↓ | `7.X.X` | `8.X.X` |
 --- | --- | ---
 `CeleryExecutor` | ✅ | ✅
 `KubernetesExecutor` | ✅️ <sub>[1]</sub> | ✅
@@ -65,7 +65,7 @@ helm install \
   --namespace $AIRFLOW_NAMESPACE \
   --version "8.X.X" \
   --values ./custom-values.yaml
-  
+
 ## wait until the above command returns (may take a while)
 ```
 
@@ -74,7 +74,7 @@ __(Step 3) - Locally expose the airflow webserver:__
 ## port-forward the airflow webserver
 kubectl port-forward svc/${AIRFLOW_NAME}-web 8080:8080 --namespace $AIRFLOW_NAMESPACE
 
-## open your browser to: http://localhost:8080 
+## open your browser to: http://localhost:8080
 ## default login: admin/admin
 ```
 
@@ -148,7 +148,7 @@ For example, using airflow `1.10.15`, with python `3.8`:
 airflow:
   # this must be "true" for airflow 1.10
   legacyCommands: true
-  
+
   image:
     repository: apache/airflow
     tag: 1.10.15-python3.8
@@ -170,11 +170,11 @@ airflow:
   config:
     ## security
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
-    
+
     ## dags
     AIRFLOW__CORE__LOAD_EXAMPLES: "False"
     AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "30"
-    
+
     ## email
     AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"
     AIRFLOW__SMTP__SMTP_HOST: "smtpmail.example.com"
@@ -182,10 +182,10 @@ airflow:
     AIRFLOW__SMTP__SMTP_PORT: "25"
     AIRFLOW__SMTP__SMTP_SSL: "False"
     AIRFLOW__SMTP__SMTP_STARTTLS: "False"
-    
+
     ## domain used in airflow emails
     AIRFLOW__WEBSERVER__BASE_URL: "http://airflow.example.com"
-    
+
     ## ether environment variables
     HTTP_PROXY: "http://proxy.example.com:8080"
 ```
@@ -199,7 +199,7 @@ airflow:
       # use a custom `xcom_sidecar` image for KubernetesPodOperator()
       from airflow.kubernetes.pod_generator import PodDefaults
       PodDefaults.SIDECAR_CONTAINER.image = "gcr.io/PROJECT-ID/custom-sidecar-image"
-      
+
     ## the name of a Secret containing a `airflow_local_settings.py` key
     ## (if set, this disables `airflow.localSettings.stringOverride`)
     #existingSecret: "my-airflow-local-settings"
@@ -232,8 +232,8 @@ dags:
     syncWait: 60
     sshSecret: "airflow-ssh-git-secret"
     sshSecretKey: "id_rsa"
-    
-    # "known_hosts" verification can be disabled by setting to "" 
+
+    # "known_hosts" verification can be disabled by setting to ""
     sshKnownHosts: |-
       github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
 ```
@@ -310,8 +310,8 @@ dags:
 
 <h3>Option 3 - embedded into container image</h3>
 
-> 🟨 __Note__ 🟨 
-> 
+> 🟨 __Note__ 🟨
+>
 > This chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, consult airflow's official [docs about custom images](https://airflow.apache.org/docs/apache-airflow/2.0.1/production-deployment.html#production-container-images)
 
 This method stores your DAGs inside the container image.
@@ -342,8 +342,8 @@ airflow:
 
 <h3>Option 1 - use init-containers</h3>
 
-> 🟥 __Warning__ 🟥 
-> 
+> 🟥 __Warning__ 🟥
+>
 > We strongly advice that you DO NOT TO USE this feature in production, instead please use "Option 2"
 
 You can use the `airflow.extraPipPackages` value to install pip packages on all Pods, you can also use the more specific `scheduler.extraPipPackages`, `web.extraPipPackages`, `worker.extraPipPackages` and `flower.extraPipPackages`.
@@ -375,7 +375,7 @@ airflow:
     PIP_TIMEOUT: 60
     PIP_INDEX_URL: https://<username>:<password>@example.com/packages/simple/
     PIP_TRUSTED_HOST: example.com
-  
+
   extraPipPackages:
     - "my-internal-package==1.0.0"
 ```
@@ -403,7 +403,7 @@ airflow:
 <hr>
 </details>
 
-### How to create airflow users? 
+### How to create airflow users?
 <details>
 <summary>Expand</summary>
 <hr>
@@ -451,7 +451,7 @@ airflow:
       email: ${ADMIN_EMAIL}
       firstName: admin
       lastName: admin
-        
+
   ## bash-like templates to be used in `airflow.users`
   usersTemplates:
     ADMIN_PASSWORD:
@@ -462,7 +462,7 @@ airflow:
       kind: configmap
       name: my-configmap
       key: email
-        
+
   ## if we create a Deployment to perpetually sync `airflow.users`
   usersUpdate: true
 ```
@@ -470,15 +470,15 @@ airflow:
 <hr>
 </details>
 
-### How to authenticate airflow users with LDAP/OAUTH? 
+### How to authenticate airflow users with LDAP/OAUTH?
 <details>
 <summary>Expand</summary>
 <hr>
 
-> 🟥 __Warning__ 🟥 
-> 
+> 🟥 __Warning__ 🟥
+>
 > If you set up LDAP/OAUTH, you should set `airflow.users = []` (and delete any previously created users)
-> 
+>
 > The version of Flask-Builder installed might not be the latest, see [How to install extra pip packages?](#how-to-install-extra-pip-packages)
 
 You can use the `web.webserverConfig.*` values to adjust the Flask-Appbuilder `webserver_config.py` file, read [Flask-builder's security docs](https://flask-appbuilder.readthedocs.io/en/latest/security.html) for further reference.
@@ -501,22 +501,22 @@ web:
       from flask_appbuilder.security.manager import AUTH_LDAP
 
       SQLALCHEMY_DATABASE_URI = conf.get('core', 'SQL_ALCHEMY_CONN')
-      
+
       AUTH_TYPE = AUTH_LDAP
       AUTH_LDAP_SERVER = "ldap://ldap.example.com"
       AUTH_LDAP_USE_TLS = False
-      
+
       # registration configs
       AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB
       AUTH_USER_REGISTRATION_ROLE = "Public"  # this role will be given in addition to any AUTH_ROLES_MAPPING
       AUTH_LDAP_FIRSTNAME_FIELD = "givenName"
       AUTH_LDAP_LASTNAME_FIELD = "sn"
       AUTH_LDAP_EMAIL_FIELD = "mail"  # if null in LDAP, email is set to: "{username}@email.notfound"
-      
+
       # bind username (for password validation)
       AUTH_LDAP_USERNAME_FORMAT = "uid=%s,ou=users,dc=example,dc=com"  # %s is replaced with the provided username
       # AUTH_LDAP_APPEND_DOMAIN = "example.com"  # bind usernames will look like: {USERNAME}@example.com
-      
+
       # search configs
       AUTH_LDAP_SEARCH = "ou=users,dc=example,dc=com"  # the LDAP search base (if non-empty, a search will ALWAYS happen)
       AUTH_LDAP_UID_FIELD = "uid"  # the username field
@@ -526,13 +526,13 @@ web:
           "cn=airflow_users,ou=groups,dc=example,dc=com": ["User"],
           "cn=airflow_admins,ou=groups,dc=example,dc=com": ["Admin"],
       }
-      
+
       # the LDAP user attribute which has their role DNs
       AUTH_LDAP_GROUP_FIELD = "memberOf"
-      
+
       # if we should replace ALL the user's roles each login, or only on registration
       AUTH_ROLES_SYNC_AT_LOGIN = True
-      
+
       # force users to re-auth after 30min of inactivity (to keep roles in sync)
       PERMANENT_SESSION_LIFETIME = 1800
 ```
@@ -554,9 +554,9 @@ web:
       from flask_appbuilder.security.manager import AUTH_OAUTH
 
       SQLALCHEMY_DATABASE_URI = conf.get('core', 'SQL_ALCHEMY_CONN')
-      
+
       AUTH_TYPE = AUTH_OAUTH
-      
+
       # registration configs
       AUTH_USER_REGISTRATION = True  # allow users who are not already in the FAB DB
       AUTH_USER_REGISTRATION_ROLE = "Public"  # this role will be given in addition to any AUTH_ROLES_MAPPING
@@ -579,7 +579,7 @@ web:
               }
           }
       ]
-      
+
       # a mapping from the values of `userinfo["role_keys"]` to a list of FAB roles
       AUTH_ROLES_MAPPING = {
           "FAB_USERS": ["User"],
@@ -588,7 +588,7 @@ web:
 
       # if we should replace ALL the user's roles each login, or only on registration
       AUTH_ROLES_SYNC_AT_LOGIN = True
-      
+
       # force users to re-auth after 30min of inactivity (to keep roles in sync)
       PERMANENT_SESSION_LIFETIME = 1800
 ```
@@ -596,7 +596,7 @@ web:
 <hr>
 </details>
 
-### How to set a custom fernet encryption key? 
+### How to set a custom fernet encryption key?
 <details>
 <summary>Expand</summary>
 <hr>
@@ -681,7 +681,7 @@ You can use the `airflow.connections` value to create airflow [Connections](http
 
 Example values to create connections called `my_aws`, `my_gcp`, `my_postgres`, and `my_ssh`:
 ```yaml
-airflow: 
+airflow:
   connections:
     ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html
     - id: my_aws
@@ -734,7 +734,7 @@ You can use `airflow.connectionsTemplates` to extract string templates from keys
 
 Example values to use templates from `Secret/my-secret` and `ConfigMap/my-configmap` in parts of the `my_aws` connection:
 ```yaml
-airflow: 
+airflow:
   connections:
     - id: my_aws
       type: aws
@@ -851,13 +851,13 @@ airflow:
 <hr>
 
 > 🟨 __Note__ 🟨
-> 
+>
 > This method of autoscaling is not ideal. There is not necessarily a link between RAM usage, and the number of pending tasks, meaning you could have a situation where your workers don't scale up despite having pending tasks.
 
 The Airflow Celery Workers can be scaled using the [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/), to enable autoscaling, you must set `workers.autoscaling.enabled=true`, then provide `workers.autoscaling.maxReplicas`.
 
 Assume every task a worker executes consumes approximately `200Mi` memory, that means memory is a good metric for utilisation monitoring.
-For a worker pod you can calculate it: `WORKER_CONCURRENCY * 200Mi`, so for `10 tasks` a worker will consume `~2Gi` of memory. 
+For a worker pod you can calculate it: `WORKER_CONCURRENCY * 200Mi`, so for `10 tasks` a worker will consume `~2Gi` of memory.
 In the following config if a worker consumes `80%` of `2Gi` (which will happen if it runs 9-10 tasks at the same time), an autoscaling event will be triggered, and a new worker will be added.
 If you have many tasks in a queue, Kubernetes will keep adding workers until maxReplicas reached, in this case `16`.
 ```yaml
@@ -891,8 +891,8 @@ workers:
 
   celery:
     ## wait at most 9min for running tasks to complete before SIGTERM
-    ## WARNING: 
-    ## - some cloud cluster-autoscaler configs will not respect graceful termination 
+    ## WARNING:
+    ## - some cloud cluster-autoscaler configs will not respect graceful termination
     ##   longer than 10min, for example, Google Kubernetes Engine (GKE)
     gracefullTermination: true
     gracefullTerminationPeriod: 540
@@ -916,8 +916,8 @@ dags:
 <summary>Expand</summary>
 <hr>
 
-> 🟥 __Warning__ 🟥 
-> 
+> 🟥 __Warning__ 🟥
+>
 > For production, you should persist logs in a production deployment using one of these methods.<br>
 > By default, logs are stored within the container's filesystem, therefore any restart of the pod will wipe your DAG logs.
 
@@ -970,7 +970,7 @@ airflow:
     AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
     AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "s3://<<MY-BUCKET-NAME>>/airflow/logs"
     AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "my_aws"
-    
+
   connections:
     ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html
     - id: my_aws
@@ -1004,7 +1004,7 @@ airflow:
     AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
     AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://<<MY-BUCKET-NAME>>/airflow/logs"
     AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "my_gcp"
-    
+
   connections:
     ## see docs: https://airflow.apache.org/docs/apache-airflow-providers-google/stable/connections/gcp.html
     - id: my_gcp
@@ -1040,13 +1040,13 @@ serviceAccount:
 <summary>Expand</summary>
 <hr>
 
-> 🟥 __Warning__ 🟥 
-> 
+> 🟥 __Warning__ 🟥
+>
 > The embedded Postgres is NOT SUITABLE for production, you should follow [How to use an external database?](#how-to-use-an-external-database)
 
 > 🟨 __Note__ 🟨
 >
-> If `pgbouncer.enabled=true` (the default), we will deploy [PgBouncer](https://www.pgbouncer.org/) to pool connections to your external database 
+> If `pgbouncer.enabled=true` (the default), we will deploy [PgBouncer](https://www.pgbouncer.org/) to pool connections to your external database
 
 The embedded Postgres database has an insecure username/password by default, you should create secure credentials before using it.
 
@@ -1108,8 +1108,8 @@ externalDatabase:
 
 <h3>Option 2 - MySQL</h3>
 
-> 🟨 __Note__ 🟨 
-> 
+> 🟨 __Note__ 🟨
+>
 > You must set `explicit_defaults_for_timestamp=1` in your MySQL instance, [see here](https://airflow.apache.org/docs/stable/howto/initialize-database.html)
 
 Example values for an external MySQL database, with an existing `airflow_cluster1` database:
@@ -1164,8 +1164,8 @@ externalRedis:
 <summary>Expand</summary>
 <hr>
 
-> 🟨 __Note__ 🟨 
-> 
+> 🟨 __Note__ 🟨
+>
 > This method can be used to pass sensitive configs to Airflow
 
 You can use the `airflow.extraEnv` value to mount extra environment variables with the same structure as [EnvVar in ContainerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#envvar-v1-core).
@@ -1238,23 +1238,23 @@ Consider the situation where you already have something hosted at the root of yo
 In this example, would set these values:
 ```yaml
 airflow:
-  config: 
+  config:
     AIRFLOW__WEBSERVER__BASE_URL: "http://example.com/airflow/"
     AIRFLOW__CELERY__FLOWER_URL_PREFIX: "/airflow/flower"
 
 ingress:
   enabled: true
-  
+
   ## WARNING: set as "networking.k8s.io/v1beta1" for Kubernetes 1.18 and earlier
   apiVersion: networking.k8s.io/v1
-  
+
   ## airflow webserver ingress configs
   web:
     annotations:
       kubernetes.io/ingress.class: nginx
     host: "example.com"
     path: "/airflow"
-    
+
   ## flower ingress configs
   flower:
     annotations:
@@ -1265,8 +1265,8 @@ ingress:
 
 We expose the `ingress.web.precedingPaths` and `ingress.web.succeedingPaths` values, which are __before__ and __after__ the default path respectively.
 
-> 🟦 __Tip__ 🟦 
-> 
+> 🟦 __Tip__ 🟦
+>
 > A common use-case is [enabling SSL with the aws-alb-ingress-controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/tasks/ssl_redirect/), which needs a redirect path to be hit before the airflow-webserver one
 
 For example, setting `ingress.web.precedingPaths` for an aws-alb-ingress-controller with SSL:
@@ -1456,6 +1456,7 @@ Parameter | Description | Default
 `airflow.podAnnotations` | extra annotations for airflow Pods | `{}`
 `airflow.extraPipPackages` | extra pip packages to install in airflow Pods | `[]`
 `airflow.extraEnv` | extra environment variables for the airflow Pods | `[]`
+`airflow.extraEnvFrom` | extra environment variables for the airflow Pods using the envFrom field | `[]`
 `airflow.extraContainers` | extra containers for the airflow Pods | `[]`
 `airflow.extraVolumeMounts` | extra VolumeMounts for the airflow Pods | `[]`
 `airflow.extraVolumes` | extra Volumes for the airflow Pods | `[]`
@@ -1766,7 +1767,7 @@ Parameter | Description | Default
 `externalRedis.databaseNumber` | the database number to use within the the external redis | `1`
 `externalRedis.passwordSecret` | the name of a pre-created secret containing the external redis password | `""`
 `externalRedis.passwordSecretKey` | the key within `externalRedis.passwordSecret` containing the password string | `redis-password`
-`externalDatabase.properties` | extra connection-string properties for the external redis | `""` 
+`externalDatabase.properties` | extra connection-string properties for the external redis | `""`
 
 <hr>
 </details>
