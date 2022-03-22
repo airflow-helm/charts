@@ -671,6 +671,7 @@ web:
     externalPort: 8080
     loadBalancerIP: ""
     loadBalancerSourceRanges: []
+    portName: "web"
     nodePort:
       http: ""
 
@@ -856,6 +857,10 @@ workers:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
   ##
   extraVolumes: []
+
+  ## sets service configs: workers
+  service:
+    portName: "workers"
 
 ###################################
 ## COMPONENT | Flower
@@ -1520,6 +1525,10 @@ pgbouncer:
     certFile:
       existingSecret: ""
       existingSecretKey: server.crt
+
+  ## sets service configs: pgbouncer
+  service:
+    portName: "pgbouncer"
 
 ###################################
 ## DATABASE | Embedded Postgres

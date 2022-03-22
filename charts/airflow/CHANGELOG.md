@@ -7,6 +7,17 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
+## [8.5.4] - 2022-01-10
+
+### Changed
+- add setting for pgbouncer, workers, and web service port names
+  - __pgbouncer setting:__ pgbouncer.service.portName
+  - __workers setting:__ workers.service.portName
+  - __web setting:__ web.service.portName
+
+### Fixed
+- Istio naming convention [issue](https://istio.io/latest/docs/reference/config/analysis/ist0118/) 
+
 ## [8.5.3] - 2022-01-10
 
 > 🟥 __Warning__ 🟥
