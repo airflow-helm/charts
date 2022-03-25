@@ -526,7 +526,9 @@ scheduler:
   numRuns: -1
 
   ## configs for the scheduler Pods' liveness probe
-  ## - `periodSeconds` x `failureThreshold` = max seconds a scheduler can be unhealthy
+  ## - "unhealthy" means the SchedulerJob has not had a heartbeat for
+  ##   AIRFLOW__SCHEDULER__SCHEDULER_HEALTH_CHECK_THRESHOLD seconds
+  ## - `periodSeconds` x `failureThreshold` = max seconds a scheduler can be in an "unhealthy" state
   ##
   livenessProbe:
     enabled: true
@@ -534,6 +536,24 @@ scheduler:
     periodSeconds: 30
     timeoutSeconds: 60
     failureThreshold: 5
+
+    ## configs for an additional check that ensures tasks are being created by the scheduler
+    ## - this check works by ensuring that the most recent LocalTaskJob had a `start_date` no more than
+    ##   `taskCreationCheck.thresholdSeconds` seconds ago
+    ## - this check is useful because the scheduler can deadlock with a heartbeat, but not be scheduling new tasks:
+    ##   - https://github.com/apache/airflow/issues/7935 (present in all versions until being patched in `2.0.2`)
+    ##   - https://github.com/apache/airflow/issues/15938 (present from `1.10.13` until being patched in `2.1.1`)
+    ##
+    taskCreationCheck:
+      ## if the task creation check is enabled
+      ##
+      enabled: false
+
+      ## the maximum number of seconds since the start_date of the most recent LocalTaskJob
+      ## - [WARNING] must be AT LEAST equal to your shortest DAG schedule_interval
+      ## - [WARNING] DummyOperator tasks will NOT be seen by this probe
+      ##
+      thresholdSeconds: 300
 
   ## extra pip packages to install in the scheduler Pods
   ##
