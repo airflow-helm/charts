@@ -153,10 +153,9 @@ spec:
               protocol: TCP
           command:
             {{- include "airflow.command" . | indent 12 }}
-            ## required because `/entrypoint` only passes "bash" / "python", and our `lifecycle.preStop` uses "timeout"
+          args:
             - "bash"
             - "-c"
-          args:
             {{- if .Values.airflow.legacyCommands }}
             - "exec airflow worker"
             {{- else }}
