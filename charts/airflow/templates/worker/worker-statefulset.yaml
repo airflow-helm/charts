@@ -105,6 +105,9 @@ spec:
             {{- include "airflow.envFrom" . | indent 12 }}
           env:
             {{- include "airflow.env" . | indent 12 }}
+            # have dumb-init only send signals to direct child process (needed for celery workers to warm shutdown)
+            - name: DUMB_INIT_SETSID
+              value: "0"
           {{- if .Values.workers.celery.gracefullTermination }}
           lifecycle:
             preStop:
