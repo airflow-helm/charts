@@ -1225,17 +1225,113 @@ kubectl create secret generic \
 </details>
 
 ### How to set up an Ingress?
+
 <details>
 <summary>Expand</summary>
 <hr>
 
-The chart provides the `ingress.*` values for deploying a Kubernetes Ingress to allow access to airflow outside the cluster.
+All this setup is meant to guide you through the setup of an [ingress-nginx](https://kubernetes.github.io/ingress-nginx/) ingress and a certificate management through [cert-manager](https://cert-manager.io/docs/)
 
-Consider the situation where you already have something hosted at the root of your domain, you might want to place airflow under a URL-prefix:
+<h3>Prerequisites</h3> 
+
+<h4>Helm prerequisites</h4>
+
+The helm repositories must be installed and up-to-date in your environment. To do this, you can do : 
+
+```console
+## For cert-manager
+helm repo add jetstack https://charts.jetstack.io
+## For ingress-nginx
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+## Ensure environment is up-to-date
+helm repo update
+```
+
+<h4>Setup cert-manager</h4>
+
+    Be careful : based on the time when you're reading this, the version could be outdated.
+
+Just install cert-manager in a dedicated namespace
+
+```bash
+helm upgrade --install cert-manager --create-namespace --namespace cert-manager --version v1.5.4 jetstack/cert-manager --set installCRDs=true
+```
+
+<h3>Option 1 - Use one ingress across your cluster</h3>
+
+<h4>Setup ingress</h4>
+
+Here you'll want to install ingress in a separate namespace. For this, you can just do : 
+
+```console
+## Install the ingress
+helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --create-namespace --namespace ingress-nginx
+```
+
+<h4>Issuer and certificate</h4>
+
+Based on the following files :
+
+- issuer.yaml
+
+```yaml
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-issuer
+spec:
+  acme:
+    ## For tests, you'll probably want to use https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: your_email
+    privateKeySecretRef:
+      name: letsencrypt-account-key
+    solvers:
+    - http01:
+       ingress:
+         class: nginx
+```
+
+- certificate.yaml
+
+```yaml
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: airflow-certificate
+spec:
+  secretName: airflow-certificate
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-issuer
+  dnsNames:
+    - your_dns
+```
+
+You can do : 
+
+```console
+## Install issuer & certificate
+kubectl apply -f issuer.yaml -n ingress-nginx
+## Be careful, the certificate must be installed in your application namespace here airflow-ns
+kubectl apply -f certificate.yaml -n airflow-ns
+```
+
+<h4>Chart configuration</h4>
+
+The chart provides the `ingress.*` values for deploying a Kubernetes Ingress to allow access to airflow outside the
+cluster.
+
+Consider the situation where you already have something hosted at the root of your domain, you might want to place
+airflow under a URL-prefix:
+
 - http://example.com/airflow/
 - http://example.com/airflow/flower
 
 In this example, would set these values:
+
 ```yaml
 airflow:
   config: 
@@ -1252,24 +1348,34 @@ ingress:
   web:
     annotations:
       kubernetes.io/ingress.class: nginx
-    host: "example.com"
+      cert-manager.io/cluster-issuer: letsencrypt
+    host: "your_dns"
     path: "/airflow"
+    tls:
+      enabled: true
+      secretName: "airflow-certificate"
     
   ## flower ingress configs
   flower:
     annotations:
       kubernetes.io/ingress.class: nginx
-    host: "example.com"
+      cert-manager.io/cluster-issuer: letsencrypt
+    host: "your_dns"
     path: "/airflow/flower"
+    tls:
+      enabled: true
+      secretName: "airflow-certificate"
 ```
 
-We expose the `ingress.web.precedingPaths` and `ingress.web.succeedingPaths` values, which are __before__ and __after__ the default path respectively.
+We expose the `ingress.web.precedingPaths` and `ingress.web.succeedingPaths` values, which are __before__ and __after__
+the default path respectively.
 
-> 🟦 __Tip__ 🟦 
-> 
+> 🟦 __Tip__ 🟦
+>
 > A common use-case is [enabling SSL with the aws-alb-ingress-controller](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.1/guide/tasks/ssl_redirect/), which needs a redirect path to be hit before the airflow-webserver one
 
 For example, setting `ingress.web.precedingPaths` for an aws-alb-ingress-controller with SSL:
+
 ```yaml
 ingress:
   web:
@@ -1277,6 +1383,119 @@ ingress:
       - path: "/*"
         serviceName: "ssl-redirect"
         servicePort: "use-annotation"
+```
+
+<h3>Option 2 - Use one ingress by namespace</h3>
+
+<h4>Setup ingress</h4>
+
+Here you'll want to install ingress in the exact namespace that you will install Airflow. For this, you can just do :
+
+```console
+## Install the ingress
+helm upgrade --install namespace-ingress ingress-nginx/ingress-nginx --namespace airflow-ns --set controller.ingressClassResource.name=airflow-ns --set controller.ingressClassResource.controllerValue="k8s.io/airflow-ns" --set controller.ingressClassResource.enabled=true --set controller.ingressClassByName=true
+```
+
+<h4>Issuer and certificate</h4>
+
+Based on the following files :
+
+- issuer.yaml
+
+```yaml
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: airflow-ns-issuer
+spec:
+  acme:
+    ## For tests, you'll probably want to use https://acme-staging-v02.api.letsencrypt.org/directory
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: your_email
+    privateKeySecretRef:
+      name: airflow-ns-account-key
+    solvers:
+    - http01:
+       ingress:
+         class: airflow-ns
+```
+
+- certificate.yaml
+
+```yaml
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: airflow-ns-certificate
+spec:
+  secretName: airflow-ns-certificate
+  issuerRef:
+    kind: Issuer
+    name: airflow-ns-issuer
+  dnsNames:
+    - your_dns
+```
+
+You can do :
+
+```console
+## Install issuer & certificate
+## Be careful, both issuer & certificate must be installed in your application namespace here airflow-ns
+kubectl apply -n airflow-ns -f issuer.yaml
+kubectl apply -n airflow-ns -f certificate.yaml
+```
+
+<h4>Ingress</h4>
+
+Because of #425, you'll need to create your ingress manually
+
+- ingress.yaml
+
+```yaml
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: airflow-ns-ingress
+  annotations:
+    cert-manager.io/issuer: airflow-ns-issuer
+spec:
+  ## This is the specific configuration that allows you to have a specific ingress per installation
+  ingressClassName: "airflow-ns"
+  tls:
+    - hosts:
+        - your_dns
+      secretName: airflow-ns-certificate
+  rules:
+    - host: your_dns
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                ## Helm install name dependendant
+                name: airflow-web
+                port:
+                  number: 8080
+```
+
+You can do :
+
+```console
+## Install ingress
+kubectl apply -n airflow-ns -f ingress.yaml
+```
+
+<h4>Chart configuration</h4>
+
+Here, because you'll set up one DNS per server, you'll don't need to override the airflow webserver configuration and you'll need to disable the ingress creation within the charts
+
+```yaml
+ingress:
+  enabled: false
 ```
 
 <hr>
