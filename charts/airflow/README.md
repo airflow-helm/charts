@@ -1130,6 +1130,36 @@ externalDatabase:
   properties: ""
 ```
 
+<h3>Option 3 - Microsoft SQL Server (MSSQL)</h3>
+
+> 🟨 __Note__ 🟨 
+> 
+> Support for MSSQL metadata backend is experimental as of airflow `2.2.3`. 
+> 
+> To setup the database, you must set `READ_COMMITTED_SNAPSHOT` to `ON` in your MSSQL instance
+> and grant all permissions on the database to the airflow user, 
+> [see here](https://airflow.apache.org/docs/apache-airflow/2.2.3/howto/set-up-database.html#setting-up-a-mssql-database)
+
+Example values for an external MsSQL database, with an existing `airflow_cluster1` database:
+```yaml
+postgresql:
+  enabled: false
+
+externalDatabase:
+  type: mssql
+  host: mssql.example.org
+  port: 1433
+  database: airflow_cluster1
+  user: airflow_cluster1
+  passwordSecret: "airflow-cluster1-mssql-password"
+  passwordSecretKey: "mssql-password"
+
+  # use this for any extra connection-string settings, e.g. ?useSSL=false
+  # Since version 2.2.0, `apache/airflow` has added ODBC drivers to the docker image, which requires the following 
+  # property to be set.
+  properties: "?driver=ODBC+Driver+17+for+SQL+Server"
+```
+
 <hr>
 </details>
 
