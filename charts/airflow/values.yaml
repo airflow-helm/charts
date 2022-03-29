@@ -1620,11 +1620,27 @@ externalDatabase:
   ##
   database: airflow
 
-  ## the user of the external database
+  ## the username for the external database
   ##
   user: airflow
 
+  ## the name of a pre-created secret containing the external database user
+  ## - if set, this overrides `externalDatabase.user`
+  ##
+  userSecret: ""
+
+  ## the key within `externalDatabase.userSecret` containing the user string
+  ##
+  userSecretKey: "postgresql-user"
+
+  ## the password for the external database
+  ## - [WARNING] to avoid storing the password in plain-text within your values,
+  ##   create a Kubernetes secret and use `externalDatabase.passwordSecret`
+  ##
+  password: ""
+
   ## the name of a pre-created secret containing the external database password
+  ## - if set, this overrides `externalDatabase.password`
   ##
   passwordSecret: ""
 
@@ -1790,11 +1806,18 @@ externalRedis:
   ##
   port: 6379
 
-  ## the database number to use within the the external redis
+  ## the database number to use within the external redis
   ##
   databaseNumber: 1
 
+  ## the password for the external redis
+  ## - [WARNING] to avoid storing the password in plain-text within your values,
+  ##   create a Kubernetes secret and use `externalRedis.passwordSecret`
+  ##
+  password: ""
+
   ## the name of a pre-created secret containing the external redis password
+  ## - if set, this overrides `externalRedis.password`
   ##
   passwordSecret: ""
 

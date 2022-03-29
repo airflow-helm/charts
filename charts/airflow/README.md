@@ -1082,25 +1082,67 @@ redis:
 <summary>Expand</summary>
 <hr>
 
+> 🟥 __Warning__ 🟥
+>
+> We __STRONGLY RECOMMEND__ that all production deployments of Airflow use an external database (not managed by this chart).
+
+When compared with the Postgres that is embedded in this chart, an external database comes with many benefits:
+
+1. The embedded Postgres version is usually very outdated, so is susceptible to critical security bugs
+2. The embedded database may not scale to your performance requirements _(NOTE: every airflow task creates database connections)_
+3. An external database will likely achieve higher uptime _(NOTE: no airflow tasks will run if your database is down)_
+4. An external database can be configured with backups and disaster recovery
+
+Commonly, people use the managed PostgreSQL service from their cloud vendor to provision an external database:
+
+Cloud Platform | Service Name
+--- | ---
+Amazon Web Services | [Amazon RDS for PostgreSQL](https://aws.amazon.com/rds/postgresql/)
+Microsoft Azure | [Azure Database for PostgreSQL](https://azure.microsoft.com/en-au/services/postgresql/) 
+Google Cloud | [Cloud SQL for PostgreSQL](https://cloud.google.com/sql/docs/postgres)
+Alibaba Cloud | [ApsaraDB RDS for PostgreSQL](https://www.alibabacloud.com/product/apsaradb-for-rds-postgresql)
+IBM Cloud | [IBM Cloud® Databases for PostgreSQL](https://cloud.ibm.com/docs/databases-for-postgresql)
+
 <h3>Option 1 - Postgres</h3>
 
 > 🟨 __Note__ 🟨
 >
-> If `pgbouncer.enabled=true` (the default), we will deploy [PgBouncer](https://www.pgbouncer.org/) to pool connections to your external database
+> By default, this chart deploys [PgBouncer](https://www.pgbouncer.org/) to pool db connections and reduce the load from large numbers of airflow tasks.
+>
+> You may disable PgBouncer by setting `pgbouncer.enabled` to `false`.
 
 Example values for an external Postgres database, with an existing `airflow_cluster1` database:
 ```yaml
 postgresql:
+  # to use the external db, the embedded one must be disabled
   enabled: false
+
+pgbouncer:
+  # for other PgBouncer configs, see the `pgbouncer.*` values
+  enabled: true
 
 externalDatabase:
   type: postgres
+  
   host: postgres.example.org
   port: 5432
+  
+  # the schema which will contain the airflow tables
   database: airflow_cluster1
-  user: airflow_cluster1
-  passwordSecret: "airflow-cluster1-postgres-password"
-  passwordSecretKey: "postgresql-password"
+
+  # (username - option 1) a plain-text helm value
+  user: my_airflow_user
+  
+  # (username - option 2) a Kubernetes secret in your airflow namespace
+  #userSecret: "airflow-cluster1-database-credentials"
+  #userSecretKey: "username"
+
+  # (password - option 1) a plain-text helm value
+  password: my_airflow_password
+
+  # (password - option 2) a Kubernetes secret in your airflow namespace
+  #passwordSecret: "airflow-cluster1-database-credentials"
+  #passwordSecretKey: "password"
 
   # use this for any extra connection-string settings, e.g. ?sslmode=disable
   properties: ""
@@ -1115,16 +1157,35 @@ externalDatabase:
 Example values for an external MySQL database, with an existing `airflow_cluster1` database:
 ```yaml
 postgresql:
+  # to use the external db, the embedded one must be disabled
   enabled: false
+
+pgbouncer:
+  # pgbouncer is automatically disabled if `externalDatabase.type` is `mysql`
+  #enabled: false
 
 externalDatabase:
   type: mysql
+  
   host: mysql.example.org
   port: 3306
+
+  # the database which will contain the airflow tables
   database: airflow_cluster1
-  user: airflow_cluster1
-  passwordSecret: "airflow-cluster1-mysql-password"
-  passwordSecretKey: "mysql-password"
+
+  # (username - option 1) a plain-text helm value
+  user: my_airflow_user
+
+  # (username - option 2) a Kubernetes secret in your airflow namespace
+  #userSecret: "airflow-cluster1-database-credentials"
+  #userSecretKey: "username"
+
+  # (password - option 1) a plain-text helm value
+  password: my_airflow_password
+
+  # (password - option 2) a Kubernetes secret in your airflow namespace
+  #passwordSecret: "airflow-cluster1-database-credentials"
+  #passwordSecretKey: "password"
 
   # use this for any extra connection-string settings, e.g. ?useSSL=false
   properties: ""
@@ -1146,9 +1207,18 @@ redis:
 externalRedis:
   host: "example.redis.cache.windows.net"
   port: 6380
-  databaseNumber: 15
-  passwordSecret: "redis-password"
-  passwordSecretKey: "value"
+  
+  # the redis database-number that airflow will use
+  databaseNumber: 1
+
+  # (option 1 - password) a plain-text helm value
+  password: my_airflow_password
+
+  # (option 2 - password) a Kubernetes secret in your airflow namespace
+  #passwordSecret: "airflow-cluster1-redis-credentials"
+  #passwordSecretKey: "password"
+
+  # use this for any extra connection-string settings
   properties: "?ssl_cert_reqs=CERT_OPTIONAL"
 ```
 
@@ -1728,7 +1798,10 @@ Parameter | Description | Default
 `externalDatabase.host` | the host of the external database | `localhost`
 `externalDatabase.port` | the port of the external database | `5432`
 `externalDatabase.database` | the database/scheme to use within the the external database | `airflow`
-`externalDatabase.user` | the user of the external database | `airflow`
+`externalDatabase.user` | the username for the external database | `airflow`
+`externalDatabase.userSecret` | the name of a pre-created secret containing the external database user | `""`
+`externalDatabase.userSecretKey` | the key within `externalDatabase.userSecret` containing the user string | `postgresql-user`
+`externalDatabase.password` | the password for the external database | `""`
 `externalDatabase.passwordSecret` | the name of a pre-created secret containing the external database password | `""`
 `externalDatabase.passwordSecretKey` | the key within `externalDatabase.passwordSecret` containing the password string | `postgresql-password`
 `externalDatabase.properties` | extra connection-string properties for the external database | `""`
@@ -1763,7 +1836,8 @@ Parameter | Description | Default
 --- | --- | ---
 `externalRedis.host` | the host of the external redis | `localhost`
 `externalRedis.port` | the port of the external redis | `6379`
-`externalRedis.databaseNumber` | the database number to use within the the external redis | `1`
+`externalRedis.databaseNumber` | the database number to use within the external redis | `1`
+`externalRedis.password` | the password for the external redis | `""`
 `externalRedis.passwordSecret` | the name of a pre-created secret containing the external redis password | `""`
 `externalRedis.passwordSecretKey` | the key within `externalRedis.passwordSecret` containing the password string | `redis-password`
 `externalDatabase.properties` | extra connection-string properties for the external redis | `""` 
