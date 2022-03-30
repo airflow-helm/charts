@@ -424,7 +424,10 @@ airflow:
       lastName: admin
     - username: user
       password: user123
-      role: User
+      # TIP: `role` can be a single role or a list of roles
+      role: 
+        - User
+        - Viewer
       email: user@example.com
       firstName: user
       lastName: user
