@@ -169,6 +169,12 @@ spec:
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
+        {{- if .Values.workers.logCleanup.enabled }}
+        {{- $lc_resources := .Values.workers.logCleanup.resources }}
+        {{- $lc_retention_min := .Values.workers.logCleanup.retentionMinutes }}
+        {{- $lc_interval_sec := .Values.workers.logCleanup.intervalSeconds }}
+        {{- include "airflow.container.log_cleanup" (dict "Release" .Release "Values" .Values "resources" $lc_resources "retention_min" $lc_retention_min "interval_sec" $lc_interval_sec) | indent 8 }}
+        {{- end }}
         {{- if .Values.airflow.extraContainers }}
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
         {{- end }}

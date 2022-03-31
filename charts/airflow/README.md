@@ -900,6 +900,12 @@ workers:
   ## how many seconds (after the 9min) to wait before SIGKILL
   terminationPeriod: 60
 
+  logCleanup:
+    resources:
+      requests:
+        ## IMPORTANT! for autoscaling to work with logCleanup
+        memory: "64Mi"
+
 dags:
   gitSync:
     resources:
@@ -931,6 +937,16 @@ airflow:
     ## this does NOT give root permissions to Pods, only the "root" group
     fsGroup: 0
 
+scheduler:
+  logCleanup:
+    ## scheduler log-cleanup must be disabled if `logs.persistence.enabled` is `true`
+    enabled: false
+
+workers:
+  logCleanup:
+    ## workers log-cleanup must be disabled if `logs.persistence.enabled` is `true`
+    enabled: false
+
 logs:
   persistence:
     enabled: true
@@ -953,6 +969,16 @@ airflow:
     ## sets the filesystem owner group of files/folders in mounted volumes
     ## this does NOT give root permissions to Pods, only the "root" group
     fsGroup: 0
+
+scheduler:
+  logCleanup:
+    ## scheduler log-cleanup must be disabled if `logs.persistence.enabled` is `true`
+    enabled: false
+
+workers:
+  logCleanup:
+    ## workers log-cleanup must be disabled if `logs.persistence.enabled` is `true`
+    enabled: false
 
 logs:
   persistence:
@@ -1486,6 +1512,7 @@ Parameter | Description | Default
 `scheduler.podAnnotations` | Pod annotations for the scheduler Deployment | `{}`
 `scheduler.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
 `scheduler.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the scheduler | `<see values.yaml>`
+`scheduler.logCleanup.*` | configs for the log-cleanup sidecar of the scheduler | `<see values.yaml>`
 `scheduler.numRuns` | the value of the `airflow --num_runs` parameter used to run the airflow scheduler | `-1`
 `scheduler.extraPipPackages` | extra pip packages to install in the scheduler Pods | `[]`
 `scheduler.extraVolumeMounts` | extra VolumeMounts for the scheduler Pods | `[]`
@@ -1549,6 +1576,7 @@ Parameter | Description | Default
 `workers.autoscaling.*` | configs for the HorizontalPodAutoscaler of the worker Pods | `<see values.yaml>`
 `workers.celery.*` | configs for the celery worker Pods | `<see values.yaml>`
 `workers.terminationPeriod` | how many seconds to wait after SIGTERM before SIGKILL of the celery worker | `60`
+`workers.logCleanup.*` | configs for the log-cleanup sidecar of the worker Pods | `<see values.yaml>`
 `workers.extraPipPackages` | extra pip packages to install in the worker Pods | `[]`
 `workers.extraVolumeMounts` | extra VolumeMounts for the worker Pods | `[]`
 `workers.extraVolumes` | extra Volumes for the worker Pods | `[]`
