@@ -1509,6 +1509,15 @@ pgbouncer:
     timeoutSeconds: 60
     failureThreshold: 3
 
+  ## configs for the pgbouncer Pods' startup probe
+  ##
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 15
+    failureThreshold: 30
+
   ## the maximum number of seconds to wait for queries upon pod termination, before force killing
   ##
   terminationGracePeriodSeconds: 120
