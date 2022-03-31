@@ -1036,18 +1036,6 @@ serviceAccount:
 <summary>Expand</summary>
 <hr>
 
-> 🟥 __Warning__ 🟥
->
-> The scheduler can have a "heartbeat" but be deadlocked such that it's unable to schedule new tasks until being restarted,
-> we provide the `scheduler.livenessProbe.taskCreationCheck.*` values to automatically restart the scheduler in these cases.
->
-> Deadlock issue reference:
->
-> - https://github.com/apache/airflow/issues/7935
->    - present in all versions until being patched in `2.0.2`
-> - https://github.com/apache/airflow/issues/15938
->    - present in versions from `1.10.13` until being patched in `2.1.1`
-
 <h3>Scheduler "Heartbeat Check"</h3>
 
 The chart includes a [Kubernetes Liveness Probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) 
@@ -1055,6 +1043,14 @@ for each airflow scheduler which regularly queries the Airflow Metadata Database
 
 A scheduler is "healthy" if it has had a "heartbeat" in the last `AIRFLOW__SCHEDULER__SCHEDULER_HEALTH_CHECK_THRESHOLD` seconds.
 Each scheduler will perform a "heartbeat" every `AIRFLOW__SCHEDULER__SCHEDULER_HEARTBEAT_SEC` seconds by updating the `latest_heartbeat` of its `SchedulerJob` in the Airflow Metadata `jobs` table.
+
+> 🟥 __Warning__ 🟥
+>
+> The scheduler can have a "heartbeat" but be deadlocked such that it's unable to schedule new tasks,
+> we provide the `scheduler.livenessProbe.taskCreationCheck.*` values to automatically restart the scheduler in these cases.
+>
+> https://github.com/apache/airflow/issues/7935 - patched in airflow `2.0.2`
+> https://github.com/apache/airflow/issues/15938 - patched in airflow `2.1.1`
 
 By default, the chart runs a liveness probe every __30 seconds__ (`periodSeconds`), and will restart a scheduler if __5 probe failures__ (`failureThreshold`) occur in a row.
 This means a scheduler must be unhealthy for at least `30 x 5 = 150` seconds before Kubernetes will automatically restart a scheduler Pod.
@@ -1087,12 +1083,12 @@ scheduler:
 
 <h3>Scheduler "Task Creation Check"</h3>
 
-> 🟨 __Note__ 🟨
->
-> The "Task Creation Check" is currently disabled by default, it can be enabled with `scheduler.livenessProbe.taskCreationCheck.enabled`, but please read the following section first!
-
 The liveness probe can additionally check if the Scheduler is creating new [tasks](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) as an indication of its health. 
 This check works by ensuring that the most recent `LocalTaskJob` had a `start_date` no more than `scheduler.livenessProbe.taskCreationCheck.thresholdSeconds` seconds ago.
+
+> 🟦 __Tip__ 🟦
+>
+> The "Task Creation Check" is currently disabled by default, it can be enabled with `scheduler.livenessProbe.taskCreationCheck.enabled`.
 
 Here is an overview of the `scheduler.livenessProbe.taskCreationCheck.*` values:
 

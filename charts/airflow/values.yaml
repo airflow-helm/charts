@@ -541,8 +541,8 @@ scheduler:
     ## - this check works by ensuring that the most recent LocalTaskJob had a `start_date` no more than
     ##   `taskCreationCheck.thresholdSeconds` seconds ago
     ## - this check is useful because the scheduler can deadlock with a heartbeat, but not be scheduling new tasks:
-    ##   - https://github.com/apache/airflow/issues/7935 (present in all versions until being patched in `2.0.2`)
-    ##   - https://github.com/apache/airflow/issues/15938 (present from `1.10.13` until being patched in `2.1.1`)
+    ##   https://github.com/apache/airflow/issues/7935 - patched in airflow `2.0.2`
+    ##   https://github.com/apache/airflow/issues/15938 - patched in airflow `2.1.1`
     ##
     taskCreationCheck:
       ## if the task creation check is enabled

@@ -177,7 +177,7 @@ Use these commands to port-forward the Services to your localhost:
 {{ end }}
 
 {{- if $scheduler_livenessProbe_taskCreationCheck_warning }}
-[MEDIUM] the scheduler liveness probe "task creation check" is disabled, the scheduler may not be restarted if it deadlocks!
+[MEDIUM] the scheduler "task creation check" is disabled, the scheduler may not be restarted if it deadlocks!
   * HELP: configure the check with `scheduler.livenessProbe.taskCreationCheck.*`
 {{ end }}
 
