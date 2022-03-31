@@ -67,6 +67,7 @@ airflow:
   ## - templates can ONLY be used in: `password`, `email`, `firstName`, `lastName`
   ## - templates used a bash-like syntax: ${MY_USERNAME}, $MY_USERNAME
   ## - templates are defined in `usersTemplates`
+  ## - `role` can be a single role or a list of roles
   ##
   users:
     - username: admin
