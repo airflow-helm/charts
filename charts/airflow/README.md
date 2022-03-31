@@ -1046,7 +1046,7 @@ Each scheduler will perform a "heartbeat" every `AIRFLOW__SCHEDULER__SCHEDULER_H
 
 > 🟥 __Warning__ 🟥
 >
-> The scheduler can have a "heartbeat" but be deadlocked such that it's unable to schedule new tasks,
+> A scheduler can have a "heartbeat" but be deadlocked such that it's unable to schedule new tasks,
 > we provide the `scheduler.livenessProbe.taskCreationCheck.*` values to automatically restart the scheduler in these cases.
 >
 > https://github.com/apache/airflow/issues/7935 - patched in airflow `2.0.2`<br>
