@@ -1049,7 +1049,7 @@ Each scheduler will perform a "heartbeat" every `AIRFLOW__SCHEDULER__SCHEDULER_H
 > The scheduler can have a "heartbeat" but be deadlocked such that it's unable to schedule new tasks,
 > we provide the `scheduler.livenessProbe.taskCreationCheck.*` values to automatically restart the scheduler in these cases.
 >
-> https://github.com/apache/airflow/issues/7935 - patched in airflow `2.0.2`
+> https://github.com/apache/airflow/issues/7935 - patched in airflow `2.0.2`<br>
 > https://github.com/apache/airflow/issues/15938 - patched in airflow `2.1.1`
 
 By default, the chart runs a liveness probe every __30 seconds__ (`periodSeconds`), and will restart a scheduler if __5 probe failures__ (`failureThreshold`) occur in a row.
