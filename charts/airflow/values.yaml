@@ -1409,7 +1409,7 @@ pgbouncer:
   ##
   image:
     repository: ghcr.io/airflow-helm/pgbouncer
-    tag: 1.15.0-patch.0
+    tag: 1.17.0-patch.0
     pullPolicy: IfNotPresent
     uid: 1001
     gid: 1001
