@@ -479,7 +479,23 @@ The list of `envFrom` for web/scheduler/worker/flower Pods
 The list of `env` for web/scheduler/worker/flower Pods
 */}}
 {{- define "airflow.env" }}
-{{- /* postgres environment variables */ -}}
+{{- /* set DATABASE_USER */ -}}
+{{- if .Values.postgresql.enabled }}
+- name: DATABASE_USER
+  value: {{ .Values.postgresql.postgresqlUsername | quote }}
+{{- else }}
+{{- if .Values.externalDatabase.userSecret }}
+- name: DATABASE_USER
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.externalDatabase.userSecret }}
+      key: {{ .Values.externalDatabase.userSecretKey }}
+{{- else }}
+{{- /* in this case, DATABASE_USER is set in the `-config-envs` Secret */ -}}
+{{- end }}
+{{- end }}
+
+{{- /* set DATABASE_PASSWORD */ -}}
 {{- if .Values.postgresql.enabled }}
 {{- if .Values.postgresql.existingSecret }}
 - name: DATABASE_PASSWORD
@@ -502,12 +518,11 @@ The list of `env` for web/scheduler/worker/flower Pods
       name: {{ .Values.externalDatabase.passwordSecret }}
       key: {{ .Values.externalDatabase.passwordSecretKey }}
 {{- else }}
-- name: DATABASE_PASSWORD
-  value: ""
+{{- /* in this case, DATABASE_PASSWORD is set in the `-config-envs` Secret */ -}}
 {{- end }}
 {{- end }}
 
-{{- /* redis environment variables */ -}}
+{{- /* set REDIS_PASSWORD */ -}}
 {{- if .Values.redis.enabled }}
 {{- if .Values.redis.existingSecret }}
 - name: REDIS_PASSWORD
@@ -530,8 +545,7 @@ The list of `env` for web/scheduler/worker/flower Pods
       name: {{ .Values.externalRedis.passwordSecret }}
       key: {{ .Values.externalRedis.passwordSecretKey }}
 {{- else }}
-- name: REDIS_PASSWORD
-  value: ""
+{{- /* in this case, REDIS_PASSWORD is set in the `-config-envs` Secret */ -}}
 {{- end }}
 {{- end }}
 
