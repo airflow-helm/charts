@@ -1903,7 +1903,7 @@ Parameter | Description | Default
 `pgbouncer.livenessProbe.*` | configs for the pgbouncer Pods' liveness probe | `<see values.yaml>`
 `pgbouncer.startupProbe.*` | configs for the pgbouncer Pods' startup probe | `<see values.yaml>`
 `pgbouncer.terminationGracePeriodSeconds` | the maximum number of seconds to wait for queries upon pod termination, before force killing | `120`
-`pgbouncer.maxClientConnections` | sets pgbouncer config: `max_client_conn` | `100`
+`pgbouncer.maxClientConnections` | sets pgbouncer config: `max_client_conn` | `1000`
 `pgbouncer.poolSize` | sets pgbouncer config: `default_pool_size` | `20`
 `pgbouncer.logDisconnections` | sets pgbouncer config: `log_disconnections` | `0`
 `pgbouncer.logConnections` | sets pgbouncer config: `log_connections` | `0`

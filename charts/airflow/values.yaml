@@ -1524,7 +1524,7 @@ pgbouncer:
 
   ## sets pgbouncer config: `max_client_conn`
   ##
-  maxClientConnections: 100
+  maxClientConnections: 1000
 
   ## sets pgbouncer config: `default_pool_size`
   ##
