@@ -128,6 +128,27 @@ scheduler:
       cpu: "1000m"
       memory: "512Mi"
 
+  ## configs for the log-cleanup sidecar of the scheduler
+  ##
+  ## NOTE:
+  ## - helps prevent excessive log buildup by regularly deleting old files
+  ##
+  logCleanup:
+    ## if the log-cleanup sidecar is enabled
+    ##
+    enabled: true
+
+    ## resource requests/limits for the log-cleanup container
+    ##
+    resources:
+      requests:
+        cpu: "10m"
+        memory: "32Mi"
+
+    ## the number of minutes to retain log files (by last-modified time)
+    ##
+    retentionMinutes: 21600
+
 ###################################
 # Airflow - WebUI Configs
 ###################################
@@ -245,6 +266,30 @@ workers:
   ##
   terminationPeriod: 60
 
+  ## configs for the log-cleanup sidecar of the worker Pods
+  ##
+  ## NOTE:
+  ## - helps prevent excessive log buildup by regularly deleting old files
+  ##
+  logCleanup:
+    ## if the log-cleanup sidecar is enabled
+    ##
+    enabled: true
+
+    ## resource requests/limits for the log-cleanup container
+    ##
+    ## WARNING:
+    ## - you MUST SPECIFY a resource request for logCleanup if using `workers.autoscaling`
+    ##
+    resources:
+      requests:
+        cpu: "10m"
+        memory: "32Mi"
+
+    ## the number of minutes to retain log files (by last-modified time)
+    ##
+    retentionMinutes: 21600
+
 ###################################
 # Airflow - Flower Configs
 ###################################
@@ -291,6 +336,16 @@ dags:
     ##
     enabled: true
 
+    ## resource requests/limits for the git-sync container
+    ##
+    ## WARNING:
+    ## - you MUST SPECIFY a resource request for gitSync if using `workers.autoscaling`
+    ##
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "64Mi"
+
     ## the url of the git repo
     ##
     repo: "git@repo.example.com/my-airflow-dags.git"
@@ -314,15 +369,6 @@ dags:
     ## the key in `dags.gitSync.sshSecret` with your ssh-key file
     ##
     sshSecretKey: id_rsa
-
-    ## resource requests/limits for the git-sync container
-    ##
-    ## WARNING:
-    ## - you MUST SPECIFY a resource request for gitSync if using `workers.autoscaling`
-    ##
-    requests:
-      cpu: "50m"
-      memory: "64Mi"
 
 ###################################
 # Kubernetes - RBAC

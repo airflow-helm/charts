@@ -66,6 +66,14 @@
   {{- if not (eq .Values.logs.persistence.accessMode "ReadWriteMany") }}
   {{ required "The `logs.persistence.accessMode` must be `ReadWriteMany`!" nil }}
   {{- end }}
+  {{- if .Values.scheduler.logCleanup.enabled }}
+  {{ required "If `logs.persistence.enabled=true`, then `scheduler.logCleanup.enabled` must be disabled!" nil }}
+  {{- end }}
+  {{- if .Values.workers.enabled }}
+    {{- if .Values.workers.logCleanup.enabled }}
+    {{ required "If `logs.persistence.enabled=true`, then `workers.logCleanup.enabled` must be disabled!" nil }}
+    {{- end }}
+  {{- end }}
 {{- end }}
 
 {{/* Checks for `dags.persistence` */}}

@@ -521,6 +521,29 @@ scheduler:
     ##
     minAvailable: ""
 
+  ## configs for the log-cleanup sidecar of the scheduler
+  ## - helps prevent excessive log buildup by regularly deleting old files
+  ##
+  logCleanup:
+    ## if the log-cleanup sidecar is enabled
+    ## - [WARNING] must be disabled if `logs.persistence.enabled` is `true`
+    ##
+    enabled: true
+
+    ## resource requests/limits for the log-cleanup container
+    ## - spec of ResourceRequirements:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ##
+    resources: {}
+
+    ## the number of minutes to retain log files (by last-modified time)
+    ##
+    retentionMinutes: 21600
+
+    ## the number of seconds between each check for files to delete
+    ##
+    intervalSeconds: 900
+
   ## sets `airflow --num_runs` parameter used to run the airflow scheduler
   ##
   numRuns: -1
@@ -793,6 +816,7 @@ workers:
 
   ## configs for the HorizontalPodAutoscaler of the worker Pods
   ## - [WARNING] if using git-sync, ensure `dags.gitSync.resources` is set
+  ## - [WARNING] if using worker log-cleanup, ensure `workers.logCleanup.resources` is set
   ##
   ## ____ EXAMPLE _______________
   ##   autoscaling:
@@ -836,6 +860,29 @@ workers:
   ##   to understand with KubernetesPodOperator(), as Pods may continue running
   ##
   terminationPeriod: 60
+
+  ## configs for the log-cleanup sidecar of the worker Pods
+  ## - helps prevent excessive log buildup by regularly deleting old files
+  ##
+  logCleanup:
+    ## if the log-cleanup sidecar is enabled
+    ## - [WARNING] must be disabled if `logs.persistence.enabled` is `true`
+    ##
+    enabled: true
+
+    ## resource requests/limits for the log-cleanup container
+    ## - spec of ResourceRequirements:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ##
+    resources: {}
+
+    ## the number of minutes to retain log files (by last-modified time)
+    ##
+    retentionMinutes: 21600
+
+    ## the number of seconds between each check for files to delete
+    ##
+    intervalSeconds: 900
 
   ## extra pip packages to install in the worker Pod
   ##
