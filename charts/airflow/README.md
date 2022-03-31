@@ -424,7 +424,7 @@ airflow:
       lastName: admin
     - username: user
       password: user123
-      # TIP: `role` can be a single role or a list of roles
+      ## TIP: `role` can be a single role or a list of roles
       role: 
         - User
         - Viewer
