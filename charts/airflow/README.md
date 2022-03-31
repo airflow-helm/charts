@@ -1114,11 +1114,11 @@ IBM Cloud | [IBM Cloud® Databases for PostgreSQL](https://cloud.ibm.com/docs/da
 Example values for an external Postgres database, with an existing `airflow_cluster1` database:
 ```yaml
 postgresql:
-  # to use the external db, the embedded one must be disabled
+  ## to use the external db, the embedded one must be disabled
   enabled: false
 
 pgbouncer:
-  # for other PgBouncer configs, see the `pgbouncer.*` values
+  ## for other PgBouncer configs, see the `pgbouncer.*` values
   enabled: true
 
 externalDatabase:
@@ -1127,24 +1127,24 @@ externalDatabase:
   host: postgres.example.org
   port: 5432
   
-  # the schema which will contain the airflow tables
+  ## the schema which will contain the airflow tables
   database: airflow_cluster1
 
-  # (username - option 1) a plain-text helm value
+  ## (username - option 1) a plain-text helm value
   user: my_airflow_user
   
-  # (username - option 2) a Kubernetes secret in your airflow namespace
+  ## (username - option 2) a Kubernetes secret in your airflow namespace
   #userSecret: "airflow-cluster1-database-credentials"
   #userSecretKey: "username"
 
-  # (password - option 1) a plain-text helm value
+  ## (password - option 1) a plain-text helm value
   password: my_airflow_password
 
-  # (password - option 2) a Kubernetes secret in your airflow namespace
+  ## (password - option 2) a Kubernetes secret in your airflow namespace
   #passwordSecret: "airflow-cluster1-database-credentials"
   #passwordSecretKey: "password"
 
-  # use this for any extra connection-string settings, e.g. ?sslmode=disable
+  ## use this for any extra connection-string settings, e.g. ?sslmode=disable
   properties: ""
 ```
 
@@ -1157,11 +1157,11 @@ externalDatabase:
 Example values for an external MySQL database, with an existing `airflow_cluster1` database:
 ```yaml
 postgresql:
-  # to use the external db, the embedded one must be disabled
+  ## to use the external db, the embedded one must be disabled
   enabled: false
 
 pgbouncer:
-  # pgbouncer is automatically disabled if `externalDatabase.type` is `mysql`
+  ## pgbouncer is automatically disabled if `externalDatabase.type` is `mysql`
   #enabled: false
 
 externalDatabase:
@@ -1170,24 +1170,24 @@ externalDatabase:
   host: mysql.example.org
   port: 3306
 
-  # the database which will contain the airflow tables
+  ## the database which will contain the airflow tables
   database: airflow_cluster1
 
-  # (username - option 1) a plain-text helm value
+  ## (username - option 1) a plain-text helm value
   user: my_airflow_user
 
-  # (username - option 2) a Kubernetes secret in your airflow namespace
+  ## (username - option 2) a Kubernetes secret in your airflow namespace
   #userSecret: "airflow-cluster1-database-credentials"
   #userSecretKey: "username"
 
-  # (password - option 1) a plain-text helm value
+  ## (password - option 1) a plain-text helm value
   password: my_airflow_password
 
-  # (password - option 2) a Kubernetes secret in your airflow namespace
+  ## (password - option 2) a Kubernetes secret in your airflow namespace
   #passwordSecret: "airflow-cluster1-database-credentials"
   #passwordSecretKey: "password"
 
-  # use this for any extra connection-string settings, e.g. ?useSSL=false
+  ## use this for any extra connection-string settings, e.g. ?useSSL=false
   properties: ""
 ```
 
@@ -1208,17 +1208,17 @@ externalRedis:
   host: "example.redis.cache.windows.net"
   port: 6380
   
-  # the redis database-number that airflow will use
+  ## the redis database-number that airflow will use
   databaseNumber: 1
 
-  # (option 1 - password) a plain-text helm value
+  ## (option 1 - password) a plain-text helm value
   password: my_airflow_password
 
-  # (option 2 - password) a Kubernetes secret in your airflow namespace
+  ## (option 2 - password) a Kubernetes secret in your airflow namespace
   #passwordSecret: "airflow-cluster1-redis-credentials"
   #passwordSecretKey: "password"
 
-  # use this for any extra connection-string settings
+  ## use this for any extra connection-string settings
   properties: "?ssl_cert_reqs=CERT_OPTIONAL"
 ```
 
