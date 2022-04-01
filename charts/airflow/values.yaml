@@ -314,6 +314,12 @@ airflow:
     ##
     securityContext: {}
 
+    ## the shareProcessNamespace config for the Pod template
+    ## - docs for shareProcessNamespace:
+    ##   https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
+    ##
+    shareProcessNamespace: false
+
     ## extra pip packages to install in the Pod template
     ##
     ## ____ EXAMPLE _______________
