@@ -101,6 +101,17 @@ airflow:
   ##
   usersUpdate: true
 
+  ## a list of roles to create
+  ##
+  roles: []
+
+  ## if we create a Deployment to perpetually sync `airflow.roles`
+  ## - when `true`, roles are updated in real-time, as ConfigMaps/Secrets change
+  ## - when `true`, roles changes from the WebUI will be reverted automatically
+  ## - when `false`, roles will only update one-time, after each `helm upgrade`
+  ##
+  rolesUpdate: true
+
   ## a list airflow connections to create
   ## - templates can ONLY be used in: `host`, `login`, `password`, `schema`, `extra`
   ## - templates used a bash-like syntax: ${AWS_ACCESS_KEY} or $AWS_ACCESS_KEY
