@@ -336,6 +336,12 @@ airflow:
     ##
     extraPipPackages: []
 
+    ## extra containers for the pod template
+    ## - spec for Container:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+    ##
+    extraContainers: []
+
     ## extra init-containers for the Pod template
     ## - spec of Container:
     ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
