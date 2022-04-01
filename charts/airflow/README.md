@@ -633,6 +633,33 @@ airflow:
           key: value
 ```
 
+<h3>Option 3 - using `_CMD` or `_SECRET` configs</h3>
+
+You can also set the fernet key by specifying either the `AIRFLOW__CORE__FERNET_KEY_CMD` or `AIRFLOW__CORE__FERNET_KEY_SECRET` environment variables.
+Read about how the `_CMD` or `_SECRET` configs work in the ["Setting Configuration Options"](https://airflow.apache.org/docs/apache-airflow/stable/howto/set-config.html) section of the Airflow documentation.
+
+Example values for using `AIRFLOW__CORE__FERNET_KEY_CMD`:
+
+```yaml
+airflow:
+  ## WARNING: you must set `fernetKey` to "", otherwise it will take precedence
+  fernetKey: ""
+
+  ## NOTE: this is only an example, if your value lives in a Secret, you probably want to use "Option 2" above
+  config:
+    AIRFLOW__CORE__FERNET_KEY_CMD: "cat /opt/airflow/fernet-key/value"
+      
+  extraVolumeMounts:
+    - name: fernet-key
+      mountPath: /opt/airflow/fernet-key
+      readOnly: true
+      
+  extraVolumes:
+    - name: fernet-key
+      secret:
+        secretName: airflow-fernet-key
+```
+
 <hr>
 </details>
 
@@ -668,6 +695,33 @@ airflow:
         secretKeyRef:
           name: airflow-webserver-secret-key
           key: value
+```
+
+<h3>Option 3 - using `_CMD` or `_SECRET` configs</h3>
+
+You can also set the webserver secret key by specifying either the `AIRFLOW__WEBSERVER__SECRET_KEY_CMD` or `AIRFLOW__WEBSERVER__SECRET_KEY_SECRET` environment variables. 
+Read about how the `_CMD` or `_SECRET` configs work in the ["Setting Configuration Options"](https://airflow.apache.org/docs/apache-airflow/stable/howto/set-config.html) section of the Airflow documentation.
+
+Example values for using `AIRFLOW__WEBSERVER__SECRET_KEY_CMD`:
+
+```yaml
+airflow:
+  ## WARNING: you must set `webserverSecretKey` to "", otherwise it will take precedence
+  webserverSecretKey: ""
+
+  ## NOTE: this is only an example, if your value lives in a Secret, you probably want to use "Option 2" above
+  config:
+    AIRFLOW__WEBSERVER__SECRET_KEY_CMD: "cat /opt/airflow/webserver-secret-key/value"
+      
+  extraVolumeMounts:
+    - name: webserver-secret-key
+      mountPath: /opt/airflow/webserver-secret-key
+      readOnly: true
+      
+  extraVolumes:
+    - name: webserver-secret-key
+      secret:
+        secretName: airflow-webserver-secret-key
 ```
 
 <hr>
