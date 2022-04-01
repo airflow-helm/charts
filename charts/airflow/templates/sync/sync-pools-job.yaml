@@ -16,8 +16,8 @@ metadata:
     chart: {{ include "airflow.labels.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-    {{- if .Values.airflow.sync.podLabels }}
-    {{- toYaml .Values.airflow.sync.podLabels | nindent 4 }}
+    {{- if .Values.airflow.sync.labels }}
+    {{- toYaml .Values.airflow.sync.labels | nindent 4 }}
     {{- end }}
   annotations:
     helm.sh/hook: post-install,post-upgrade
