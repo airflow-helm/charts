@@ -36,7 +36,11 @@ spec:
               service:
                 name: {{ .serviceName }}
                 port:
+                  {{- if kindIs "string" .servicePort }}
+                  name: {{ .servicePort }}
+                  {{- else }}
                   number: {{ .servicePort }}
+                  {{- end }}
           {{- end }}
           - path: {{ .Values.ingress.flower.path }}
             pathType: ImplementationSpecific
@@ -52,6 +56,10 @@ spec:
               service:
                 name: {{ .serviceName }}
                 port:
+                  {{- if kindIs "string" .servicePort }}
+                  name: {{ .servicePort }}
+                  {{- else }}
                   number: {{ .servicePort }}
+                  {{- end }}
           {{- end }}
 {{- end }}

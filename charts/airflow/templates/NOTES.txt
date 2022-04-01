@@ -46,6 +46,24 @@
   {{- end }}
 {{- end }}
 
+{{- /* if we show the external database password warning */ -}}
+{{- $external_database_password_warning := false }}
+{{- if and (not .Values.postgresql.enabled) (not .Values.externalDatabase.passwordSecret) }}
+  {{- /* don't show a warning if the password is empty */ -}}
+  {{- if .Values.externalDatabase.password }}
+  {{- $external_database_password_warning = true }}
+  {{- end }}
+{{- end }}
+
+{{- /* if we show the external redis password warning */ -}}
+{{- $external_redis_password_warning := false }}
+{{- if and (not .Values.redis.enabled) (not .Values.externalRedis.passwordSecret) }}
+  {{- /* don't show a warning if the password is empty */ -}}
+  {{- if .Values.externalRedis.password }}
+  {{- $external_redis_password_warning = true }}
+  {{- end }}
+{{- end }}
+
 {{- /* if we show the extraPipPackages warning */ -}}
 {{- $extra_pip_warning := false }}
 {{- if .Values.airflow.extraPipPackages }}
@@ -72,6 +90,18 @@
 {{- $known_host_warning := false }}
 {{- if and (.Values.dags.gitSync.enabled) (.Values.dags.gitSync.sshSecret) (not .Values.dags.gitSync.sshKnownHosts) }}
 {{- $known_host_warning = true }}
+{{- end }}
+
+{{- /* if we show the scheduler livenessProbe warning */ -}}
+{{- $scheduler_livenessProbe_warning := false }}
+{{- if not .Values.scheduler.livenessProbe.enabled }}
+{{- $scheduler_livenessProbe_warning = true }}
+{{- end }}
+
+{{- /* if we show the scheduler livenessProbe taskCreationCheck warning */ -}}
+{{- $scheduler_livenessProbe_taskCreationCheck_warning := false }}
+{{- if and (.Values.scheduler.livenessProbe.enabled) (not .Values.scheduler.livenessProbe.taskCreationCheck.enabled) }}
+{{- $scheduler_livenessProbe_taskCreationCheck_warning = true }}
 {{- end }}
 
 ========================================================================
@@ -144,6 +174,16 @@ Use these commands to port-forward the Services to your localhost:
   * HELP: set a custom value with `airflow.webserverSecretKey` or `AIRFLOW__WEBSERVER__SECRET_KEY`
 {{ end }}
 
+{{- if $external_database_password_warning }}
+[CRITICAL] external database password is set using plain-text value!
+  * HELP: create a Kubernetes secret with your database password and configure `externalDatabase.passwordSecret`
+{{ end }}
+
+{{- if $external_redis_password_warning }}
+[CRITICAL] external redis password is set using plain-text value!
+  * HELP: create a Kubernetes secret with your redis password and configure `externalRedis.passwordSecret`
+{{ end }}
+
 {{- if $extra_pip_warning }}
 [HIGH] using `extraPipPackages` can cause unexpected runtime errors if external PyPi packages change between Pod restarts
   * HELP: create a Docker image with your pip packages installed and use it with `airflow.image.*`
@@ -157,6 +197,16 @@ Use these commands to port-forward the Services to your localhost:
 {{- if $known_host_warning }}
 [HIGH] git-sync ssh known_hosts verification is disabled!
   * HELP: set `dags.gitSync.sshKnownHosts` with the ssh fingerprint of your git host
+{{ end }}
+
+{{- if $scheduler_livenessProbe_warning }}
+[MEDIUM] the scheduler liveness probe is disabled, the scheduler may not be restarted if it becomes unhealthy!
+  * HELP: enable the probe with `scheduler.livenessProbe.enabled`
+{{ end }}
+
+{{- if $scheduler_livenessProbe_taskCreationCheck_warning }}
+[MEDIUM] the scheduler "task creation check" is disabled, the scheduler may not be restarted if it deadlocks!
+  * HELP: configure the check with `scheduler.livenessProbe.taskCreationCheck.*`
 {{ end }}
 
 {{- end }}

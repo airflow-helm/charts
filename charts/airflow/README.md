@@ -424,7 +424,10 @@ airflow:
       lastName: admin
     - username: user
       password: user123
-      role: User
+      ## TIP: `role` can be a single role or a list of roles
+      role: 
+        - User
+        - Viewer
       email: user@example.com
       firstName: user
       lastName: user
@@ -630,6 +633,33 @@ airflow:
           key: value
 ```
 
+<h3>Option 3 - using `_CMD` or `_SECRET` configs</h3>
+
+You can also set the fernet key by specifying either the `AIRFLOW__CORE__FERNET_KEY_CMD` or `AIRFLOW__CORE__FERNET_KEY_SECRET` environment variables.
+Read about how the `_CMD` or `_SECRET` configs work in the ["Setting Configuration Options"](https://airflow.apache.org/docs/apache-airflow/stable/howto/set-config.html) section of the Airflow documentation.
+
+Example values for using `AIRFLOW__CORE__FERNET_KEY_CMD`:
+
+```yaml
+airflow:
+  ## WARNING: you must set `fernetKey` to "", otherwise it will take precedence
+  fernetKey: ""
+
+  ## NOTE: this is only an example, if your value lives in a Secret, you probably want to use "Option 2" above
+  config:
+    AIRFLOW__CORE__FERNET_KEY_CMD: "cat /opt/airflow/fernet-key/value"
+      
+  extraVolumeMounts:
+    - name: fernet-key
+      mountPath: /opt/airflow/fernet-key
+      readOnly: true
+      
+  extraVolumes:
+    - name: fernet-key
+      secret:
+        secretName: airflow-fernet-key
+```
+
 <hr>
 </details>
 
@@ -665,6 +695,33 @@ airflow:
         secretKeyRef:
           name: airflow-webserver-secret-key
           key: value
+```
+
+<h3>Option 3 - using `_CMD` or `_SECRET` configs</h3>
+
+You can also set the webserver secret key by specifying either the `AIRFLOW__WEBSERVER__SECRET_KEY_CMD` or `AIRFLOW__WEBSERVER__SECRET_KEY_SECRET` environment variables. 
+Read about how the `_CMD` or `_SECRET` configs work in the ["Setting Configuration Options"](https://airflow.apache.org/docs/apache-airflow/stable/howto/set-config.html) section of the Airflow documentation.
+
+Example values for using `AIRFLOW__WEBSERVER__SECRET_KEY_CMD`:
+
+```yaml
+airflow:
+  ## WARNING: you must set `webserverSecretKey` to "", otherwise it will take precedence
+  webserverSecretKey: ""
+
+  ## NOTE: this is only an example, if your value lives in a Secret, you probably want to use "Option 2" above
+  config:
+    AIRFLOW__WEBSERVER__SECRET_KEY_CMD: "cat /opt/airflow/webserver-secret-key/value"
+      
+  extraVolumeMounts:
+    - name: webserver-secret-key
+      mountPath: /opt/airflow/webserver-secret-key
+      readOnly: true
+      
+  extraVolumes:
+    - name: webserver-secret-key
+      secret:
+        secretName: airflow-webserver-secret-key
 ```
 
 <hr>
@@ -900,6 +957,12 @@ workers:
   ## how many seconds (after the 9min) to wait before SIGKILL
   terminationPeriod: 60
 
+  logCleanup:
+    resources:
+      requests:
+        ## IMPORTANT! for autoscaling to work with logCleanup
+        memory: "64Mi"
+
 dags:
   gitSync:
     resources:
@@ -931,6 +994,16 @@ airflow:
     ## this does NOT give root permissions to Pods, only the "root" group
     fsGroup: 0
 
+scheduler:
+  logCleanup:
+    ## scheduler log-cleanup must be disabled if `logs.persistence.enabled` is `true`
+    enabled: false
+
+workers:
+  logCleanup:
+    ## workers log-cleanup must be disabled if `logs.persistence.enabled` is `true`
+    enabled: false
+
 logs:
   persistence:
     enabled: true
@@ -953,6 +1026,16 @@ airflow:
     ## sets the filesystem owner group of files/folders in mounted volumes
     ## this does NOT give root permissions to Pods, only the "root" group
     fsGroup: 0
+
+scheduler:
+  logCleanup:
+    ## scheduler log-cleanup must be disabled if `logs.persistence.enabled` is `true`
+    enabled: false
+
+workers:
+  logCleanup:
+    ## workers log-cleanup must be disabled if `logs.persistence.enabled` is `true`
+    enabled: false
 
 logs:
   persistence:
@@ -1031,6 +1114,119 @@ serviceAccount:
 <hr>
 </details>
 
+### How to configure the scheduler liveness probe?
+<details>
+<summary>Expand</summary>
+<hr>
+
+<h3>Scheduler "Heartbeat Check"</h3>
+
+The chart includes a [Kubernetes Liveness Probe](https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/) 
+for each airflow scheduler which regularly queries the Airflow Metadata Database to ensure the scheduler is ["healthy"](https://airflow.apache.org/docs/apache-airflow/stable/logging-monitoring/check-health.html).
+
+A scheduler is "healthy" if it has had a "heartbeat" in the last `AIRFLOW__SCHEDULER__SCHEDULER_HEALTH_CHECK_THRESHOLD` seconds.
+Each scheduler will perform a "heartbeat" every `AIRFLOW__SCHEDULER__SCHEDULER_HEARTBEAT_SEC` seconds by updating the `latest_heartbeat` of its `SchedulerJob` in the Airflow Metadata `jobs` table.
+
+> 🟥 __Warning__ 🟥
+>
+> A scheduler can have a "heartbeat" but be deadlocked such that it's unable to schedule new tasks,
+> we provide the `scheduler.livenessProbe.taskCreationCheck.*` values to automatically restart the scheduler in these cases.
+>
+> https://github.com/apache/airflow/issues/7935 - patched in airflow `2.0.2`<br>
+> https://github.com/apache/airflow/issues/15938 - patched in airflow `2.1.1`
+
+By default, the chart runs a liveness probe every __30 seconds__ (`periodSeconds`), and will restart a scheduler if __5 probe failures__ (`failureThreshold`) occur in a row.
+This means a scheduler must be unhealthy for at least `30 x 5 = 150` seconds before Kubernetes will automatically restart a scheduler Pod.
+
+Here is an overview of the `scheduler.livenessProbe.*` values:
+
+```yaml
+scheduler:
+  livenessProbe:
+    enabled: true
+    
+    ## number of seconds to wait after a scheduler container starts before running its first probe
+    ## NOTE: schedulers take a few seconds to actually start
+    initialDelaySeconds: 10
+    
+    ## number of seconds to wait between each probe
+    periodSeconds: 30
+    
+    ## maximum number of seconds that a probe can take before timing out
+    ## WARNING: if your database is very slow, you may need to increase this value to prevent invalid scheduler restarts
+    timeoutSeconds: 60
+    
+    ## maximum number of consecutive probe failures, after which the scheduler will be restarted
+    ## NOTE: a "failure" could be any of:
+    ##  1. the probe takes more than `timeoutSeconds`
+    ##  2. the probe detects the scheduler as "unhealthy"
+    ##  3. the probe "task creation check" fails
+    failureThreshold: 5
+```
+
+<h3>Scheduler "Task Creation Check"</h3>
+
+The liveness probe can additionally check if the Scheduler is creating new [tasks](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) as an indication of its health. 
+This check works by ensuring that the most recent `LocalTaskJob` had a `start_date` no more than `scheduler.livenessProbe.taskCreationCheck.thresholdSeconds` seconds ago.
+
+> 🟦 __Tip__ 🟦
+>
+> The "Task Creation Check" is currently disabled by default, it can be enabled with `scheduler.livenessProbe.taskCreationCheck.enabled`.
+
+Here is an overview of the `scheduler.livenessProbe.taskCreationCheck.*` values:
+
+```yaml
+scheduler:
+  livenessProbe:
+    enabled: true
+    ...
+    
+    taskCreationCheck:
+      ## if the task creation check is enabled
+      enabled: true
+
+      ## the maximum number of seconds since the start_date of the most recent LocalTaskJob
+      ## WARNING: must be AT LEAST equal to your shortest DAG schedule_interval
+      ## WARNING: DummyOperator tasks will NOT be seen by this probe
+      thresholdSeconds: 300
+```
+
+You might use the following `canary_dag` DAG definition to run a small task every __300 seconds__ (5 minutes):
+
+```python
+from datetime import datetime, timedelta
+from airflow import DAG
+
+# import using try/except to support both airflow 1 and 2
+try:
+    from airflow.operators.bash import BashOperator
+except ModuleNotFoundError:
+    from airflow.operators.bash_operator import BashOperator
+
+dag = DAG(
+    dag_id="canary_dag",
+    default_args={
+        "owner": "airflow",
+    },
+    schedule_interval="*/5 * * * *",
+    start_date=datetime(2022, 1, 1),
+    dagrun_timeout=timedelta(minutes=5),
+    is_paused_upon_creation=False,
+    catchup=False,
+)
+
+# WARNING: while `DummyOperator` would use less resources, the check can't see those tasks 
+#          as they don't create LocalTaskJob instances
+task = BashOperator(
+    task_id="canary_task",
+    bash_command="echo 'Hello World!'",
+    dag=dag,
+)
+```
+
+<hr>
+</details>
+
 ## FAQ - Databases
 
 > __Frequently asked questions related to database configs__
@@ -1082,27 +1278,69 @@ redis:
 <summary>Expand</summary>
 <hr>
 
+> 🟥 __Warning__ 🟥
+>
+> We __STRONGLY RECOMMEND__ that all production deployments of Airflow use an external database (not managed by this chart).
+
+When compared with the Postgres that is embedded in this chart, an external database comes with many benefits:
+
+1. The embedded Postgres version is usually very outdated, so is susceptible to critical security bugs
+2. The embedded database may not scale to your performance requirements _(NOTE: every airflow task creates database connections)_
+3. An external database will likely achieve higher uptime _(NOTE: no airflow tasks will run if your database is down)_
+4. An external database can be configured with backups and disaster recovery
+
+Commonly, people use the managed PostgreSQL service from their cloud vendor to provision an external database:
+
+Cloud Platform | Service Name
+--- | ---
+Amazon Web Services | [Amazon RDS for PostgreSQL](https://aws.amazon.com/rds/postgresql/)
+Microsoft Azure | [Azure Database for PostgreSQL](https://azure.microsoft.com/en-au/services/postgresql/) 
+Google Cloud | [Cloud SQL for PostgreSQL](https://cloud.google.com/sql/docs/postgres)
+Alibaba Cloud | [ApsaraDB RDS for PostgreSQL](https://www.alibabacloud.com/product/apsaradb-for-rds-postgresql)
+IBM Cloud | [IBM Cloud® Databases for PostgreSQL](https://cloud.ibm.com/docs/databases-for-postgresql)
+
 <h3>Option 1 - Postgres</h3>
 
 > 🟨 __Note__ 🟨
 >
-> If `pgbouncer.enabled=true` (the default), we will deploy [PgBouncer](https://www.pgbouncer.org/) to pool connections to your external database
+> By default, this chart deploys [PgBouncer](https://www.pgbouncer.org/) to pool db connections and reduce the load from large numbers of airflow tasks.
+>
+> You may disable PgBouncer by setting `pgbouncer.enabled` to `false`.
 
 Example values for an external Postgres database, with an existing `airflow_cluster1` database:
 ```yaml
 postgresql:
+  ## to use the external db, the embedded one must be disabled
   enabled: false
+
+pgbouncer:
+  ## for other PgBouncer configs, see the `pgbouncer.*` values
+  enabled: true
 
 externalDatabase:
   type: postgres
+  
   host: postgres.example.org
   port: 5432
+  
+  ## the schema which will contain the airflow tables
   database: airflow_cluster1
-  user: airflow_cluster1
-  passwordSecret: "airflow-cluster1-postgres-password"
-  passwordSecretKey: "postgresql-password"
 
-  # use this for any extra connection-string settings, e.g. ?sslmode=disable
+  ## (username - option 1) a plain-text helm value
+  user: my_airflow_user
+  
+  ## (username - option 2) a Kubernetes secret in your airflow namespace
+  #userSecret: "airflow-cluster1-database-credentials"
+  #userSecretKey: "username"
+
+  ## (password - option 1) a plain-text helm value
+  password: my_airflow_password
+
+  ## (password - option 2) a Kubernetes secret in your airflow namespace
+  #passwordSecret: "airflow-cluster1-database-credentials"
+  #passwordSecretKey: "password"
+
+  ## use this for any extra connection-string settings, e.g. ?sslmode=disable
   properties: ""
 ```
 
@@ -1115,18 +1353,37 @@ externalDatabase:
 Example values for an external MySQL database, with an existing `airflow_cluster1` database:
 ```yaml
 postgresql:
+  ## to use the external db, the embedded one must be disabled
   enabled: false
+
+pgbouncer:
+  ## pgbouncer is automatically disabled if `externalDatabase.type` is `mysql`
+  #enabled: false
 
 externalDatabase:
   type: mysql
+  
   host: mysql.example.org
   port: 3306
-  database: airflow_cluster1
-  user: airflow_cluster1
-  passwordSecret: "airflow-cluster1-mysql-password"
-  passwordSecretKey: "mysql-password"
 
-  # use this for any extra connection-string settings, e.g. ?useSSL=false
+  ## the database which will contain the airflow tables
+  database: airflow_cluster1
+
+  ## (username - option 1) a plain-text helm value
+  user: my_airflow_user
+
+  ## (username - option 2) a Kubernetes secret in your airflow namespace
+  #userSecret: "airflow-cluster1-database-credentials"
+  #userSecretKey: "username"
+
+  ## (password - option 1) a plain-text helm value
+  password: my_airflow_password
+
+  ## (password - option 2) a Kubernetes secret in your airflow namespace
+  #passwordSecret: "airflow-cluster1-database-credentials"
+  #passwordSecretKey: "password"
+
+  ## use this for any extra connection-string settings, e.g. ?useSSL=false
   properties: ""
 ```
 
@@ -1146,9 +1403,18 @@ redis:
 externalRedis:
   host: "example.redis.cache.windows.net"
   port: 6380
-  databaseNumber: 15
-  passwordSecret: "redis-password"
-  passwordSecretKey: "value"
+  
+  ## the redis database-number that airflow will use
+  databaseNumber: 1
+
+  ## (option 1 - password) a plain-text helm value
+  password: my_airflow_password
+
+  ## (option 2 - password) a Kubernetes secret in your airflow namespace
+  #passwordSecret: "airflow-cluster1-redis-credentials"
+  #passwordSecretKey: "password"
+
+  ## use this for any extra connection-string settings
   properties: "?ssl_cert_reqs=CERT_OPTIONAL"
 ```
 
@@ -1459,6 +1725,7 @@ Parameter | Description | Default
 `airflow.extraContainers` | extra containers for the airflow Pods | `[]`
 `airflow.extraVolumeMounts` | extra VolumeMounts for the airflow Pods | `[]`
 `airflow.extraVolumes` | extra Volumes for the airflow Pods | `[]`
+`airflow.clusterDomain` | kubernetes cluster domain name | `cluster.local`
 `airflow.localSettings.*` | airflow_local_settings.py | `<see values.yaml>`
 `airflow.kubernetesPodTemplate.*` | pod_template.yaml | `<see values.yaml>`
 `airflow.dbMigrations.*` | db-migrations Deployment | `<see values.yaml>`
@@ -1486,6 +1753,7 @@ Parameter | Description | Default
 `scheduler.podAnnotations` | Pod annotations for the scheduler Deployment | `{}`
 `scheduler.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
 `scheduler.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the scheduler | `<see values.yaml>`
+`scheduler.logCleanup.*` | configs for the log-cleanup sidecar of the scheduler | `<see values.yaml>`
 `scheduler.numRuns` | the value of the `airflow --num_runs` parameter used to run the airflow scheduler | `-1`
 `scheduler.extraPipPackages` | extra pip packages to install in the scheduler Pods | `[]`
 `scheduler.extraVolumeMounts` | extra VolumeMounts for the scheduler Pods | `[]`
@@ -1549,6 +1817,7 @@ Parameter | Description | Default
 `workers.autoscaling.*` | configs for the HorizontalPodAutoscaler of the worker Pods | `<see values.yaml>`
 `workers.celery.*` | configs for the celery worker Pods | `<see values.yaml>`
 `workers.terminationPeriod` | how many seconds to wait after SIGTERM before SIGKILL of the celery worker | `60`
+`workers.logCleanup.*` | configs for the log-cleanup sidecar of the worker Pods | `<see values.yaml>`
 `workers.extraPipPackages` | extra pip packages to install in the worker Pods | `[]`
 `workers.extraVolumeMounts` | extra VolumeMounts for the worker Pods | `[]`
 `workers.extraVolumes` | extra Volumes for the worker Pods | `[]`
@@ -1687,8 +1956,9 @@ Parameter | Description | Default
 `pgbouncer.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
 `pgbouncer.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the pgbouncer | `<see values.yaml>`
 `pgbouncer.livenessProbe.*` | configs for the pgbouncer Pods' liveness probe | `<see values.yaml>`
+`pgbouncer.startupProbe.*` | configs for the pgbouncer Pods' startup probe | `<see values.yaml>`
 `pgbouncer.terminationGracePeriodSeconds` | the maximum number of seconds to wait for queries upon pod termination, before force killing | `120`
-`pgbouncer.maxClientConnections` | sets pgbouncer config: `max_client_conn` | `100`
+`pgbouncer.maxClientConnections` | sets pgbouncer config: `max_client_conn` | `1000`
 `pgbouncer.poolSize` | sets pgbouncer config: `default_pool_size` | `20`
 `pgbouncer.logDisconnections` | sets pgbouncer config: `log_disconnections` | `0`
 `pgbouncer.logConnections` | sets pgbouncer config: `log_connections` | `0`
@@ -1728,7 +1998,10 @@ Parameter | Description | Default
 `externalDatabase.host` | the host of the external database | `localhost`
 `externalDatabase.port` | the port of the external database | `5432`
 `externalDatabase.database` | the database/scheme to use within the the external database | `airflow`
-`externalDatabase.user` | the user of the external database | `airflow`
+`externalDatabase.user` | the username for the external database | `airflow`
+`externalDatabase.userSecret` | the name of a pre-created secret containing the external database user | `""`
+`externalDatabase.userSecretKey` | the key within `externalDatabase.userSecret` containing the user string | `postgresql-user`
+`externalDatabase.password` | the password for the external database | `""`
 `externalDatabase.passwordSecret` | the name of a pre-created secret containing the external database password | `""`
 `externalDatabase.passwordSecretKey` | the key within `externalDatabase.passwordSecret` containing the password string | `postgresql-password`
 `externalDatabase.properties` | extra connection-string properties for the external database | `""`
@@ -1763,7 +2036,8 @@ Parameter | Description | Default
 --- | --- | ---
 `externalRedis.host` | the host of the external redis | `localhost`
 `externalRedis.port` | the port of the external redis | `6379`
-`externalRedis.databaseNumber` | the database number to use within the the external redis | `1`
+`externalRedis.databaseNumber` | the database number to use within the external redis | `1`
+`externalRedis.password` | the password for the external redis | `""`
 `externalRedis.passwordSecret` | the name of a pre-created secret containing the external redis password | `""`
 `externalRedis.passwordSecretKey` | the key within `externalRedis.passwordSecret` containing the password string | `redis-password`
 `externalDatabase.properties` | extra connection-string properties for the external redis | `""` 

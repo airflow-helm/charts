@@ -10,7 +10,7 @@ airflow:
   ##
   image:
     repository: apache/airflow
-    tag: 2.1.2-python3.8
+    tag: 2.1.4-python3.8
     pullPolicy: IfNotPresent
     pullSecret: ""
     uid: 50000
@@ -67,6 +67,7 @@ airflow:
   ## - templates can ONLY be used in: `password`, `email`, `firstName`, `lastName`
   ## - templates used a bash-like syntax: ${MY_USERNAME}, $MY_USERNAME
   ## - templates are defined in `usersTemplates`
+  ## - `role` can be a single role or a list of roles
   ##
   users:
     - username: admin
@@ -232,6 +233,14 @@ airflow:
   ##
   extraVolumes: []
 
+  ## kubernetes cluster domain name
+  ## - configured in the kubelet with `--cluster-domain` flag (deprecated):
+  ##   https://kubernetes.io/docs/reference/command-line-tools-reference/kubelet/
+  ## - or configured in the kubelet with configuration file `clusterDomain` option:
+  ##   https://kubernetes.io/docs/tasks/administer-cluster/kubelet-config-file/
+  ##
+  clusterDomain: "cluster.local"
+
   ########################################
   ## FILE | airflow_local_settings.py
   ########################################
@@ -299,7 +308,12 @@ airflow:
     ##
     tolerations: []
 
+    ## labels for the Pod template
+    ##
+    podLabels: {}
+
     ## annotations for the Pod template
+    ##
     podAnnotations: {}
 
     ## the security context for the Pod template
@@ -307,6 +321,12 @@ airflow:
     ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
     ##
     securityContext: {}
+
+    ## the shareProcessNamespace config for the Pod template
+    ## - docs for shareProcessNamespace:
+    ##   https://kubernetes.io/docs/tasks/configure-pod-container/share-process-namespace/
+    ##
+    shareProcessNamespace: false
 
     ## extra pip packages to install in the Pod template
     ##
@@ -321,6 +341,12 @@ airflow:
     ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
     ##
     extraContainers: []
+
+    ## extra init-containers for the Pod template
+    ## - spec of Container:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+    ##
+    extraInitContainers: []
 
     ## extra VolumeMounts for the Pod template
     ## - spec for VolumeMount:
@@ -527,19 +553,62 @@ scheduler:
     ##
     minAvailable: ""
 
+  ## configs for the log-cleanup sidecar of the scheduler
+  ## - helps prevent excessive log buildup by regularly deleting old files
+  ##
+  logCleanup:
+    ## if the log-cleanup sidecar is enabled
+    ## - [WARNING] must be disabled if `logs.persistence.enabled` is `true`
+    ##
+    enabled: true
+
+    ## resource requests/limits for the log-cleanup container
+    ## - spec of ResourceRequirements:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ##
+    resources: {}
+
+    ## the number of minutes to retain log files (by last-modified time)
+    ##
+    retentionMinutes: 21600
+
+    ## the number of seconds between each check for files to delete
+    ##
+    intervalSeconds: 900
+
   ## sets `airflow --num_runs` parameter used to run the airflow scheduler
   ##
   numRuns: -1
 
   ## configs for the scheduler Pods' liveness probe
-  ## - `periodSeconds` x `failureThreshold` = max seconds a scheduler can be unhealthy
+  ## - "unhealthy" means the SchedulerJob has not had a heartbeat for
+  ##   AIRFLOW__SCHEDULER__SCHEDULER_HEALTH_CHECK_THRESHOLD seconds
+  ## - `periodSeconds` x `failureThreshold` = max seconds a scheduler can be in an "unhealthy" state
   ##
   livenessProbe:
     enabled: true
     initialDelaySeconds: 10
     periodSeconds: 30
-    timeoutSeconds: 10
+    timeoutSeconds: 60
     failureThreshold: 5
+
+    ## configs for an additional check that ensures tasks are being created by the scheduler
+    ## - this check works by ensuring that the most recent LocalTaskJob had a `start_date` no more than
+    ##   `taskCreationCheck.thresholdSeconds` seconds ago
+    ## - this check is useful because the scheduler can deadlock with a heartbeat, but not be scheduling new tasks:
+    ##   https://github.com/apache/airflow/issues/7935 - patched in airflow `2.0.2`
+    ##   https://github.com/apache/airflow/issues/15938 - patched in airflow `2.1.1`
+    ##
+    taskCreationCheck:
+      ## if the task creation check is enabled
+      ##
+      enabled: false
+
+      ## the maximum number of seconds since the start_date of the most recent LocalTaskJob
+      ## - [WARNING] must be AT LEAST equal to your shortest DAG schedule_interval
+      ## - [WARNING] DummyOperator tasks will NOT be seen by this probe
+      ##
+      thresholdSeconds: 300
 
   ## extra pip packages to install in the scheduler Pods
   ##
@@ -799,6 +868,7 @@ workers:
 
   ## configs for the HorizontalPodAutoscaler of the worker Pods
   ## - [WARNING] if using git-sync, ensure `dags.gitSync.resources` is set
+  ## - [WARNING] if using worker log-cleanup, ensure `workers.logCleanup.resources` is set
   ##
   ## ____ EXAMPLE _______________
   ##   autoscaling:
@@ -842,6 +912,29 @@ workers:
   ##   to understand with KubernetesPodOperator(), as Pods may continue running
   ##
   terminationPeriod: 60
+
+  ## configs for the log-cleanup sidecar of the worker Pods
+  ## - helps prevent excessive log buildup by regularly deleting old files
+  ##
+  logCleanup:
+    ## if the log-cleanup sidecar is enabled
+    ## - [WARNING] must be disabled if `logs.persistence.enabled` is `true`
+    ##
+    enabled: true
+
+    ## resource requests/limits for the log-cleanup container
+    ## - spec of ResourceRequirements:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ##
+    resources: {}
+
+    ## the number of minutes to retain log files (by last-modified time)
+    ##
+    retentionMinutes: 21600
+
+    ## the number of seconds between each check for files to delete
+    ##
+    intervalSeconds: 900
 
   ## extra pip packages to install in the worker Pod
   ##
@@ -1086,7 +1179,7 @@ dags:
     ##
     image:
       repository: k8s.gcr.io/git-sync/git-sync
-      tag: v3.2.2
+      tag: v3.5.0
       pullPolicy: IfNotPresent
       uid: 65533
       gid: 65533
@@ -1368,7 +1461,7 @@ pgbouncer:
   ##
   image:
     repository: ghcr.io/airflow-helm/pgbouncer
-    tag: 1.15.0-patch.0
+    tag: 1.17.0-patch.0
     pullPolicy: IfNotPresent
     uid: 1001
     gid: 1001
@@ -1444,8 +1537,17 @@ pgbouncer:
     enabled: true
     initialDelaySeconds: 5
     periodSeconds: 30
-    timeoutSeconds: 15
+    timeoutSeconds: 60
     failureThreshold: 3
+
+  ## configs for the pgbouncer Pods' startup probe
+  ##
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 15
+    failureThreshold: 30
 
   ## the maximum number of seconds to wait for queries upon pod termination, before force killing
   ##
@@ -1453,7 +1555,7 @@ pgbouncer:
 
   ## sets pgbouncer config: `max_client_conn`
   ##
-  maxClientConnections: 100
+  maxClientConnections: 1000
 
   ## sets pgbouncer config: `default_pool_size`
   ##
@@ -1626,11 +1728,27 @@ externalDatabase:
   ##
   database: airflow
 
-  ## the user of the external database
+  ## the username for the external database
   ##
   user: airflow
 
+  ## the name of a pre-created secret containing the external database user
+  ## - if set, this overrides `externalDatabase.user`
+  ##
+  userSecret: ""
+
+  ## the key within `externalDatabase.userSecret` containing the user string
+  ##
+  userSecretKey: "postgresql-user"
+
+  ## the password for the external database
+  ## - [WARNING] to avoid storing the password in plain-text within your values,
+  ##   create a Kubernetes secret and use `externalDatabase.passwordSecret`
+  ##
+  password: ""
+
   ## the name of a pre-created secret containing the external database password
+  ## - if set, this overrides `externalDatabase.password`
   ##
   passwordSecret: ""
 
@@ -1796,11 +1914,18 @@ externalRedis:
   ##
   port: 6379
 
-  ## the database number to use within the the external redis
+  ## the database number to use within the external redis
   ##
   databaseNumber: 1
 
+  ## the password for the external redis
+  ## - [WARNING] to avoid storing the password in plain-text within your values,
+  ##   create a Kubernetes secret and use `externalRedis.passwordSecret`
+  ##
+  password: ""
+
   ## the name of a pre-created secret containing the external redis password
+  ## - if set, this overrides `externalRedis.password`
   ##
   passwordSecret: ""
 

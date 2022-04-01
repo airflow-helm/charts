@@ -4,7 +4,7 @@ Define the content of the `pgbouncer.ini` config file.
 {{- define "airflow.pgbouncer.pgbouncer.ini" }}
 [databases]
 {{- if .Values.postgresql.enabled }}
-* = host={{ printf "%s.%s.svc.cluster.local" (include "airflow.postgresql.fullname" .) (.Release.Namespace) }} port=5432
+* = host={{ printf "%s.%s.svc.%s" (include "airflow.postgresql.fullname" .) (.Release.Namespace) (.Values.airflow.clusterDomain) }} port=5432
 {{- else }}
 * = host={{ .Values.externalDatabase.host }} port={{ .Values.externalDatabase.port }}
 {{- end }}
@@ -23,6 +23,10 @@ auth_file = /home/pgbouncer/users.txt
 
 log_disconnections = {{ .Values.pgbouncer.logDisconnections }}
 log_connections = {{ .Values.pgbouncer.logConnections }}
+
+# locks will never be released when `pool_mode=transaction` (airflow initdb/upgradedb scripts create locks)
+server_reset_query = SELECT pg_advisory_unlock_all()
+server_reset_query_always = 1
 
 ## CLIENT TLS SETTINGS ##
 client_tls_sslmode = {{ .Values.pgbouncer.clientSSL.mode }}

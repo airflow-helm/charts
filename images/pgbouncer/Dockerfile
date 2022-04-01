@@ -1,7 +1,7 @@
-FROM alpine:3.13 AS builder
+FROM alpine:3.14 AS builder
 
 # args -- software versions
-ARG PGBOUNCER_VERSION=1.15.0
+ARG PGBOUNCER_VERSION=1.17.0
 
 # install -- pgbouncer build dependanices
 RUN apk --no-cache add \
@@ -29,7 +29,7 @@ RUN curl -sL "https://www.pgbouncer.org/downloads/files/${PGBOUNCER_VERSION}/pgb
  && make \
  && make install
 
-FROM alpine:3.13
+FROM alpine:3.14
 
 # args -- uid/gid
 ARG PGBOUNCER_USER=pgbouncer

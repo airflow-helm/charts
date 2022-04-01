@@ -15,6 +15,10 @@ metadata:
   annotations:
     {{- toYaml .Values.airflow.kubernetesPodTemplate.podAnnotations | nindent 4 }}
   {{- end }}
+  {{- if .Values.airflow.kubernetesPodTemplate.podLabels }}
+  labels:
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.podLabels | nindent 4 }}
+  {{- end }}
 spec:
   restartPolicy: Never
   {{- if .Values.airflow.image.pullSecret }}
@@ -22,6 +26,7 @@ spec:
     - name: {{ .Values.airflow.image.pullSecret }}
   {{- end }}
   serviceAccountName: {{ include "airflow.serviceAccountName" . }}
+  shareProcessNamespace: {{ .Values.airflow.kubernetesPodTemplate.shareProcessNamespace }}
   {{- if $podNodeSelector }}
   nodeSelector:
     {{- $podNodeSelector | nindent 4 }}
@@ -38,13 +43,16 @@ spec:
   securityContext:
     {{- $podSecurityContext | nindent 4 }}
   {{- end }}
-  {{- if or ($extraPipPackages) (.Values.dags.gitSync.enabled) }}
+  {{- if or ($extraPipPackages) (.Values.dags.gitSync.enabled) (.Values.airflow.kubernetesPodTemplate.extraInitContainers) }}
   initContainers:
     {{- if $extraPipPackages }}
     {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) | indent 4 }}
     {{- end }}
     {{- if .Values.dags.gitSync.enabled }}
     {{- include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") | indent 4 }}
+    {{- end }}
+    {{- if .Values.airflow.kubernetesPodTemplate.extraInitContainers }}
+    {{- toYaml .Values.airflow.kubernetesPodTemplate.extraInitContainers | nindent 4 }}
     {{- end }}
   {{- end }}
   containers:
@@ -53,16 +61,12 @@ spec:
       envFrom:
         {{- include "airflow.envFrom" . | indent 8 }}
       env:
-        {{- if not .Values.airflow.legacyCommands }}
-        ## enable the `/entrypoint` db connection check
-        - name: CONNECTION_CHECK_MAX_COUNT
-          value: "20"
-        {{- end }}
         ## KubernetesExecutor Pods use LocalExecutor internally
         - name: AIRFLOW__CORE__EXECUTOR
           value: LocalExecutor
-        {{- /* this has user-defined variables, so must be included BELOW (so the ABOVE `env` take precedence) */ -}}
-        {{- include "airflow.env" . | indent 8 }}
+        {{- /* NOTE: the FIRST definition of an `env` takes precedence (so we include user-defined `env` LAST) */ -}}
+        {{- /* NOTE: we set `CONNECTION_CHECK_MAX_COUNT=20` to enable airflow's `/entrypoint` db connection check */ -}}
+        {{- include "airflow.env" (dict "Release" .Release "Values" .Values "CONNECTION_CHECK_MAX_COUNT" "20")  | indent 8 }}
       ports: []
       command: []
       args: []

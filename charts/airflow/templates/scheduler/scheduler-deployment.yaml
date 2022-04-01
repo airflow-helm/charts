@@ -125,34 +125,66 @@ spec:
             timeoutSeconds: {{ .Values.scheduler.livenessProbe.timeoutSeconds }}
             exec:
               command:
+                {{- include "airflow.command" . | indent 16 }}
                 - "python"
                 - "-Wignore"
                 - "-c"
                 - |
+                  import os
                   import sys
-                  from typing import List
+
+                  # suppress logs triggered from importing airflow packages
+                  {{- if .Values.airflow.legacyCommands }}
+                  os.environ["AIRFLOW__CORE__LOGGING_LEVEL"] = "ERROR"
+                  {{- else }}
+                  os.environ["AIRFLOW__LOGGING__LOGGING_LEVEL"] = "ERROR"
+                  {{- end }}
+
                   from airflow.jobs.scheduler_job import SchedulerJob
                   from airflow.utils.db import create_session
                   from airflow.utils.net import get_hostname
-                  from airflow.utils.state import State
+                  {{- if .Values.scheduler.livenessProbe.taskCreationCheck.enabled }}
+                  from airflow.jobs.local_task_job import LocalTaskJob
+                  from airflow.utils import timezone
+                  {{- end }}
 
                   with create_session() as session:
+                      # ensure the SchedulerJob with most recent heartbeat for this `hostname` is alive
                       hostname = get_hostname()
-                      query = session \
+                      scheduler_job = session \
                           .query(SchedulerJob) \
-                          .filter_by(state=State.RUNNING, hostname=hostname) \
-                          .order_by(SchedulerJob.latest_heartbeat.desc())
-                      jobs: List[SchedulerJob] = query.all()
-                      alive_jobs = [job for job in jobs if job.is_alive()]
-                      count_alive_jobs = len(alive_jobs)
+                          .filter_by(hostname=hostname) \
+                          .order_by(SchedulerJob.latest_heartbeat.desc()) \
+                          .limit(1) \
+                          .first()
+                      if (scheduler_job is not None) and scheduler_job.is_alive():
+                          pass
+                      else:
+                          sys.exit(f"The SchedulerJob (id={scheduler_job.id}) for hostname '{hostname}' is not alive")
 
-                  if count_alive_jobs == 1:
-                      # scheduler is healthy - we expect one SchedulerJob per scheduler
-                      pass
-                  elif count_alive_jobs == 0:
-                      sys.exit(f"UNHEALTHY - 0 alive SchedulerJob for: {hostname}")
-                  else:
-                      sys.exit(f"UNHEALTHY - {count_alive_jobs} (more than 1) alive SchedulerJob for: {hostname}")
+                      {{- if .Values.scheduler.livenessProbe.taskCreationCheck.enabled }}
+                      {{- $task_job_threshold := .Values.scheduler.livenessProbe.taskCreationCheck.thresholdSeconds }}
+                      {{- if not (or (typeIs "float64" $task_job_threshold) (typeIs "int64" $task_job_threshold)) }}
+                      {{- /* the type of a number could be float64 or int64 depending on how it was set (values.yaml, or --set) */ -}}
+                      {{ required (printf "`scheduler.livenessProbe.taskCreationCheck.thresholdSeconds` must be int-type, but got %s!" (typeOf $task_job_threshold)) nil }}
+                      {{- end }}
+
+                      # ensure the most recent LocalTaskJob had a start_date in the last `task_job_threshold` seconds
+                      task_job_threshold = {{ $task_job_threshold }}
+                      task_job = session \
+                          .query(LocalTaskJob) \
+                          .order_by(LocalTaskJob.id.desc()) \
+                          .limit(1) \
+                          .first()
+                      if task_job is not None:
+                          if (timezone.utcnow() - task_job.start_date).total_seconds() < task_job_threshold:
+                              pass
+                          else:
+                              sys.exit(
+                                  f"The most recent LocalTaskJob (id={task_job.id}, dag_id={task_job.dag_id}) "
+                                  f"started over {task_job_threshold} seconds ago"
+                              )
+                      {{- end }}
           {{- end }}
           {{- if or ($volumeMounts) (include "airflow.executor.kubernetes_like" .) }}
           volumeMounts:
@@ -166,6 +198,12 @@ spec:
           {{- end }}
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
+        {{- end }}
+        {{- if .Values.scheduler.logCleanup.enabled }}
+        {{- $lc_resources := .Values.scheduler.logCleanup.resources }}
+        {{- $lc_retention_min := .Values.scheduler.logCleanup.retentionMinutes }}
+        {{- $lc_interval_sec := .Values.scheduler.logCleanup.intervalSeconds }}
+        {{- include "airflow.container.log_cleanup" (dict "Release" .Release "Values" .Values "resources" $lc_resources "retention_min" $lc_retention_min "interval_sec" $lc_interval_sec) | indent 8 }}
         {{- end }}
         {{- if .Values.airflow.extraContainers }}
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
