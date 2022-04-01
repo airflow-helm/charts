@@ -1670,18 +1670,67 @@ A [ServiceMonitor](https://github.com/prometheus-operator/prometheus-operator/bl
 <summary>Expand</summary>
 <hr>
 
-You can use the `extraManifests.[]` value to add custom Kubernetes manifests to the chart.
+You may use the `extraManifests` value to specify a list of extra Kubernetes manifests that will be deployed alongside the chart.
 
-Example values to add a `BackendConfig` resource (for GKE):
+> 🟦 __Tip__ 🟦 
+> 
+> [Helm templates](https://helm.sh/docs/chart_template_guide/functions_and_pipelines/) within these strings will be rendered
+
+Example values to create a `Secret` for database credentials: _(__WARNING:__ store custom values securely if used)_
 ```yaml
 extraManifests:
-  - apiVersion: cloud.google.com/v1beta1
-    kind: BackendConfig
+  - |
+    apiVersion: v1
+    kind: Secret
     metadata:
-      name: "{{ .Release.Name }}-test"
+      name: airflow-postgres-credentials
+    data:
+      postgresql-password: {{ `password1` | b64enc | quote }}
+```
+
+Example values to create a `Deployment` for a [busybox](https://busybox.net/) container:
+```yaml
+extraManifests:
+  - |
+    apiVersion: apps/v1
+    kind: Deployment
+    metadata:
+      name: {{ include "airflow.fullname" . }}-busybox
+      labels:
+        app: {{ include "airflow.labels.app" . }}
+        component: busybox
+        chart: {{ include "airflow.labels.chart" . }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
     spec:
-      securityPolicy:
-        name: "gcp-cloud-armor-policy-test"
+      replicas: 1
+      selector:
+        matchLabels:
+          app: {{ include "airflow.labels.app" . }}
+          component: busybox
+          release: {{ .Release.Name }}
+      template:
+        metadata:
+          labels:
+            app: {{ include "airflow.labels.app" . }}
+            component: busybox
+            release: {{ .Release.Name }}
+        spec:
+          containers:
+            - name: busybox
+              image: busybox:1.35
+              command:
+                - "/bin/sh"
+                - "-c"
+              args:
+                - |
+                  ## to break the infinite loop when we receive SIGTERM
+                  trap "exit 0" SIGTERM;
+                  ## keep the container running (so people can `kubectl exec -it` into it)
+                  while true; do
+                    echo "I am alive...";
+                    sleep 30;
+                  done
 ```
 
 <hr>
@@ -1930,7 +1979,7 @@ Parameter | Description | Default
 
 Parameter | Description | Default
 --- | --- | ---
-`extraManifests` | extra Kubernetes manifests to include alongside this chart | `[]`
+`extraManifests` | a list of extra Kubernetes manifests that will be deployed alongside the chart | `[]`
 
 <hr>
 </details>

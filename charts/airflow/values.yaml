@@ -1434,18 +1434,58 @@ serviceAccount:
 ###################################
 ## CONFIG | Kubernetes Extra Manifests
 ###################################
-## extra Kubernetes manifests to include alongside this chart
-## - this can be used to include ANY Kubernetes YAML resource
+## a list of extra Kubernetes manifests that will be deployed alongside the chart
+## - helm templates within these strings will be rendered
 ##
 ## ____ EXAMPLE _______________
 ##   extraManifests:
-##    - apiVersion: cloud.google.com/v1beta1
-##      kind: BackendConfig
-##      metadata:
-##        name: "{{ .Release.Name }}-test"
-##      spec:
-##        securityPolicy:
-##          name: "gcp-cloud-armor-policy-test"
+##     - |
+##       apiVersion: v1
+##       kind: Secret
+##       metadata:
+##         name: airflow-postgres
+##       data:
+##         postgresql-password: {{ `password1` | b64enc | quote }}
+##     - |
+##       apiVersion: apps/v1
+##       kind: Deployment
+##       metadata:
+##         name: {{ include "airflow.fullname" . }}-busybox
+##         labels:
+##           app: {{ include "airflow.labels.app" . }}
+##           component: busybox
+##           chart: {{ include "airflow.labels.chart" . }}
+##           release: {{ .Release.Name }}
+##           heritage: {{ .Release.Service }}
+##       spec:
+##         replicas: 1
+##         selector:
+##           matchLabels:
+##             app: {{ include "airflow.labels.app" . }}
+##             component: busybox
+##             release: {{ .Release.Name }}
+##         template:
+##           metadata:
+##             labels:
+##               app: {{ include "airflow.labels.app" . }}
+##               component: busybox
+##               release: {{ .Release.Name }}
+##           spec:
+##             containers:
+##               - name: busybox
+##                 image: busybox:1.35
+##                 command:
+##                   - "/bin/sh"
+##                   - "-c"
+##                 args:
+##                   - |
+##                     ## to break the infinite loop when we receive SIGTERM
+##                     trap "exit 0" SIGTERM;
+##                     ## keep the container running (so people can `kubectl exec -it` into it)
+##                     while true; do
+##                       echo "I am alive...";
+##                       sleep 30;
+##                     done
 ##
 extraManifests: []
 

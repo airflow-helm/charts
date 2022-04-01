@@ -1,4 +1,9 @@
-{{- range .Values.extraManifests }}
+{{- range $manifest := .Values.extraManifests }}
 ---
-{{ tpl (toYaml .) $ }}
+{{- if typeIs "string" $manifest }}
+{{ tpl $manifest $ }}
+{{- else }}
+{{- /* support non-string manifests for backwards compatibility with previous chart versions */ -}}
+{{ tpl (toYaml $manifest) $ }}
+{{- end }}
 {{- end }}
