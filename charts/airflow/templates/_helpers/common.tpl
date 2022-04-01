@@ -72,6 +72,17 @@ The path containing DAG files
 {{- end -}}
 
 {{/*
+If the airflow triggerer should be used.
+*/}}
+{{- define "airflow.triggerer.should_use" -}}
+{{- if .Values.triggerer.enabled -}}
+{{- if not .Values.airflow.legacyCommands -}}
+true
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 If PgBouncer should be used.
 */}}
 {{- define "airflow.pgbouncer.should_use" -}}
