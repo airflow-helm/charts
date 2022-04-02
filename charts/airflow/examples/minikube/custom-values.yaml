@@ -96,6 +96,22 @@ workers:
   replicas: 1
 
 ###################################
+# Airflow - Triggerer Configs
+###################################
+triggerer:
+  ## if the airflow triggerer should be deployed
+  ##
+  ## WARNING:
+  ## - the triggerer component was added in airflow 2.2.0
+  ## - if `airflow.legacyCommands` is `true` the triggerer will NOT be deployed
+  ##
+  enabled: true
+
+  ## the number of triggerer Pods to run
+  ##
+  replicas: 1
+
+###################################
 # Airflow - Flower Configs
 ###################################
 flower:

@@ -6,7 +6,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s" .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-
 {{/*
 The version of airflow being deployed.
 - extracted from the image tag (only for images in airflow's official DockerHub repo)
