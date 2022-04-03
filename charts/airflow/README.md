@@ -1909,7 +1909,7 @@ Parameter | Description | Default
 `triggerer.podAnnotations` | Pod annotations for the triggerer Deployment | `{}`
 `triggerer.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
 `triggerer.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the triggerer Deployment | `<see values.yaml>`
-`triggerer.capacity` | maximum number of triggers each triggerer will run at once (sets `AIRFLOW__TRIGGERER__DEFAULT_CAPACITY`) | 1000
+`triggerer.capacity` | maximum number of triggers each triggerer will run at once (sets `AIRFLOW__TRIGGERER__DEFAULT_CAPACITY`) | `1000`
 `triggerer.livenessProbe.*` | liveness probe for the triggerer Pods | `<see values.yaml>`
 `triggerer.extraPipPackages` | extra pip packages to install in the triggerer Pods | `[]`
 `triggerer.extraVolumeMounts` | extra VolumeMounts for the triggerer Pods | `[]`
