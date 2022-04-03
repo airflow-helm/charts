@@ -291,6 +291,33 @@ workers:
     retentionMinutes: 21600
 
 ###################################
+# Airflow - Triggerer Configs
+###################################
+triggerer:
+  ## if the airflow triggerer should be deployed
+  ##
+  ## WARNING:
+  ## - the triggerer component was added in airflow 2.2.0
+  ## - if `airflow.legacyCommands` is `true` the triggerer will NOT be deployed
+  ##
+  enabled: true
+
+  ## the number of triggerer Pods to run
+  ##
+  replicas: 1
+
+  ## resource requests/limits for the triggerer Pods
+  ##
+  resources:
+    requests:
+      cpu: "256m"
+      memory: "2Gi"
+
+  ## maximum number of triggers each triggerer will run at once (sets `AIRFLOW__TRIGGERER__DEFAULT_CAPACITY`)
+  ##
+  capacity: 1000
+
+###################################
 # Airflow - Flower Configs
 ###################################
 flower:

@@ -7,6 +7,18 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
+The version of airflow being deployed.
+- extracted from the image tag (only for images in airflow's official DockerHub repo)
+- always in `XX.XX.XX` format (ignores any pre-release suffixes)
+- empty if no version can be extracted
+*/}}
+{{- define "airflow.image.version" -}}
+{{- if eq .Values.airflow.image.repository "apache/airflow" -}}
+{{- regexFind `^[0-9]+\.[0-9]+\.[0-9]+` .Values.airflow.image.tag -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Construct the `labels.app` for used by all resources in this chart.
 */}}
 {{- define "airflow.labels.app" -}}
@@ -68,6 +80,23 @@ The path containing DAG files
 {{- printf "%s/repo/%s" (.Values.dags.path | trimSuffix "/") (.Values.dags.gitSync.repoSubPath | trimAll "/") -}}
 {{- else -}}
 {{- printf .Values.dags.path -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+If the airflow triggerer should be used.
+*/}}
+{{- define "airflow.triggerer.should_use" -}}
+{{- if .Values.triggerer.enabled -}}
+{{- if not .Values.airflow.legacyCommands -}}
+{{- if include "airflow.image.version" . -}}
+{{- if semverCompare ">=2.2.0" (include "airflow.image.version" .) -}}
+true
+{{- end -}}
+{{- else -}}
+true
+{{- end -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
