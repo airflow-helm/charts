@@ -105,11 +105,11 @@ TBD
 
 > 🟨 __NOTES__ 🟨
 > 
-> - You can now use Secrets and ConfigMaps to define your `airflow.{users,connections,pools,variables}`, see the docs:
->    - [How to create airflow users?](https://github.com/airflow-helm/charts/tree/main/charts/airflow#how-to-create-airflow-users)
->    - [How to create airflow connections?](https://github.com/airflow-helm/charts/tree/main/charts/airflow#how-to-create-airflow-connections)
->    - [How to create airflow variables?](https://github.com/airflow-helm/charts/tree/main/charts/airflow#how-to-create-airflow-variables)
->    - [How to create airflow pools?](https://github.com/airflow-helm/charts/tree/main/charts/airflow#how-to-create-airflow-pools)
+> - You may now use Secrets and ConfigMaps to define your `airflow.{users,connections,pools,variables}`:
+>    - [How to manage airflow users?](docs/faq/security/airflow-users.md)
+>    - [How to manage airflow connections?](docs/faq/dags/airflow-connections.md)
+>    - [How to manage airflow variables?](docs/faq/dags/airflow-variables.md)
+>    - [How to manage airflow pools?](docs/faq/dags/airflow-pools.md)
 
 ### Added
 - allow referencing Secrets/ConfigMaps in `airflow.{users,connections,pools,variables}` ([#281](https://github.com/airflow-helm/charts/pull/281))
@@ -262,7 +262,7 @@ TBD
 - native support for [Airflow 2.0's HA scheduler](https://airflow.apache.org/docs/apache-airflow/stable/scheduler.html#running-more-than-one-scheduler), see the new `scheduler.replicas` value
 - significantly improved git-sync system by moving to [kubernetes/git-sync](https://github.com/kubernetes/git-sync)
 - significantly improved pip installs by moving to an init-container
-- added a [guide for integrating airflow with your "Microsoft AD" or "OAUTH"](README.md#how-to-authenticate-airflow-users-with-ldapoauth)
+- added docs for [How to integrate airflow with LDAP or OAUTH?](docs/faq/security/ldap-oauth.md)
 - general cleanup of almost every helm file
 - significant docs/README rewrite
 
