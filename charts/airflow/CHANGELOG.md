@@ -8,6 +8,65 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
+## [8.6.0] - 2022-04-13
+
+> 🟥 __WARNINGS__ 🟥
+>
+> - If you have `logs.persistence.enabled` set to `true`, you MUST disable `scheduler.logCleanup.enabled` and `workers.logCleanup.enabled` or the upgrade will fail
+> - If using airflow `2.0.X` or `2.1.X`, you should set `triggerer.enabled` to `false`, as the triggerer was added in airflow `2.2.0` and will fail in older versions
+> - If you currently pin `dags.gitSync.image.tag`, please update to the new default of `v3.5.0`
+> - If you currently pin `pgbouncer.image.tag`, please update to the new default of `1.17.0-patch.0`
+> - If you currently pin `pgbouncer.maxClientConnections`, please update to the new default of `1000`
+
+> 🟨 __NOTES__ 🟨
+>
+> - Consider enabling the new [Scheduler "task creation check"](docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-task-creation-check) to prevent deadlocks, especially if using airflow versions before `2.1.1`
+> - If you disabled PgBouncer because of incompatibility with "Azure PostgreSQL", you can re-enable it if you [set `pgbouncer.authType = scram-sha-256` and `pgbouncer.serverSSL = verify-ca`](docs/faq/database/pgbouncer.md)
+> - This chart version fixes [an issue that caused `db-migrations` to hang](https://github.com/airflow-helm/charts/pull/529) when PgBouncer is enabled with airflow `2.2.0+`
+> - While NOT recommended, you can now set [external database](docs/faq/database/external-database.md) and [external redis](docs/faq/database/external-redis.md) passwords with a plain-text value
+> - If you are using [celery worker autoscaling](docs/faq/configuration/autoscaling-celery-workers.md), you must set a non-empty value for `workers.logCleanup.resources.requests`
+> - The new ["log-cleanup sidecar"](docs/faq/monitoring/log-cleanup.md) is enabled by default on schedulers and workers
+> - The new [PgBouncer startupProbe](https://github.com/airflow-helm/charts/pull/547) will only work in Kubernetes 1.18+
+> - The [`extraManifests` value](docs/faq/kubernetes/extra-manifests.md) has been significantly improved
+
+> 🟦 __OTHER__ 🟦
+>
+> - If you appreciate the `User-Community Airflow Helm Chart` please consider supporting us!
+>    - [give a ⭐ on GitHub](https://github.com/airflow-helm/charts/stargazers)
+>    - [give a ⭐ on ArtifactHub](https://artifacthub.io/packages/helm/airflow-helm/airflow)
+
+### Added
+- add "airflow triggerer" Deployment ([#555](https://github.com/airflow-helm/charts/pull/555))
+- add "log-cleanup sidecar" to scheduler and worker ([docs](docs/faq/monitoring/log-cleanup.md)) ([#554](https://github.com/airflow-helm/charts/pull/554))
+- add "task creation check" to scheduler liveness probe ([docs](docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-task-creation-check)) ([#549](https://github.com/airflow-helm/charts/pull/549))
+- allow setting database passwords with values & setting database usernames from secrets ([docs](docs/faq/database/external-database.md#option-1---postgres)) ([#553](https://github.com/airflow-helm/charts/pull/553))
+- allow `airflow.users[].roles` to specify a list of roles ([docs](docs/faq/security/airflow-users.md)) ([#539](https://github.com/airflow-helm/charts/pull/539))
+- add `pgbouncer.authType` value ([docs](docs/faq/database/pgbouncer.md)) ([#498](https://github.com/airflow-helm/charts/pull/498))
+- add `ingressClassName` values to ingress ([docs](docs/faq/kubernetes/ingress.md)) ([#527](https://github.com/airflow-helm/charts/pull/527))
+- add `airflow.clusterDomain` value ([#441](https://github.com/airflow-helm/charts/pull/441))
+- add `labels` values for `sync` and `db-migrations` ([#467](https://github.com/airflow-helm/charts/pull/467))
+- add `airflow.kubernetesPodTemplate.extraContainers` value ([#456](https://github.com/airflow-helm/charts/pull/456))
+- add `airflow.kubernetesPodTemplate.extraInitContainers` value ([#446](https://github.com/airflow-helm/charts/pull/446))
+- add `airflow.kubernetesPodTemplate.shareProcessNamespace` value ([#408](https://github.com/airflow-helm/charts/pull/408))
+- add `airflow.kubernetesPodTemplate.podLabels` value ([#534](https://github.com/airflow-helm/charts/pull/534))
+
+### Changed
+- the default `airflow.image` is now `apache/airflow:2.2.5-python3.8` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support))
+- support helm templating in `extraManifests` by allowing string elements ([docs](docs/faq/kubernetes/extra-manifests.md)) ([#523](https://github.com/airflow-helm/charts/pull/523))
+- update default `dags.gitSync.image.tag` to `v3.5.0` ([#544](https://github.com/airflow-helm/charts/pull/544))
+- update default `pgbouncer.image.tag` to `1.17.0-patch.0` ([#552](https://github.com/airflow-helm/charts/pull/552))
+- update default `pgbouncer.maxClientConnections` to `1000` ([#543](https://github.com/airflow-helm/charts/pull/543))
+
+### Fixed
+- fix `airflow.{fernetKey,webserverSecretKey}` overshadowing `_CMD` and `_SECRET` configs ([docs-1](docs/faq/security/set-fernet-key.md), [docs-2](docs/faq/security/set-webserver-secret-key.md)) ([#508](https://github.com/airflow-helm/charts/pull/508))
+- fix PG_ADVISORY_LOCK not being released when using pgbouncer ([#529](https://github.com/airflow-helm/charts/pull/529))
+- only set `CONNECTION_CHECK_MAX_COUNT` once ([#533](https://github.com/airflow-helm/charts/pull/533))
+- set `DUMB_INIT_SETSID=0` for celery workers (fix warm shutdown) ([#550](https://github.com/airflow-helm/charts/pull/550))
+- replace pgbouncer readinessProbe with startupProbe ([#547](https://github.com/airflow-helm/charts/pull/547))
+- allow ingress `servicePort` to be string or number ([#530](https://github.com/airflow-helm/charts/pull/530))
+- fix `pgbouncer.livenessProbe.enabled` not being respected ([#546](https://github.com/airflow-helm/charts/pull/546))
+- cast user values with toString before b64enc ([#557](https://github.com/airflow-helm/charts/pull/557))
+
 ## [8.5.3] - 2022-01-10
 
 > 🟥 __WARNINGS__ 🟥
@@ -622,7 +681,8 @@ TBD
 >
 > - To read about versions `7.0.0` and before, please see the [legacy repo](https://github.com/helm/charts/tree/master/stable/airflow).
 
-[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.5.3...HEAD
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.6.0...HEAD
+[8.6.0]: https://github.com/airflow-helm/charts/compare/airflow-8.5.3...airflow-8.6.0
 [8.5.3]: https://github.com/airflow-helm/charts/compare/airflow-8.5.2...airflow-8.5.3
 [8.5.2]: https://github.com/airflow-helm/charts/compare/airflow-8.5.1...airflow-8.5.2
 [8.5.1]: https://github.com/airflow-helm/charts/compare/airflow-8.5.0...airflow-8.5.1

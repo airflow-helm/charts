@@ -2,13 +2,11 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to set the airflow version?
+# How to choose the airflow version?
 
 > 🟦 __Tip__ 🟦
 >
-> There is a default version (`airflow.image.tag`) of airflow shipped with each version of the chart, see the default [values.yaml](../../../values.yaml) for the current one.
-
-> 🟦 __Tip__ 🟦
+> There is a default version of airflow shipped with each version of the chart, see the [default `values.yaml`](../../../values.yaml) for the current one.
 >
 > Many versions of airflow versions are supported by the chart, please see the [Airflow Version Support](../../..#airflow-version-support) matrix.
 
@@ -58,4 +56,7 @@ airflow:
 
     ## WARNING: even if set to "Always" do not reuse tag names, as containers only pull the latest image when restarting
     pullPolicy: IfNotPresent
+
+    ## sets first element of `spec.imagePullSecrets` on Pod templates (for access to private container registry)
+    pullSecret: ""
 ```

@@ -1,21 +1,42 @@
-# Patterns to ignore when building packages.
-# This supports shell glob matching, relative path matching, and
-# negation (prefixed with !). Only one pattern per line.
-.DS_Store
-# Common VCS dirs
-.git/
+# Patterns to ignore when building the helm package
+
+## Git
+.git
 .gitignore
-.bzr/
-.bzrignore
-.hg/
-.hgignore
-.svn/
-# Common backup files
-*.swp
-*.bak
-*.tmp
-*~
-# Various IDEs
-.project
+
+## JetBrains
 .idea/
-*.tmproj
+*.iml
+*.ipr
+*.iws
+
+## VSCode
+.vscode/*
+*.code-workspace
+.history/
+
+## Vim
+[._]*.s[a-v][a-z]
+[._]*.sw[a-p]
+[._]s[a-rt-v][a-z]
+[._]ss[a-gi-z]
+[._]sw[a-p]
+Session.vim
+Sessionx.vim
+.netrwhist
+*~
+[._]*.un~
+
+## Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+.\#*
+
+## macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*

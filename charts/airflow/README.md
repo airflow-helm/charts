@@ -5,6 +5,11 @@
 The `User-Community Airflow Helm Chart` is the standard way to deploy [Apache Airflow](https://airflow.apache.org/) on [Kubernetes](https://kubernetes.io/) with [Helm](https://helm.sh/).
 Originally created in 2018, it has since helped thousands of companies create production-ready deployments of Airflow on Kubernetes.
 
+> If you appreciate the `User-Community Airflow Helm Chart` please consider supporting us!
+>
+> - [give a ⭐ on GitHub](https://github.com/airflow-helm/charts/stargazers)
+> - [give a ⭐ on ArtifactHub](https://artifacthub.io/packages/helm/airflow-helm/airflow)
+
 > __NOTE:__ this project is independent of the official chart found in the `apache/airflow` GitHub repository, and is supported by the kind contributions of users like yourself!
 
 ## Project Goals
@@ -47,7 +52,7 @@ Originally created in 2018, it has since helped thousands of companies create pr
 ## Frequently Asked Questions
 
 - __Configuration:__
-  - [`How to set the airflow version?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-version.md) <a id="how-to-use-a-specific-version-of-airflow"></a>
+  - [`How to choose the airflow version?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-version.md) <a id="how-to-use-a-specific-version-of-airflow"></a>
   - [`How to set airflow configs?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-configs.md) <a id="how-to-set-airflow-configs"></a>
   - [`How to load airflow plugins?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-plugins.md)
   - [`How to install extra python packages?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md) <a id="how-to-install-extra-pip-packages"></a>
