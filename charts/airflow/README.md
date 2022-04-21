@@ -12,8 +12,8 @@ Originally created in 2018, it has since helped thousands of companies create pr
 
 > __CONTRIBUTING:__ if you appreciate this project please consider supporting us!
 >
-> - [give a ⭐ on GitHub](https://github.com/airflow-helm/charts/stargazers)
-> - [give a ⭐ on ArtifactHub](https://artifacthub.io/packages/helm/airflow-helm/airflow)
+> - [`give a ⭐ on GitHub`](https://github.com/airflow-helm/charts/stargazers)
+> - [`give a ⭐ on ArtifactHub`](https://artifacthub.io/packages/helm/airflow-helm/airflow)
 
 ## Project Goals
 
@@ -47,6 +47,8 @@ Originally created in 2018, it has since helped thousands of companies create pr
 - Personalised tips/warnings after each `helm upgrade`
 
 ## Guides
+
+> Get notified about new releases by [`watching 👀 on GitHub`](https://github.com/airflow-helm/charts/watchers), choose "custom" and then "releases" (top right of the page)
 
 - [`Quickstart Guide`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/guides/quickstart.md) <sup><sub>⭐</sub></sup> <a id="quickstart-guide"></a>
 - [`Upgrade Guide`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/guides/upgrade.md) <sup><sub>⭐</sub></sup> <a id="upgrade"></a>
@@ -91,18 +93,20 @@ Originally created in 2018, it has since helped thousands of companies create pr
 
 ## Examples
 
-The following table lists __example deployments__ of this chart.
+> We encourage contributions with examples for other platforms.
 
-Example | Deployment Environment | Airflow Version | Airflow Executor
---- | --- | --- | ---
-[minikube](https://github.com/airflow-helm/charts/tree/main/charts/airflow/examples/minikube) | `Minikube` or `Kind` or `K3D` | `1.10+` or `2.0+` | `CeleryExecutor`
-[google-gke](https://github.com/airflow-helm/charts/tree/main/charts/airflow/examples/google-gke) | `Google Cloud - GKE` | `1.10+` or `2.0+` | `CeleryExecutor`
+- [`Minikube Example`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/examples/minikube)
+   - __Platform:__ `Minikube` (also works on `Kind` and `k3d`)
+   - __Airflow Executor:__ `CeleryExecutor`
+- [`GKE Example`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/examples/google-gke)
+   - __Platform:__ `Google Kubernetes Engine (GKE)`
+   - __Airflow Executor:__ `CeleryExecutor`
 
 ## Airflow Version Support
 
-The following table lists the __airflow versions__ supported by this chart.
+> Set your airflow version with the [`airflow.image.tag`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-version.md) value.
 
-> __TIP:__ Set your airflow version with the [`airflow.image.tag`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-version.md) value.
+The following table lists the __airflow versions__ supported by this chart.
 
 Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.5.3` | `8.6.0+` |
 --- | --- | --- | ---
@@ -116,9 +120,9 @@ Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.
 
 ## Airflow Executor Support
 
-The following table lists the [__airflow executors__](https://airflow.apache.org/docs/apache-airflow/stable/executor/index.html) supported by this chart.
+> Set your airflow executor with the `airflow.executor` value.
 
-> __TIP:__ Set your airflow executor with the `airflow.executor` value.
+The following table lists the [__airflow executors__](https://airflow.apache.org/docs/apache-airflow/stable/executor/index.html) supported by this chart.
 
 Chart Version → <br> Airflow Executor ↓ | `7.X.X` | `8.X.X` | 
 --- | --- | ---
@@ -130,9 +134,9 @@ Chart Version → <br> Airflow Executor ↓ | `7.X.X` | `8.X.X` |
 
 ## Helm Values
 
-The following is a summary of the __helm values__ provided by this chart.
+> The full list of values can be found in the [`values.yaml`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/values.yaml) file.
 
-> __TIP:__ The full list of values can be found in the [`values.yaml`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/values.yaml) file.
+The following is a summary of the __helm values__ provided by this chart.
 
 <details>
 <summary><code>airflow.*</code></summary>
