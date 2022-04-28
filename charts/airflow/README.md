@@ -14,6 +14,7 @@ Originally created in 2018, it has since helped thousands of companies create pr
 >
 > - [`give a ⭐ on GitHub`](https://github.com/airflow-helm/charts/stargazers)
 > - [`give a ⭐ on ArtifactHub`](https://artifacthub.io/packages/helm/airflow-helm/airflow)
+> - [`talk 💬💬💬 with the community on GitHub Discussions `](https://github.com/airflow-helm/charts/discussions)
 
 ## Project Goals
 
@@ -41,8 +42,10 @@ Originally created in 2018, it has since helped thousands of companies create pr
 - Multiple ways to install extra Python packages:
    - Init-Containers ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md#option-1---use-init-containers))
    - Embedded Into Container Image ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md#option-2---embedded-into-container-image-recommended))
-- Automatic restarting of unhealthy Airflow Schedulers ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md))
-- Automatic clean up of old airflow logs ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-cleanup.md))
+- Automatically restart unhealthy Airflow Schedulers:
+   - Heartbeat Check ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-heartbeat-check))
+   - Task Creation Check ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-task-creation-check))
+- Automatically remove old airflow logs ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-cleanup.md))
 - Out-of-the-box Support for `ArgoCD` and similar tools
 - Personalised tips/warnings after each `helm upgrade`
 
