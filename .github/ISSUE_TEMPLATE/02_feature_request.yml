@@ -1,5 +1,5 @@
-name: Feature Request
-description: Suggest an idea for the project!
+name: 💡 Feature Request
+description: Suggest an idea for the project
 labels: [ "kind/enhancement" ]
 body:
   - type: markdown
@@ -14,7 +14,7 @@ body:
       options:
         - label: I have checked for [existing issues](https://github.com/airflow-helm/charts/issues).
           required: true
-        - label: This report is about the [user-community Airflow Helm Chart](https://github.com/airflow-helm/charts/tree/main/charts/airflow).
+        - label: This report is about the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow).
           required: true
   - type: textarea
     id: motivation
