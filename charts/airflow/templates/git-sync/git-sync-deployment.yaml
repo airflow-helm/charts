@@ -1,0 +1,85 @@
+{{- if and (.Values.airflow.dags.persistence.enabled .Values.airflow.dags.gitSync.enabled) }}
+{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.airflow.dags.gitSync.nodeSelector) }}
+{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.airflow.dags.gitSync.affinity) }}
+{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.airflow.dags.gitSync.tolerations) }}
+{{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.airflow.dags.gitSync.securityContext) }}
+{{- $volumes := include "volumes.dags" (dict "Values" .Values ) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "airflow.fullname" . }}-dags-gitsync
+  labels:
+    app: {{ include "airflow.labels.app" . }}
+    component: dags-git-sync
+    chart: {{ include "airflow.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    {{- if .Values.airflow.dags.gitSync.labels }}
+    {{- toYaml .Values.airflow.dags.gitSync.labels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.airflow.dags.gitSync.annotations }}
+  annotations:
+    {{- toYaml .Values.airflow.dags.gitSync.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      ## multiple gitSync pods can safely run concurrently
+      maxSurge: 25%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: {{ include "airflow.labels.app" . }}
+      component: dags-git-sync
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      annotations:
+        checksum/secret-config-envs: {{ include (print $.Template.BasePath "/config/secret-config-envs.yaml") . | sha256sum }}
+        checksum/secret-local-settings: {{ include (print $.Template.BasePath "/config/secret-local-settings.yaml") . | sha256sum }}
+        {{- if .Values.airflow.podAnnotations }}
+        {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
+        {{- end }}
+        {{- if .Values.airflow.dags.gitSync.podAnnotations }}
+        {{- toYaml .Values.airflow.dags.gitSync.podAnnotations | nindent 8 }}
+        {{- end }}
+        {{- if .Values.airflow.dags.gitSync.safeToEvict }}
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        {{- end }}
+      labels:
+        app: {{ include "airflow.labels.app" . }}
+        component: dags-git-sync
+        release: {{ .Release.Name }}
+        {{- if .Values.airflow.dags.gitSync.podLabels }}
+        {{- toYaml .Values.airflow.dags.gitSync.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      restartPolicy: Always
+      {{- if .Values.airflow.image.pullSecret }}
+      imagePullSecrets:
+        - name: {{ .Values.airflow.image.pullSecret }}
+      {{- end }}
+      {{- if $podNodeSelector }}
+      nodeSelector:
+        {{- $podNodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if $podAffinity }}
+      affinity:
+        {{- $podAffinity | nindent 8 }}
+      {{- end }}
+      {{- if $podTolerations }}
+      tolerations:
+        {{- $podTolerations | nindent 8 }}
+      {{- end }}
+      {{- if $podSecurityContext }}
+      securityContext:
+        {{- $podSecurityContext | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "airflow.serviceAccountName" . }}
+      containers:
+        {{- include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values) | indent 8 }}
+      volumes:
+        {{- $volumes | indent 8 }}
+{{- end }}
