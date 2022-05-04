@@ -84,7 +84,7 @@
 {{- end }}
 
 {{/* Checks for `dags.gitSync` */}}
-{{- if .Values.dags.gitSync.enabled }}
+{{- if and (.Values.dags.gitSync.enabled)  (not .Values.dags.persistence.enabled)  }}
   {{- if not .Values.dags.gitSync.repo }}
   {{ required "If `dags.gitSync.enabled=true`, then `dags.gitSync.repo` must be non-empty!" nil }}
   {{- end }}

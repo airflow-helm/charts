@@ -442,7 +442,7 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
 {{- end }}
 
 {{- /* git-sync */ -}}
-{{- if .Values.dags.gitSync.enabled }}
+{{- if and (.Values.dags.gitSync.enabled)  (not .Values.dags.persistence.enabled)  }}
 {{- if .Values.dags.gitSync.sshSecret }}
 - name: git-secret
   secret:
