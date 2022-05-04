@@ -82,7 +82,7 @@ def needs_db_migrations() -> bool:
     log_alembic_level = log_alembic.level
     try:
         log_alembic.setLevel("WARN")
-        check_migrations(0)
+        check_migrations(1)
         log_alembic.setLevel(log_alembic_level)
         return False
     except TimeoutError:
