@@ -390,6 +390,25 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Value
 {{- end }}
 
 {{/*
+The dag data volume to be used by various pods
+EXAMPLE USAGE: {{ include "volumes.dags" (dict "Release" .Release "Values" .Values) }}
+*/}}
+{{- define "volumes.dags" }}
+{{- /* dags */ -}}
+{{- if .Values.dags.persistence.enabled }}
+- name: dags-data
+  mountPath: {{ .Values.dags.path }}
+  subPath: {{ .Values.dags.persistence.subPath }}
+  {{- if eq .Values.dags.persistence.accessMode "ReadOnlyMany" }}
+  readOnly: true
+  {{- end }}
+{{- else if .Values.dags.gitSync.enabled }}
+- name: dags-data
+  mountPath: {{ .Values.dags.path }}
+{{- end }}
+{{- end }}
+
+{{/*
 The list of `volumes` for web/scheduler/worker/flower Pods
 EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
 */}}
@@ -406,19 +425,7 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
     defaultMode: 0644
 {{- end }}
 
-{{- /* dags */ -}}
-{{- if .Values.dags.persistence.enabled }}
-- name: dags-data
-  persistentVolumeClaim:
-    {{- if .Values.dags.persistence.existingClaim }}
-    claimName: {{ .Values.dags.persistence.existingClaim }}
-    {{- else }}
-    claimName: {{ printf "%s-dags" (include "airflow.fullname" . | trunc 58) }}
-    {{- end }}
-{{- else if .Values.dags.gitSync.enabled }}
-- name: dags-data
-  emptyDir: {}
-{{- end }}
+{{ include "volumes.dags" (dict "Release" .Release "Values" .Values) }}
 
 {{- /* logs */ -}}
 {{- if .Values.logs.persistence.enabled }}
