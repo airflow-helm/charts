@@ -30,15 +30,18 @@ Originally created in 2018, it has since helped thousands of companies create pr
 - Easily integrate with your `PostgresSQL` or `MySQL` databases ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/external-database.md))
 - Automatic deployment of `PgBouncer` to reduce PostgresSQL database strain ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/pgbouncer.md))
 - Declaratively manage Airflow configurations:
-   - Configs ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-configs.md))
+   - Config Files ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-configs.md))
    - Users ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/security/airflow-users.md))
    - Connections ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-connections.md))
    - Variables ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-variables.md))
    - Pools ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-pools.md))
 - Multiple ways to load your DAG definitions:
    - Git-Sync Sidecar ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/load-dag-definitions.md#option-1---git-sync-sidecar))
-   - Persistent Volume ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/load-dag-definitions.md#option-2---persistent-volume))
+   - Persistent Volume Claim ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/load-dag-definitions.md#option-2---persistent-volume-claim))
    - Embedded Into Container Image ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/load-dag-definitions.md#option-3---embedded-into-container-image))
+- Multiple ways to persist your logs:
+   - Persistent Volume Claim ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-persistence.md#option-1---persistent-volume-claim))
+   - Remote Providers ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-persistence.md#option-2---remote-providers))
 - Multiple ways to install extra Python packages:
    - Init-Containers ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md#option-1---use-init-containers))
    - Embedded Into Container Image ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md#option-2---embedded-into-container-image-recommended))

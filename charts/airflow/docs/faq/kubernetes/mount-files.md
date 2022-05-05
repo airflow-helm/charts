@@ -4,20 +4,22 @@
 
 # How to mount ConfigMaps and Secrets as files?
 
-## Mount on CeleryExecutor Workers
+## Mount on ALL Airflow Pods
 
-You may use the `workers.extraVolumeMounts` and `workers.extraVolumes` values to mount ConfigMaps/Secrets as files on the airflow CeleryExecutor worker pods.
+You may use the `airflow.extraVolumeMounts` and `airflow.extraVolumes` values to mount ConfigMaps/Secrets as files on all airflow pods.
 
-For example, to mount a Secret called `redshift-creds` at the `/opt/airflow/secrets/redshift-creds` directory of all CeleryExecutor worker pods:
+For example, to mount a Secret called `redshift-creds` at the `/opt/airflow/secrets/redshift-creds` directory of all airflow pods:
 
 ```yaml
-workers:
+airflow:
   extraVolumeMounts:
+    ## spec for VolumeMount: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
     - name: redshift-creds
       mountPath: /opt/airflow/secrets/redshift-creds
       readOnly: true
 
   extraVolumes:
+    ## spec for Volume: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
     - name: redshift-creds
       secret:
         secretName: redshift-creds
@@ -45,6 +47,27 @@ workers:
 > redis_password = Path("/opt/airflow/secrets/redshift-creds/password").read_text().strip()
 > ```
 
+## Mount on CeleryExecutor Workers
+
+You may use the `workers.extraVolumeMounts` and `workers.extraVolumes` values to mount ConfigMaps/Secrets as files on the airflow CeleryExecutor worker pods.
+
+For example, to mount a Secret called `redshift-creds` at the `/opt/airflow/secrets/redshift-creds` directory of all CeleryExecutor worker pods:
+
+```yaml
+workers:
+  extraVolumeMounts:
+    ## spec for VolumeMount: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+    - name: redshift-creds
+      mountPath: /opt/airflow/secrets/redshift-creds
+      readOnly: true
+  
+  extraVolumes:
+    ## spec for Volume: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+    - name: redshift-creds
+      secret:
+        secretName: redshift-creds
+```
+
 ## Mount on KubernetesExecutor Pod Template
 
 You may use the `airflow.kubernetesPodTemplate.extraVolumeMounts` and `airflow.kubernetesPodTemplate.extraVolumes` values to mount ConfigMaps/Secrets as files on the airflow KubernetesExecutor pod template.
@@ -54,11 +77,13 @@ For example, to mount a Secret called `redshift-creds` at the `/opt/airflow/secr
 ```yaml
 airflow:
   kubernetesPodTemplate:
+    ## spec for VolumeMount: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
     extraVolumeMounts:
       - name: redshift-creds
         mountPath: /opt/airflow/secrets/redshift-creds
         readOnly: true
   
+    ## spec for Volume: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
     extraVolumes:
       - name: redshift-creds
         secret:
