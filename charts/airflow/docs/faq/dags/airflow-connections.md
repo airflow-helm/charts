@@ -4,16 +4,18 @@
 
 # How to manage airflow connections?
 
+## Introduction
+
 Airflow Connections are typically [created](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html#creating-a-connection-with-the-ui) 
 and [updated](https://airflow.apache.org/docs/apache-airflow/stable/howto/connection.html#editing-a-connection-with-the-ui) using the WebUI, 
-but this can be dangerous as it makes your Airflow environment dependent on _manual post-install steps_, leaving you vulnerable to users making unexpected changes.
-To solve this and other issues, the chart provides the `airflow.connections` value to specify a list of connections that will be automatically reconciled into your airflow deployment.
+but this can be dangerous as it makes your Airflow environment dependent on _manual post-install steps_, 
+leaving you vulnerable to users making unexpected changes.
 
-## Defining Connections
+To solve this and other issues, the chart provides the `airflow.connections` value to specify a list of connections that will be automatically synced into your airflow deployment.
 
-We provide the `airflow.connections` value, a YAML list with elements that have the attributes of an Airflow Connection.
+## How to define a connection?
 
-Here is an example connection that has all possible fields set as `"..."`:
+All `airflow.connections` must have an `id` and `type` specified, but the meaning of other attributes will depend on the `type`.
 
 ```yaml
 airflow: 
@@ -27,154 +29,141 @@ airflow:
       ## "Description"
       description: ...
       
-      ## "Host" (allows connectionsTemplates)
+      ## "Host" (supports `airflow.connectionsTemplates`)
       host: ...
       
       ## "Port"
       port: ...
       
-      ## "Schema" (allows connectionsTemplates)
+      ## "Schema" (supports `airflow.connectionsTemplates`)
       schema: ...
       
-      ## "Login" (allows connectionsTemplates)
+      ## "Login" (supports `airflow.connectionsTemplates`)
       login: ...
       
-      ## "Password" (allows connectionsTemplates)
+      ## "Password" (supports `airflow.connectionsTemplates`)
       password: ...
             
-      ## "Extra" (allows connectionsTemplates)
+      ## "Extra" (supports `airflow.connectionsTemplates`)
       extra: ...
 ```
 
-The `type` attribute specifies what kind of connection is being managed, to learn about each connection `type`:
-- See the [examples section](#examples) of this FAQ page.
-- See [the list of types](https://airflow.apache.org/docs/apache-airflow-providers/core-extensions/connections.html) in airflow's official docs. 
-   - _(TIP: click "Connection Types" in the left-sidebar after clicking on a "hook" API page)_
-
 > 🟦 __Tip__ 🟦
 >
-> The `extra` attribute must be a valid JSON object, this means you must _escape_ any special JSON characters in your strings.
-> 
-> For example, this connection includes an `extra` JSON object with values that contain `newlines` and `"`:
-> 
-> ```yaml
-> airflow: 
->   connections:
->     - id: ...
->       type: ...
->       extra: |
->         {
->           "key_1": "line_one\n line_two\n special_\"_chars\n line_four\n"
->         }
-> ```
->
-> The following Python function may be used to generate an escaped JSON string:
-> 
-> ```python
-> import json
-> 
-> raw_string = """line_one\n line_two\n special_"_chars\n line_four\n"""
-> 
-> # NOTE: `json.dumps()` adds `"` around the string
-> escaped_string = json.dumps(raw_string)
-> 
-> print("-------- BEGIN RAW STRING --------")
-> print(raw_string)
-> print("-------- END RAW STRING ----------")
-> 
-> print("-------- BEGIN ESCAPED STRING --------")
-> print(escaped_string)
-> print("-------- END ESCAPED STRING ----------")
-> ```
+> See the [examples](#examples) for sample values that create common connection types.
 
-## Connection Syncing
+## How are connections synced?
 
-Connections defined in `airflow.connections` are automatically synced into the airflow metadata database:
+The chart will automatically sync connections defined in `airflow.connections` into the airflow metadata database,
+how this sync is done will depend on the value of `airflow.connectionsUpdate`.
 
-- If `airflow.connectionsUpdate` is `true` _(default)_:
-   - a Deployment is created that syncs connection definitions every 60 seconds (or whenever a Secret/ConfigMap referenced in `airflow.connectionsTemplates` is updated)
-- If `airflow.connectionsUpdate` is `false`:
-   - a [`post-install` hook](https://helm.sh/docs/topics/charts_hooks/) runs a Job after each `helm install/upgrade` that syncs connection definitions a single time
-
-> 🟦 __Tip__ 🟦
->
-> Removing a connection that was previously defined in `airflow.connections` requires __two steps__ 
-> because the sync ignores connections not listed in `airflow.connections`:
-> 
-> 1. Remove the connection from the `airflow.connections` list.
-> 2. Use the WebUI or CLI to remove the connection.
+- If `airflow.connectionsUpdate = true` _(default)_:
+   - The chart uses a Deployment that syncs connections every 60 seconds
+   - _NOTE: a sync also occurs when a Secret/ConfigMap referenced in `airflow.connectionsTemplates` is updated_
+- If `airflow.connectionsUpdate = false`:
+   - The chart uses a [`post-install` hook](https://helm.sh/docs/topics/charts_hooks/) to run a sync Job after each `helm upgrade`
+   - _NOTE: this means that connections are only synced when running `helm upgrade`_
 
 > 🟥 __Warning__ 🟥
 >
-> When using ArgoCD (or similar tools), you must set `airflow.connectionsUpdate` to `true`,
+> When using ArgoCD you must set `airflow.connectionsUpdate` to `true`,
 > otherwise you may encounter "field is immutable" errors from the `post-install` Job.
-> This is because `helm template` does not apply the [`helm.sh/hook-delete-policy: before-hook-creation`](https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies)
-> annotation that removes any existing Jobs before applying the new one.
+> (This is because ArgoCD does not respect the [`helm.sh/hook-delete-policy: before-hook-creation`](https://helm.sh/docs/topics/charts_hooks/#hook-deletion-policies)
+> annotation on the Job)
 
-## Templating from Secrets and ConfigMaps
+## How to delete a connection?
 
-Sometimes you may wish to use parts of Secrets or ConfigMaps within your connection definitions, we provide the `airflow.connectionsTemplates` value to enable this.
+The sync process is unable to delete connections as it ignores everything not listed in `airflow.connections`.
 
-The keys of `airflow.connectionsTemplates` will be templated using [`$`-based substitution](https://docs.python.org/3/library/string.html#template-strings) inside 
+Therefore, to fully remove a connection you must:
+
+1. Remove it from your `airflow.connections` value
+2. Manually delete it with the Airflow WebUI or CLI
+
+## How to use Kubernetes Secrets and ConfigMaps?
+
+Sometimes you may wish to use parts of Secrets or ConfigMaps within your connection definitions rather 
+than storing them in plain-text within your values.
+
+The keys of `airflow.connectionsTemplates` will be templated using 
+[`$`-based substitution](https://docs.python.org/3/library/string.html#template-strings) inside 
 the `host`, `schema`, `login`, `password` and `extra` string fields.
 
-Here is a conceptual example which uses templates from `ConfigMap/my-configmap` and `Secret/my-secret`.
+For examples of using `airflow.connectionsTemplates`, please see:
+
+- [AWS Connection - Secret Templates](#aws-connection---secret-templates)
+- [Azure Blob Storage Connection - Secret Templates](#azure-blob-storage-connection---secret-templates)
+- [Postgres Connection - Secret Templates](#postgres-connection---secret-templates)
+- [SSH Connection - Secret Templates](#ssh-connection---secret-templates)
+
+## How to integrate with external _secret management systems_?
+
+Updates to Secrets are automatically propagated to the `airflow.connections` which reference them.
+
+This behaviour enables you to use [External Secrets Operator](https://github.com/external-secrets/external-secrets)
+to integrate your connection definitions with many popular _secret management systems_ like:
+
+- [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/)
+- [Azure Key Vault](https://azure.microsoft.com/en-us/services/key-vault/)
+- [Google Secrets Manager](https://cloud.google.com/secret-manager)
+- [HashiCorp Vault](https://github.com/hashicorp/vault)
+
+## How to include special characters in `extra`?
+
+The `extra` field must be a valid JSON object, this means you must escape any special JSON characters in your strings.
+
+For example, this connection includes an `extra` JSON object with values that contain `newlines` and `"`:
 
 ```yaml
-airflow:
+airflow: 
   connections:
     - id: ...
       type: ...
-      description: ...
-      host: ${CONFIGMAP_TEMPLATE}
-      port: ...
-      schema: ${CONFIGMAP_TEMPLATE}
-      login: ${CONFIGMAP_TEMPLATE}
-      password: ${SECRET_TEMPLATE}
-      
-      ## WARNING: if CONFIGMAP_TEMPLATE or SECRET_TEMPLATE contain any special characters like `"`,
-      ##          they must be escaped so that a valid JSON string is created
-      ##          (currently, this escaping must take place in the Secret/ConfigMap itself)
       extra: |
         {
-          "example_1": "${CONFIGMAP_TEMPLATE}",
-          "example_2": "${SECRET_TEMPLATE}",
+          "key_1": "line_one\n line_two\n special_\"_chars\n line_four\n"
         }
-
-  connectionsTemplates:
-    ## creates a template called ${CONFIGMAP_TEMPLATE} from the `username` key in `ConfigMap/my-configmap` 
-    CONFIGMAP_TEMPLATE:
-      kind: configmap
-      name: my-configmap
-      key: username
-
-    ## creates a template called ${SECRET_TEMPLATE} from the `password` key in `Secret/my-secret` 
-    SECRET_TEMPLATE:
-      kind: secret
-      name: my-secret
-      key: password
 ```
 
-> 🟦 __Tip__ 🟦
->
-> Updates to Secrets and ConfigMaps referenced in `airflow.connectionsTemplates` are automatically propagated to the `airflow.connections` which reference them.
-> This allows integration with _secret management systems_ through the [External Secrets Operator](https://github.com/external-secrets/external-secrets).
->
-> The [External Secrets Operator](https://github.com/external-secrets/external-secrets) supports common _secret management systems_ like:
-> - [AWS Secrets Manager](https://aws.amazon.com/secrets-manager/)
-> - [Azure Key Vault](https://azure.microsoft.com/en-us/services/key-vault/)
-> - [Google Secrets Manager](https://cloud.google.com/secret-manager)
-> - [HashiCorp Vault](https://github.com/hashicorp/vault)
+The following Python function may be used to generate an escaped JSON string:
+
+```python
+import json
+
+raw_string = """line_one\n line_two\n special_"_chars\n line_four\n"""
+
+# NOTE: `json.dumps()` adds `"` around the string
+escaped_string = json.dumps(raw_string)
+
+print("-------- BEGIN RAW STRING --------")
+print(raw_string)
+print("-------- END RAW STRING ----------")
+
+print("-------- BEGIN ESCAPED STRING --------")
+print(escaped_string)
+print("-------- END ESCAPED STRING ----------")
+```
 
 # Examples
 
-The following examples cover some common connection types which you may find useful.
+The following examples cover some common connection `type`s which you may find useful.
 
-## AWS Connection
+> 🟦 __Tip__ 🟦
+>
+> See the [official docs listing airflow's supported connection types](https://airflow.apache.org/docs/apache-airflow-providers/core-extensions/connections.html).
 
-The `apache-airflow-providers-amazon` provider package contains the [`"aws"`](https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html) connection type.
+## AWS Connection 
 
-For example, the following values will create an `"aws"` type connection called `my_aws`:
+The `apache-airflow-providers-amazon` provider package contains the `"aws"` connection type,
+here are some examples for `"aws"` type connections.
+
+> 🟦 __Tip__ 🟦
+>
+> See the [official docs for `"aws"` type connections](https://airflow.apache.org/docs/apache-airflow-providers-amazon/stable/connections/aws.html).
+
+### AWS Connection - Plain Text
+
+The following values will create an `"aws"` type connection called `my_aws` using a token stored in plain-text:
 
 ```yaml
 airflow: 
@@ -189,72 +178,115 @@ airflow:
       ## your `AWS_SECRET_ACCESS_KEY`
       password: XXXXXXXX
       
-      ## refer to "aws" connection docs for valid parameters
+      ## see the official "aws" connection docs for valid extra configs
       extra: |
         {
           "region_name": "eu-central-1"
         }
 ```
 
-> 🟦 __Tip__ 🟦
->
-> If you are running on EKS, it is usually preferable to use [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html),
-> which removes the need to provide `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY`.
-> 
-> To use IRSA, you must create an "empty" AWS connection, and apply the appropriate Pod ServiceAccount annotations.
-> 
-> ```yaml
-> airflow:
->   connections:
->     - id: my_aws
->       type: aws
->       description: my AWS connection
-> 
->       ## no access tokens should be provided, 
->       ## otherwise they will take precedence over the ones injected by IRSA
->       #login: ~
->       #password: ~
-> 
->       ## TIP: omit `role_arn` if an assume_role is not necessary 
->       ##      (e.g. if `eks.amazonaws.com/role-arn` already has the correct permissions)
->       ##
->       ## TIP: you may create separate connections with different `role_arn` to give varied access 
->       ##      (this is especially important for cross-account access)
->       extra: |
->         {
->           "role_arn": "arn:aws:iam::123456789012:role/S3Access",
->           "region_name": "eu-central-1"
->         }
-> 
-> serviceAccount:
->   annotations:
->     # replace with the AWS role you have configured for IRSA
->     eks.amazonaws.com/role-arn: "arn:aws:iam::XXXXXXXXXX:role/<<MY_ROLE_NAME>>"
-> ```
-
 > 🟥 __Warning__ 🟥
 >
-> If you are using Airflow 1.10+, you must include `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in `extra` field, rather than the `login` and `password` fields.
+> Consider using ["AWS Connection - Secret Templates"](#aws-connection---secret-templates) or 
+> ["AWS Connection - EKS IAM roles for service accounts"](#aws-connection---eks-iam-roles-for-service-accounts) rather than storing 
+> `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in plain-text within your values.
+
+### AWS Connection - Secret Templates
+
+The following values will create an `"aws"` type connection called `my_aws` using a token stored in `Secret/my-aws-token`:
+
+```yaml
+airflow: 
+  connections:
+    - id: my_aws
+      type: aws
+      description: my AWS connection
+      
+      ## this string template is defined by `airflow.connectionsTemplates.ACCESS_KEY_ID` 
+      login: ${ACCESS_KEY_ID}
+      
+      ## this string template is defined by `airflow.connectionsTemplates.SECRET_ACCESS_KEY` 
+      password: ${SECRET_ACCESS_KEY}
+      
+      ## see the official "aws" connection docs for valid extra configs
+      extra: |
+        {
+          "region_name": "eu-central-1"
+        }
+
+  connectionsTemplates:
+    ## extracts the value of AWS_ACCESS_KEY_ID from `Secret/my-aws-token`
+    ACCESS_KEY_ID:
+      kind: secret
+      name: my-aws-token
+      key: AWS_ACCESS_KEY_ID
+
+    ## extracts the value of AWS_SECRET_ACCESS_KEY from `Secret/my-aws-token`
+    SECRET_ACCESS_KEY:
+      kind: secret
+      name: my-aws-token
+      key: AWS_SECRET_ACCESS_KEY
+```
+
+> 🟦 __Tip__ 🟦
+>
+> You may create the `Secret` called `my-aws-token` with `kubectl`.
 > 
-> ```yaml
-> airflow: 
->   connections:
->     - id: my_aws
->       type: aws
->       description: my AWS connection
->       extra: |
->         { 
->           "aws_access_key_id": "XXXXXXXX",
->           "aws_secret_access_key": "XXXXXXXX",
->           "region_name": "eu-central-1"
->         }
+> ```shell
+> kubectl create secret generic \
+>   my-aws-token \
+>   --from-literal=AWS_ACCESS_KEY_ID='xxxxxxxxxxxxxxxxxxxx' \
+>   --from-literal=AWS_SECRET_ACCESS_KEY='aaaaaaaaaaaaa/bbbbbbb/cccccccccccccccccc' \
+>   --namespace my-airflow-namespace
 > ```
+
+### AWS Connection - EKS IAM roles for service accounts
+
+If you are running on EKS, it is usually preferable to use [IAM roles for service accounts (IRSA)](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html),
+which removes the need to provide `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY`.
+
+The following values will create an `"aws"` type connection called `my_aws` that will use IRSA:
+
+```yaml
+airflow:
+  connections:
+    - id: my_aws
+      type: aws
+      description: my AWS connection
+
+      ## NOTE: don't provide `login` or `password`,
+      ##       otherwise they will take precedence over the ones injected by IRSA
+      extra: |
+        {
+          "region_name": "eu-central-1"
+        }
+      
+      ## NOTE: airflow supports cross-account AWS access through the usual assume_role method,
+      ##       you can provide the ARN of the role to assume under the "role_arn" field of "extra"
+      #extra: |
+      #  {
+      #    "role_arn": "arn:aws:iam::YYYYYYYYYYY:role/Cross-Account-Role",
+      #    "region_name": "eu-central-1"
+      #  }
+
+serviceAccount:
+  annotations:
+    # replace with the AWS role you have configured for IRSA
+    eks.amazonaws.com/role-arn: "arn:aws:iam::XXXXXXXXXX:role/<<MY_ROLE_NAME>>"
+```
 
 ## GCP Connection
 
-The `apache-airflow-providers-google` provider package contains the [`"google_cloud_platform"`](https://airflow.apache.org/docs/apache-airflow-providers-google/stable/connections/gcp.html) connection type.
+The `apache-airflow-providers-google` provider package contains the `"google_cloud_platform"` connection type,
+here are some examples for `"google_cloud_platform"` type connections.
 
-For example, the following values will create a `"google_cloud_platform"` type connection called `my_gcp` that references a keyfile stored in `Secret/gcp-keyfile`:
+> 🟦 __Tip__ 🟦
+>
+> See the [official docs for `"google_cloud_platform"` type connections](https://airflow.apache.org/docs/apache-airflow-providers-google/stable/connections/gcp.html).
+
+### GCP Connection - Secret Keyfile
+
+The following values will create a `"google_cloud_platform"` type connection called `my_gcp` that will use a `keyfile.json` from `Secret/my-gcp-keyfile`:
 
 ```yaml
 airflow:
@@ -263,7 +295,7 @@ airflow:
       type: google_cloud_platform
       description: my GCP connection
       
-      ## refer to "google_cloud_platform" connection docs for valid parameters
+      ## see the official "google_cloud_platform" connection docs for valid extra configs
       extra: |
         {
           "extra__google_cloud_platform__key_path": "/opt/airflow/secrets/gcp-keyfile/keyfile.json",
@@ -278,38 +310,57 @@ airflow:
   extraVolumes:
     - name: gcp-keyfile
       secret:
-        ## assumes that `Secret/gcp-keyfile` contains a key called `keyfile.json`
-        secretName: gcp-keyfile
+        ## assumes that `Secret/my-gcp-keyfile` contains a key called `keyfile.json`
+        secretName: my-gcp-keyfile
 ```
 
 > 🟦 __Tip__ 🟦
 >
-> If you are running on GKE, it is usually preferable to use [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity),
-> which removes the need to provide a keyfile.
+> If you have a GCP keyfile at `./keyfile.json`, 
+> you may create `Secret/my-gcp-keyfile` using this command:
 > 
-> To use Workload Identity, you must create an "empty" GCP connection, and apply the appropriate Pod ServiceAccount annotations.
-> 
-> ```yaml
-> airflow:
->   connections:
->     - id: my_gcp
->       type: google_cloud_platform
->       description: my GCP connection
->       extra: |
->         {
->           "extra__google_cloud_platform__num_retries: "5"
->         }
-> 
-> serviceAccount:
->   annotations:
->     iam.gke.io/gcp-service-account: "<<MY_ROLE_NAME>>@<<MY_PROJECT_NAME>>.iam.gserviceaccount.com"
+> ```shell
+> kubectl create secret generic \
+>   my-gcp-keyfile \
+>   --from-file=keyfile.json=./keyfile.json \
+>   --namespace my-airflow-namespace
 > ```
+
+### GCP Connection - GKE Workload Identity
+
+If you are running on GKE, it is usually preferable to use [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity),
+which removes the need to provide a keyfile.
+
+The following values will create a `"google_cloud_platform"` type connection called `my_gcp` that will use GKE Workload Identity:
+
+```yaml
+airflow:
+  connections:
+    - id: my_gcp
+      type: google_cloud_platform
+      description: my GCP connection
+      extra: |
+        {
+          "extra__google_cloud_platform__num_retries: "5"
+        }
+
+serviceAccount:
+  annotations:
+    iam.gke.io/gcp-service-account: "<<MY_ROLE_NAME>>@<<MY_PROJECT_NAME>>.iam.gserviceaccount.com"
+```
 
 ## Azure Blob Storage Connection
 
-The `apache-airflow-providers-microsoft-azure` provider package contains the [`"wabs"`](https://airflow.apache.org/docs/apache-airflow-providers-microsoft-azure/stable/connections/wasb.html) connection type.
+The `apache-airflow-providers-microsoft-azure` provider package contains the `"wabs"` connection type,
+here are some examples for `"wabs"` type connections.
 
-For example, the following values will create a `"wabs"` type connection called `my_wabs`:
+> 🟦 __Tip__ 🟦
+>
+> See the [official docs for `"wabs"` type connections](https://airflow.apache.org/docs/apache-airflow-providers-microsoft-azure/stable/connections/wasb.html).
+
+### Azure Blob Storage Connection - Plain Text
+
+The following values will create a `"wabs"` type connection called `my_wabs` using a token stored in plain-text:
 
 ```yaml
 airflow:
@@ -331,34 +382,173 @@ airflow:
         }
 ```
 
+> 🟥 __Warning__ 🟥
+>
+> Consider using ["Azure Blob Storage Connection - Secret Templates"](#azure-blob-storage-connection---secret-templates) rather than storing 
+> `AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, and `AZURE_TENANT_ID` in plain-text within your values.
+
+### Azure Blob Storage Connection - Secret Templates
+
+The following values will create a `"wabs"` type connection called `my_wabs` using a token stored in `Secret/my-wabs-token`:
+
+```yaml
+airflow: 
+  connections:
+    - id: my_wabs
+      type: wabs
+      description: my Azure Blob Storage connection
+      
+      ## this string template is defined by `airflow.connectionsTemplates.CLIENT_ID` 
+      login: ${CLIENT_ID}
+      
+      ## this string template is defined by `airflow.connectionsTemplates.CLIENT_SECRET` 
+      password: ${CLIENT_SECRET}
+      
+      ## this string template is defined by `airflow.connectionsTemplates.TENANT_ID` 
+      extra: |
+        {
+          "extra__wasb__tenant_id": "${TENANT_ID}"
+        }
+
+  connectionsTemplates:
+    ## extracts the value of AZURE_CLIENT_ID from `Secret/my-wabs-token`
+    CLIENT_ID:
+      kind: secret
+      name: my-wabs-token
+      key: AZURE_CLIENT_ID
+
+    ## extracts the value of AZURE_CLIENT_SECRET from `Secret/my-wabs-token`
+    CLIENT_SECRET:
+      kind: secret
+      name: my-wabs-token
+      key: AZURE_CLIENT_SECRET
+
+    ## extracts the value of AZURE_TENANT_ID from `Secret/my-wabs-token`
+    TENANT_ID:
+      kind: secret
+      name: my-wabs-token
+      key: AZURE_TENANT_ID
+```
+
+> 🟦 __Tip__ 🟦
+>
+> You may create the `Secret` called `my-wabs-token` with `kubectl`.
+> 
+> ```shell
+> kubectl create secret generic \
+>   my-wabs-token \
+>   --from-literal=AZURE_CLIENT_ID='xxxxxxxxxxxxxxxxxxxx' \
+>   --from-literal=AZURE_CLIENT_SECRET='xxxxxxxxxxxxxxxxxxxx' \
+>   --from-literal=AZURE_TENANT_ID='xxxxxxxxxxxxxxxxxxxx' \
+>   --namespace my-airflow-namespace
+> ```
+
 ## Postgres Connection
 
-The `apache-airflow-providers-postgres` provider package contains the [`"postgres"`](https://airflow.apache.org/docs/apache-airflow-providers-postgres/stable/connections/postgres.html) connection type.
+The `apache-airflow-providers-postgres` provider package contains the `"postgres"` connection type,
+here are some examples for `"postgres"` type connections.
 
-For example, the following values will create a `"postgres"` type connection called `my_postgres`:
+> 🟦 __Tip__ 🟦
+>
+> See the [official docs for `"postgres"` type connections](https://airflow.apache.org/docs/apache-airflow-providers-postgres/stable/connections/postgres.html).
+
+### Postgres Connection - Plain Text
+
+The following values will create a `"postgres"` type connection called `my_postgres` using credentials stored in plain-text:
 
 ```yaml
 airflow:
   connections:
     - id: my_postgres
-      type: postgresql
+      type: postgres
       description: my Postgres connection
+      
       host: postgres.example.com
       port: 5432
-      login: db_user
-      password: db_pass
-      schema: my_db
+      
+      login: XXXXXXXX
+      password: XXXXXXXX
+      
+      schema: my_database
+      
+      ## see the official "postgres" connection docs for valid extra configs
       extra: |
         { 
           "sslmode": "allow" 
         }
 ```
 
+> 🟥 __Warning__ 🟥
+>
+> Consider using ["Postgres Connection - Secret Templates"](#postgres-connection---secret-templates) rather than storing 
+> `login` and `password` in plain-text within your values.
+
+### Postgres Connection - Secret Templates
+
+The following values will create an `"postgres"` type connection called `my_postgres` using credentials stored in `Secret/my-postgres-credentials`:
+
+```yaml
+airflow: 
+  connections:
+    - id: my_postgres
+      type: postgres
+      description: my Postgres connection
+      
+      host: postgres.example.com
+      port: 5432
+      
+      ## this string template is defined by `airflow.connectionsTemplates.POSTGRES_USERNAME` 
+      login: ${POSTGRES_USERNAME}
+      
+      ## this string template is defined by `airflow.connectionsTemplates.POSTGRES_PASSWORD` 
+      password: ${POSTGRES_PASSWORD}
+      
+      schema: my_database
+      
+      ## see the official "postgres" connection docs for valid extra configs
+      extra: |
+        { 
+          "sslmode": "allow" 
+        }
+
+  connectionsTemplates:
+    ## extracts the value of `username` from `Secret/my-postgres-credentials`
+    POSTGRES_USERNAME:
+      kind: secret
+      name: my-postgres-credentials
+      key: username
+
+    ## extracts the value of `password` from `Secret/my-postgres-credentials`
+    POSTGRES_PASSWORD:
+      kind: secret
+      name: my-postgres-credentials
+      key: password
+```
+
+> 🟦 __Tip__ 🟦
+>
+> You may create the `Secret` called `my-postgres-credentials` with `kubectl`.
+> 
+> ```shell
+> kubectl create secret generic \
+>   my-postgres-credentials \
+>   --from-literal=username='xxxxxxxxxxxx' \
+>   --from-literal=password='xxxxxxxxxxxx' \
+>   --namespace my-airflow-namespace
+> ```
+
 ## SSH Connection
 
-The `apache-airflow-providers-ssh` provider package contains the [`"ssh"` connection type](https://airflow.apache.org/docs/apache-airflow-providers-ssh/stable/connections/ssh.html).
+The `apache-airflow-providers-ssh` provider package contains the `"ssh"` connection type,
+here are some examples for `"ssh"` type connections.
 
-For example to create a `"ssh"` connection called `my_ssh`:
+> 🟦 __Tip__ 🟦
+>
+> See the [official docs for `"ssh"` type connections](https://airflow.apache.org/docs/apache-airflow-providers-ssh/stable/connections/ssh.html).
+
+### SSH Connection - Plain Text
+
+The following values will create a `"ssh"` type connection called `my_ssh` using credentials stored in plain-text:
 
 ```yaml
 airflow:
@@ -366,16 +556,121 @@ airflow:
     - id: my_ssh
       type: ssh
       description: my SSH connection
+      
       host: ssh.example.com
       port: 22
-      login: ssh_user
-      password: ssh_pass
       
-      ## refer to "ssh" connection docs for valid parameters
-      ## TIP: you may specify "key_file" under `extra` rather than providing a `password`
+      login: XXXXXXXX
+      password: XXXXXXXX
+      
+      ## see the official "ssh" connection docs for valid extra configs
       extra: |
         { 
           "conn_timeout": "15" 
         }
 ```
 
+> 🟥 __Warning__ 🟥
+>
+> Consider using ["SSH Connection - Secret Templates"](#ssh-connection---secret-templates) or 
+> ["SSH Connection - Secret Keyfile"](#ssh-connection---secret-keyfile) rather than storing 
+> `login` and `password` in plain-text within your values.
+
+### SSH Connection - Secret Templates
+
+The following values will create an `"ssh"` type connection called `my_ssh` using credentials stored in `Secret/my-ssh-credentials`:
+
+```yaml
+airflow: 
+  connections:
+    - id: my_ssh
+      type: ssh
+      description: my SSH connection
+      
+      host: ssh.example.com
+      port: 22
+      
+      ## this string template is defined by `airflow.connectionsTemplates.SSH_USERNAME` 
+      login: ${SSH_USERNAME}
+      
+      ## this string template is defined by `airflow.connectionsTemplates.SSH_PASSWORD` 
+      password: ${SSH_PASSWORD}
+      
+      ## see the official "ssh" connection docs for valid extra configs
+      extra: |
+        { 
+          "conn_timeout": "15" 
+        }
+
+  connectionsTemplates:
+    ## extracts the value of `username` from `Secret/my-ssh-credentials`
+    SSH_USERNAME:
+      kind: secret
+      name: my-ssh-credentials
+      key: username
+
+    ## extracts the value of `password` from `Secret/my-ssh-credentials`
+    SSH_PASSWORD:
+      kind: secret
+      name: my-ssh-credentials
+      key: password
+```
+
+> 🟦 __Tip__ 🟦
+>
+> You may create the `Secret` called `my-ssh-credentials` with `kubectl`.
+> 
+> ```shell
+> kubectl create secret generic \
+>   my-ssh-credentials \
+>   --from-literal=username='xxxxxxxxxxxx' \
+>   --from-literal=password='xxxxxxxxxxxx' \
+>   --namespace my-airflow-namespace
+> ```
+
+### SSH Connection - Secret Keyfile
+
+The following values will create a `"ssh"` type connection called `my_ssh` that will use an `id_rsa` file from `Secret/my-ssh-keyfile`:
+
+```yaml
+airflow:
+  connections:
+    - id: my_ssh
+      type: ssh
+      description: my SSH connection
+      
+      host: ssh.example.com
+      port: 22
+            
+      ## see the official "ssh" connection docs for valid extra configs
+      extra: |
+        { 
+          "key_file": "/opt/airflow/secrets/ssh-keyfile/id_rsa",
+          "conn_timeout": "15"
+        }
+
+  extraVolumeMounts:
+    - name: ssh-keyfile
+      mountPath: /opt/airflow/secrets/ssh-keyfile
+      readOnly: true
+
+  extraVolumes:
+    - name: ssh-keyfile
+      secret:
+        ## assumes that `Secret/my-ssh-keyfile` contains a key called `id_rsa`
+        secretName: my-ssh-keyfile
+        ## ssh complains if `id_rsa` has permissions that are too open
+        defaultMode: 0600
+```
+
+> 🟦 __Tip__ 🟦
+>
+> If you have the SSH private key at `$HOME/.ssh/id_rsa`, 
+> you may create `Secret/my-ssh-keyfile` using this command:
+> 
+> ```shell
+> kubectl create secret generic \
+>   my-ssh-keyfile \
+>   --from-file=id_rsa=$HOME/.ssh/id_rsa \
+>   --namespace my-airflow-namespace
+> ```
