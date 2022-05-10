@@ -1078,6 +1078,116 @@ triggerer:
   extraVolumes: []
 
 ###################################
+## COMPONENT | Dag Processor
+###################################
+dagProcessor:
+  ## if the airflow dag processor should be deployed
+  ## - [WARNING] the dag processor component was added in airflow 2.3.0
+  ## - [WARNING] if `airflow.legacyCommands` is `true` the dag processor will NOT be deployed
+  ##
+  enabled: true
+
+  ## the number of dag processor Pods to run
+  ## - if you set this >1 we recommend defining a `dagProcessor.podDisruptionBudget`
+  ##
+  replicas: 1
+
+  ## resource requests/limits for the dag processor Pods
+  ## - spec for ResourceRequirements:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ##
+  resources: {}
+
+  ## the nodeSelector configs for the dag processor Pods
+  ## - docs for nodeSelector:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
+  ##
+  nodeSelector: {}
+
+  ## the affinity configs for the dag processor Pods
+  ## - spec for Affinity:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+  ##
+  affinity: {}
+
+  ## the toleration configs for the dag processor Pods
+  ## - spec for Toleration:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+  ##
+  tolerations: []
+
+  ## the security context for the dag processor Pods
+  ## - spec for PodSecurityContext:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
+  ##
+  securityContext: {}
+
+  ## labels for the dag processor Deployment
+  ##
+  labels: {}
+
+  ## Pod labels for the dag processor Deployment
+  ##
+  podLabels: {}
+
+  ## annotations for the dag processor Deployment
+  ##
+  annotations: {}
+
+  ## Pod annotations for the dag processor Deployment
+  ##
+  podAnnotations: {}
+
+  ## if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true"
+  ##
+  safeToEvict: true
+
+  ## configs for the PodDisruptionBudget of the dag processor Deployment
+  ##
+  podDisruptionBudget:
+    ## if a PodDisruptionBudget resource is created for the dag processor Deployment
+    ##
+    enabled: false
+
+    ## the maximum unavailable pods/percentage for the dag processor Deployment
+    ##
+    maxUnavailable: ""
+
+    ## the minimum available pods/percentage for the dag processor Deployment
+    ##
+    minAvailable: ""
+
+  ## configs for the dag processor Pods' liveness probe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 30
+    timeoutSeconds: 60
+    failureThreshold: 5
+
+  ## extra pip packages to install in the dag processor Pod
+  ##
+  ## ____ EXAMPLE _______________
+  ##   extraPipPackages:
+  ##     - "SomeProject==1.0.0"
+  ##
+  extraPipPackages: []
+
+  ## extra VolumeMounts for the dag processor Pods
+  ## - spec for VolumeMount:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+  ##
+  extraVolumeMounts: []
+
+  ## extra Volumes for the dag processor Pods
+  ## - spec for Volume:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+  ##
+  extraVolumes: []
+
+
+###################################
 ## COMPONENT | Flower
 ###################################
 flower:
