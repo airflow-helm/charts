@@ -1,0 +1,24 @@
+{{- if and (include "airflow.dagProcessor.should_use" .) (.Values.dagProcessor.podDisruptionBudget.enabled) }}
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "airflow.fullname" . }}-dag-processor
+  labels:
+    app: {{ include "airflow.labels.app" . }}
+    component: dag-processor
+    chart: {{ include "airflow.labels.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  {{- if .Values.dagProcessor.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.dagProcessor.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+  {{- if .Values.dagProcessor.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.dagProcessor.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ include "airflow.labels.app" . }}
+      component: dag-processor
+      release: {{ .Release.Name }}
+{{- end }}
