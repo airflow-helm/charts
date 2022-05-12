@@ -84,6 +84,46 @@ The path containing DAG files
 {{- end -}}
 
 {{/*
+Helper template which checks if `logs.path` is stored under any of the passed `volumeMounts`.
+EXAMPLE USAGE: {{ include "airflow._has_logs_path" (dict "Values" .Values "volume_mounts" .Values.xxxx.extraVolumeMounts) }}
+*/}}
+{{- define "airflow._has_logs_path" -}}
+{{- $has_logs_path := false -}}
+{{- /* loop over `.volume_mounts`, checking if `mountPath` is a prefix of `logs.path` */ -}}
+{{- range .volume_mounts -}}
+  {{- if .mountPath }}
+    {{- if hasPrefix (clean .mountPath) (clean $.Values.logs.path) -}}
+    {{- $has_logs_path = true -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $has_logs_path -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+If `logs.path` is stored under any of the global `airflow.extraVolumeMounts` mounts.
+*/}}
+{{- define "airflow.extraVolumeMounts.has_log_path" -}}
+{{- include "airflow._has_logs_path" (dict "Values" .Values "volume_mounts" .Values.airflow.extraVolumeMounts) -}}
+{{- end -}}
+
+{{/*
+If `logs.path` is stored under any of the `scheduler.extraVolumeMounts` mounts.
+*/}}
+{{- define "airflow.scheduler.extraVolumeMounts.has_log_path" -}}
+{{- include "airflow._has_logs_path" (dict "Values" .Values "volume_mounts" .Values.scheduler.extraVolumeMounts) -}}
+{{- end -}}
+
+{{/*
+If `logs.path` is stored under any of the `workers.extraVolumeMounts` mounts.
+*/}}
+{{- define "airflow.workers.extraVolumeMounts.has_log_path" -}}
+{{- include "airflow._has_logs_path" (dict "Values" .Values "volume_mounts" .Values.workers.extraVolumeMounts) -}}
+{{- end -}}
+
+{{/*
 If the airflow triggerer should be used.
 */}}
 {{- define "airflow.triggerer.should_use" -}}

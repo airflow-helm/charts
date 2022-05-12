@@ -208,3 +208,150 @@ airflow:
 ```
 
 </details>
+
+## Option 3 - Pod Volumes
+
+You may use a [`Pod Volume`](https://kubernetes.io/docs/concepts/storage/volumes/) to store your logs.
+Kubernetes has many types of Pod Volumes, consult [the official docs](https://kubernetes.io/docs/concepts/storage/volumes/#volume-types) for the full list.
+
+> 🟥 __Warning__ 🟥
+>
+> This is an advanced feature, only use it if you know that you need it.
+
+> 🟦 __Tip__ 🟦
+>
+> It is possible to store both __logs__ AND __DAGs__ on the same Pod Volume by setting `dags.path` and `logs.path` to be a sub folder 
+> under the `mountPath` of your `airflow.extraVolumeMounts`. _(WARNING: the volume type must support writing)_
+
+<details>
+<summary>
+  <a id="persistentVolumeClaim-volume"></a>
+  <b><code>persistentVolumeClaim</code> Volume</b>
+</summary>
+
+---
+
+> 🟦 __Tip__ 🟦
+>
+> The chart has special values just for PersistentVolumeClaims (`logs.persistence.*`).
+> <br>
+> Unless you require the flexibility of `extraVolumeMounts`, we recommend using [`Option 1`](#option-1---persistent-volume-claim) instead.
+
+For example, to mount a [`persistentVolumeClaim`](https://kubernetes.io/docs/concepts/storage/volumes/#persistentvolumeclaim) type volume at `/opt/airflow/logs`:
+
+```yaml
+airflow:
+  extraVolumeMounts:
+    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+    - name: logs-volume
+      mountPath: /opt/airflow/logs
+
+  extraVolumes:
+    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+    - name: logs-volume
+      persistentVolumeClaim:
+        claimName: my-existing-persistent-volume-claim
+
+scheduler:
+  logCleanup:
+    ## WARNING: scheduler log-cleanup must be disabled if `logs.path` is under an `airflow.extraVolumeMounts`
+    enabled: false
+
+workers:
+  logCleanup:
+    ## WARNING: workers log-cleanup must be disabled if `logs.path` is under an `airflow.extraVolumeMounts`
+    enabled: false
+
+logs:
+  ## NOTE: this is the default value
+  path: /opt/airflow/logs
+```
+
+</details>
+
+<details>
+<summary>
+  <a id="nfs-volume"></a>
+  <b><code>nfs</code> Volume</b>
+</summary>
+
+---
+
+For example, to mount an [`nfs`](https://kubernetes.io/docs/concepts/storage/volumes/#nfs) type volume at `/opt/airflow/logs`:
+
+```yaml
+airflow:
+  extraVolumeMounts:
+    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+    - name: logs-volume
+      mountPath: /opt/airflow/logs
+
+  extraVolumes:
+    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+    - name: logs-volume
+      nfs:
+        path: /path/on/nfs/server
+        server: nfs.example.com
+
+scheduler:
+  logCleanup:
+    ## WARNING: scheduler log-cleanup must be disabled if `logs.path` is under an `airflow.extraVolumeMounts`
+    enabled: false
+
+workers:
+  logCleanup:
+    ## WARNING: workers log-cleanup must be disabled if `logs.path` is under an `airflow.extraVolumeMounts`
+    enabled: false
+
+logs:
+  ## NOTE: this is the default value
+  path: /opt/airflow/logs
+```
+
+</details>
+
+<details>
+<summary>
+  <a id="hostPath-volumes"></a>
+  <b><code>hostPath</code> Volume</b>
+</summary>
+
+---
+
+> 🟥 __Warning__ 🟥
+>
+> We strongly recommend NOT TO USE `hostPath` type volumes, as they provide access to the filesystem of the underlying node.
+
+For example, to mount a [`hostPath`](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath) type volume at `/opt/airflow/logs`:
+
+```yaml
+airflow:
+  extraVolumeMounts:
+    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+    - name: logs-volume
+      mountPath: /opt/airflow/logs
+
+  extraVolumes:
+    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+    - name: logs-volume
+      hostPath:
+        ## WARNING: this represents a local path on the Kubernetes Node
+        path: /tmp/airflow
+        type: DirectoryOrCreate
+
+scheduler:
+  logCleanup:
+    ## WARNING: scheduler log-cleanup must be disabled if `logs.path` is under an `airflow.extraVolumeMounts`
+    enabled: false
+
+workers:
+  logCleanup:
+    ## WARNING: workers log-cleanup must be disabled if `logs.path` is under an `airflow.extraVolumeMounts`
+    enabled: false
+
+logs:
+  ## NOTE: this is the default value
+  path: /opt/airflow/logs
+```
+
+</details>

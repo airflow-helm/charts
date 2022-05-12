@@ -61,18 +61,41 @@
   {{ required "Don't define `airflow.config.AIRFLOW__CORE__SQL_ALCHEMY_CONN`, it will be automatically set by the chart!" nil }}
 {{- end }}
 
+{{/* Checks for `scheduler.logCleanup` */}}
+{{- if .Values.scheduler.logCleanup.enabled }}
+  {{- if .Values.logs.persistence.enabled }}
+  {{ required "If `logs.persistence.enabled=true`, then `scheduler.logCleanup.enabled` must be `false`!" nil }}
+  {{- end }}
+  {{- if include "airflow.extraVolumeMounts.has_log_path" . }}
+  {{ required "If `logs.path` is under any `airflow.extraVolumeMounts`, then `scheduler.logCleanup.enabled` must be `false`!" nil }}
+  {{- end }}
+  {{- if include "airflow.scheduler.extraVolumeMounts.has_log_path" . }}
+  {{ required "If `logs.path` is under any `scheduler.extraVolumeMounts`, then `scheduler.logCleanup.enabled` must be `false`!" nil }}
+  {{- end }}
+{{- end }}
+
+{{/* Checks for `workers.logCleanup` */}}
+{{- if .Values.workers.enabled }}
+  {{- if .Values.workers.logCleanup.enabled }}
+    {{- if .Values.logs.persistence.enabled }}
+    {{ required "If `logs.persistence.enabled=true`, then `workers.logCleanup.enabled` must be `false`!" nil }}
+    {{- end }}
+    {{- if include "airflow.extraVolumeMounts.has_log_path" . }}
+    {{ required "If `logs.path` is under any `airflow.extraVolumeMounts`, then `workers.logCleanup.enabled` must be `false`!" nil }}
+    {{- end }}
+    {{- if include "airflow.workers.extraVolumeMounts.has_log_path" . }}
+    {{ required "If `logs.path` is under any `workers.extraVolumeMounts`, then `workers.logCleanup.enabled` must be `false`!" nil }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
 {{/* Checks for `logs.persistence` */}}
 {{- if .Values.logs.persistence.enabled }}
   {{- if not (eq .Values.logs.persistence.accessMode "ReadWriteMany") }}
   {{ required "The `logs.persistence.accessMode` must be `ReadWriteMany`!" nil }}
   {{- end }}
-  {{- if .Values.scheduler.logCleanup.enabled }}
-  {{ required "If `logs.persistence.enabled=true`, then `scheduler.logCleanup.enabled` must be disabled!" nil }}
-  {{- end }}
-  {{- if .Values.workers.enabled }}
-    {{- if .Values.workers.logCleanup.enabled }}
-    {{ required "If `logs.persistence.enabled=true`, then `workers.logCleanup.enabled` must be disabled!" nil }}
-    {{- end }}
+  {{- if include "airflow.extraVolumeMounts.has_log_path" . }}
+  {{ required "If `logs.path` is under any `airflow.extraVolumeMounts`, then `logs.persistence.enabled` must be `false`!" nil }}
   {{- end }}
 {{- end }}
 

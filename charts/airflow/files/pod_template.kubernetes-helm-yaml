@@ -6,7 +6,7 @@
 {{- $extraVolumeMounts := .Values.airflow.kubernetesPodTemplate.extraVolumeMounts }}
 {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
 {{- $extraVolumes := .Values.airflow.kubernetesPodTemplate.extraVolumes }}
-{{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
+{{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes "extraVolumeMounts" $extraVolumeMounts) }}
 apiVersion: v1
 kind: Pod
 metadata:
