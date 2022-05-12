@@ -1,8 +1,8 @@
-{{- if and (.Values.airflow.dags.persistence.enabled .Values.airflow.dags.gitSync.enabled) }}
-{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.airflow.dags.gitSync.nodeSelector) }}
-{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.airflow.dags.gitSync.affinity) }}
-{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.airflow.dags.gitSync.tolerations) }}
-{{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.airflow.dags.gitSync.securityContext) }}
+{{- if and (.Values.dags.persistence.enabled) (.Values.dags.gitSync.enabled) }}
+{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.dags.gitSync.nodeSelector) }}
+{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.dags.gitSync.affinity) }}
+{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.dags.gitSync.tolerations) }}
+{{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.dags.gitSync.securityContext) }}
 {{- $volumes := include "volumes.dags" (dict "Values" .Values ) }}
 apiVersion: apps/v1
 kind: Deployment
@@ -14,12 +14,12 @@ metadata:
     chart: {{ include "airflow.labels.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-    {{- if .Values.airflow.dags.gitSync.labels }}
-    {{- toYaml .Values.airflow.dags.gitSync.labels | nindent 4 }}
+    {{- if .Values.dags.gitSync.labels }}
+    {{- toYaml .Values.dags.gitSync.labels | nindent 4 }}
     {{- end }}
-  {{- if .Values.airflow.dags.gitSync.annotations }}
+  {{- if .Values.dags.gitSync.annotations }}
   annotations:
-    {{- toYaml .Values.airflow.dags.gitSync.annotations | nindent 4 }}
+    {{- toYaml .Values.dags.gitSync.annotations | nindent 4 }}
   {{- end }}
 spec:
   replicas: 1
@@ -42,18 +42,18 @@ spec:
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
-        {{- if .Values.airflow.dags.gitSync.podAnnotations }}
-        {{- toYaml .Values.airflow.dags.gitSync.podAnnotations | nindent 8 }}
+        {{- if .Values.dags.gitSync.podAnnotations }}
+        {{- toYaml .Values.dags.gitSync.podAnnotations | nindent 8 }}
         {{- end }}
-        {{- if .Values.airflow.dags.gitSync.safeToEvict }}
+        {{- if .Values.dags.gitSync.safeToEvict }}
         cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
         {{- end }}
       labels:
         app: {{ include "airflow.labels.app" . }}
         component: dags-git-sync
         release: {{ .Release.Name }}
-        {{- if .Values.airflow.dags.gitSync.podLabels }}
-        {{- toYaml .Values.airflow.dags.gitSync.podLabels | nindent 8 }}
+        {{- if .Values.dags.gitSync.podLabels }}
+        {{- toYaml .Values.dags.gitSync.podLabels | nindent 8 }}
         {{- end }}
     spec:
       restartPolicy: Always
