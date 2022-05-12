@@ -86,9 +86,13 @@ spec:
         {{- if $extraPipPackages }}
         {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
         {{- end }}
-        {{- if and (.Values.dags.gitSync.enabled)  (not .Values.dags.persistence.enabled)  }}
+        {{- if .Values.dags.gitSync.enabled }}
+        {{- if .Values.dags.persistence.enabled  }}
+        {{- include "airflow.container.dag_pvc_copy" (dict "Release" .Release "Values" .Values) | indent 8 }}
+        {{- else }}
         ## git-sync is included so "airflow plugins" & "python packages" can be stored in the dags repo
         {{- include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") | indent 8 }}
+        {{- end }}
         {{- end }}
         {{- include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
         {{- include "airflow.init_container.wait_for_db_migrations" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}

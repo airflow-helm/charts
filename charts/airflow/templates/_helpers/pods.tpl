@@ -254,8 +254,6 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
           name: {{ .Values.dags.gitSync.httpSecret }}
           key: {{ .Values.dags.gitSync.httpSecretPasswordKey }}
     {{- end }}
-    {{- /* this has user-defined variables, so must be included BELOW (so the ABOVE `env` take precedence) */ -}}
-    {{- include "airflow.env" . | indent 4 }}
   volumeMounts:
     - name: dags-data
       mountPath: /dags
@@ -271,6 +269,27 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
       readOnly: true
       subPath: known_hosts
     {{- end }}
+{{- end }}
+
+{{/*
+Define a container which copies the contents of the DAG PVC to the DAG directory in the pod
+EXAMPLE USAGE: {{ include "airflow.container.dag_pvc_copy" (dict "Release" .Release "Values" .Values)  }}
+*/}}
+{{- define "airflow.container.dag_pvc_copy" }}
+- name: dags-copy-from-pvc
+  image: busybox:1.35
+  imagePullPolicy: Never
+  securityContext:
+    runAsUser: {{ .Values.dags.gitSync.image.uid }}
+    runAsGroup: {{ .Values.dags.gitSync.image.gid }}
+  volumeMounts:
+    - name: dags-data
+      mountPath: /dags
+  command:
+    - "cp"
+    - "-r"
+    - "/dags"
+    - {{ .Values.dags.path }}
 {{- end }}
 
 {{/*
