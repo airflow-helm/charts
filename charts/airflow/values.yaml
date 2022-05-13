@@ -1385,6 +1385,8 @@ dags:
     ##
     maxFailures: 0
 
+    securityContext: {}
+
 ###################################
 ## CONFIG | Kubernetes Ingress
 ###################################
