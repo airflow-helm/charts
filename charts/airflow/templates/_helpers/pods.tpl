@@ -280,13 +280,15 @@ EXAMPLE USAGE: {{ include "airflow.container.dag_pvc_copy" (dict "Release" .Rele
   image: busybox:1.35
   imagePullPolicy: IfNotPresent
   securityContext:
-    runAsUser: {{ .Values.dags.gitSync.image.uid }}
-    runAsGroup: {{ .Values.dags.gitSync.image.gid }}
+    runAsUser: {{ .Values.airflow.image.uid }}
+    runAsGroup: {{ .Values.airflow.image.gid }}
   volumeMounts:
+    - name: original-dag-content
+      mountPath: /dags/original-dags
     - name: dags-data
-      mountPath: /dags
+      mountPath: /dags/copied-dags
   command: ["/bin/sh","-c"]
-  args: ["mkdir -p {{ .Values.dags.path }}; cp -r /dags {{ .Values.dags.path }}"]
+  args: ["cp -rL /dags/original-dags/repo /dags/copied-dags/"]
 {{- end }}
 
 {{/*
@@ -367,12 +369,17 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Value
 
 {{- /* dags */ -}}
 {{- if .Values.dags.persistence.enabled }}
+{{- if .Values.dags.gitSync.enabled }}
+- name: dags-data
+  mountPath: {{ .Values.dags.path }}
+{{- else }}
 - name: dags-data
   mountPath: {{ .Values.dags.path }}
   subPath: {{ .Values.dags.persistence.subPath }}
   {{- if eq .Values.dags.persistence.accessMode "ReadOnlyMany" }}
   readOnly: true
   {{- end }}
+{{- end }}
 {{- else if .Values.dags.gitSync.enabled }}
 - name: dags-data
   mountPath: {{ .Values.dags.path }}
@@ -424,6 +431,18 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
 
 {{- /* dags */ -}}
 {{- if .Values.dags.persistence.enabled }}
+
+{{- if .Values.dags.gitSync.enabled }}
+- name: original-dag-content
+  persistentVolumeClaim:
+    {{- if .Values.dags.persistence.existingClaim }}
+    claimName: {{ .Values.dags.persistence.existingClaim }}
+    {{- else }}
+    claimName: {{ printf "%s-dags" (include "airflow.fullname" . | trunc 58) }}
+    {{- end }}
+- name: dags-data
+  emptyDir: {}
+{{- else }}
 - name: dags-data
   persistentVolumeClaim:
     {{- if .Values.dags.persistence.existingClaim }}
@@ -431,6 +450,8 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
     {{- else }}
     claimName: {{ printf "%s-dags" (include "airflow.fullname" . | trunc 58) }}
     {{- end }}
+{{- end }}
+
 {{- else if .Values.dags.gitSync.enabled }}
 - name: dags-data
   emptyDir: {}
