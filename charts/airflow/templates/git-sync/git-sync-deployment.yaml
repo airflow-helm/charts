@@ -80,8 +80,8 @@ spec:
           image: {{ .Values.dags.gitSync.image.repository }}:{{ .Values.dags.gitSync.image.tag }}
           imagePullPolicy: {{ .Values.dags.gitSync.image.pullPolicy }}
           securityContext:
-            allowPrivilegeEscalation: false
-            runAsUser: 0
+            runAsUser: {{ .Values.dags.gitSync.image.uid }}
+            runAsGroup: {{ .Values.dags.gitSync.image.gid }}
           resources:
             {{- toYaml .Values.dags.gitSync.resources | nindent 12 }}
           env:
@@ -160,7 +160,7 @@ spec:
         - name: git-secret
           secret:
             secretName: {{ .Values.dags.gitSync.sshSecret }}
-            defaultMode: 0400
+            defaultMode: 0644
         {{- end }}
         
         {{- if .Values.dags.gitSync.sshKnownHosts }}
