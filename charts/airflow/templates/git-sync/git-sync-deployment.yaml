@@ -3,7 +3,6 @@
 {{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.dags.gitSync.affinity) }}
 {{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.dags.gitSync.tolerations) }}
 {{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.dags.gitSync.securityContext) }}
-{{- $volumes := include "volumes.dags" (dict "Values" .Values ) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -37,8 +36,6 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secret-config-envs: {{ include (print $.Template.BasePath "/config/secret-config-envs.yaml") . | sha256sum }}
-        checksum/secret-local-settings: {{ include (print $.Template.BasePath "/config/secret-local-settings.yaml") . | sha256sum }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
@@ -79,7 +76,98 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       containers:
-        {{- include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values) | indent 8 }}
+        - name: dags-git-sync
+          image: {{ .Values.dags.gitSync.image.repository }}:{{ .Values.dags.gitSync.image.tag }}
+          imagePullPolicy: {{ .Values.dags.gitSync.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 0
+          resources:
+            {{- toYaml .Values.dags.gitSync.resources | nindent 12 }}
+          env:
+            - name: GIT_SYNC_ROOT
+              value: "/dags"
+            - name: GIT_SYNC_DEST
+              value: "repo"
+            - name: GIT_SYNC_REPO
+              value: {{ .Values.dags.gitSync.repo | quote }}
+            - name: GIT_SYNC_BRANCH
+              value: {{ .Values.dags.gitSync.branch | quote }}
+            - name: GIT_SYNC_REV
+              value: {{ .Values.dags.gitSync.revision | quote }}
+            - name: GIT_SYNC_DEPTH
+              value: {{ .Values.dags.gitSync.depth | quote }}
+            - name: GIT_SYNC_WAIT
+              value: {{ .Values.dags.gitSync.syncWait | quote }}
+            - name: GIT_SYNC_TIMEOUT
+              value: {{ .Values.dags.gitSync.syncTimeout | quote }}
+            - name: GIT_SYNC_ADD_USER
+              value: "true"
+            - name: GIT_SYNC_MAX_SYNC_FAILURES
+              value: {{ .Values.dags.gitSync.maxFailures | quote }}
+            {{- if .Values.dags.gitSync.sshSecret }}
+            - name: GIT_SYNC_SSH
+              value: "true"
+            - name: GIT_SSH_KEY_FILE
+              value: "/etc/git-secret/id_rsa"
+            {{- end }}
+            {{- if .Values.dags.gitSync.sshKnownHosts }}
+            - name: GIT_KNOWN_HOSTS
+              value: "true"
+            - name: GIT_SSH_KNOWN_HOSTS_FILE
+              value: "/etc/git-secret/known_hosts"
+            {{- else }}
+            - name: GIT_KNOWN_HOSTS
+              value: "false"
+            {{- end }}
+            {{- if .Values.dags.gitSync.httpSecret }}
+            - name: GIT_SYNC_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.dags.gitSync.httpSecret }}
+                  key: {{ .Values.dags.gitSync.httpSecretUsernameKey }}
+            - name: GIT_SYNC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.dags.gitSync.httpSecret }}
+                  key: {{ .Values.dags.gitSync.httpSecretPasswordKey }}
+            {{- end }}
+          volumeMounts:
+            - name: dags-data
+              mountPath: /dags
+            {{- if .Values.dags.gitSync.sshSecret }}
+            - name: git-secret
+              mountPath: /etc/git-secret/id_rsa
+              readOnly: true
+              subPath: {{ .Values.dags.gitSync.sshSecretKey }}
+            {{- end }}
+            {{- if .Values.dags.gitSync.sshKnownHosts }}
+            - name: git-known-hosts
+              mountPath: /etc/git-secret/known_hosts
+              readOnly: true
+              subPath: known_hosts
+            {{- end }}
       volumes:
-        {{- $volumes | indent 8 }}
+        - name: dags-data
+          persistentVolumeClaim:
+            {{- if .Values.dags.persistence.existingClaim }}
+            claimName: {{ .Values.dags.persistence.existingClaim }}
+            {{- else }}
+            claimName: {{ printf "%s-dags" (include "airflow.fullname" . | trunc 58) }}
+            {{- end }}
+
+        {{- if .Values.dags.gitSync.sshSecret }}
+        - name: git-secret
+          secret:
+            secretName: {{ .Values.dags.gitSync.sshSecret }}
+            defaultMode: 0400
+        {{- end }}
+        
+        {{- if .Values.dags.gitSync.sshKnownHosts }}
+        - name: git-known-hosts
+          secret:
+            secretName: {{ include "airflow.fullname" . }}-known-hosts
+            defaultMode: 0644
+        {{- end }}
+
 {{- end }}
