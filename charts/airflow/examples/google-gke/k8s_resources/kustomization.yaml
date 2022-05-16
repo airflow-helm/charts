@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: airflow-cluster1
+resources:
+  - certificate.yaml
+  - secret-fernet-key.yaml
+  - secret-git-secret.yaml
+  - secret-mysql-credentials.yaml
+  - secret-redis-password.yaml
+  - secret-webserver-key.yaml

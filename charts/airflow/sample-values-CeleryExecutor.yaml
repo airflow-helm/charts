@@ -14,39 +14,21 @@ airflow:
   ## the airflow executor type to use
   executor: CeleryExecutor
 
-  ## the fernet encryption key
-  ## [NOTE] we have set `AIRFLOW__CORE__FERNET_KEY` from a Secret using `airflow.extraEnv`
-  fernetKey: ""
+  ## the fernet encryption key (sets `AIRFLOW__CORE__FERNET_KEY`)
+  ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/security/set-fernet-key.md
+  ## [WARNING] change from default value to ensure security
+  fernetKey: "7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc="
 
-  ## the secret_key for flask
-  ## [NOTE] we have set `AIRFLOW__WEBSERVER__SECRET_KEY` from a Secret using `airflow.extraEnv`
-  webserverSecretKey: ""
+  ## the secret_key for flask (sets `AIRFLOW__WEBSERVER__SECRET_KEY`)
+  ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/security/set-webserver-secret-key.md
+  ## [WARNING] change from default value to ensure security
+  webserverSecretKey: "THIS IS UNSAFE!"
 
   ## environment variables for airflow configs
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/configuration/airflow-configs.md
   config:
     AIRFLOW__WEBSERVER__EXPOSE_CONFIG: "False"
     AIRFLOW__CORE__LOAD_EXAMPLES: "False"
-
-    ## enable SSL for webserver
-    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT: "/opt/airflow/ssl-cert/tls.crt"
-    AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY: "/opt/airflow/ssl-cert/tls.key"
-
-    ## remote log storage
-    AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
-    AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "gs://XXXXXXXX--airflow-cluster1/airflow/logs"
-    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "my_gcp"
-
-    ## email
-    AIRFLOW__EMAIL__EMAIL_BACKEND: "airflow.utils.email.send_email_smtp"
-    AIRFLOW__SMTP__SMTP_HOST: "smtpmail.example.com"
-    AIRFLOW__SMTP__SMTP_MAIL_FROM: "admin@airflow-cluster1.example.com"
-    AIRFLOW__SMTP__SMTP_PORT: "25"
-    AIRFLOW__SMTP__SMTP_SSL: "False"
-    AIRFLOW__SMTP__SMTP_STARTTLS: "False"
-
-    ## domain used in airflow emails
-    AIRFLOW__WEBSERVER__BASE_URL: "https://airflow-cluster1.example.com/"
 
   ## a list of users to create
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/security/airflow-users.md
@@ -60,31 +42,15 @@ airflow:
 
   ## a list airflow connections to create
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/dags/airflow-connections.md
-  connections:
-    ## [NOTE] this connection is "empty" because we are using "GKE Workload Identity"
-    - id: my_gcp
-      type: google_cloud_platform
-      description: my GCP connection
-      extra: |-
-        { 
-          "extra__google_cloud_platform__num_retries": "5" 
-        }
+  connections: []
 
   ## a list airflow variables to create
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/dags/airflow-variables.md
-  variables:
-    - key: "environment"
-      value: "prod"
+  variables: []
 
   ## a list airflow pools to create
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/dags/airflow-pools.md
-  pools:
-    - name: "pool_1"
-      slots: 5
-      description: "example pool with 5 slots"
-    - name: "pool_2"
-      slots: 10
-      description: "example pool with 10 slots"
+  pools: []
 
   ## extra pip packages to install in airflow Pods
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/configuration/extra-python-packages.md
@@ -93,19 +59,7 @@ airflow:
 
   ## extra environment variables for the airflow Pods
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/kubernetes/mount-environment-variables.md
-  extraEnv:
-    ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/security/set-fernet-key.md
-    - name: AIRFLOW__CORE__FERNET_KEY
-      valueFrom:
-        secretKeyRef:
-          name: airflow-cluster1-fernet-key
-          key: value
-    ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/security/set-webserver-secret-key.md
-    - name: AIRFLOW__WEBSERVER__SECRET_KEY
-      valueFrom:
-        secretKeyRef:
-          name: airflow-cluster1-webserver-key
-          key: value
+  extraEnv: []
 
   ## extra VolumeMounts for the airflow Pods
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/kubernetes/mount-persistent-volumes.md
@@ -122,27 +76,17 @@ airflow:
 ###################################
 scheduler:
   ## the number of scheduler Pods to run
-  replicas: 2
+  replicas: 1
 
   ## resource requests/limits for the scheduler Pods
   ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
-  resources:
-    requests:
-      cpu: "1000m"
-      memory: "512Mi"
+  resources: {}
 
   ## configs for the log-cleanup sidecar of the scheduler
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/monitoring/log-cleanup.md
   logCleanup:
     enabled: true
     retentionMinutes: 21600
-
-    ## resource requests/limits for the log-cleanup container
-    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
-    resources:
-      requests:
-        cpu: "10m"
-        memory: "32Mi"
 
   ## configs for the scheduler Pods' liveness probe
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md
@@ -164,19 +108,12 @@ web:
 
   ## resource requests/limits for the web Pods
   ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
-  resources:
-    requests:
-      cpu: "200m"
-      memory: "900Mi"
+  resources: {}
 
   ## configs for the Service of the web Pods
   service:
-    type: LoadBalancer
-    externalPort: 443
-    loadBalancerIP: XXX.XXX.XXX.XXX
-    loadBalancerSourceRanges: []
-    annotations:
-      cloud.google.com/load-balancer-type: "Internal"
+    type: ClusterIP
+    externalPort: 8080
 
   ## configs generating the `webserver_config.py` file
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/configuration/airflow-configs.md#webserver_configpy
@@ -195,20 +132,6 @@ web:
     ## the name of a Secret containing a `webserver_config.py` key
     existingSecret: ""
 
-  ## extra VolumeMounts for the web Pods
-  ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/kubernetes/mount-files.md
-  extraVolumeMounts:
-    - name: ssl-cert
-      mountPath: /opt/airflow/ssl-cert
-      readOnly: true
-
-  ## extra Volumes for the web Pods
-  ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/kubernetes/mount-files.md
-  extraVolumes:
-    - name: ssl-cert
-      secret:
-        secretName: airflow-cluster1-cert
-
 ###################################
 ## COMPONENT | Airflow Workers
 ###################################
@@ -217,32 +140,17 @@ workers:
   enabled: true
 
   ## the number of worker Pods to run
-  replicas: 2
+  replicas: 1
 
   ## resource requests/limits for the worker Pods
   ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
-  resources:
-    requests:
-      cpu: "256m"
-      memory: "2Gi"
-
-  ## configs for the PodDisruptionBudget of the worker StatefulSet
-  podDisruptionBudget:
-    enabled: true
-    maxUnavailable: "20%"
+  resources: {}
 
   ## configs for the log-cleanup sidecar of the worker Pods
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/monitoring/log-cleanup.md
   logCleanup:
     enabled: true
     retentionMinutes: 21600
-
-    ## resource requests/limits for the log-cleanup container
-    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
-    resources:
-      requests:
-        cpu: "10m"
-        memory: "32Mi"
 
 ###################################
 ## COMPONENT | Triggerer
@@ -256,10 +164,7 @@ triggerer:
 
   ## resource requests/limits for the triggerer Pods
   ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
-  resources:
-    requests:
-      cpu: "256m"
-      memory: "2Gi"
+  resources: {}
 
   ## maximum number of triggers each triggerer will run at once (sets `AIRFLOW__TRIGGERER__DEFAULT_CAPACITY`)
   capacity: 1000
@@ -276,10 +181,7 @@ flower:
 
   ## resource requests/limits for the flower Pod
   ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
-  resources:
-    requests:
-      cpu: "10m"
-      memory: "64Mi"
+  resources: {}
 
   ## configs for the Service of the flower Pods
   service:
@@ -313,40 +215,7 @@ dags:
   ## configs for the git-sync sidecar
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/dags/load-dag-definitions.md
   gitSync:
-    enabled: true
-
-    ## the url of the git repo
-    repo: "git@github.com:USERNAME/REPOSITORY.git"
-
-    ## the git branch to check out
-    branch: master
-
-    ## the git revision (tag or hash) to check out
-    revision: HEAD
-
-    ## the name of a pre-created Secret with git ssh credentials
-    sshSecret: "airflow-cluster1-git-secret"
-    sshSecretKey: "id_rsa"
-
-    ## the string value of a "known_hosts" file (for SSH only)
-    ## NOTE: "known_hosts" verification can be disabled by setting to ""
-    sshKnownHosts: |-
-      github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
-
-    ## number of seconds to wait between syncs
-    ## [NOTE] also sets `AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL` unless overwritten in `airflow.config`
-    syncWait: 60
-
-    ## the sub-path within your repo where dags are located
-    ## [NOTE] airflow will only see dags under this path, but the whole repo will still be synced
-    #repoSubPath: "path/to/dags"
-
-    ## resource requests/limits for the git-sync container
-    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
-    resources:
-      requests:
-        cpu: "50m"
-        memory: "64Mi"
+    enabled: false
 
 ###################################
 ## CONFIG | Kubernetes Ingress
@@ -364,11 +233,10 @@ serviceAccount:
   create: true
 
   ## the name of the ServiceAccount
-  name: "airflow"
+  name: ""
 
   ## annotations for the ServiceAccount
-  annotations:
-    iam.gke.io/gcp-service-account: airflow-cluster1@MY_PROJECT_ID.iam.gserviceaccount.com
+  annotations: {}
 
 ###################################
 ## CONFIG | Kubernetes Extra Manifests
@@ -384,14 +252,30 @@ extraManifests: []
 pgbouncer:
   ## if the pgbouncer Deployment is created
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/database/pgbouncer.md
-  enabled: false
+  enabled: true
+
+  ## resource requests/limits for the pgbouncer Pods
+  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  resources: {}
+
+  ## sets pgbouncer config: `auth_type`
+  authType: md5
 
 ###################################
 ## DATABASE | Embedded Postgres
 ###################################
 postgresql:
   ## if the `stable/postgresql` chart is used
-  enabled: false
+  ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/database/embedded-database.md
+  ## [WARNING] the embedded Postgres is NOT SUITABLE for production deployments of Airflow
+  ## [WARNING] consider using an external database with `externalDatabase.*`
+  enabled: true
+
+  ## configs for the PVC of postgresql
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 8Gi
 
 ###################################
 ## DATABASE | External Database
@@ -399,25 +283,7 @@ postgresql:
 externalDatabase:
   ## the type of external database
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/database/external-database.md
-  type: mysql
-
-  ## the address of the external database
-  host: mysql.airflow-cluster1.example.com
-  port: 3306
-
-  ## the database which will contain the airflow tables
-  database: airflow_cluster1
-
-  ## the name of a pre-created secret containing the external database user
-  userSecret: "airflow-cluster1-mysql-credentials"
-  userSecretKey: "username"
-
-  ## the name of a pre-created secret containing the external database password
-  passwordSecret: "airflow-cluster1-mysql-credentials"
-  passwordSecretKey: "password"
-
-  ## use this for any extra connection-string settings, e.g. ?useSSL=false
-  properties: ""
+  type: postgres
 
 ###################################
 ## DATABASE | Embedded Redis
@@ -428,10 +294,6 @@ redis:
   ## [WARNING] consider using an external database with `externalDatabase.*`
   enabled: true
 
-  ## the name of a pre-created secret containing the redis password
-  existingSecret: "airflow-cluster1-redis-password"
-  existingSecretPasswordKey: "redis-password"
-
   ## configs for redis cluster mode
   cluster:
     enabled: false
@@ -441,10 +303,7 @@ redis:
   master:
     ## resource requests/limits for the redis master Pods
     ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
-    resources:
-      requests:
-        cpu: "10m"
-        memory: "32Mi"
+    resources: {}
 
     ## configs for the PVC of the redis master Pods
     persistence:
@@ -456,10 +315,7 @@ redis:
   slave:
     ## resource requests/limits for the slave Pods
     ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
-    resources:
-      requests:
-        cpu: "10m"
-        memory: "32Mi"
+    resources: {}
 
     ## configs for the PVC of the redis slave Pods
     persistence:

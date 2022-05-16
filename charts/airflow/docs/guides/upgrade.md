@@ -4,13 +4,14 @@
 
 # Upgrade Guide
 
-> 🟦 __Tip__ 🟦
->
-> Always consult the [CHANGELOG](../../CHANGELOG.md) before upgrading chart versions.
+## Step 1 - Prepare your Changes
 
-> 🟦 __Tip__ 🟦
->
-> Always pin a specific `--version X.X.X` rather than installing the latest version.
+This guide is applicable in the following situations:
+
+1. upgrading to newer versions of the chart
+2. applying changes made to your `custom-values.yaml` file
+
+## Step 2 - Apply your Changes
 
 ```shell
 ## pull updates from the helm repository
@@ -28,3 +29,16 @@ helm upgrade \
   --version "8.X.X" \
   --values ./custom-values.yaml
 ```
+
+> 🟥 __Warning__ 🟥
+>
+> Always pin the `--version` so you don't unexpectedly update chart versions!
+
+> 🟥 __Warning__ 🟥
+>
+> Before upgrading chart versions, always consult [`CHANGELOG.md`](../../CHANGELOG.md)!
+
+> 🟦 __Tip__ 🟦
+>
+> [`Watch 👀 on GitHub`](https://github.com/airflow-helm/charts/watchers) to be notified about new chart versions,
+> click "watch" → "custom" → "releases".

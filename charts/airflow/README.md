@@ -9,20 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/airflow-helm/charts/stargazers">
-    <img alt="GitHub Stars" src="https://img.shields.io/github/stars/airflow-helm/charts?style=for-the-badge&color=ffcb2f&label=Support%20with%20%E2%AD%90%20on%20GitHub">
-  </a>
-  <a href="https://artifacthub.io/packages/helm/airflow-helm/airflow">
-    <img alt="ArtifactHub Stars" src="https://img.shields.io/badge/dynamic/json?style=for-the-badge&color=ffcb2f&label=Support%20with%20%E2%AD%90%20on%20ArtifactHub&query=stars&url=https://artifacthub.io/api/v1/packages/af52c9e8-afa6-4443-952f-3d4d17e3be35/stars">
-  </a>
-  <a href="https://github.com/airflow-helm/charts/discussions">
-    <img alt="GitHub Discussions" src="https://img.shields.io/github/discussions/airflow-helm/charts?style=for-the-badge&color=17a2b8&label=Start%20a%20Discussion">
-  </a>
-  <a href="https://github.com/airflow-helm/charts/issues/new/choose">
-    <img alt="GitHub Issues" src="https://img.shields.io/github/issues/airflow-helm/charts?style=for-the-badge&color=17a2b8&label=Open%20an%20Issue">
-  </a>
-  <br>
-  <a href="https://thesuperzapper.github.io/GithubStats/?username=airflow-helm&repository=charts">
+  <a href="https://github.com/airflow-helm/charts/releases">
     <img alt="Downloads" src="https://img.shields.io/github/downloads/airflow-helm/charts/total?style=flat-square&color=28a745">
   </a>
   <a href="https://github.com/airflow-helm/charts/graphs/contributors">
@@ -32,7 +19,28 @@
     <img alt="License" src="https://img.shields.io/github/license/airflow-helm/charts?style=flat-square&color=28a745">
   </a>
   <a href="https://github.com/airflow-helm/charts/releases">
-    <img alt="Latest Release" src="https://img.shields.io/github/v/release/airflow-helm/charts?style=flat-square&color=5d37a2&label=latest%20release">
+    <img alt="Latest Release" src="https://img.shields.io/github/v/release/airflow-helm/charts?style=flat-square&color=6f42c1&label=latest%20release">
+  </a>
+  <a href="https://artifacthub.io/packages/helm/airflow-helm/airflow">
+    <img alt="ArtifactHub" src="https://img.shields.io/static/v1?style=flat-square&color=417598&logo=artifacthub&label=ArtifactHub&message=airflow-helm">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/airflow-helm/charts/stargazers">
+    <img alt="GitHub Stars" src="https://img.shields.io/github/stars/airflow-helm/charts?style=for-the-badge&color=ffcb2f&label=Support%20with%20%E2%AD%90%20on%20GitHub">
+  </a>
+  <a href="https://artifacthub.io/packages/helm/airflow-helm/airflow">
+    <img alt="ArtifactHub Stars" src="https://img.shields.io/badge/dynamic/json?style=for-the-badge&color=ffcb2f&label=Support%20with%20%E2%AD%90%20on%20ArtifactHub&query=stars&url=https://artifacthub.io/api/v1/packages/af52c9e8-afa6-4443-952f-3d4d17e3be35/stars">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/airflow-helm/charts/discussions">
+    <img alt="GitHub Discussions" src="https://img.shields.io/github/discussions/airflow-helm/charts?style=for-the-badge&color=17a2b8&label=Start%20a%20Discussion">
+  </a>
+  <a href="https://github.com/airflow-helm/charts/issues/new/choose">
+    <img alt="GitHub Issues" src="https://img.shields.io/github/issues/airflow-helm/charts?style=for-the-badge&color=17a2b8&label=Open%20an%20Issue">
   </a>
 </p>
 
@@ -42,6 +50,12 @@
 
 This project is independent from the official chart found in the `apache/airflow` GitHub repository, 
 and was previously known as `stable/airflow` when it was developed in the `helm/charts` GitHub repository.
+
+> ___✨ Message from the Maintainers ✨___
+>
+> _This project is primarily maintained by [@thesuperzapper](https://github.com/thesuperzapper) (Mathew Wicks),
+> an Independent Consultant who works with companies around the world on their Data and ML platforms,
+> feel free to [reach out](https://www.linkedin.com/in/mathewwicks/)!_
 
 ## Project Goals
 
@@ -79,13 +93,15 @@ and was previously known as `stable/airflow` when it was developed in the `helm/
 - Out-of-the-box Support for `ArgoCD` and similar tools
 - Personalised tips/warnings after each `helm upgrade`
 
+<br>
+
 ## Guides
 
-> Get notified about new releases by [`watching 👀 on GitHub`](https://github.com/airflow-helm/charts/watchers), choose "custom" and then "releases" (top right of the page)
+#### [`Quickstart Guide`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/guides/quickstart.md) <sup><sub>⭐</sub></sup> <a id="quickstart-guide"></a>
 
-- [`Quickstart Guide`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/guides/quickstart.md) <sup><sub>⭐</sub></sup> <a id="quickstart-guide"></a>
-- [`Upgrade Guide`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/guides/upgrade.md) <sup><sub>⭐</sub></sup> <a id="upgrade"></a>
-- [`Uninstall Guide`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/guides/uninstall.md) <a id="uninstall"></a>
+#### [`Upgrade Guide`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/guides/upgrade.md) <sup><sub>⭐</sub></sup> <a id="upgrade"></a>
+
+#### [`Uninstall Guide`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/guides/uninstall.md) <a id="uninstall"></a>
 
 ## Frequently Asked Questions
 
@@ -126,20 +142,19 @@ and was previously known as `stable/airflow` when it was developed in the `helm/
 
 ## Examples
 
-> We encourage contributions with examples for other platforms.
+- __Custom Values Starting Points:__
+  - [`CeleryExecutor`](sample-values-CeleryExecutor.yaml)
+  - [`KubernetesExecutor`](sample-values-KubernetesExecutor.yaml)
+  - [`CeleryKubernetesExecutor`](sample-values-CeleryKubernetesExecutor.yaml)
+- __Real-World Examples:__
+  - [`Minikube / Kind / K3D`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/examples/minikube)
+  - [`Google Kubernetes Engine (GKE)`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/examples/google-gke)
 
-- [`Minikube Example`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/examples/minikube)
-   - __Platform:__ `Minikube` (also works on `Kind` and `k3d`)
-   - __Airflow Executor:__ `CeleryExecutor`
-- [`GKE Example`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/examples/google-gke)
-   - __Platform:__ `Google Kubernetes Engine (GKE)`
-   - __Airflow Executor:__ `CeleryExecutor`
+<br>
 
 ## Airflow Version Support
 
-> Set your airflow version with the [`airflow.image.tag`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-version.md) value.
-
-The following table lists the __airflow versions__ supported by this chart.
+The following table lists the __airflow versions__ supported by this chart (set by [`airflow.image.tag`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-version.md) value).
 
 Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.5.3` | `8.6.0+` |
 --- | --- | --- | ---
@@ -153,9 +168,7 @@ Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.
 
 ## Airflow Executor Support
 
-> Set your airflow executor with the `airflow.executor` value.
-
-The following table lists the [__airflow executors__](https://airflow.apache.org/docs/apache-airflow/stable/executor/index.html) supported by this chart.
+The following table lists the [__airflow executors__](https://airflow.apache.org/docs/apache-airflow/stable/executor/index.html) supported by this chart (set by `airflow.executor` value).
 
 Chart Version → <br> Airflow Executor ↓ | `7.X.X` | `8.X.X` | 
 --- | --- | ---
@@ -167,9 +180,9 @@ Chart Version → <br> Airflow Executor ↓ | `7.X.X` | `8.X.X` |
 
 ## Helm Values
 
-> The full list of values can be found in the [`values.yaml`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/values.yaml) file.
+The following is a summary of the __helm values__ provided by this chart (see full list in [`values.yaml`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/values.yaml) file).
 
-The following is a summary of the __helm values__ provided by this chart.
+> click the `▶` symbol to expand
 
 <details>
 <summary><code>airflow.*</code></summary>
