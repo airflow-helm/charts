@@ -4,6 +4,10 @@
 
 # How to manage airflow users?
 
+## Integrate with LDAP or OAUTH
+
+For more information, please refer to the [`How to integrate airflow with LDAP or OAUTH?`](ldap-oauth.md) page.
+
 ## Define with Plain-Text
 
 You may use the `airflow.users` value to create airflow users in a declarative way.
@@ -78,8 +82,5 @@ airflow:
 
 > 🟨 __Note__ 🟨
 >
-> If `airflow.usersUpdate = true`, the users which use `airflow.usersTemplates` will be updated in real-time, allowing tools like [external-secrets](https://github.com/external-secrets/kubernetes-external-secrets) to be used.
-
-## Integrate with LDAP or OAUTH
-
-For more information, please refer to the [How to integrate airflow with LDAP or OAUTH?](ldap-oauth.md) page.
+> When `airflow.usersUpdate` is `true`, the `airflow.users` which use `airflow.usersTemplates` will be updated in real-time, 
+> allowing tools like [External Secrets Operator](https://github.com/external-secrets/external-secrets) to be used.

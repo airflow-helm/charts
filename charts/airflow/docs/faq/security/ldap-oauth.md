@@ -19,27 +19,32 @@
 
 ## Integrate with LDAP
 
-Airflow uses [Flask-Appbuilder](https://github.com/dpgaspar/Flask-AppBuilder) for its WebUI.
+You may integrate Airflow (which uses [Flask-Appbuilder](https://github.com/dpgaspar/Flask-AppBuilder)) with an LDAP server.
 
-> 🟦 __Tip__ 🟦
->
-> Learn more about [integrating Flask-Appbuilder with LDAP](https://flask-appbuilder.readthedocs.io/en/latest/security.html#authentication-ldap) in their docs.
+Learn more about [integrating with LDAP](https://flask-appbuilder.readthedocs.io/en/latest/security.html#authentication-ldap) in the Flask-Appbuilder docs.
 
-We provide `web.webserverConfig.*` to define the Flask-AppBuilder [`webserver_config.py`](../configuration/airflow-configs.md#webserver_configpy) file.
+<details>
+<summary>
+  <b>Example</b>
+</summary>
 
-For example, to integrate with a typical Microsoft Active Directory using Flask-AppBuilder's `AUTH_LDAP` `AUTH_TYPE`:
+---
+
+For example, using the [`web.webserverConfig`](../configuration/airflow-configs.md#webserver_configpy) values to integrate with a typical Microsoft Active Directory:
 
 ```yaml
 web:
-  # WARNING: for production usage, create your own image with these packages installed rather than using `extraPipPackages`
+  ## WARNING: we recommend NOT using `extraPipPackages` in critical deployments,
+  ##          consider making a custom Docker image with your pip requirements installed
   extraPipPackages:
-    ## the following configs require Flask-AppBuilder 3.2.0 (or later)
-    - "Flask-AppBuilder~=3.4.0"
-    ## the following configs require python-ldap
-    - "python-ldap~=3.4.0"
+    ## AUTH_ROLES_MAPPING needs 3.2.0 (or later)
+    - "Flask-AppBuilder==3.4.5"
+    ## Flask-AppBuilder needs `python-ldap` for LDAP support
+    - "python-ldap==3.4.0"
 
   webserverConfig:
-    stringOverride: |-
+    ## this is the full text of your `webserver_config.py`
+    stringOverride: |
       from airflow import configuration as conf
       from flask_appbuilder.security.manager import AUTH_LDAP
 
@@ -80,28 +85,36 @@ web:
       PERMANENT_SESSION_LIFETIME = 1800
 ```
 
+</details>
+
 ## Integrate with OAUTH
 
-Airflow uses [Flask-Appbuilder](https://github.com/dpgaspar/Flask-AppBuilder) for its WebUI.
+You may integrate Airflow (which uses [Flask-Appbuilder](https://github.com/dpgaspar/Flask-AppBuilder)) with an OAUTH system.
 
-> 🟦 __Tip__ 🟦
->
-> Learn more about [integrating Flask-Appbuilder with OAUTH](https://flask-appbuilder.readthedocs.io/en/latest/security.html#authentication-oauth) in their docs.
+Learn more about [integrating with OAUTH](https://flask-appbuilder.readthedocs.io/en/latest/security.html#authentication-oauth) in the Flask-Appbuilder docs.
 
-We provide `web.webserverConfig.*` to define the Flask-AppBuilder [`webserver_config.py`](../configuration/airflow-configs.md#webserver_configpy) file.
+<details>
+<summary>
+  <b>Example</b>
+</summary>
 
-For example, to integrate with Okta using Flask-AppBuilder's `AUTH_OAUTH` `AUTH_TYPE`:
+---
+
+For example, using the [`web.webserverConfig`](../configuration/airflow-configs.md#webserver_configpy) values to integrate with Okta OAUTH:
 
 ```yaml
 web:
+  ## WARNING: we recommend NOT using `extraPipPackages` in critical deployments,
+  ##          consider making a custom Docker image with your pip requirements installed
   extraPipPackages:
-    ## the following configs require Flask-AppBuilder 3.2.0 (or later)
-    - "Flask-AppBuilder~=3.4.0"
-    ## the following configs require Authlib
-    - "Authlib~=0.15.5"
+    ## AUTH_ROLES_MAPPING needs 3.2.0 (or later)
+    - "Flask-AppBuilder==3.4.5"
+    ## Flask-AppBuilder needs `Authlib` for OAUTH support
+    - "Authlib==1.0.1"
 
   webserverConfig:
-    stringOverride: |-
+    ## this is the full text of your `webserver_config.py`
+    stringOverride: |
       from airflow import configuration as conf
       from flask_appbuilder.security.manager import AUTH_OAUTH
 
@@ -144,3 +157,5 @@ web:
       # force users to re-auth after 30min of inactivity (to keep roles in sync)
       PERMANENT_SESSION_LIFETIME = 1800
 ```
+
+</details>

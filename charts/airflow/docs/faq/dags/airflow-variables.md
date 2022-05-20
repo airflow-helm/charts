@@ -58,5 +58,5 @@ airflow:
 
 > 🟨 __Note__ 🟨
 >
-> If `airflow.variablesTemplates = true`, the connections which use `airflow.variablesTemplates` will be updated in real-time,
-> allowing tools like [external-secrets](https://github.com/external-secrets/kubernetes-external-secrets) to be used.
+> When `airflow.variablesUpdate` is `true`, the `airflow.variables` which use `airflow.variablesTemplates` will be updated in real-time, 
+> allowing tools like [External Secrets Operator](https://github.com/external-secrets/external-secrets) to be used.

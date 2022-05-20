@@ -4,67 +4,152 @@
 
 # How to install extra python packages?
 
-## Option 1 - use init-containers
+## Option 1 - Init Containers
+
+You may use Pod [init-containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) to install pip packages during each Pod startup.
 
 > 🟥 __Warning__ 🟥
 >
-> We __strongly advice__ that you DO NOT USE "Option 1" in production, as PyPI packages may change unexpectedly between container restarts.
+> We strongly recommend you DO NOT use `extraPipPackages` in critical deployments.
+> <br>
+> Packages from PyPI can change unexpectedly between container restarts and break your environment.
 
-### Install on all Airflow Pods
+> 🟦 __Tip__ 🟦
+>
+> Always pin a SPECIFIC package version like `torch==1.8.0` instead of `torch~=1.8.0`,
+> this reduces the likelihood of inconsistent package versions across your cluster.
 
-You may use the `airflow.extraPipPackages` value to install pip packages on all airflow Pods.
+<details>
+<summary>
+  <b>Install on ALL Pods</b>
+</summary>
 
-For example, to install PyTorch on all scheduler/web/worker/flower Pods:
+---
+
+The `airflow.extraPipPackages` value installs pip packages on all Airflow Pods.
+
+For example, to install `torch` on all Airflow Pods:
 
 ```yaml
 airflow:
   extraPipPackages:
-    - "airflow-exporter~=1.4.1"
+    - "torch==1.8.0"
 ```
 
-### Install on Scheduler only
+> 🟨 __Note__ 🟨
+> 
+> Global packages defined in `airflow.extraPipPackages` will NOT be installed in the KubernetesExecutor pod template.
 
-You may use the `scheduler.extraPipPackages` value to install pip packages on the airflow scheduler Pods.
+</details>
 
-For example, to install PyTorch on the scheduler Pods only:
+<details>
+<summary>
+  <b>Install on Scheduler Pods</b>
+</summary>
+
+---
+
+The `scheduler.extraPipPackages` value installs pip packages on the Airflow Scheduler Pods.
+
+For example, to install `torch` on the Scheduler Pods only:
 
 ```yaml
 scheduler:
   extraPipPackages:
-    - "torch~=1.8.0"
+    - "torch==1.8.0"
 ```
 
 > 🟦 __Tip__ 🟦
 >
-> If a package is defined in both `airflow.extraPipPackages` and `scheduler.extraPipPackages`, the version in the latter will take precedence.
+> If the same package is defined in both `airflow.extraPipPackages` and `scheduler.extraPipPackages`, 
+> the version in `scheduler.extraPipPackages` will take precedence.
 >
-> This is because we list packages from deployment-specific values at the end of the `pip install ...` command.
+> This is because packages from deployment-specific values are listed at the END of the `pip install` command.
 
-### Install on Worker only
+</details>
 
-You may use the `worker.extraPipPackages` value to install pip packages on the airflow worker Pods.
+<details>
+<summary>
+  <b>Install on Worker Pods (CeleryExecutor)</b>
+</summary>
 
-For example, to install PyTorch on the worker Pods only:
+---
+
+The `worker.extraPipPackages` value installs pip packages on the Airflow Worker Pods.
+
+For example, to install `torch` on the Worker Pods only:
 
 ```yaml
 worker:
   extraPipPackages:
-    - "torch~=1.8.0"
+    - "torch==1.8.0"
 ```
 
-### Install on Flower only
+> 🟦 __Tip__ 🟦
+>
+> If the same package is defined in both `airflow.extraPipPackages` and `worker.extraPipPackages`, 
+> the version in `worker.extraPipPackages` will take precedence.
+>
+> This is because packages from deployment-specific values are listed at the END of the `pip install` command.
 
-You may use the `flower.extraPipPackages` value to install pip packages on the flower Pods.
+</details>
 
-For example, to install PyTorch on the flower Pods only:
+<details>
+<summary>
+  <b>Install on Pod Template (KubernetesExecutor)</b>
+</summary>
+
+---
+
+The `airflow.kubernetesPodTemplate.extraPipPackages` value installs pip packages in the KubernetesExecutor Pod Template.
+
+For example, to install `torch` on the KubernetesExecutor Pod Template only:
+
+```yaml
+airflow:
+  kubernetesPodTemplate:
+    extraPipPackages:
+      - "torch==1.8.0"
+```
+
+> 🟨 __Note__ 🟨
+> 
+> Global packages defined in `airflow.extraPipPackages` will NOT be installed in the KubernetesExecutor pod template.
+
+</details>
+
+<details>
+<summary>
+  <b>Install on Flower Pods</b>
+</summary>
+
+---
+
+The `flower.extraPipPackages` value installs pip packages on the Flower Pods.
+
+For example, to install `torch` on the Flower Pods only:
 
 ```yaml
 flower:
   extraPipPackages:
-    - "torch~=1.8.0"
+    - "torch==1.8.0"
 ```
 
-### Install from Private pip index
+> 🟦 __Tip__ 🟦
+>
+> If the same package is defined in both `airflow.extraPipPackages` and `flower.extraPipPackages`, 
+> the version in `flower.extraPipPackages` will take precedence.
+>
+> This is because packages from deployment-specific values are listed at the END of the `pip install` command.
+
+</details>
+
+<details>
+<summary>
+  <b>Install from PRIVATE pip Index</b>
+</summary>
+
+---
 
 Pip can install packages from a private Python Package Index using the `--index-url` argument or `PIP_INDEX_URL` environment variable.
 
@@ -82,21 +167,38 @@ airflow:
     - "my-internal-package==1.0.0"
 ```
 
-## Option 2 - embedded into container image (recommended)
+</details>
 
-This chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, you may extend the airflow container image with your pip packages.
+## Option 2 - Embedded Into Container Image
 
-For example, here is a Dockerfile that extends `airflow:2.1.4-python3.8` with the `torch` package:
+You may embed your python packages directly into the container image.
+
+> 🟩 __Suggestion__ 🟩
+> 
+> This is the __suggested method__ for installing extra python packages.
+
+<details>
+<summary>
+  <b>Example</b>
+</summary>
+
+---
+
+This chart uses the official [`apache/airflow`](https://hub.docker.com/r/apache/airflow) Docker images.
+
+Here is a Dockerfile that extends `apache/airflow:2.2.5-python3.8` with the `torch` package:
 
 ```dockerfile
-FROM apache/airflow:2.1.4-python3.8
+FROM apache/airflow:2.2.5-python3.8
 
 # install your pip packages
 RUN pip install --no-cache-dir \
     torch~=1.8.0
 ```
 
-After building and tagging your Dockerfile as `MY_REPO:MY_TAG`, you may use it with the chart by specifying `airflow.image.*`:
+You might then build and tag this Dockerfile as `MY_REPO:MY_TAG`.
+
+The following values tell the chart to use the `MY_REPO:MY_TAG` container image:
 
 ```yaml
 airflow:
@@ -104,17 +206,21 @@ airflow:
     repository: MY_REPO
     tag: MY_TAG
         
-    ## WARNING: even if set to "Always" do not reuse tag names, as containers only pull the latest image when restarting
+    ## WARNING: even if set to "Always" DO NOT reuse tag names, 
+    ##          containers only pull the latest image when restarting
     pullPolicy: IfNotPresent
 ```
 
 > 🟥 __Warning__ 🟥
 >
-> Ensure that you never reuse an image tag name.
-> This ensures that whenever you update `airflow.image.tag`, all airflow pods will restart with the latest pip-packages.
->
-> For example, you may append a version or git hash corresponding to your pip-packages:
+> Ensure that you NEVER REUSE an image tag name.
+> <br>
+> This ensures that whenever you update `airflow.image.tag`, all airflow pods will restart and have the same packages.
+> <br>
+> For example, you may append a version or git hash corresponding to your packages:
 >
 > 1. `MY_REPO:MY_TAG-v1`, `MY_REPO:MY_TAG-v2`, `MY_REPO:MY_TAG-v3`
 > 2. `MY_REPO:MY_TAG-0.1.0`, `MY_REPO:MY_TAG-0.1.1`, `MY_REPO:MY_TAG-0.1.3`
 > 3. `MY_REPO:MY_TAG-a1a1a1a`, `MY_REPO:MY_TAG-a2a2a3a`, `MY_REPO:MY_TAG-a3a3a3a`
+
+</details>

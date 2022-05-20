@@ -84,8 +84,8 @@ and was previously known as `stable/airflow` when it was developed in the `helm/
    - Persistent Volume Claim ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-persistence.md#option-1---persistent-volume-claim))
    - Remote Providers ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-persistence.md#option-2---remote-providers))
 - Multiple ways to install extra Python packages:
-   - Init-Containers ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md#option-1---use-init-containers))
-   - Embedded Into Container Image ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md#option-2---embedded-into-container-image-recommended))
+   - Init-Containers ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md#option-1---init-containers))
+   - Embedded Into Container Image ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md#option-2---embedded-into-container-image))
 - Automatically restart unhealthy Airflow Schedulers:
    - Heartbeat Check ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-heartbeat-check))
    - Task Creation Check ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-task-creation-check))

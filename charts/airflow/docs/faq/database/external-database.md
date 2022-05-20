@@ -4,20 +4,26 @@
 
 # How to configure an external database?
 
-> 🟥 __Warning__ 🟥
->
-> We __STRONGLY RECOMMEND__ that all production deployments of Airflow use an external database, not the [embedded database](embedded-database.md).
+We __STRONGLY RECOMMEND__ that all production deployments of Airflow use an external database, rather than the [embedded database](embedded-database.md).
+
+When compared with the embedded Postgres, an __external database__ comes with many benefits:
+
+1. The embedded Postgres version is usually __outdated__, so is susceptible to critical security bugs
+2. The embedded database may not __scale__ to your performance requirements
+3. An external database will likely achieve higher __uptime__
+4. An external database can be configured with backups and __disaster recovery__
+
+## Option 1 - Postgres
+
+You may use [PostgreSQL](https://en.wikipedia.org/wiki/PostgreSQL) for your external database.
+
+> 🟩 __Suggestion__ 🟩
+> 
+> PostgreSQL is the __suggested database__, given its historically higher level of support in the airflow ecosystem.
 
 > 🟦 __Tip__ 🟦
 >
-> When compared with the Postgres that is embedded in this chart, an __external database__ comes with many benefits:
-> 
-> 1. The embedded Postgres version is usually very outdated, so is susceptible to critical security bugs
-> 2. The embedded database may not scale to your performance requirements
-> 3. An external database will likely achieve higher uptime
-> 4. An external database can be configured with backups and disaster recovery
-> 
-> Commonly, people use the managed PostgreSQL service from their cloud vendor to provision an external database:
+> People often use managed Postgres services, here are some popular ones:
 > 
 > Cloud Platform | Service Name
 > --- | ---
@@ -27,13 +33,17 @@
 > Alibaba Cloud | [ApsaraDB RDS for PostgreSQL](https://www.alibabacloud.com/product/apsaradb-for-rds-postgresql)
 > IBM Cloud | [IBM Cloud® Databases for PostgreSQL](https://cloud.ibm.com/docs/databases-for-postgresql)
 
-## Option 1 - Postgres
+<details>
+<summary>
+  <b>Example</b>
+</summary>
 
-> 🟨 __Note__ 🟨
+---
+
+> 🟦 __Tip__ 🟦
 >
-> By default, this chart deploys [PgBouncer](https://www.pgbouncer.org/) to pool db connections and reduce the load from large numbers of airflow tasks.
->
-> You may read more about [how to configure the chart's PgBouncer](pgbouncer.md).
+> By default, we deploy [PgBouncer](https://www.pgbouncer.org/) to reduce database load, 
+> learn more about [configuring PgBouncer](pgbouncer.md) in our docs.
 
 For example, to use an external Postgres at `postgres.example.org`, with an existing `airflow_cluster1` database:
 
@@ -81,11 +91,23 @@ externalDatabase:
   properties: ""
 ```
 
+</details>
+
 ## Option 2 - MySQL
+
+You may use [MySQL](https://en.wikipedia.org/wiki/MySQL) for your external database. 
 
 > 🟥 __Warning__ 🟥
 >
-> You must set `explicit_defaults_for_timestamp=1` in your MySQL instance, [see here](https://airflow.apache.org/docs/stable/howto/initialize-database.html)
+> You must set `explicit_defaults_for_timestamp=1` in your MySQL instance, 
+> [see here](https://airflow.apache.org/docs/apache-airflow/stable/howto/set-up-database.html#setting-up-a-mysql-database).
+
+<details>
+<summary>
+  <b>Example</b>
+</summary>
+
+---
 
 For example, to use an external MySQL at `mysql.example.org`, with an existing `airflow_cluster1` database:
 
@@ -124,3 +146,5 @@ externalDatabase:
   ## use this for any extra connection-string settings, e.g. ?useSSL=false
   properties: ""
 ```
+
+</details>

@@ -5,22 +5,29 @@
 # How to load DAG definitions?
 
 To use your airflow cluster, you will need to make your DAG definitions (python files) available to airflow.
+
 While there are many ways you can achieve this, we natively support the following methods.
 
 ## Option 1 - Git-Sync Sidecar 
 
-With this method, you store your DAGs in a git repo and configure sidecars on the airflow Pods which automatically keep a local cache of this repo in sync.
+You may store DAG definitions in a git repo and configure the chart to automatically sync a local copy this repo into each airflow Pod at a regular interval.
 
 > 🟦 __Tip__ 🟦
 >
-> The git repo content is stored under a `repo/` sub folder of `dag.path`, 
-> so by default you will find your repo under `/opt/airflow/dags/repo`.
+> The content of the git repo will be stored at `{dags.path}/repo/`, 
+> by default this will be `/opt/airflow/dags/repo/`.
 
-### SSH git auth
+<details>
+<summary>
+  <a id="ssh-authentication"></a>
+  <b>SSH Authentication</b>
+</summary>
 
-You may configure your git-sync sidecars to access the repo through SSH.
+---
 
-For example to sync from `git@github.com:USERNAME/REPOSITORY.git` using the RSA keys stored in `Secret/airflow-ssh-git-secret`:
+The git-sync sidecars can access the git repo using SSH authentication.
+
+For example to sync `git@github.com:USERNAME/REPOSITORY.git` using the RSA keys stored in `Secret/airflow-ssh-git-secret`:
 
 ```yaml
 airflow:
@@ -66,8 +73,8 @@ dags:
 
 > 🟦 __Tip__ 🟦
 >
-> If you have the SSH private key at `$HOME/.ssh/id_rsa`, 
-> you may create `Secret/airflow-ssh-git-secret` using this command:
+> You may create `Secret/airflow-ssh-git-secret` using this command,
+> if you have the SSH private key stored under `$HOME/.ssh/id_rsa`:
 > 
 > ```shell
 > kubectl create secret generic \
@@ -76,11 +83,19 @@ dags:
 >   --namespace my-airflow-namespace
 > ```
 
-### HTTP git auth
+</details>
 
-You may configure your git-sync sidecars to access the repo through HTTP.
+<details>
+<summary>
+  <a id="https-authentication"></a>
+  <b>HTTP Authentication</b>
+</summary>
 
-For example, to sync from `https://github.com/USERNAME/REPOSITORY.git` using the HTTP credentials stored in `Secret/airflow-http-git-secret`:
+---
+
+The git-sync sidecars can access the git repo using HTTP authentication.
+
+For example, to sync `https://github.com/USERNAME/REPOSITORY.git` using the HTTP credentials stored in `Secret/airflow-http-git-secret`:
 
 ```yaml
 airflow:
@@ -133,18 +148,33 @@ dags:
 >   --namespace my-airflow-namespace
 > ```
 
+</details>
+
 ## Option 2 - Persistent Volume Claim
 
-With this method, you use a [`persistentVolumeClaim`](https://kubernetes.io/docs/concepts/storage/volumes/#persistentvolumeclaim) type Volume to share DAG files between the airflow Pods.
+You may use a [`PersistentVolumeClaim`](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) to share your DAG definitions across the airflow Pods.
+
+> 🟨 __Note__ 🟨
+>
+> The `PersistentVolumeClaim` will be empty by default,
+> you must either manually fill it with your DAG files, or configure an external system to automate this process.
+> For example, you may create a CI/CD pipeline on your DAGs repo to update the volume as commits are made.
+
+<details>
+<summary>
+  <a id="chart-managed-volume"></a>
+  <b>Chart Managed Volume</b>
+</summary>
+
+---
+
+The chart can manage the initial creation of a PersistentVolumeClaim for your DAG files.
 
 > 🟦 __Tip__ 🟦
 >
-> You must configure some external system to populate the volume with your latest DAGs.
-> For example, you may use your CI/CD pipeline system to preform a sync as changes are pushed to your DAGs git repo.
-
-### Chart Managed Volume
-
-The chart can manage creation of the PersistentVolumeClaim for your DAGs.
+> The name of the `PersistentVolumeClaim` will be your helm release-name with `"-dags"` appended.
+> <br>
+> For example, if you use `helm install my-airflow ...`, the PVC will be called `my-airflow-dags`.
 
 For example, to have the chart create a PersistentVolumeClaim with the `storageClass` called `default` and a `size` of `1Gi`:
 
@@ -162,19 +192,21 @@ dags:
     ## NOTE: some types of StorageClass will ignore this request (for example, EFS)
     size: 1Gi
     
-    ## NOTE: as multiple Pods read the DAGs concurrently this must be ReadOnlyMany or ReadWriteMany
+    ## NOTE: as multiple Pods read the DAGs concurrently this MUST be ReadOnlyMany or ReadWriteMany
     accessMode: ReadOnlyMany
 ```
 
-> 🟦 __Tip__ 🟦
->
-> The name of the chart-managed PersistentVolumeClaim will be your `helm install` release name with `"-dags"` appended.
-> 
-> For example, if you use `helm install my-airflow airflow-stable/airflow ...`, the PVC will be called: `my-airflow-dags`
+</details>
 
-### User Managed Volume
+<details>
+<summary>
+  <a id="user-managed-volume"></a>
+  <b>User Managed Volume</b>
+</summary>
 
-If you wish to take more control of the PersistentVolumeClaim used for your DAGs, you may create a 
+---
+
+If you wish to take more control of the PersistentVolumeClaim used for your DAG files, you may create a 
 [`PersistentVolumeClaim`](https://kubernetes.io/docs/concepts/storage/persistent-volumes/#persistentvolumeclaims) 
 resource inside your helm install namespace and then tell the chart to use it.
 
@@ -191,16 +223,33 @@ dags:
     ## NOTE: this is name of your existing volume
     existingClaim: my-dags-pvc
     
-    ## NOTE: as multiple Pods read the DAGs concurrently this must be ReadOnlyMany or ReadWriteMany
+    ## NOTE: as multiple Pods read the DAGs concurrently this MUST be ReadOnlyMany or ReadWriteMany
     accessMode: ReadOnlyMany
 ```
 
+</details>
+
 ## Option 3 - Embedded Into Container Image
 
-With this method, you store your DAGs inside your container image.
-This chart uses the official [apache/airflow](https://hub.docker.com/r/apache/airflow) images, you may extend them to include your DAG definition files.
+You may embed your DAG files directly into the container image.
 
-For example, here is a Dockerfile, which extends `apache/airflow:2.2.5-python3.8` by placing DAG files into `/opt/airflow/dags`:
+> 🟥 __Warning__ 🟥
+>
+> This method requires all airflow containers to restart after each update to your DAG files.
+> <br>
+> All airflow Pods will run the same image, and have the latest DAG definitions.
+
+<details>
+<summary>
+  <a id="example"></a>
+  <b>Example</b>
+</summary>
+
+---
+
+This chart uses the official [`apache/airflow`](https://hub.docker.com/r/apache/airflow) Docker images.
+
+Here is a Dockerfile that extends `apache/airflow:2.2.5-python3.8` by placing DAG files into `/opt/airflow/dags`:
 
 ```dockerfile
 FROM apache/airflow:2.2.5-python3.8
@@ -208,6 +257,8 @@ FROM apache/airflow:2.2.5-python3.8
 ## copy the content of local folder `./my_dag_folder` into container folder `/opt/airflow/dags`
 COPY ./my_dag_folder /opt/airflow/dags
 ```
+
+You might then build and tag this Dockerfile as `MY_REPO:MY_TAG`.
 
 The following values tell the chart to use the `MY_REPO:MY_TAG` container image:
 
@@ -217,17 +268,21 @@ airflow:
     repository: MY_REPO
     tag: MY_TAG
 
-    ## WARNING: even if set to "Always" do not reuse tag names, as containers only pull the latest image when restarting
+    ## WARNING: even if set to "Always" DO NOT reuse tag names, 
+    ##          containers only pull the latest image when restarting
     pullPolicy: IfNotPresent
 ```
 
 > 🟥 __Warning__ 🟥
 >
-> Ensure that you never reuse an image tag name.
-> This ensures that whenever you update `airflow.image.tag`, all airflow pods will restart with the latest DAGs.
->
+> Ensure that you NEVER REUSE an image tag name.
+> <br>
+> This ensures that whenever you update `airflow.image.tag`, all airflow pods will restart and have the same DAGs.
+> <br>
 > For example, you may append a version or git hash corresponding to your DAGs:
 >
 > 1. `MY_REPO:MY_TAG-v1`, `MY_REPO:MY_TAG-v2`, `MY_REPO:MY_TAG-v3`
 > 2. `MY_REPO:MY_TAG-0.1.0`, `MY_REPO:MY_TAG-0.1.1`, `MY_REPO:MY_TAG-0.1.3`
 > 3. `MY_REPO:MY_TAG-a1a1a1a`, `MY_REPO:MY_TAG-a2a2a3a`, `MY_REPO:MY_TAG-a3a3a3a`
+
+</details>
