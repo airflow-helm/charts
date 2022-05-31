@@ -40,3 +40,8 @@ Sessionx.vim
 .AppleDouble
 .LSOverride
 ._*
+
+## Chart Documentation
+/ci
+/docs
+/examples
