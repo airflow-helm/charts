@@ -1,0 +1,31 @@
+name: release image / postgresql-bitnami-11-alpine
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - images/postgresql-bitnami/11/alpine/VERSION
+
+jobs:
+  call_workflow:
+    uses: ./.github/workflows/_release-image.yaml
+    with:
+      folder_path: images/postgresql-bitnami/11/alpine
+
+      image_title: postgresql-bitnami
+      image_description: the postgresql-bitnami image for the user-community airflow helm chart
+
+      image_flavor: alpine
+      image_flavor_is_primary: true
+
+      tag_with_latest: true
+      tag_with_major_version: true
+
+      build_platforms: |
+        linux/amd64
+        linux/arm64
+
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

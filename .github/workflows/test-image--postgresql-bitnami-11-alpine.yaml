@@ -1,0 +1,17 @@
+name: test image / postgresql-bitnami-11-alpine
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - images/postgresql-bitnami/11/alpine/**
+
+jobs:
+  call_workflow:
+    uses: ./.github/workflows/_test-image.yaml
+    with:
+      folder_path: images/postgresql-bitnami/11/alpine
+      build_platforms: |
+        linux/amd64
+        linux/arm64
