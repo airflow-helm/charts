@@ -1,4 +1,4 @@
-name: "Charts | Run Tests"
+name: "test charts"
 
 on:
   pull_request:
@@ -8,23 +8,23 @@ on:
       - "charts/**"
 
 jobs:
-  lint-and-install:
+  lint_and_install:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
       - name: Install Helm
-        uses: azure/setup-helm@v1
+        uses: azure/setup-helm@v2.1
         with:
-          version: v3.6.1
+          version: v3.9.0
 
       - name: Install chart-testing
-        uses: helm/chart-testing-action@v2.1.0
+        uses: helm/chart-testing-action@v2.2.1
         with:
-          version: v3.4.0
+          version: v3.6.0
 
       - name: List Changed Charts (chart-testing)
         id: list-changed
@@ -34,18 +34,23 @@ jobs:
             echo "::set-output name=CHANGED::true"
           fi
 
+      - name: Lint Charts (chart-testing)
+        if: ${{ steps.list-changed.outputs.CHANGED == 'true' }}
+        run: |
+          ct lint --config ct-config.yaml --check-version-increment=false
+
       - name: Create kind Cluster
-        uses: helm/kind-action@v1.1.0
-        if: steps.list-changed.outputs.CHANGED == 'true'
+        # specific commit is used because no tagged version includes `kubectl_version` feature
+        uses: helm/kind-action@deab45fc8df9de5090a604e8ec11778eea7170bd
+        if: ${{ steps.list-changed.outputs.CHANGED == 'true' }}
         timeout-minutes: 5
         with:
-          version: v0.11.1
+          version: v0.14.0
+          kubectl_version: v1.24.0
+          node_image: kindest/node:v1.24.0@sha256:0866296e693efe1fed79d5e6c7af8df71fc73ae45e3679af05342239cdc5bc8e
           wait: 300s
 
-      - name: Lint Charts (chart-testing)
-        if: steps.list-changed.outputs.CHANGED == 'true'
-        run: ct lint --config ct-config.yaml --check-version-increment=false
-
       - name: Install Charts (chart-testing)
-        if: steps.list-changed.outputs.CHANGED == 'true'
-        run: ct install --config ct-config.yaml
+        if: ${{ steps.list-changed.outputs.CHANGED == 'true' }}
+        run: |
+          ct install --config ct-config.yaml
