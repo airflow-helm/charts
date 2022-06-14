@@ -1,0 +1,17 @@
+name: test image / pgbouncer
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - images/pgbouncer/**
+
+jobs:
+  call_workflow:
+    uses: ./.github/workflows/_test-image.yaml
+    with:
+      folder_path: images/pgbouncer
+      build_platforms: |
+        linux/amd64
+        linux/arm64

@@ -1,0 +1,68 @@
+name: test image (TEMPLATE)
+
+on:
+  workflow_call:
+    inputs:
+      folder_path:
+        required: true
+        type: string
+      build_platforms:
+        required: true
+        type: string
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Check '${{ inputs.folder_path }}/VERSION' File
+        env:
+          VERSION_FILE_PATH: ${{ inputs.folder_path }}/VERSION
+          VERSION_REGEX: ^([0-9]+)(\.[0-9]+)?(\.[0-9]+)?-patch\.([0-9]+)$
+        run: |
+          VERSION_RAW=$(cat $VERSION_FILE_PATH)
+          if ! [[ $VERSION_RAW =~ $VERSION_REGEX ]]; then
+            echo "::error::$VERSION_FILE_PATH must match regex $VERSION_REGEX but got: '$VERSION_RAW'"
+            exit 1
+          fi
+
+  build_image:
+    runs-on: ubuntu-latest
+    needs: [ lint ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Install Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Generate Image Tags/Labels
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ghcr.io/${{ github.repository_owner }}/ci/${{ inputs.folder_path }}
+          tags: |
+            type=ref,event=pr,prefix=pr-,suffix=
+          labels: |
+            org.opencontainers.image.title=ci/${{ inputs.folder_path }}
+            org.opencontainers.image.description=test images for ${{ inputs.folder_path }}
+
+      - name: Build Image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./${{ inputs.folder_path }}
+          push: false
+          platforms: ${{ inputs.build_platforms }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/ci/${{ inputs.folder_path }}

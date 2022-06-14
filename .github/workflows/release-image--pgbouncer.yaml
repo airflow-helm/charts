@@ -1,0 +1,31 @@
+name: release image / pgbouncer
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - images/pgbouncer/VERSION
+
+jobs:
+  call_workflow:
+    uses: ./.github/workflows/_release-image.yaml
+    with:
+      folder_path: images/pgbouncer
+
+      image_title: pgbouncer
+      image_description: the pgbouncer image for the user-community airflow helm chart
+
+      image_flavor: alpine
+      image_flavor_is_primary: true
+
+      tag_with_latest: true
+      tag_with_major_version: false
+
+      build_platforms: |
+        linux/amd64
+        linux/arm64
+
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}

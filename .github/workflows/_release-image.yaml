@@ -1,0 +1,178 @@
+name: release image (TEMPLATE)
+
+on:
+  workflow_call:
+    inputs:
+      folder_path:
+        required: true
+        type: string
+
+      image_title:
+        required: true
+        type: string
+      image_description:
+        required: true
+        type: string
+
+      image_flavor:
+        required: true
+        type: string
+      image_flavor_is_primary:
+        required: true
+        type: boolean
+
+      tag_with_latest:
+        required: true
+        type: boolean
+      tag_with_major_version:
+        required: true
+        type: boolean
+
+      build_platforms:
+        required: true
+        type: string
+
+    secrets:
+      DOCKERHUB_USERNAME:
+        required: true
+      DOCKERHUB_TOKEN:
+        required: true
+
+jobs:
+  create_tag:
+    runs-on: ubuntu-latest
+    outputs:
+      TAG_NAME: ${{ steps.push-tag.outputs.TAG_NAME }}
+      VERSION_SW_MAJOR: ${{ steps.read-version.outputs.VERSION_SW_MAJOR }}
+      VERSION_SW_MINOR: ${{ steps.read-version.outputs.VERSION_SW_MINOR }}
+      VERSION_SW_PATCH: ${{ steps.read-version.outputs.VERSION_SW_PATCH }}
+      VERSION_IMAGE_PATCH: ${{ steps.read-version.outputs.VERSION_IMAGE_PATCH }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Read '${{ inputs.folder_path }}/VERSION' File
+        id: read-version
+        env:
+          VERSION_FILE_PATH: ${{ inputs.folder_path }}/VERSION
+          VERSION_REGEX: ^([0-9]+)(\.[0-9]+)?(\.[0-9]+)?-patch\.([0-9]+)$
+        run: |
+          VERSION_RAW=$(cat $VERSION_FILE_PATH)
+          if [[ $VERSION_RAW =~ $VERSION_REGEX ]]; then
+            echo "::set-output name=VERSION_RAW::$VERSION_RAW"
+            
+            # captures 'A' from 'A.B.C-patch.D'
+            VERSION_SW_MAJOR="${BASH_REMATCH[1]}"
+            echo "::set-output name=VERSION_SW_MAJOR::$VERSION_SW_MAJOR"
+            
+            # captures '.B' from 'A.B.C-patch.D'
+            # (NOTE: if present, will have a '.' prefix, else empty)
+            VERSION_SW_MINOR="${BASH_REMATCH[2]}"
+            echo "::set-output name=VERSION_SW_MINOR::$VERSION_SW_MINOR"
+          
+            # captures '.C' from 'A.B.C-patch.D'
+            # (NOTE: if present, will have a '.' prefix, else empty)
+            VERSION_SW_PATCH="${BASH_REMATCH[3]}"
+            echo "::set-output name=VERSION_SW_PATCH::$VERSION_SW_PATCH"
+            
+            # captures 'D' from 'A.B.C-patch.D'
+            VERSION_IMAGE_PATCH="${BASH_REMATCH[4]}"
+            echo "::set-output name=VERSION_IMAGE_PATCH::$VERSION_IMAGE_PATCH"
+                 
+          else
+            echo "::error::$VERSION_FILE_PATH must match regex $VERSION_REGEX but got: '$VERSION_RAW'"
+            exit 1
+          fi
+
+      - name: Create Tag if Not Already Present
+        id: push-tag
+        env:
+          TAG_NAME: ${{ inputs.folder_path }}-${{ steps.read-version.outputs.VERSION_RAW }}
+        run: |
+          if git show-ref --verify --quiet "refs/tags/$TAG_NAME"; then
+              export CURRENT_HASH=$(git log -1 --format="%H")
+              export TAG_HASH=$(git show-ref --hash "refs/tags/$TAG_NAME")
+              echo "::warning::current hash = $CURRENT_HASH"
+              echo "::warning::tag's hash   = $TAG_HASH"
+              if [ "$CURRENT_HASH" = "$TAG_HASH" ]; then
+                  echo "::warning::tag '$TAG_NAME' already exists, and has the expected hash, continuing..."
+              else
+                  echo "::error::tag '$TAG_NAME' already exists, but has an unexpected hash, failing..."
+                  exit 1
+              fi
+          else
+              git tag "$TAG_NAME"
+              git push origin "$TAG_NAME"
+          fi
+          echo "::set-output name=TAG_NAME::$TAG_NAME"
+
+  build_and_push_image:
+    needs: [ create_tag ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ needs.create_tag.outputs.TAG_NAME }}
+          fetch-depth: 0
+
+      - name: Install QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Install Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Image Tags/Labels
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            airflowhelm/${{ inputs.image_title }}
+            ghcr.io/${{ github.repository_owner }}/${{ inputs.image_title }}
+          flavor: |
+            latest=${{ inputs.tag_with_latest }}
+          tags: |
+            ## tags excluding "image flavor" (only used for the primary flavor)
+            type=raw,priority=100,value=${{ needs.create_tag.outputs.VERSION_SW_MAJOR }},enable=${{ inputs.image_flavor_is_primary && inputs.tag_with_major_version }}
+            type=raw,priority=110,value=${{ needs.create_tag.outputs.VERSION_SW_MAJOR }}${{ needs.create_tag.outputs.VERSION_SW_MINOR }}${{ needs.create_tag.outputs.VERSION_SW_PATCH }},enable=${{ inputs.image_flavor_is_primary }}
+            type=raw,priority=120,value=${{ needs.create_tag.outputs.VERSION_SW_MAJOR }}${{ needs.create_tag.outputs.VERSION_SW_MINOR }}${{ needs.create_tag.outputs.VERSION_SW_PATCH }}-patch.${{ needs.create_tag.outputs.VERSION_IMAGE_PATCH }},enable=${{ inputs.image_flavor_is_primary }}
+            ## tags including "image flavor"
+            type=raw,priority=200,value=${{ needs.create_tag.outputs.VERSION_SW_MAJOR }}-${{ inputs.image_flavor }},enable=${{ inputs.tag_with_major_version }}
+            type=raw,priority=210,value=${{ needs.create_tag.outputs.VERSION_SW_MAJOR }}${{ needs.create_tag.outputs.VERSION_SW_MINOR }}${{ needs.create_tag.outputs.VERSION_SW_PATCH }}-${{ inputs.image_flavor }}
+            type=raw,priority=220,value=${{ needs.create_tag.outputs.VERSION_SW_MAJOR }}${{ needs.create_tag.outputs.VERSION_SW_MINOR }}${{ needs.create_tag.outputs.VERSION_SW_PATCH }}-${{ inputs.image_flavor }}-patch.${{ needs.create_tag.outputs.VERSION_IMAGE_PATCH }}
+          labels: |
+            org.opencontainers.image.title=${{ inputs.image_title }}
+            org.opencontainers.image.description=${{ inputs.image_description }}
+            org.opencontainers.image.url=https://github.com/${{ github.repository }}/tree/main/${{ inputs.folder_path }}
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}/tree/main/${{ inputs.folder_path }}
+
+      - name: Build and Push Image
+        uses: docker/build-push-action@v3
+        with:
+          context: ./${{ inputs.folder_path }}
+          push: true
+          platforms: ${{ inputs.build_platforms }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/ci/${{ inputs.folder_path }}
+          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/ci/${{ inputs.folder_path }},mode=max
