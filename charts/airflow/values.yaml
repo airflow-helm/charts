@@ -209,6 +209,12 @@ airflow:
   ##
   extraPipPackages: []
 
+  ## pip packages that are protected from upgrade/downgrade by `extraPipPackages`
+  ## - [WARNING] Pods will fail to start if `extraPipPackages` would cause these packages to change versions
+  ##
+  protectedPipPackages:
+    - "apache-airflow"
+
   ## extra environment variables for the airflow Pods
   ## - spec for EnvVar:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#envvar-v1-core

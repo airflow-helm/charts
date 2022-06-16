@@ -212,6 +212,7 @@ Parameter | Description | Default
 `airflow.defaultSecurityContext` | default securityContext configs for Pods (is overridden by pod-specific values) | `{fsGroup: 0}`
 `airflow.podAnnotations` | extra annotations for airflow Pods | `{}`
 `airflow.extraPipPackages` | extra pip packages to install in airflow Pods | `[]`
+`airflow.protectedPipPackages` | pip packages that are protected from upgrade/downgrade by `extraPipPackages` | `["apache-airflow"]`
 `airflow.extraEnv` | extra environment variables for the airflow Pods | `[]`
 `airflow.extraContainers` | extra containers for the airflow Pods | `[]`
 `airflow.extraVolumeMounts` | extra VolumeMounts for the airflow Pods | `[]`
