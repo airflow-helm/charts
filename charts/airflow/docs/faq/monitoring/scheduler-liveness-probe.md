@@ -41,17 +41,15 @@ scheduler:
     failureThreshold: 5
 ```
 
-## Scheduler "Task Creation Check"
-
 > 🟥 __Warning__ 🟥
 >
-> A scheduler can have a ["heartbeat"](#scheduler-heartbeat-check) but be deadlocked such that it's unable to schedule new tasks,
-> we provide the `scheduler.livenessProbe.taskCreationCheck.*` values to configure a probe that automatically restarts the scheduler in these cases.
->
-> Known Deadlock Bugs:
+> A scheduler can have a "heartbeat" but be deadlocked such that it's unable to schedule new tasks,
+> the ["task creation check"](#scheduler-task-creation-check) should detect these situations and force a scheduler restart.
 > 
 > - https://github.com/apache/airflow/issues/7935 - patched in airflow `2.0.2`
 > - https://github.com/apache/airflow/issues/15938 - patched in airflow `2.1.1`
+
+## Scheduler "Task Creation Check"
 
 The liveness probe can additionally check if the Scheduler is creating new [tasks](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) as an indication of its health.
 This check works by ensuring that the most recent `LocalTaskJob` had a `start_date` no more than `scheduler.livenessProbe.taskCreationCheck.thresholdSeconds` seconds ago.
