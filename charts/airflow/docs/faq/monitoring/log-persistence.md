@@ -2,7 +2,7 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to persist airflow logs?
+# Manage Airflow Logs
 
 By default, logs are stored under `/opt/airflow/logs` within an [`emptyDir`](https://kubernetes.io/docs/concepts/storage/volumes/#emptydir) type Volume, 
 this means they only last as long as each airflow Pod resides on the same Node.

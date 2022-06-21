@@ -2,7 +2,7 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to install extra python packages?
+# Install Extra Python/Pip Packages
 
 ## Option 1 - Init Containers
 

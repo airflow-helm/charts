@@ -2,7 +2,7 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to add extra kubernetes manifests?
+# Include Extra Kubernetes Manifests
 
 You may use the `extraManifests` value to specify a list of extra Kubernetes manifests that will be deployed alongside the chart.
 

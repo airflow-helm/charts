@@ -2,7 +2,7 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to set up a kubernetes ingress?
+# Configure Kubernetes Ingress
 
 The chart provides the `ingress.*` values for deploying a Kubernetes Ingress to allow access to airflow outside the cluster.
 

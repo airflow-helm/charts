@@ -2,7 +2,7 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to configure an external database?
+# Configure Database (External)
 
 We __STRONGLY RECOMMEND__ that all production deployments of Airflow use an external database, rather than the [embedded database](embedded-database.md).
 

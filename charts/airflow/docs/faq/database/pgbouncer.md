@@ -2,7 +2,7 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to configure pgbouncer?
+# Configure PgBouncer
 
 By default, this chart deploys [PgBouncer](https://www.pgbouncer.org/) to pool db connections and reduce the load from large numbers of airflow tasks.
 

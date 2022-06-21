@@ -2,7 +2,7 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to configure autoscaling for celery workers?
+# Configure Celery Worker Autoscaling
 
 > 🟨 __Note__ 🟨
 >

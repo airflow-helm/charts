@@ -2,7 +2,7 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to integrate airflow with LDAP or OAUTH?
+# Integrate Airflow with LDAP or OAUTH
 
 > 🟥 __Warning__ 🟥
 > 

@@ -2,7 +2,7 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to configure an external redis?
+# Configure Database (External)
 
 For example, to use an external redis at `example.redis.cache.windows.net` with ssl enabled:
 

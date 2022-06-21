@@ -2,11 +2,11 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to manage airflow users?
+# Manage Airflow Users
 
 ## Integrate with LDAP or OAUTH
 
-For more information, please refer to the [`How to integrate airflow with LDAP or OAUTH?`](ldap-oauth.md) page.
+For more information, please refer to the [`Integrate Airflow with LDAP or OAUTH`](ldap-oauth.md) page.
 
 ## Define with Plain-Text
 

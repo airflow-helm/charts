@@ -51,12 +51,6 @@
 This project is independent from the official chart found in the `apache/airflow` GitHub repository, 
 and was previously known as `stable/airflow` when it was developed in the `helm/charts` GitHub repository.
 
-> ___✨ Message from the Maintainers ✨___
->
-> _This project is primarily maintained by [@thesuperzapper](https://github.com/thesuperzapper) (Mathew Wicks),
-> an Independent Consultant who works with companies around the world on their Data and ML platforms,
-> feel free to [reach out](https://www.linkedin.com/in/mathewwicks/)!_
-
 ## Project Goals
 
 1. Ease of Use
@@ -66,32 +60,33 @@ and was previously known as `stable/airflow` when it was developed in the `helm/
 
 ## Key Features
 
-- Support for Airflow `1.10+` and `2.0+` ([version support matrix](#airflow-version-support))
-- Support for `CeleryExecutor`, `KubernetesExecutor`, and `CeleryKubernetesExecutor` ([executor support matrix](#airflow-executor-support))
-- Easily integrate with your `PostgresSQL` or `MySQL` databases ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/external-database.md))
-- Automatic deployment of `PgBouncer` to reduce PostgresSQL database strain ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/pgbouncer.md))
-- Declaratively manage Airflow configurations:
-   - Config Files ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-configs.md))
-   - Users ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/security/airflow-users.md))
-   - Connections ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-connections.md))
-   - Variables ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-variables.md))
-   - Pools ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-pools.md))
-- Multiple ways to load your DAG definitions:
-   - Git-Sync Sidecar ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/load-dag-definitions.md#option-1---git-sync-sidecar))
-   - Persistent Volume Claim ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/load-dag-definitions.md#option-2---persistent-volume-claim))
-   - Embedded Into Container Image ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/load-dag-definitions.md#option-3---embedded-into-container-image))
-- Multiple ways to persist your logs:
-   - Persistent Volume Claim ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-persistence.md#option-1---persistent-volume-claim))
-   - Remote Providers ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-persistence.md#option-2---remote-providers))
-- Multiple ways to install extra Python packages:
-   - Init-Containers ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md#option-1---init-containers))
-   - Embedded Into Container Image ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md#option-2---embedded-into-container-image))
-- Automatically restart unhealthy Airflow Schedulers:
-   - Heartbeat Check ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-heartbeat-check))
-   - Task Creation Check ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-task-creation-check))
-- Automatically remove old airflow logs ([docs](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-cleanup.md))
-- Out-of-the-box Support for `ArgoCD` and similar tools
-- Personalised tips/warnings after each `helm upgrade`
+- __Support for Airflow Versions:__ 
+   - [`1.10` | `2.0` | `2.1` | `2.2`](#airflow-version-support)
+- __Support for Airflow Executors:__ 
+   - [`CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor`](#airflow-executor-support)
+- __Easily Connect with your Database:__
+   - [`Connect to Postgres`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/external-database.md#option-1---postgres) |
+     [`Configure PgBouncer`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/pgbouncer.md) |
+     [`Connect to MySQL`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/external-database.md#option-2---mysql)
+- __Declaratively Manage Airflow Configs:__
+   - [`Users`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/security/airflow-users.md) |
+     [`Connections`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-connections.md) |
+     [`Variables`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-variables.md) |
+     [`Pools`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-pools.md)
+- __Load Airflow DAGs:__
+   - [`Load from Git-Sync`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/load-dag-definitions.md#option-1---git-sync-sidecar) |
+     [`Load from Volume`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/load-dag-definitions.md#option-2---persistent-volume-claim) |
+     [`Embed Into Image`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/load-dag-definitions.md#option-3---embedded-into-container-image)
+- __Manage Airflow Logs:__
+   - [`Persist on Volume`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-persistence.md#option-1---persistent-volume-claim) |
+     [`Persist on Remote Provider`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-persistence.md#option-2---remote-providers) |
+     [`Automatic Log Cleanup`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-cleanup.md)
+- __Install Extra Python Packages:__
+   - [`Install with Init-Containers`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md#option-1---init-containers) |
+     [`Embed Into Image`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md#option-2---embedded-into-container-image)
+- __Automatically Restart Unhealthy Airflow Schedulers:__
+   - [`Heartbeat Check`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-heartbeat-check) |
+     [`Task Creation Check`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-task-creation-check)
 
 <br>
 
@@ -106,39 +101,39 @@ and was previously known as `stable/airflow` when it was developed in the `helm/
 ## Frequently Asked Questions
 
 - __Configuration:__
-  - [`How to choose the airflow version?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-version.md) <sup><sub>⭐</sub></sup> <a id="how-to-use-a-specific-version-of-airflow"></a>
-  - [`How to set airflow configs?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-configs.md) <sup><sub>⭐</sub></sup> <a id="how-to-set-airflow-configs"></a>
-  - [`How to load airflow plugins?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-plugins.md)
-  - [`How to install extra python packages?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md) <a id="how-to-install-extra-pip-packages"></a>
-  - [`How to configure autoscaling for celery workers?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/autoscaling-celery-workers.md) <a id="how-to-set-up-celery-worker-autoscaling"></a>
+  - [`Set Airflow Version`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-version.md) <sup><sub>⭐</sub></sup> <a id="how-to-use-a-specific-version-of-airflow"></a>
+  - [`Manage Airflow Configs`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-configs.md) <sup><sub>⭐</sub></sup> <a id="how-to-set-airflow-configs"></a>
+  - [`Manage Airflow Plugins`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-plugins.md)
+  - [`Install Extra Python/Pip Packages`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/extra-python-packages.md) <a id="how-to-install-extra-pip-packages"></a>
+  - [`Configure Celery Worker Autoscaling`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/autoscaling-celery-workers.md) <a id="how-to-set-up-celery-worker-autoscaling"></a>
 - __DAGs:__
-  - [`How to load DAG definitions?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/load-dag-definitions.md) <sup><sub>⭐</sub></sup> <a id="how-to-store-dags"></a>
-  - [`How to manage airflow connections?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-connections.md) <sup><sub>⭐</sub></sup> <a id="how-to-create-airflow-connections"></a>
-  - [`How to manage airflow variables?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-variables.md) <a id="how-to-create-airflow-variables"></a>
-  - [`How to manage airflow pools?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-pools.md) <a id="how-to-create-airflow-pools"></a>
+  - [`Load Airflow DAGs`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/load-dag-definitions.md) <sup><sub>⭐</sub></sup> <a id="how-to-store-dags"></a>
+  - [`Manage Airflow Connections`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-connections.md) <sup><sub>⭐</sub></sup> <a id="how-to-create-airflow-connections"></a>
+  - [`Manage Airflow Variables`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-variables.md) <a id="how-to-create-airflow-variables"></a>
+  - [`Manage Airflow Pools`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/dags/airflow-pools.md) <a id="how-to-create-airflow-pools"></a>
 - __Security:__
-  - [`How to manage airflow users?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/security/airflow-users.md) <sup><sub>⭐</sub></sup> <a id="how-to-create-airflow-users"></a>
-  - [`How to integrate airflow with LDAP or OAUTH?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/security/ldap-oauth.md) <a id="how-to-authenticate-airflow-users-with-ldapoauth"></a>
-  - [`How to set the fernet encryption key?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/security/set-fernet-key.md) <a id="how-to-set-a-custom-fernet-encryption-key"></a>
-  - [`How to set the webserver secret key?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/security/set-webserver-secret-key.md) <a id="how-to-set-a-custom-webserver-secret_key"></a>
+  - [`Manage Airflow Users`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/security/airflow-users.md) <sup><sub>⭐</sub></sup> <a id="how-to-create-airflow-users"></a>
+  - [`Integrate Airflow with LDAP or OAUTH`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/security/ldap-oauth.md) <a id="how-to-authenticate-airflow-users-with-ldapoauth"></a>
+  - [`Set Airflow Fernet Encryption Key`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/security/set-fernet-key.md) <a id="how-to-set-a-custom-fernet-encryption-key"></a>
+  - [`Set Airflow Webserver Secret Key`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/security/set-webserver-secret-key.md) <a id="how-to-set-a-custom-webserver-secret_key"></a>
 - __Monitoring:__
-  - [`How to persist airflow logs?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-persistence.md) <sup><sub>⭐</sub></sup> <a id="how-to-persist-airflow-logs"></a>
-  - [`How to automatically clean up airflow logs?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-cleanup.md)
-  - [`How to configure the scheduler liveness probe?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md) <a id="how-to-configure-the-scheduler-liveness-probe"></a>
-  - [`How to integrate airflow with Prometheus?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/prometheus.md) <a id="how-to-integrate-airflow-with-prometheus"></a>
+  - [`Manage Airflow Logs`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-persistence.md) <sup><sub>⭐</sub></sup> <a id="how-to-persist-airflow-logs"></a>
+  - [`Manage Airflow Logs Cleanup`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/log-cleanup.md)
+  - [`Configure Scheduler Liveness Probe`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md) <a id="how-to-configure-the-scheduler-liveness-probe"></a>
+  - [`Integrate Airflow with Prometheus`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/prometheus.md) <a id="how-to-integrate-airflow-with-prometheus"></a>
 - __Databases:__
-  - [`How to configure the embedded database?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/embedded-database.md) <a id="how-to-use-the-embedded-postgres"></a>
-  - [`How to configure the embedded redis?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/embedded-redis.md)
-  - [`How to configure an external database?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/external-database.md) <sup><sub>⭐</sub></sup> <a id="how-to-use-an-external-database"></a>
-  - [`How to configure an external redis?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/external-redis.md) <sup><sub>⭐</sub></sup> <a id="how-to-use-an-external-redis"></a>
-  - [`How to configure pgbouncer?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/pgbouncer.md)
+  - [`Configure Database (Built-In)`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/embedded-database.md) <a id="how-to-use-the-embedded-postgres"></a>
+  - [`Configure Database (External)`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/external-database.md) <sup><sub>⭐</sub></sup> <a id="how-to-use-an-external-database"></a>
+  - [`Configure PgBouncer`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/pgbouncer.md)
+  - [`Configure Redis (Built-In)`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/embedded-redis.md)
+  - [`Configure Redis (External)`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/external-redis.md) <sup><sub>⭐</sub></sup> <a id="how-to-use-an-external-redis"></a>
 - __Kubernetes:__
-  - [`How to set up a kubernetes ingress?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/ingress.md) <a id="how-to-set-up-an-ingress"></a>
-  - [`How to add extra kubernetes manifests?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/extra-manifests.md) <a id="how-to-add-extra-manifests"></a>
-  - [`How to configure pod affinity, nodeSelector, and tolerations?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/affinity-node-selectors-tolerations.md) <a id="how-to-use-pod-affinity-nodeselector-and-tolerations"></a>
-  - [`How to mount extra persistent volumes?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/mount-persistent-volumes.md)
-  - [`How to mount ConfigMaps and Secrets as environment variables?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/mount-environment-variables.md) <a id="how-to-create-airflow-variables"></a>
-  - [`How to mount ConfigMaps and Secrets as files?`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/mount-files.md) <a id="how-to-mount-secretsconfigmaps-as-files-on-workers"></a>
+  - [`Configure Kubernetes Ingress`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/ingress.md) <sup><sub>⭐</sub></sup> <a id="how-to-set-up-an-ingress"></a>
+  - [`Mount Extra Persistent Volumes`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/mount-persistent-volumes.md) <sup><sub>⭐</sub></sup>
+  - [`Mount Files from Secrets/ConfigMaps`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/mount-files.md) <a id="how-to-mount-secretsconfigmaps-as-files-on-workers"></a>
+  - [`Mount Environment Variables from Secrets/ConfigMaps`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/mount-environment-variables.md) <a id="how-to-create-airflow-variables"></a>
+  - [`Configure Pod Affinity/Selectors/Tolerations`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/affinity-node-selectors-tolerations.md) <a id="how-to-use-pod-affinity-nodeselector-and-tolerations"></a>
+  - [`Include Extra Kubernetes Manifests`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/extra-manifests.md) <a id="how-to-add-extra-manifests"></a>
 
 ## Examples
 

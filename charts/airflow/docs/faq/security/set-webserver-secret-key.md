@@ -2,7 +2,7 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to set the webserver secret key?
+# Set Airflow Webserver Secret Key
 
 ## Option 1 - using the value
 

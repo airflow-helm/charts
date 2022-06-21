@@ -2,7 +2,7 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to load DAG definitions?
+# Load Airflow DAGs
 
 To use your airflow cluster, you will need to make your DAG definitions (python files) available to airflow.
 

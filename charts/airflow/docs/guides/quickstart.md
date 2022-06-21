@@ -116,5 +116,5 @@ kubectl port-forward svc/${AIRFLOW_NAME}-web 8080:8080 --namespace $AIRFLOW_NAME
 >
 > Learn more about authentication:
 >
-> - [`FAQ: How to manage airflow users?`](../faq/security/airflow-users.md) 
-> - [`FAQ: How to integrate airflow with LDAP or OAUTH?`](../faq/security/ldap-oauth.md)
+> - [`Manage Airflow Users`](../faq/security/airflow-users.md) 
+> - [`Integrate Airflow with LDAP or OAUTH`](../faq/security/ldap-oauth.md)

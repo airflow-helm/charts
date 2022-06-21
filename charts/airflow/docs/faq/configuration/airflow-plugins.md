@@ -2,7 +2,7 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# How to load airflow plugins?
+# Manage Airflow Plugins
 
 There are multiple ways to load [Airflow Plugins](https://airflow.apache.org/docs/apache-airflow/stable/plugins.html) when using the chart.
 
