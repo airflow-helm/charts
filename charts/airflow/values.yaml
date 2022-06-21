@@ -618,6 +618,11 @@ scheduler:
       ##
       thresholdSeconds: 300
 
+      ## minimum number of seconds the scheduler must have run before the task creation check begins
+      ## - [WARNING] must be long enough for the scheduler to boot and create a task
+      ##
+      schedulerAgeBeforeCheck: 180
+
   ## extra pip packages to install in the scheduler Pods
   ##
   ## ____ EXAMPLE _______________

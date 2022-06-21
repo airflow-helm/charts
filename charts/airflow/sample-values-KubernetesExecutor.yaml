@@ -126,6 +126,7 @@ scheduler:
     taskCreationCheck:
       enabled: false
       thresholdSeconds: 300
+      schedulerAgeBeforeCheck: 180
 
 ###################################
 ## COMPONENT | Airflow Webserver

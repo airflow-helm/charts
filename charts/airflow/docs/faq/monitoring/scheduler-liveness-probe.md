@@ -12,14 +12,6 @@ for each airflow scheduler which regularly queries the Airflow Metadata Database
 A scheduler is "healthy" if it has had a "heartbeat" in the last `AIRFLOW__SCHEDULER__SCHEDULER_HEALTH_CHECK_THRESHOLD` seconds.
 Each scheduler will perform a "heartbeat" every `AIRFLOW__SCHEDULER__SCHEDULER_HEARTBEAT_SEC` seconds by updating the `latest_heartbeat` of its `SchedulerJob` in the Airflow Metadata `jobs` table.
 
-> 🟥 __Warning__ 🟥
->
-> A scheduler can have a "heartbeat" but be deadlocked such that it's unable to schedule new tasks,
-> we provide the [`scheduler.livenessProbe.taskCreationCheck.*`](#scheduler-task-creation-check) values to automatically restart the scheduler in these cases.
->
-> - https://github.com/apache/airflow/issues/7935 - patched in airflow `2.0.2`
-> - https://github.com/apache/airflow/issues/15938 - patched in airflow `2.1.1`
-
 By default, the chart runs a liveness probe every __30 seconds__ (`periodSeconds`), and will restart a scheduler if __5 probe failures__ (`failureThreshold`) occur in a row.
 This means a scheduler must be unhealthy for at least `30 x 5 = 150` seconds before Kubernetes will automatically restart a scheduler Pod.
 
@@ -51,6 +43,16 @@ scheduler:
 
 ## Scheduler "Task Creation Check"
 
+> 🟥 __Warning__ 🟥
+>
+> A scheduler can have a ["heartbeat"](#scheduler-heartbeat-check) but be deadlocked such that it's unable to schedule new tasks,
+> we provide the `scheduler.livenessProbe.taskCreationCheck.*` values to configure a probe that automatically restarts the scheduler in these cases.
+>
+> Known Deadlock Bugs:
+> 
+> - https://github.com/apache/airflow/issues/7935 - patched in airflow `2.0.2`
+> - https://github.com/apache/airflow/issues/15938 - patched in airflow `2.1.1`
+
 The liveness probe can additionally check if the Scheduler is creating new [tasks](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) as an indication of its health.
 This check works by ensuring that the most recent `LocalTaskJob` had a `start_date` no more than `scheduler.livenessProbe.taskCreationCheck.thresholdSeconds` seconds ago.
 
@@ -73,6 +75,11 @@ scheduler:
       ## WARNING: must be AT LEAST equal to your shortest DAG schedule_interval
       ## WARNING: DummyOperator tasks will NOT be seen by this probe
       thresholdSeconds: 300
+      
+      ## minimum number of seconds the scheduler must have run before the task creation check begins
+      ## WARNING: must be long enough for the scheduler to boot and create a task
+      ##
+      schedulerAgeBeforeCheck: 180
 ```
 
 > 🟦 __Tip__ 🟦

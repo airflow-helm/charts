@@ -149,6 +149,9 @@ spec:
                   {{- end }}
 
                   with create_session() as session:
+                      ########################
+                      # heartbeat check
+                      ########################
                       # ensure the SchedulerJob with most recent heartbeat for this `hostname` is alive
                       hostname = get_hostname()
                       scheduler_job = session \
@@ -161,29 +164,37 @@ spec:
                           pass
                       else:
                           sys.exit(f"The SchedulerJob (id={scheduler_job.id}) for hostname '{hostname}' is not alive")
-
                       {{- if .Values.scheduler.livenessProbe.taskCreationCheck.enabled }}
+                      {{- $min_scheduler_age := .Values.scheduler.livenessProbe.taskCreationCheck.schedulerAgeBeforeCheck }}
+                      {{- if not (or (typeIs "float64" $min_scheduler_age) (typeIs "int64" $min_scheduler_age)) }}
+                      {{- /* the type of a number could be float64 or int64 depending on how it was set (values.yaml, or --set) */ -}}
+                      {{ required (printf "`scheduler.livenessProbe.taskCreationCheck.schedulerAgeBeforeCheck` must be int-type, but got %s!" (typeOf $min_scheduler_age)) nil }}
+                      {{- end }}
                       {{- $task_job_threshold := .Values.scheduler.livenessProbe.taskCreationCheck.thresholdSeconds }}
                       {{- if not (or (typeIs "float64" $task_job_threshold) (typeIs "int64" $task_job_threshold)) }}
                       {{- /* the type of a number could be float64 or int64 depending on how it was set (values.yaml, or --set) */ -}}
                       {{ required (printf "`scheduler.livenessProbe.taskCreationCheck.thresholdSeconds` must be int-type, but got %s!" (typeOf $task_job_threshold)) nil }}
                       {{- end }}
-
-                      # ensure the most recent LocalTaskJob had a start_date in the last `task_job_threshold` seconds
-                      task_job_threshold = {{ $task_job_threshold }}
-                      task_job = session \
-                          .query(LocalTaskJob) \
-                          .order_by(LocalTaskJob.id.desc()) \
-                          .limit(1) \
-                          .first()
-                      if task_job is not None:
-                          if (timezone.utcnow() - task_job.start_date).total_seconds() < task_job_threshold:
-                              pass
-                          else:
-                              sys.exit(
-                                  f"The most recent LocalTaskJob (id={task_job.id}, dag_id={task_job.dag_id}) "
-                                  f"started over {task_job_threshold} seconds ago"
-                              )
+                      ########################
+                      # task creation check
+                      ########################
+                      min_scheduler_age = {{ $min_scheduler_age }}
+                      if (timezone.utcnow() - scheduler_job.start_date).total_seconds() > min_scheduler_age:
+                          # ensure the most recent LocalTaskJob had a start_date in the last `task_job_threshold` seconds
+                          task_job_threshold = {{ $task_job_threshold }}
+                          task_job = session \
+                              .query(LocalTaskJob) \
+                              .order_by(LocalTaskJob.id.desc()) \
+                              .limit(1) \
+                              .first()
+                          if task_job is not None:
+                              if (timezone.utcnow() - task_job.start_date).total_seconds() < task_job_threshold:
+                                  pass
+                              else:
+                                  sys.exit(
+                                      f"The most recent LocalTaskJob (id={task_job.id}, dag_id={task_job.dag_id}) "
+                                      f"started over {task_job_threshold} seconds ago"
+                                  )
                       {{- end }}
           {{- end }}
           {{- if or ($volumeMounts) (include "airflow.executor.kubernetes_like" .) }}
