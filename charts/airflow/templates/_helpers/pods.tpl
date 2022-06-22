@@ -364,7 +364,11 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Value
 {{- end }}
 
 {{- /* logs */ -}}
-{{- if .Values.logs.persistence.enabled }}
+{{- if include "airflow.extraVolumeMounts.has_log_path" . }}
+{{- /* when `airflow.extraVolumeMounts` has `logs.path`, we dont need a "logs-data" volume mount */ -}}
+{{- else if include "airflow._has_logs_path" (dict "Values" .Values "volume_mounts" .extraVolumeMounts) }}
+{{- /* when `.extraVolumeMounts` has `logs.path`, we dont need a "logs-data" volume mount */ -}}
+{{- else if .Values.logs.persistence.enabled }}
 - name: logs-data
   mountPath: {{ .Values.logs.path }}
   subPath: {{ .Values.logs.persistence.subPath }}
@@ -393,7 +397,7 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Value
 
 {{/*
 The list of `volumes` for web/scheduler/worker/flower Pods
-EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes) }}
+EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes "extraVolumeMounts" $extraVolumeMounts) }}
 */}}
 {{- define "airflow.volumes" }}
 {{- /* airflow_local_settings.py */ -}}
@@ -423,7 +427,11 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
 {{- end }}
 
 {{- /* logs */ -}}
-{{- if .Values.logs.persistence.enabled }}
+{{- if include "airflow.extraVolumeMounts.has_log_path" . }}
+{{- /* when `airflow.extraVolumeMounts` has `logs.path`, we dont need a "logs-data" volume */ -}}
+{{- else if include "airflow._has_logs_path" (dict "Values" .Values "volume_mounts" .extraVolumeMounts) }}
+{{- /* when `.extraVolumeMounts` has `logs.path`, we dont need a "logs-data" volume */ -}}
+{{- else if .Values.logs.persistence.enabled }}
 - name: logs-data
   persistentVolumeClaim:
     {{- if .Values.logs.persistence.existingClaim }}

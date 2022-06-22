@@ -12,6 +12,22 @@
   {{- end }}
 {{- end }}
 
+{{- /* if an extra volume has been mounted for worker logs */ -}}
+{{- $extra_volumes_worker_logs := false }}
+{{- if include "airflow.extraVolumeMounts.has_log_path" . }}
+{{- $extra_volumes_worker_logs = true }}
+{{- end }}
+{{- if .Values.workers.enabled }}
+  {{- if include "airflow._has_logs_path" (dict "Values" .Values "volume_mounts" .Values.workers.extraVolumeMounts) }}
+  {{- $extra_volumes_worker_logs = true }}
+  {{- end }}
+{{- end }}
+{{- if and (include "airflow.executor.kubernetes_like" .) (not .Values.airflow.kubernetesPodTemplate.stringOverride) }}
+  {{- if include "airflow._has_logs_path" (dict "Values" .Values "volume_mounts" .Values.airflow.kubernetesPodTemplate.extraVolumeMounts) }}
+  {{- $extra_volumes_worker_logs = true }}
+  {{- end }}
+{{- end }}
+
 {{- /* if we show the fernet_key warning */ -}}
 {{- $fernet_key_warning := true }}
 {{- $fernet_key_envvars := list "AIRFLOW__CORE__FERNET_KEY" "AIRFLOW__CORE__FERNET_KEY_CMD" "AIRFLOW__CORE__FERNET_KEY_SECRET" }}
@@ -118,9 +134,9 @@ Default Airflow Webserver login:
 {{- end }}
 {{ end }}
 
-{{- if and (not .Values.logs.persistence.enabled) (not $remote_logging_enabled) }}
+{{- if not (or .Values.logs.persistence.enabled $remote_logging_enabled $extra_volumes_worker_logs) }}
 You have NOT set up persistence for worker task logs, do this by:
-  1. Using a Kubernetes PVC with `logs.persistence.*`
+  1. Using a PersistentVolumeClaim with `logs.persistence.*`
   2. Using remote logging with `AIRFLOW__LOGGING__REMOTE_LOGGING`
 {{ end }}
 
