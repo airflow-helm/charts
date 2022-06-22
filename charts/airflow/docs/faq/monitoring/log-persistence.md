@@ -216,12 +216,12 @@ Kubernetes has many types of Pod Volumes, consult [the official docs](https://ku
 
 > 🟥 __Warning__ 🟥
 >
-> This is an advanced feature, only use it if you know that you need it.
+> Pod Volumes are an advanced feature, consider other options unless you need the flexibility of this approach.
 
 > 🟦 __Tip__ 🟦
 >
 > It is possible to store both __logs__ AND __DAGs__ on the same Pod Volume by setting `dags.path` and `logs.path` to be a sub folder 
-> under the `mountPath` of your `airflow.extraVolumeMounts`. _(WARNING: the volume type must support writing)_
+> under a `mountPath` from `airflow.extraVolumeMounts`. _(WARNING: the volume type must support writing)_
 
 <details>
 <summary>
@@ -233,9 +233,8 @@ Kubernetes has many types of Pod Volumes, consult [the official docs](https://ku
 
 > 🟦 __Tip__ 🟦
 >
-> The chart has special values just for PersistentVolumeClaims (`logs.persistence.*`).
-> <br>
-> Unless you require the flexibility of `extraVolumeMounts`, we recommend using [`Option 1`](#option-1---persistent-volume-claim) instead.
+> The chart has special values just for PersistentVolumeClaims (`logs.persistence.*`), 
+> see [`Option 1`](#option-1---persistent-volume-claim) for more information.
 
 For example, to mount a [`persistentVolumeClaim`](https://kubernetes.io/docs/concepts/storage/volumes/#persistentvolumeclaim) type volume at `/opt/airflow/logs`:
 
