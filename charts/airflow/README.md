@@ -61,7 +61,7 @@ and was previously known as `stable/airflow` when it was developed in the `helm/
 ## Key Features
 
 - __Support for Airflow Versions:__ 
-   - [`1.10` | `2.0` | `2.1` | `2.2`](#airflow-version-support)
+   - [`1.10` | `2.0` | `2.1` | `2.2` | `2.3`](#airflow-version-support)
 - __Support for Airflow Executors:__ 
    - [`CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor`](#airflow-executor-support)
 - __Easily Connect with your Database:__
@@ -151,12 +151,13 @@ and was previously known as `stable/airflow` when it was developed in the `helm/
 
 The following table lists the __airflow versions__ supported by this chart (set by [`airflow.image.tag`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-version.md) value).
 
-Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.5.3` | `8.6.0+` |
---- | --- | --- | ---
-`1.10.X` | ✔️ | ⚠️ <sub>[1]</sub> | ⚠️ <sub>[1]</sub>
-`2.0.X` | ❌ | ✔️ | ✔️
-`2.1.X` | ❌ | ✔️ | ✔️
-`2.2.X` | ❌ | ⚠️ <sub>[2]</sub> | ✔️️
+Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.5.3` | `8.6.0` | `8.6.1+` |
+--- | --- | --- | --- | ---
+`1.10.X` | ✔️ | ✔️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub>
+`2.0.X` | ❌ | ✔️ | ✔️ | ✔️
+`2.1.X` | ❌ | ✔️ | ✔️ | ✔️
+`2.2.X` | ❌ | ⚠️ <sub>[2]</sub> | ✔️️ | ✔️
+`2.3.X` | ❌ | ❌ | ❌ | ✔️️
 
 <sub>[1] you must set `airflow.legacyCommands = true` when using airflow version `1.10.X`</sub><br>
 <sub>[2] the [Deferrable Operators & Triggers](https://airflow.apache.org/docs/apache-airflow/stable/concepts/deferring.html) feature won't work, as there is no `airflow triggerer` Deployment</sub>
