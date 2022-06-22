@@ -1,6 +1,13 @@
 {{/* Checks for `.Release.name` */}}
-{{- if gt (len .Release.Name) 43 }}
-  {{ required "The `.Release.name` must be less than 43 characters (due to the 63 character limit for names in Kubernetes)!" nil }}
+{{/* NOTE: `allowLongReleaseName` was added when the max length dropped from 43 to 40, and is NOT intended for new deployments */}}
+{{- if .Values.allowLongReleaseName }}
+  {{- if gt (len .Release.Name) 43 }}
+  {{ required "The `.Release.name` must be <= 43 characters (due to the 63 character limit for names in Kubernetes)!" nil }}
+  {{- end }}
+{{- else }}
+  {{- if gt (len .Release.Name) 40 }}
+  {{ required "The `.Release.name` must be <= 40 characters (due to the 63 character limit for names in Kubernetes)!" nil }}
+  {{- end }}
 {{- end }}
 
 {{/* Checks for `airflow.legacyCommands` */}}
