@@ -19,6 +19,12 @@ You may use Pod [init-containers](https://kubernetes.io/docs/concepts/workloads/
 > Always pin a SPECIFIC package version like `torch==1.8.0` instead of `torch~=1.8.0`,
 > this reduces the likelihood of inconsistent package versions across your cluster.
 
+> 🟦 __Tip__ 🟦
+>
+> The `airflow.protectedPipPackages` value specifies a list of packages whose versions will be constrained to whatever was already installed in the image.
+> <br>
+> By default, we only protect the `apache-airflow` package, but you can extend `airflow.protectedPipPackages` with your own packages.
+
 <details>
 <summary>
   <b>Install on ALL Pods</b>
