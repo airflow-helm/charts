@@ -177,8 +177,8 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "R
       unset PYTHONUSERBASE && \
       pip freeze | grep -i {{ range .Values.airflow.protectedPipPackages }}-e {{ printf "%s==" . | quote }} {{ end }} > protected-packages.txt && \
       pip install --constraint ./protected-packages.txt --user {{ range .extraPipPackages }}{{ . | quote }} {{ end }} && \
-      echo "copying '/home/airflow/.local/*' to '/opt/home-airflow-local'..." && \
-      cp -r /home/airflow/.local/* /opt/home-airflow-local
+      echo "copying '/home/airflow/.local/' to '/opt/home-airflow-local/.local/'..." && \
+      rsync -ah --stats --delete /home/airflow/.local/ /opt/home-airflow-local/.local/
   volumeMounts:
     - name: home-airflow-local
       mountPath: /opt/home-airflow-local
@@ -377,6 +377,7 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Value
 {{- if .extraPipPackages }}
 - name: home-airflow-local
   mountPath: /home/airflow/.local
+  subPath: .local
 {{- end }}
 
 {{- /* user-defined (global) */ -}}
