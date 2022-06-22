@@ -67,6 +67,9 @@
 {{- if or (.Values.airflow.config.AIRFLOW__CORE__SQL_ALCHEMY_CONN) (.Values.airflow.config.AIRFLOW__CORE__SQL_ALCHEMY_CONN_CMD) }}
   {{ required "Don't define `airflow.config.AIRFLOW__CORE__SQL_ALCHEMY_CONN`, it will be automatically set by the chart!" nil }}
 {{- end }}
+{{- if or (.Values.airflow.config.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN) (.Values.airflow.config.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN_CMD) }}
+  {{ required "Don't define `airflow.config.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN`, it will be automatically set by the chart!" nil }}
+{{- end }}
 
 {{/* Checks for `logs.persistence` */}}
 {{- if .Values.logs.persistence.enabled }}
