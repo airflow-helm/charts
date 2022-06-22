@@ -1,12 +1,58 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to the `User-Community Airflow Helm Chart` will be documented in this file.
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - TBD
+## [Unreleased]
 
 TBD
+
+## [8.6.1] - 2022-06-22
+
+> 🟥 __WARNINGS__ 🟥
+>
+> - When using `extraPipPackages`, Pods will now fail to start if the `apache-airflow` version would be changed from the image version,
+>   see `airflow.protectedPipPackages` for more information.
+>   (NOTE: for critical deployments we STRONGLY recommend [embedding extra packages into the image](docs/faq/configuration/extra-python-packages.md#option-2---embedded-into-container-image) instead of using `extraPipPackages`)
+> - The maximum length for a helm release-name has been lowered to `40` characters (down from `43`).
+>   Existing deployments with a helm release-name between `41` and `43` characters MUST enable the `allowLongReleaseName` value to continue using the chart.
+>   (NOTE: the embedded Postgres and Redis will not work with a release-name between `41` and `43` characters).
+
+> 🟨 __NOTES__ 🟨
+>
+> - The chart now works with Airflow 2.3, however, please note the default image tag is still `2.2.5-python3.8`.
+> - Storing [logs under `airflow.extraVolumeMounts` (Pod Volumes)](docs/faq/monitoring/log-persistence.md#option-3---pod-volumes) is now a supported usage pattern.
+> - The [Scheduler "task creation check"](docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-task-creation-check) now has the `scheduler.livenessProbe.taskCreationCheck.schedulerAgeBeforeCheck` 
+>   value to ensure the scheduler has time to create tasks before starting the check.
+> - Airflow 2.3.0 introduced BETA support for ARM CPUs (like Apple Silicon).
+>   The chart's current default images for Postgres/Redis only support `amd64`,
+>   however, you may test our drop-in replacements that support both `arm64` and `amd64`:
+>    - [`bitnami/postgresql`](https://hub.docker.com/r/bitnami/postgresql/) → [`ghcr.io/airflow-helm/postgresql-bitnami`](https://ghcr.io/airflow-helm/postgresql-bitnami)
+>    - [`bitnami/redis`](https://hub.docker.com/r/bitnami/redis/) → `TBA`
+
+> 🟦 __OTHER__ 🟦
+>
+> - If you appreciate the `User-Community Airflow Helm Chart` please consider supporting us!
+>    - [give a ⭐ on GitHub](https://github.com/airflow-helm/charts/stargazers)
+>    - [give a ⭐ on ArtifactHub](https://artifacthub.io/packages/helm/airflow-helm/airflow)
+
+### Added
+- add `airflow.protectedPipPackages` ([#610](https://github.com/airflow-helm/charts/pull/610))
+- allow using `extraVolumeMounts` for log storage ([#585](https://github.com/airflow-helm/charts/pull/585))
+- minimum scheduler age before task-creation-check ([#612](https://github.com/airflow-helm/charts/pull/612))
+
+### Changed
+- update `.helmignore` file to exclude docs ([#593](https://github.com/airflow-helm/charts/pull/593))
+- require release-name to have <= 40 characters ([#589](https://github.com/airflow-helm/charts/pull/589))
+
+### Fixed
+- fix some breaking changes from airflow 2.3.0 ([#592](https://github.com/airflow-helm/charts/pull/592)) 
+- fix wait-for-db-migrations in airflow 2.3.0 ([#576](https://github.com/airflow-helm/charts/pull/576)) 
+- fix pgbouncer liveness probe in minikube ([#560](https://github.com/airflow-helm/charts/pull/560))
+- use rsync for extraPipPackages ([#599](https://github.com/airflow-helm/charts/pull/599))
+- set `AIRFLOW__LOGGING__WORKER_LOG_SERVER_PORT` ([#608](https://github.com/airflow-helm/charts/pull/608))
+- only set `SQLALCHEMY_DATABASE_URI` in airflow 1.10 ([#609](https://github.com/airflow-helm/charts/pull/609))
 
 ## [8.6.0] - 2022-04-13
 
@@ -28,12 +74,6 @@ TBD
 > - The new ["log-cleanup sidecar"](docs/faq/monitoring/log-cleanup.md) is enabled by default on schedulers and workers
 > - The new [PgBouncer startupProbe](https://github.com/airflow-helm/charts/pull/547) will only work in Kubernetes 1.18+
 > - The [`extraManifests` value](docs/faq/kubernetes/extra-manifests.md) has been significantly improved
-
-> 🟦 __OTHER__ 🟦
->
-> - If you appreciate the `User-Community Airflow Helm Chart` please consider supporting us!
->    - [give a ⭐ on GitHub](https://github.com/airflow-helm/charts/stargazers)
->    - [give a ⭐ on ArtifactHub](https://artifacthub.io/packages/helm/airflow-helm/airflow)
 
 ### Added
 - add "airflow triggerer" Deployment ([#555](https://github.com/airflow-helm/charts/pull/555))
@@ -681,7 +721,8 @@ TBD
 >
 > - To read about versions `7.0.0` and before, please see the [legacy repo](https://github.com/helm/charts/tree/master/stable/airflow).
 
-[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.6.0...HEAD
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.6.1...HEAD
+[8.6.1]: https://github.com/airflow-helm/charts/compare/airflow-8.6.0...airflow-8.6.1
 [8.6.0]: https://github.com/airflow-helm/charts/compare/airflow-8.5.3...airflow-8.6.0
 [8.5.3]: https://github.com/airflow-helm/charts/compare/airflow-8.5.2...airflow-8.5.3
 [8.5.2]: https://github.com/airflow-helm/charts/compare/airflow-8.5.1...airflow-8.5.2
