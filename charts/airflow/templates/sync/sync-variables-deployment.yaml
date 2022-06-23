@@ -1,4 +1,4 @@
-{{- if and (.Values.airflow.variables) (.Values.airflow.variablesUpdate) }}
+{{- if and (or .Values.airflow.variables .Values.airflow.variablesTemplates) (.Values.airflow.variablesUpdate) }}
 {{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.airflow.sync.nodeSelector) }}
 {{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.airflow.sync.affinity) }}
 {{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.airflow.sync.tolerations) }}

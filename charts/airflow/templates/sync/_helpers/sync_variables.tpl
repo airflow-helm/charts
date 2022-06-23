@@ -15,7 +15,7 @@ The python sync script for variables.
 #############
 from airflow.models import Variable
 from airflow.utils.db import create_session
-
+from pathlib import Path
 
 #############
 ## Classes ##
@@ -43,6 +43,7 @@ class VariableWrapper(object):
 ###############
 ## Variables ##
 ###############
+VAR__TEMPLATES_PATH = Path('/mnt/templates')
 VAR__TEMPLATE_NAMES = [
   {{- range $k, $v := .Values.airflow.variablesTemplates }}
   {{ $k | quote }},
@@ -63,6 +64,14 @@ VAR__VARIABLE_WRAPPERS = {
 ###############
 ## Functions ##
 ###############
+def load_template_variables():
+    for variable_name in VAR__TEMPLATE_NAMES:
+        variable_path = VAR__TEMPLATES_PATH / variable_name
+        yield variable_name, VariableWrapper(
+            key=variable_name,
+            val=variable_path.read_text()
+        )
+
 def compare_variables(v1: Variable, v2: Variable) -> bool:
     """
     Check if two Variable objects are identical.
@@ -114,7 +123,10 @@ def sync_with_airflow() -> None:
     """
     Preform a sync of all objects with airflow (note, `sync_with_airflow()` is called in `main()` template).
     """
-    sync_all_variables(variable_wrappers=VAR__VARIABLE_WRAPPERS)
+    sync_all_variables(variable_wrappers={
+        **VAR__VARIABLE_WRAPPERS,
+        **dict(load_template_variables())
+    })
 
 
 ##############

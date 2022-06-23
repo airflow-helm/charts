@@ -14,9 +14,11 @@ The python sync script for connections.
 #############
 ## Imports ##
 #############
+import json
+
 from airflow.models import Connection
 from airflow.utils.db import create_session
-
+from pathlib import Path
 
 #############
 ## Classes ##
@@ -87,6 +89,7 @@ class ConnectionWrapper(object):
 ###############
 ## Variables ##
 ###############
+VAR__TEMPLATES_PATH = Path('/mnt/templates')
 VAR__TEMPLATE_NAMES = [
   {{- range $k, $v := .Values.airflow.connectionsTemplates }}
   {{ $k | quote }},
@@ -132,6 +135,14 @@ VAR__CONNECTION_WRAPPERS = {
 ###############
 ## Functions ##
 ###############
+def load_template_connection():
+    for connection_name in VAR__TEMPLATE_NAMES:
+        connection_path = VAR__TEMPLATES_PATH / connection_name
+        connection_data = json.loads(connection_path.read_text())
+        yield connection_name, ConnectionWrapper(
+            **connection_data
+        )
+
 def compare_connections(c1: Connection, c2: Connection) -> bool:
     """
     Check if two Connection objects are identical.
@@ -204,7 +215,10 @@ def sync_with_airflow() -> None:
     """
     Preform a sync of all objects with airflow (note, `sync_with_airflow()` is called in `main()` template).
     """
-    sync_all_connections(connection_wrappers=VAR__CONNECTION_WRAPPERS)
+    sync_all_connections(connection_wrappers={
+        **VAR__CONNECTION_WRAPPERS,
+        **dict(load_template_connection())
+    })
 
 
 ##############
