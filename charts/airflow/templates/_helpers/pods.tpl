@@ -7,7 +7,9 @@ imagePullPolicy: {{ .Values.airflow.image.pullPolicy }}
 securityContext:
   runAsUser: {{ .Values.airflow.image.uid }}
   runAsGroup: {{ .Values.airflow.image.gid }}
+  {{- if .Values.airflow.defaultContainerSecurityContext }}
   {{- omit .Values.airflow.defaultContainerSecurityContext "runAsUser" "runAsGroup" | toYaml | nindent 2 }}
+  {{- end }}
 {{- end }}
 
 {{/*
@@ -200,7 +202,9 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
   securityContext:
     runAsUser: {{ .Values.dags.gitSync.image.uid }}
     runAsGroup: {{ .Values.dags.gitSync.image.gid }}
+    {{- if .Values.airflow.defaultContainerSecurityContext }}
     {{- omit .Values.airflow.defaultContainerSecurityContext "runAsUser" "runAsGroup" | toYaml | nindent 4 }}
+    {{- end }}
   resources:
     {{- toYaml .Values.dags.gitSync.resources | nindent 4 }}
   envFrom:

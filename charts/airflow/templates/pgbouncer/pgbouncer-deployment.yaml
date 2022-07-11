@@ -84,7 +84,9 @@ spec:
           securityContext:
             runAsUser: {{ .Values.pgbouncer.image.uid }}
             runAsGroup: {{ .Values.pgbouncer.image.gid }}
+            {{- if .Values.airflow.defaultContainerSecurityContext }}
             {{- omit .Values.airflow.defaultContainerSecurityContext "runAsUser" "runAsGroup" | toYaml | nindent 12 }}
+            {{- end }}
           resources:
             {{- toYaml .Values.pgbouncer.resources | nindent 12 }}
           envFrom:
