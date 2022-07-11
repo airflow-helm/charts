@@ -197,6 +197,14 @@ airflow:
     ## this does NOT give root permissions to Pods, only the "root" group
     fsGroup: 0
 
+  ## default securityContext for Containers in airflow Pods
+  ## - `runAsUser` is ignored, please set with per-image `*.image.uid`
+  ## - `runAsGroup` is ignored, please set with per-image `*.image.gid`
+  ## - spec for SecurityContext:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
+  ##
+  defaultContainerSecurityContext: {}
+
   ## extra annotations for airflow Pods
   ##
   podAnnotations: {}
@@ -2029,7 +2037,7 @@ redis:
       ## the access mode of the PVC
       ##
       accessModes:
-      - ReadWriteOnce
+        - ReadWriteOnce
 
       ## the size of PVC to request
       ##
