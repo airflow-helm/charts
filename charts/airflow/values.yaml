@@ -645,6 +645,9 @@ scheduler:
       ##
       schedulerAgeBeforeCheck: 180
 
+  ## extra environment for just the scheduler Pods
+  extraEnv: []
+
   ## extra pip packages to install in the scheduler Pods
   ##
   ## ____ EXAMPLE _______________
@@ -812,6 +815,9 @@ web:
     periodSeconds: 10
     timeoutSeconds: 5
     failureThreshold: 6
+
+  ## extra environment for just the web Pods
+  extraEnv: []
 
   ## extra pip packages to install in the web Pods
   ##
@@ -994,6 +1000,9 @@ workers:
     ##
     intervalSeconds: 900
 
+  ## extra environment for just the worker Pods
+  extraEnv: []
+
   ## configs for the worker Pods' liveness probe
   ##
   livenessProbe:
@@ -1121,6 +1130,9 @@ triggerer:
     periodSeconds: 30
     timeoutSeconds: 60
     failureThreshold: 5
+
+  ## extra environment for just the triggerer Pods
+  extraEnv: []
 
   ## extra pip packages to install in the triggerer Pod
   ##
@@ -1263,6 +1275,9 @@ flower:
     periodSeconds: 10
     timeoutSeconds: 5
     failureThreshold: 6
+
+  ## extra environment for just the flower Pods
+  extraEnv: []
 
   ## extra pip packages to install in the flower Pod
   ##

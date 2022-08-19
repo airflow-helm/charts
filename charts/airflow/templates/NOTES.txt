@@ -11,6 +11,11 @@
   {{- $remote_logging_enabled = true }}
   {{- end }}
 {{- end }}
+{{- range $env := .Values.workers.extraEnv }}
+  {{- if has $env.name $remote_logging_envvars }}
+  {{- $remote_logging_enabled = true }}
+  {{- end }}
+{{- end }}
 
 {{- /* if an extra volume has been mounted for worker logs */ -}}
 {{- $extra_volumes_worker_logs := false }}
@@ -44,6 +49,7 @@
   {{- $fernet_key_warning = false }}
   {{- end }}
 {{- end }}
+{{/* we still warn even if we set the fernet key in sub-extraEnvs as they might be different, and that would be bad */}}
 
 {{- /* if we show the webserver secret_key warning */ -}}
 {{- $web_secret_warning := true }}
@@ -57,6 +63,11 @@
   {{- end }}
 {{- end }}
 {{- range $env := .Values.airflow.extraEnv }}
+  {{- if has $env.name $web_secret_envvars }}
+  {{- $web_secret_warning = false }}
+  {{- end }}
+{{- end }}
+{{- range $env := .Values.web.extraEnv }}
   {{- if has $env.name $web_secret_envvars }}
   {{- $web_secret_warning = false }}
   {{- end }}
