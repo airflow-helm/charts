@@ -664,6 +664,10 @@ web:
   ########################################
   ##
   webserverConfig:
+    ## by default, the helm chart owns the webserver config, however, sometimes it may be on a
+    ## custom version of the image. If this is the case, set this to false
+    enabled: true
+
     ## the full content of the `webserver_config.py` file (as a string)
     ## - docs for Flask-AppBuilder security configs:
     ##   https://flask-appbuilder.readthedocs.io/en/latest/security.html
