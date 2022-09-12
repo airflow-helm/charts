@@ -1300,6 +1300,24 @@ dags:
     ##
     size: 1Gi
 
+  ## a dictionary of dag is we want to control the status for
+  ##
+  ## ____ EXAMPLE _______________
+  ##   controlled:
+  ##     myamazingdag: true # will ensure the dag 'myamazingdag' is never paused
+  ##     myamazingdag2: false # will ensure the dag 'myamazingdag2' is alwas paused
+  ##
+  controlled: []
+
+  ## if we should unpause any dag that is not explicitly listed in `dags.controlled`
+  ##
+  pauseUncontrolled: false
+
+  ## if we create a Deployment to perpetually sync `dags.controlled`
+  ## - see docs for `airflow.usersUpdate`
+  ##
+  controlledUpdate: true
+
   ## configs for the git-sync sidecar (https://github.com/kubernetes/git-sync)
   ##
   gitSync:
@@ -2029,7 +2047,7 @@ redis:
       ## the access mode of the PVC
       ##
       accessModes:
-      - ReadWriteOnce
+        - ReadWriteOnce
 
       ## the size of PVC to request
       ##
