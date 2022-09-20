@@ -6,6 +6,7 @@
 {{- $extraPipPackages := .Values.airflow.extraPipPackages }}
 {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) }}
 {{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) }}
+{{- $priorityClassName := include "airflow.priorityClassName" (dict "Release" .Release "Values" .Values "priorityClassName" .Values.airflow.dbMigrations.priorityClassName) }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -70,6 +71,9 @@ spec:
       {{- if $podSecurityContext }}
       securityContext:
         {{- $podSecurityContext | nindent 8 }}
+      {{- end }}
+      {{- if $priorityClassName }}
+      priorityClassName: {{ $priorityClassName}}
       {{- end }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       initContainers:

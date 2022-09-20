@@ -3,6 +3,7 @@
 {{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.pgbouncer.affinity) }}
 {{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.pgbouncer.tolerations) }}
 {{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.pgbouncer.securityContext) }}
+{{- $priorityClassName := include "airflow.priorityClassName" (dict "Release" .Release "Values" .Values "priorityClassName" .Values.pgbouncer.priorityClassName) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -74,6 +75,9 @@ spec:
       {{- if $podSecurityContext }}
       securityContext:
         {{- $podSecurityContext | nindent 8 }}
+      {{- end }}
+      {{- if $priorityClassName }}
+      priorityClassName: {{ $priorityClassName}}
       {{- end }}
       terminationGracePeriodSeconds: {{ .Values.pgbouncer.terminationGracePeriodSeconds }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
