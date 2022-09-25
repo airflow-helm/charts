@@ -100,30 +100,32 @@ def main(sync_forever: bool):
 
     if sync_forever:
         # define variables used to track how long since last refresh/sync
+        global objects_sync_epoch, next_sync_epoch
         templates_sync_epoch = time.time()
         objects_sync_epoch = time.time()
 
         # main loop
         while True:
             # monitor for template secret/configmap updates
-            if (time.time() - templates_sync_epoch) > CONF__TEMPLATES_SYNC_INTERVAL:
+            next_sync_epoch = time.time()
+            if (next_sync_epoch - templates_sync_epoch) > CONF__TEMPLATES_SYNC_INTERVAL:
                 logging.debug(f"template sync interval reached, re-syncing all templates...")
                 changed_templates = refresh_template_cache(
                     template_names=VAR__TEMPLATE_NAMES,
                     template_mtime_cache=VAR__TEMPLATE_MTIME_CACHE,
                     template_value_cache=VAR__TEMPLATE_VALUE_CACHE
                 )
-                templates_sync_epoch = time.time()
+                templates_sync_epoch = next_sync_epoch
                 if changed_templates:
                     logging.info(f"template values have changed: [{','.join(changed_templates)}]")
                     sync_with_airflow()
-                    objects_sync_epoch = time.time()
+                    objects_sync_epoch = next_sync_epoch
 
             # monitor for external changes to objects (like from UI)
-            if (time.time() - objects_sync_epoch) > CONF__OBJECTS_SYNC_INTERVAL:
+            if (next_sync_epoch - objects_sync_epoch) > CONF__OBJECTS_SYNC_INTERVAL:
                 logging.debug(f"sync interval reached, re-syncing all objects...")
                 sync_with_airflow()
-                objects_sync_epoch = time.time()
+                objects_sync_epoch = next_sync_epoch
 
             # ensure we dont loop too fast
             time.sleep(0.5)
