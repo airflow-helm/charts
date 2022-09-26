@@ -18,7 +18,7 @@ from datetime import datetime
 from airflow.models import Pool
 from airflow.utils.db import create_session
 from croniter import croniter
-
+from typing import Tuple
 
 
 #############
@@ -32,14 +32,14 @@ class Schedule(object):
     def __init__(
             self,
             name: str,
-            recurrence: str
+            recurrence: str,
             slots: int
     ):
         self.name = name
         self.recurrence = recurrence
         self.slots = slots
 
-    def satisfies(self, interval: Optional[DateTimeInterval]) -> bool:
+    def satisfies(self, interval: Optional[DateTimeInterval] = None) -> bool:
         if interval is None:
             return False
 
@@ -180,7 +180,7 @@ def sync_all_pools(pool_wrappers: Dict[str, PoolWrapper]) -> None:
 def update_pools() -> None:
     interval = (objects_sync_epoch, next_sync_epoch) if objects_sync_epoch else None
     for pool in VAR__POOL_WRAPPERS.values():
-        pool.update(**kwargs)
+        pool.update(interval=interval)
 
 
 def sync_with_airflow() -> None:

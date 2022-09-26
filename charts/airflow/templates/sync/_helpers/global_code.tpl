@@ -24,6 +24,8 @@ CONF__TEMPLATES_SYNC_INTERVAL = 10
 # how frequently to re-sync objects (Connections, Pools, Users, Variables)
 CONF__OBJECTS_SYNC_INTERVAL = 60
 
+objects_sync_epoch = None
+next_sync_epoch = None
 
 ######################
 ## Global Functions ##
@@ -88,6 +90,7 @@ def refresh_template_cache(template_names: List[str],
 
 
 def main(sync_forever: bool):
+    global objects_sync_epoch, next_sync_epoch
     # initial sync of template cache
     refresh_template_cache(
         template_names=VAR__TEMPLATE_NAMES,
@@ -99,8 +102,7 @@ def main(sync_forever: bool):
     sync_with_airflow()
 
     if sync_forever:
-        # define variables used to track how long since last refresh/sync
-        global objects_sync_epoch, next_sync_epoch
+        # initialise variables used to track how long since last refresh/sync
         templates_sync_epoch = time.time()
         objects_sync_epoch = time.time()
 
