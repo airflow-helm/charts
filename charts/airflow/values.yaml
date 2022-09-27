@@ -956,6 +956,7 @@ workers:
     intervalSeconds: 900
 
   ## extra init Container for the worker Pod
+  ##
   ## ____ EXAMPLE _______________
   ##   extraInitContainer:
   ##     - name: "custom-init-container"
@@ -969,6 +970,7 @@ workers:
   ##            echo "Copy certs to shared volume"
   ##            cp -RL /etc/ssl/certs/* /tmp/ssl/certs
   ##            ${JAVA_HOME}/bin/keytool -import -trustcacerts -alias ca_minio -file /secrets-minio-cert/root.crt -cacerts -storepass changeit -noprompt
+  ##
   extraInitContainer: []
 
   ## extra pip packages to install in the worker Pod
