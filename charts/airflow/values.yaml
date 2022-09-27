@@ -955,6 +955,22 @@ workers:
     ##
     intervalSeconds: 900
 
+  ## extra init Container for the worker Pod
+  ## ____ EXAMPLE _______________
+  ##   extraInitContainer:
+  ##     - name: "custom-init-container"
+  ##        image: apache-airflow-spark:master-202207120818-d86175de
+  ##        command: ["/bin/sh", "-c"]
+  ##        args:
+  ##          - |-
+  ##            set -e
+  ##            export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64/
+  ##            mkdir -p /tmp/ssl/certs || true
+  ##            echo "Copy certs to shared volume"
+  ##            cp -RL /etc/ssl/certs/* /tmp/ssl/certs
+  ##            ${JAVA_HOME}/bin/keytool -import -trustcacerts -alias ca_minio -file /secrets-minio-cert/root.crt -cacerts -storepass changeit -noprompt
+  extraInitContainer: []
+
   ## extra pip packages to install in the worker Pod
   ##
   ## ____ EXAMPLE _______________
