@@ -958,7 +958,7 @@ workers:
   ## extra init Container for the worker Pod
   ##
   ## ____ EXAMPLE _______________
-  ## extraInitContainer:
+  ## extraInitContainer:
   ##   - name: "custom-init-container"
   ##      image: apache-airflow-spark:master-202207120818-d86175de
   ##      command: ["/bin/sh", "-c"]
