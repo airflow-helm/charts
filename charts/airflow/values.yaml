@@ -322,6 +322,11 @@ airflow:
     ##
     podAnnotations: {}
 
+    ## run commands after the container starts (postStart) or before the container stops (preStop)
+    ## - spec for container lifecycle
+    ##   https://kubernetes.io/docs/tasks/configure-pod-container/attach-handler-lifecycle-event/
+    lifecycle: {}
+
     ## the security context for the Pod template
     ## - spec for PodSecurityContext:
     ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
