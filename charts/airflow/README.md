@@ -158,6 +158,7 @@ Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.
 `2.1.X` | ❌ | ✔️ | ✔️ | ✔️
 `2.2.X` | ❌ | ⚠️ <sub>[2]</sub> | ✔️️ | ✔️
 `2.3.X` | ❌ | ❌ | ❌ | ✔️️
+`2.4.X` | ❌ | ❌ | ❌ | ✔️️
 
 <sub>[1] you must set `airflow.legacyCommands = true` when using airflow version `1.10.X`</sub><br>
 <sub>[2] the [Deferrable Operators & Triggers](https://airflow.apache.org/docs/apache-airflow/stable/concepts/deferring.html) feature won't work, as there is no `airflow triggerer` Deployment</sub>
