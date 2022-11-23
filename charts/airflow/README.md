@@ -48,7 +48,7 @@
 
 ## History
 
-This project is independent from the official chart found in the `apache/airflow` GitHub repository, 
+This project is independent from the official chart found in the `apache/airflow` GitHub repository,
 and was previously known as `stable/airflow` when it was developed in the `helm/charts` GitHub repository.
 
 ## Project Goals
@@ -60,9 +60,9 @@ and was previously known as `stable/airflow` when it was developed in the `helm/
 
 ## Key Features
 
-- __Support for Airflow Versions:__ 
+- __Support for Airflow Versions:__
    - [`1.10` | `2.0` | `2.1` | `2.2` | `2.3`](#airflow-version-support)
-- __Support for Airflow Executors:__ 
+- __Support for Airflow Executors:__
    - [`CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor`](#airflow-executor-support)
 - __Easily Connect with your Database:__
    - [`Connect to Postgres`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/external-database.md#option-1---postgres) |
@@ -167,7 +167,7 @@ Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.
 
 The following table lists the [__airflow executors__](https://airflow.apache.org/docs/apache-airflow/stable/executor/index.html) supported by this chart (set by `airflow.executor` value).
 
-Chart Version → <br> Airflow Executor ↓ | `7.X.X` | `8.X.X` | 
+Chart Version → <br> Airflow Executor ↓ | `7.X.X` | `8.X.X` |
 --- | --- | ---
 `CeleryExecutor` | ✔️ | ✔️
 `KubernetesExecutor` | ⚠️️ <sub>[1]</sub> | ✔️
@@ -536,5 +536,14 @@ Parameter | Description | Default
 `prometheusRule.enabled` | if the PrometheusRule resources should be deployed | `false`
 `prometheusRule.additionalLabels` | labels for PrometheusRule, so that Prometheus can select it | `{}`
 `prometheusRule.groups` | alerting rules for Prometheus | `[]`
+
+</details>
+
+<details>
+<summary><code>podDisruptionBudget.*</code></summary>
+
+Parameter | Description | Default
+--- | --- | ---
+`podDisruptionBudget.apiVersion` | The `apiVersion` to use for PodDisruptionBudget resources. For Kubernetes 1.21 and later: "policy/v1" and for Kubernetes 1.20 and before: "policy/v1beta1".  | `policy/v1`
 
 </details>

@@ -2171,3 +2171,13 @@ prometheusRule:
   ## - docs for alerting rules: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
   ##
   groups: []
+
+###################################
+## CONFIG | Kubernetes PDB
+###################################
+podDisruptionBudget:
+  ## the `apiVersion` to use for PodDisruptionBudget resources
+  ## - for Kubernetes 1.21 and later: "policy/v1"
+  ## - for Kubernetes 1.20 and before: "policy/v1beta1"
+  ##
+  apiVersion: policy/v1
