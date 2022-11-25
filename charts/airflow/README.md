@@ -229,6 +229,7 @@ Parameter | Description | Default
 Parameter | Description | Default
 --- | --- | ---
 `scheduler.replicas` | the number of scheduler Pods to run | `1`
+`scheduler.revisionHistoryLimit` | the limit number of deployment revision history | `null`
 `scheduler.resources` | resource requests/limits for the scheduler Pods | `{}`
 `scheduler.nodeSelector` | the nodeSelector configs for the scheduler Pods | `{}`
 `scheduler.affinity` | the affinity configs for the scheduler Pods | `{}`
@@ -257,6 +258,7 @@ Parameter | Description | Default
 --- | --- | ---
 `web.webserverConfig.*` | configs to generate webserver_config.py | `<see values.yaml>`
 `web.replicas` | the number of web Pods to run | `1`
+`web.revisionHistoryLimit` | the limit number of deployment revision history | `null`
 `web.resources` | resource requests/limits for the airflow web pods | `{}`
 `web.nodeSelector` | the number of web Pods to run | `{}`
 `web.affinity` | the affinity configs for the web Pods | `{}`
@@ -312,6 +314,7 @@ Parameter | Description | Default
 --- | --- | ---
 `triggerer.enabled` | if the triggerer should be deployed | `true`
 `triggerer.replicas` | the number of triggerer Pods to run | `1`
+`triggerer.revisionHistoryLimit` | the limit number of deployment revision history | `null`
 `triggerer.resources` | resource requests/limits for the airflow triggerer Pods | `{}`
 `triggerer.nodeSelector` | the nodeSelector configs for the triggerer Pods | `{}`
 `triggerer.affinity` | the affinity configs for the triggerer Pods | `{}`
@@ -337,6 +340,8 @@ Parameter | Description | Default
 Parameter | Description | Default
 --- | --- | ---
 `flower.enabled` | if the Flower UI should be deployed | `true`
+`flower.replicas` | the number of flower Pods to run | `1`
+`flower.revisionHistoryLimit` | the limit number of deployment revision history | `null`
 `flower.resources` | resource requests/limits for the flower Pods | `{}`
 `flower.nodeSelector` | the nodeSelector configs for the flower Pods | `{}`
 `flower.affinity` | the affinity configs for the flower Pods | `{}`
@@ -426,6 +431,7 @@ Parameter | Description | Default
 Parameter | Description | Default
 --- | --- | ---
 `pgbouncer.enabled` | if the pgbouncer Deployment is created | `true`
+`pgbouncer.revisionHistoryLimit` | the limit number of deployment revision history | `null`
 `pgbouncer.image.*` | configs for the pgbouncer container image | `<see values.yaml>`
 `pgbouncer.resources` | resource requests/limits for the pgbouncer Pods | `{}`
 `pgbouncer.nodeSelector` | the nodeSelector configs for the pgbouncer Pods | `{}`

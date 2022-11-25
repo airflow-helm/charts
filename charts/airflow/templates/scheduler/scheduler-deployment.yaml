@@ -26,6 +26,9 @@ metadata:
     {{- end }}
 spec:
   replicas: {{ .Values.scheduler.replicas }}
+  {{- if .Values.scheduler.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.scheduler.revisionHistoryLimit }}
+  {{- end }}
   strategy:
     type: RollingUpdate
     rollingUpdate:

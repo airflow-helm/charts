@@ -502,6 +502,12 @@ scheduler:
   ##
   replicas: 1
 
+  ## the limit number of deployment revision history
+  ## - docs for revisionHistoryLimit:
+  ##   https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#revision-history-limit
+  ##
+  revisionHistoryLimit:
+
   ## resource requests/limits for the scheduler Pod
   ## - spec of ResourceRequirements:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
@@ -689,6 +695,12 @@ web:
   ## - if you set this >1 we recommend defining a `web.podDisruptionBudget`
   ##
   replicas: 1
+
+  ## the limit number of deployment revision history
+  ## - docs for revisionHistoryLimit:
+  ##   https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#revision-history-limit
+  ##
+  revisionHistoryLimit:
 
   ## resource requests/limits for the web Pod
   ## - spec for ResourceRequirements:
@@ -990,6 +1002,12 @@ triggerer:
   ##
   replicas: 1
 
+  ## the limit number of deployment revision history
+  ## - docs for revisionHistoryLimit:
+  ##   https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#revision-history-limit
+  ##
+  revisionHistoryLimit:
+
   ## resource requests/limits for the triggerer Pods
   ## - spec for ResourceRequirements:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
@@ -1100,6 +1118,12 @@ flower:
   ## - if you set this >1 we recommend defining a `flower.podDisruptionBudget`
   ##
   replicas: 1
+
+  ## the limit number of deployment revision history
+  ## - docs for revisionHistoryLimit:
+  ##   https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#revision-history-limit
+  ##
+  revisionHistoryLimit:
 
   ## resource requests/limits for the flower Pod
   ## - spec for ResourceRequirements:
@@ -1638,6 +1662,12 @@ pgbouncer:
   ## if the pgbouncer Deployment is created
   ##
   enabled: true
+
+  ## the limit number of deployment revision history
+  ## - docs for revisionHistoryLimit:
+  ##   https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#revision-history-limit
+  ##
+  revisionHistoryLimit:
 
   ## configs for the pgbouncer container image
   ##

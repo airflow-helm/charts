@@ -27,6 +27,9 @@ metadata:
     {{- end }}
 spec:
   replicas: {{ .Values.flower.replicas }}
+  {{- if .Values.flower.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.flower.revisionHistoryLimit }}
+  {{- end }}
   strategy:
     type: RollingUpdate
     rollingUpdate:

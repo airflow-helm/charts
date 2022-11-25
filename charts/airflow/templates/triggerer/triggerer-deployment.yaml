@@ -27,6 +27,9 @@ metadata:
     {{- end }}
 spec:
   replicas: {{ .Values.triggerer.replicas }}
+  {{- if .Values.triggerer.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.triggerer.revisionHistoryLimit }}
+  {{- end }}
   strategy:
     type: RollingUpdate
     rollingUpdate:

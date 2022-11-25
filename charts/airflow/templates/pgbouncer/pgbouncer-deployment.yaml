@@ -22,6 +22,9 @@ metadata:
   {{- end }}
 spec:
   replicas: 1
+  {{- if .Values.pgbouncer.revisionHistoryLimit }}
+  revisionHistoryLimit: {{ .Values.pgbouncer.revisionHistoryLimit }}
+  {{- end }}
   strategy:
     rollingUpdate:
       ## multiple pgbouncer pods can safely run concurrently
