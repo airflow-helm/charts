@@ -1,0 +1,9 @@
+# set default to auto
+* text=auto
+
+# some of our templates generate linux files, so need LF endings when checked out on windows
+*.ini text eol=lf
+*.py text eol=lf
+*.sh text eol=lf
+*.tpl text eol=lf
+*.yaml text eol=lf
