@@ -921,6 +921,7 @@ workers:
   ##
   autoscaling:
     enabled: false
+    apiVersion: autoscaling/v2beta2
     maxReplicas: 2
     metrics: []
 
