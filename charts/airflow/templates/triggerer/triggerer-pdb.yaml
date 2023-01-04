@@ -1,5 +1,5 @@
 {{- if and (include "airflow.triggerer.should_use" .) (.Values.triggerer.podDisruptionBudget.enabled) }}
-apiVersion: policy/v1beta1
+apiVersion: {{ .Values.triggerer.podDisruptionBudget.apiVersion }}
 kind: PodDisruptionBudget
 metadata:
   name: {{ include "airflow.fullname" . }}-triggerer

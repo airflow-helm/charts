@@ -559,6 +559,12 @@ scheduler:
     ##
     enabled: false
 
+    ## the `apiVersion` to use for PodDisruptionBudget resources
+    ## - for Kubernetes 1.21 and later: "policy/v1"
+    ## - for Kubernetes 1.20 and before: "policy/v1beta1"
+    ##
+    apiVersion: policy/v1beta1
+
     ## the maximum unavailable pods/percentage for the scheduler
     ##
     maxUnavailable: ""
@@ -747,6 +753,12 @@ web:
     ##
     enabled: false
 
+    ## the `apiVersion` to use for PodDisruptionBudget resources
+    ## - for Kubernetes 1.21 and later: "policy/v1"
+    ## - for Kubernetes 1.20 and before: "policy/v1beta1"
+    ##
+    apiVersion: policy/v1beta1
+
     ## the maximum unavailable pods/percentage for the web Deployment
     ##
     maxUnavailable: ""
@@ -876,6 +888,12 @@ workers:
     ## if a PodDisruptionBudget resource is created for the worker StatefulSet
     ##
     enabled: false
+
+    ## the `apiVersion` to use for PodDisruptionBudget resources
+    ## - for Kubernetes 1.21 and later: "policy/v1"
+    ## - for Kubernetes 1.20 and before: "policy/v1beta1"
+    ##
+    apiVersion: policy/v1beta1
 
     ## the maximum unavailable pods/percentage for the worker StatefulSet
     ##
@@ -1047,6 +1065,12 @@ triggerer:
     ##
     enabled: false
 
+    ## the `apiVersion` to use for PodDisruptionBudget resources
+    ## - for Kubernetes 1.21 and later: "policy/v1"
+    ## - for Kubernetes 1.20 and before: "policy/v1beta1"
+    ##
+    apiVersion: policy/v1beta1
+
     ## the maximum unavailable pods/percentage for the triggerer Deployment
     ##
     maxUnavailable: ""
@@ -1157,6 +1181,12 @@ flower:
     ## if a PodDisruptionBudget resource is created for the flower Deployment
     ##
     enabled: false
+
+    ## the `apiVersion` to use for PodDisruptionBudget resources
+    ## - for Kubernetes 1.21 and later: "policy/v1"
+    ## - for Kubernetes 1.20 and before: "policy/v1beta1"
+    ##
+    apiVersion: policy/v1beta1
 
     ## the maximum unavailable pods/percentage for the flower Deployment
     ##
@@ -1704,6 +1734,12 @@ pgbouncer:
     ## if a PodDisruptionBudget resource is created for the pgbouncer Deployment
     ##
     enabled: false
+
+    ## the `apiVersion` to use for PodDisruptionBudget resources
+    ## - for Kubernetes 1.21 and later: "policy/v1"
+    ## - for Kubernetes 1.20 and before: "policy/v1beta1"
+    ##
+    apiVersion: policy/v1beta1
 
     ## the maximum unavailable pods/percentage for the pgbouncer Deployment
     ##
