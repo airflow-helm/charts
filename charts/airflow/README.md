@@ -63,7 +63,7 @@ and was previously known as `stable/airflow` when it was developed in the `helm/
 - __Support for Airflow Versions:__ 
    - [`1.10` | `2.0` | `2.1` | `2.2` | `2.3`](#airflow-version-support)
 - __Support for Airflow Executors:__ 
-   - [`CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor`](#airflow-executor-support)
+   - [`CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor` | `LocalExecutor`](#airflow-executor-support)
 - __Easily Connect with your Database:__
    - [`Connect to Postgres`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/external-database.md#option-1---postgres) |
      [`Configure PgBouncer`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/pgbouncer.md) |
@@ -171,6 +171,7 @@ Chart Version → <br> Airflow Executor ↓ | `7.X.X` | `8.X.X` |
 `CeleryExecutor` | ✔️ | ✔️
 `KubernetesExecutor` | ⚠️️ <sub>[1]</sub> | ✔️
 `CeleryKubernetesExecutor` | ❌ | ✔️
+`LocalExecutor` | ❌ | ✔️
 
 <sub>[1] we encourage you to use chart version `8.X.X`, so you can use the `airflow.kubernetesPodTemplate.*` values (requires airflow `1.10.11+`) </sub>
 
