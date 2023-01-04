@@ -8,6 +8,13 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
+## [8.7.0] - 2023-01-04
+
+### Changed
+- added a new `apiVersion` field for `podDisruptionBudget` configuration under the available components
+- added a new `apiVersion` field for `autoscaling` configuration for the worker deployment
+
+
 ## [8.6.1] - 2022-06-22
 
 > 🟥 __WARNINGS__ 🟥
