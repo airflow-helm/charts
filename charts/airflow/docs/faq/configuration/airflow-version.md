@@ -8,7 +8,7 @@
 >
 > There is a default version of airflow shipped with each version of the chart, see the [default `values.yaml`](../../../values.yaml) for the current one.
 >
-> Many versions of airflow versions are supported by the chart, please see the [Airflow Version Support](../../..#airflow-version-support) matrix.
+> Many versions of airflow versions are supported by the chart, please see the [Airflow Version Support](../../../README.md#airflow-version-support) matrix.
 
 ## Airflow 2.X
 
