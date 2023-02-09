@@ -1,6 +1,6 @@
-[🔗 Return to `Table of Contents` for more FAQ topics 🔗](https://github.com/airflow-helm/charts/tree/main/charts/airflow#frequently-asked-questions)
+[🔗 Return to `Table of Contents` for more FAQ topics 🔗](../../../README.md#frequently-asked-questions)
 
-> Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
+> Note, this page was written for the [`User-Community Airflow Helm Chart`](../../../)
 
 # Manage Airflow Logs
 

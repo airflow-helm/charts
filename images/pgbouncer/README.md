@@ -1,10 +1,10 @@
 # PgBouncer Docker Image
 
-The Apache Airflow helm chart under [charts/airflow](https://github.com/airflow-helm/charts/tree/main/charts/airflow) uses this docker image to implement [PgBouncer](https://www.pgbouncer.org/) support.
+The Apache Airflow helm chart under [charts/airflow](../../charts/airflow) uses this docker image to implement [PgBouncer](https://www.pgbouncer.org/) support.
 
 ### Important Links:
-- The [Dockerfile](https://github.com/airflow-helm/charts/blob/main/images/pgbouncer/Dockerfile) for this image.
-- The [CHANGELOG.md](https://github.com/airflow-helm/charts/blob/main/images/pgbouncer/CHANGELOG.md) for this image.
+- The [Dockerfile](Dockerfile) for this image.
+- The [CHANGELOG.md](CHANGELOG.md) for this image.
 
 ### Pull Locations:
 - [DockerHub](https://hub.docker.com/r/airflowhelm/pgbouncer):

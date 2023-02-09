@@ -43,4 +43,4 @@
 
 <h3 align="center">↓ ↓ ↓</h3>
 
-<h1 align="center"><a href="https://github.com/airflow-helm/charts/tree/main/charts/airflow">Chart Homepage</a></h1>
+<h1 align="center"><a href="charts/airflow">Chart Homepage</a></h1>

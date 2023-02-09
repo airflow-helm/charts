@@ -91,7 +91,7 @@ TBD
 - add `airflow.kubernetesPodTemplate.podLabels` value ([#534](https://github.com/airflow-helm/charts/pull/534))
 
 ### Changed
-- the default `airflow.image` is now `apache/airflow:2.2.5-python3.8` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support))
+- the default `airflow.image` is now `apache/airflow:2.2.5-python3.8` (see the [airflow version support matrix](README.md#airflow-version-support))
 - support helm templating in `extraManifests` by allowing string elements ([docs](docs/faq/kubernetes/extra-manifests.md)) ([#523](https://github.com/airflow-helm/charts/pull/523))
 - update default `dags.gitSync.image.tag` to `v3.5.0` ([#544](https://github.com/airflow-helm/charts/pull/544))
 - update default `pgbouncer.image.tag` to `1.17.0-patch.0` ([#552](https://github.com/airflow-helm/charts/pull/552))
@@ -115,7 +115,7 @@ TBD
 > - If you currently set `scheduler.livenessProbe.timeoutSeconds` or `pgbouncer.livenessProbe.timeoutSeconds` in your values, ensure you update them to the new default of `60`
 
 ### Changed
-- the default `airflow.image` is now `apache/airflow:2.1.4-python3.8` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support))
+- the default `airflow.image` is now `apache/airflow:2.1.4-python3.8` (see the [airflow version support matrix](README.md#airflow-version-support))
 
 ### Fixed
 - increase default `timeoutSeconds` for liveness probes ([#496](https://github.com/airflow-helm/charts/pull/496))
@@ -163,7 +163,7 @@ TBD
 - added `airflow.localSettings.*` values to make specifying `airflow_local_settings.py` easier ([#374](https://github.com/airflow-helm/charts/pull/374))
 
 ### Changed
-- the default `airflow.image` is now `apache/airflow:2.1.2-python3.8` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support))
+- the default `airflow.image` is now `apache/airflow:2.1.2-python3.8` (see the [airflow version support matrix](README.md#airflow-version-support))
 - the default `airflow.image.gid` is now `0` ([#388](https://github.com/airflow-helm/charts/pull/388))
 - the Kubernetes Ingress now uses `networking.k8s.io/v1` for `apiVersion` by default ([#381](https://github.com/airflow-helm/charts/pull/381))
 - we now include git-sync containers in all Deployments ([#390](https://github.com/airflow-helm/charts/pull/390))
@@ -215,7 +215,7 @@ TBD
 - removed the need for `helmWait` value ([#266](https://github.com/airflow-helm/charts/pull/266))
 
 ### Changed
-- the default `airflow.image` is now `apache/airflow:2.1.1-python3.8` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)) ([#286](https://github.com/airflow-helm/charts/issues/286))
+- the default `airflow.image` is now `apache/airflow:2.1.1-python3.8` (see the [airflow version support matrix](README.md#airflow-version-support)) ([#286](https://github.com/airflow-helm/charts/issues/286))
 - the `Chart.yaml` now explicitly specifies `apiVersion=v2` (requiring helm 3) ([#278](https://github.com/airflow-helm/charts/issues/278))
 - the `requirements.yaml` file was removed in preference of the `v2` dependencies method (specifying in `Chart.yaml`) ([#278](https://github.com/airflow-helm/charts/issues/278))
 - git-sync containers are now deployed in webserver, regardless of `airflow.legacyCommands` ([#288](https://github.com/airflow-helm/charts/pull/288))
