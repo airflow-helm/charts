@@ -106,6 +106,20 @@ spec:
             - "bash"
             - "-c"
             - "exec airflow dag-processor"
+          {{- if .Values.dagProcessor.livenessProbe.enabled }}
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.dagProcessor.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.dagProcessor.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.dagProcessor.livenessProbe.failureThreshold }}
+            timeoutSeconds: {{ .Values.dagProcessor.livenessProbe.timeoutSeconds }}
+            exec:
+              command:
+                {{- include "airflow.command" . | indent 4 }}
+              args:
+                - "bash"
+                - "-c"
+                - CONNECTION_CHECK_MAX_COUNT=0 AIRFLOW__LOGGING__LOGGING_LEVEL=ERROR exec airflow jobs check
+          {{- end }}
           {{- if $volumeMounts }}
           volumeMounts:
             {{- $volumeMounts | indent 12 }}
