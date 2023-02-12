@@ -1083,7 +1083,6 @@ triggerer:
 dagProcessor:
   ## if the airflow dag processor should be deployed
   ## - [WARNING] the dag processor component was added in airflow 2.3.0
-  ## - [WARNING] if `airflow.legacyCommands` is `true` the dag processor will NOT be deployed
   ##
   enabled: false
 
