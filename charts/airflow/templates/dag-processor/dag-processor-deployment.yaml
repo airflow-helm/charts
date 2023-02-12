@@ -1,4 +1,4 @@
-{{- if include "airflow.dagProcessor.should_use" . }}
+{{- if .Values.dagProcessor.enabled }}
 {{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.dagProcessor.nodeSelector) }}
 {{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.dagProcessor.affinity) }}
 {{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.dagProcessor.tolerations) }}

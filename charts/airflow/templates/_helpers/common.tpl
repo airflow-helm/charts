@@ -101,23 +101,6 @@ true
 {{- end -}}
 
 {{/*
-If the airflow dag processor should be used.
-*/}}
-{{- define "airflow.dagProcessor.should_use" -}}
-{{- if .Values.dagProcessor.enabled -}}
-{{- if not .Values.airflow.legacyCommands -}}
-{{- if include "airflow.image.version" . -}}
-{{- if semverCompare ">=2.3.0" (include "airflow.image.version" .) -}}
-true
-{{- end -}}
-{{- else -}}
-false
-{{- end -}}
-{{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 If PgBouncer should be used.
 */}}
 {{- define "airflow.pgbouncer.should_use" -}}
