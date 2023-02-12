@@ -1360,7 +1360,8 @@ dags:
     ##
     syncTimeout: 120
 
-    ## the git submodule behavior to use for syncs: one of 'recursive', 'shallow', or 'off'
+    ## the git submodule behavior
+    ## - allowed values: "recursive", "shallow", "off"
     ##
     submoduleStrategy: recursive
 
