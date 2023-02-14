@@ -315,7 +315,7 @@ airflow:
       extra: |
         {
           "extra__google_cloud_platform__key_path": "/opt/airflow/secrets/gcp-keyfile/keyfile.json",
-          "extra__google_cloud_platform__num_retries: "5"
+          "extra__google_cloud_platform__num_retries": 5
         }
 
   extraVolumeMounts:
@@ -363,7 +363,7 @@ airflow:
       description: my GCP connection
       extra: |
         {
-          "extra__google_cloud_platform__num_retries: "5"
+          "extra__google_cloud_platform__num_retries": 5
         }
 
 serviceAccount:
