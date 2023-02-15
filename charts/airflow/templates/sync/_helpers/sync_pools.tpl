@@ -23,7 +23,6 @@ from typing import Tuple
 #############
 ## Classes ##
 #############
-DateTimeInterval = Tuple[float, float]
 
 
 class Schedule(object):
@@ -42,21 +41,13 @@ class Schedule(object):
         self.recurrence = recurrence
         self.slots = slots
 
-    def satisfies(self, interval: Optional[DateTimeInterval] = None) -> bool:
-        if interval is None:
-            return False
-
-        from_epoch, to_epoch = interval
-        next_at = croniter(self.recurrence, from_epoch).get_next(float)
-        if next_at < to_epoch:
-            next_time = datetime.fromtimestamp(next_at)
-            logging.info(f"Satisfying Policy {self.name} at {next_time}")
-            return True
-        return False
-
     def update(self, pool: "PoolWrapper"):
         """updates pool based on the policy"""
         pool.slots = self.slots
+
+    def get_last_update(self, now: datetime) -> datetime:
+        return croniter(expr_format=self.recurrence, start_time=epoch).get_prev(ret_type=datetime)
+
 
 
 class PoolWrapper(object):
@@ -79,11 +70,15 @@ class PoolWrapper(object):
         pool.description = self.description
         return pool
 
-    def update_from_schedules(self, **kwargs) -> None:
-        for schedule in self.schedules:
-            if schedule.satisfies(**kwargs):
-                schedule.update(pool)
-                return
+    @property
+    def is_scheduled(self) -> bool:
+        return len(self.schedules) > 0
+
+    def update_from_schedules(self, ) -> None:
+        epoch = datetime.now()
+        most_recent_schedule = sorted(self.schedules, key=lambda x: x.get_last_update(now))[-1]
+        most_recent_schedule.update(self)
+
 
 
 
@@ -179,10 +174,13 @@ def sync_all_pools(pool_wrappers: Dict[str, PoolWrapper]) -> None:
     logging.info("END: airflow pools sync")
 
 
-def update_pool_wrappers_from_schedules() -> None:
-    interval = (objects_sync_epoch, next_sync_epoch) if objects_sync_epoch else None
-    for pool in VAR__POOL_WRAPPERS.values():
-        pool.update_from_schedules(interval=interval)
+def update_pool_wrappers_from_schedules(pool_wrappers: Dict[str, PoolWrapper]) -> None:
+    """
+    Sync all scheduled pools in provided `pool_wrappers` according to the most recent schedule.
+    """
+    for pool in pool_wrappers.values():
+        if pool.is_scheduled:
+            pool.update_from_schedules()
 
 
 def sync_with_airflow() -> None:
@@ -190,7 +188,7 @@ def sync_with_airflow() -> None:
     Preform a sync of all objects with airflow (note, `sync_with_airflow()` is called in `main()` template).
     """
     {{- if .Values.airflow.poolsUpdate }}
-    update_pool_wrappers_from_schedules()
+    update_pool_wrappers_from_schedules(pool_wrappers=VAR__POOL_WRAPPERS)
     {{- end }}
 
     sync_all_pools(pool_wrappers=VAR__POOL_WRAPPERS)
