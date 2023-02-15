@@ -45,8 +45,9 @@ class Schedule(object):
         """updates pool based on the policy"""
         pool.slots = self.slots
 
-    def get_last_update(self, now: datetime) -> datetime:
-        return croniter(expr_format=self.recurrence, start_time=epoch).get_prev(ret_type=datetime)
+    @property
+    def last_update(self) -> datetime:
+        return croniter(expr_format=self.recurrence, start_time=datetime.now()).get_prev(ret_type=datetime)
 
 
 
@@ -75,8 +76,7 @@ class PoolWrapper(object):
         return len(self.schedules) > 0
 
     def update_from_schedules(self, ) -> None:
-        epoch = datetime.now()
-        most_recent_schedule = sorted(self.schedules, key=lambda x: x.get_last_update(now))[-1]
+        most_recent_schedule = sorted(self.schedules, key=lambda x: x.last_update)[-1]
         most_recent_schedule.update(self)
 
 
