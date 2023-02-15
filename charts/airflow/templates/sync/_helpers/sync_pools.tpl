@@ -38,6 +38,7 @@ class Schedule(object):
             raise ValueError(f"Invalid recurrence {recurrence} for schedule {name}")
 
         self.name = name
+
         self.recurrence = recurrence
         self.slots = slots
 
@@ -102,6 +103,9 @@ VAR__POOL_WRAPPERS = {
     {{ required "each `slots` in `airflow.pools` must be int-type!" nil }}
     {{- end }}
     slots={{ (required "each `slots` in `airflow.pools` must be non-empty!" .slots) }},
+    {{- if and (not $.Values.airflow.poolsUpdate) (gt (len (default "" .schedules)) 0)  }}
+        {{ required "`airflow.poolsUpdate` must be true when specifying scheduled pools" nil }}
+    {{- end }}
     schedules=[
         {{- range .schedules }}
             Schedule(
@@ -113,7 +117,7 @@ VAR__POOL_WRAPPERS = {
                 {{- end }}
                 slots={{ (required "each `slots` in `airflow.pools` must be non-empty!" .slots) }},
             ),
-        {{ end }}
+        {{- end }}
     ]
   ),
   {{- end }}
