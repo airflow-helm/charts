@@ -106,7 +106,7 @@ def main(sync_forever: bool):
         # main loop
         while True:
             # monitor for template secret/configmap updates
-            if time.time() - templates_sync_epoch) > CONF__TEMPLATES_SYNC_INTERVAL:
+            if (time.time() - templates_sync_epoch) > CONF__TEMPLATES_SYNC_INTERVAL:
                 logging.debug(f"template sync interval reached, re-syncing all templates...")
                 changed_templates = refresh_template_cache(
                     template_names=VAR__TEMPLATE_NAMES,
