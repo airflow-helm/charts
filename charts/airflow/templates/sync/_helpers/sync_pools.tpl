@@ -13,11 +13,10 @@ The python sync script for pools.
 #############
 ## Imports ##
 #############
-import re
-from datetime import datetime
 from airflow.models import Pool
 from airflow.utils.db import create_session
 from croniter import croniter
+from datetime import datetime
 from typing import Tuple
 
 
@@ -35,6 +34,9 @@ class Schedule(object):
             recurrence: str,
             slots: int
     ):
+        if not croniter.is_valid(recurrence):
+            raise ValueError(f"Invalid recurrence {recurrence} for schedule {name}")
+
         self.name = name
         self.recurrence = recurrence
         self.slots = slots
@@ -53,11 +55,7 @@ class Schedule(object):
 
     def update(self, pool: "PoolWrapper"):
         """updates pool based on the policy"""
-
         pool.slots = self.slots
-        at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        original = re.sub(r" {2}#.*", "", pool.description)
-        pool.description = f"{original}  #{self.name} policy updated on {at}"
 
 
 class PoolWrapper(object):
@@ -80,7 +78,7 @@ class PoolWrapper(object):
         pool.description = self.description
         return pool
 
-    def update(self, **kwargs) -> None:
+    def update_from_schedules(self, **kwargs) -> None:
         for schedule in self.schedules:
             if schedule.satisfies(**kwargs):
                 schedule.update(pool)
@@ -177,10 +175,10 @@ def sync_all_pools(pool_wrappers: Dict[str, PoolWrapper]) -> None:
     logging.info("END: airflow pools sync")
 
 
-def update_pools() -> None:
+def update_pool_wrappers_from_schedules() -> None:
     interval = (objects_sync_epoch, next_sync_epoch) if objects_sync_epoch else None
     for pool in VAR__POOL_WRAPPERS.values():
-        pool.update(interval=interval)
+        pool.update_from_schedules(interval=interval)
 
 
 def sync_with_airflow() -> None:
@@ -188,7 +186,7 @@ def sync_with_airflow() -> None:
     Preform a sync of all objects with airflow (note, `sync_with_airflow()` is called in `main()` template).
     """
     {{- if .Values.airflow.poolsUpdate }}
-    update_pools()
+    update_pool_wrappers_from_schedules()
     {{- end }}
 
     sync_all_pools(pool_wrappers=VAR__POOL_WRAPPERS)
