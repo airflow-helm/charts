@@ -31,6 +31,9 @@ ingress:
     path: "/airflow"
     ## WARNING: requires Kubernetes 1.18 or later, use "kubernetes.io/ingress.class" annotation for older versions
     ingressClassName: "nginx"
+    tls:
+      enabled: false
+      secretName: example.com-tls
     
   ## flower ingress configs
   flower:
