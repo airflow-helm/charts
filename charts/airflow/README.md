@@ -61,7 +61,7 @@ and was previously known as `stable/airflow` when it was developed in the `helm/
 ## Key Features
 
 - __Support for Airflow Versions:__ 
-   - [`1.10` | `2.0` | `2.1` | `2.2` | `2.3`](#airflow-version-support)
+   - [`1.10` | `2.0` | `2.1` | `2.2` | `2.3` | `2.4`](#airflow-version-support)
 - __Support for Airflow Executors:__ 
    - [`CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor`](#airflow-executor-support)
 - __Easily Connect with your Database:__
