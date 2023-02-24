@@ -54,6 +54,14 @@ EXAMPLE USAGE: {{ include "airflow.podSecurityContext" (dict "Release" .Release 
 {{- end }}
 
 {{/*
+Define the priorityClassName for airflow pods
+EXAMPLE USAGE: {{ include "airflow.priorityClassName" (dict "Release" .Release "Values" .Values "priorityClassName" $priorityClassName) }}
+*/}}
+{{- define "airflow.priorityClassName" }}
+{{- .priorityClassName | default .Values.airflow.defaultPriorityClassName }}
+{{- end }}
+
+{{/*
 Define an init-container which checks the DB status
 EXAMPLE USAGE: {{ include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) }}
 */}}

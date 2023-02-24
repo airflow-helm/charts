@@ -207,6 +207,7 @@ Parameter | Description | Default
 `airflow.defaultAffinity` | default affinity configs for airflow Pods (is overridden by pod-specific values) | `{}`
 `airflow.defaultTolerations` | default toleration configs for airflow Pods (is overridden by pod-specific values) | `[]`
 `airflow.defaultSecurityContext` | default securityContext configs for Pods (is overridden by pod-specific values) | `{fsGroup: 0}`
+`airflow.defaultPriorityClassName` | default priorityClassName for airflow Pods (is overridden by pod-specific values) | `""`
 `airflow.podAnnotations` | extra annotations for airflow Pods | `{}`
 `airflow.extraPipPackages` | extra pip packages to install in airflow Pods | `[]`
 `airflow.protectedPipPackages` | pip packages that are protected from upgrade/downgrade by `extraPipPackages` | `["apache-airflow"]`
@@ -234,6 +235,7 @@ Parameter | Description | Default
 `scheduler.affinity` | the affinity configs for the scheduler Pods | `{}`
 `scheduler.tolerations` | the toleration configs for the scheduler Pods | `[]`
 `scheduler.securityContext` | the security context for the scheduler Pods | `{}`
+`scheduler.priorityClassName` | the priorityClassName for the scheduler Pods | `""`
 `scheduler.labels` | labels for the scheduler Deployment | `{}`
 `scheduler.podLabels` | Pod labels for the scheduler Deployment | `{}`
 `scheduler.annotations` | annotations for the scheduler Deployment | `{}`
@@ -262,6 +264,7 @@ Parameter | Description | Default
 `web.affinity` | the affinity configs for the web Pods | `{}`
 `web.tolerations` | the toleration configs for the web Pods | `[]`
 `web.securityContext` | the security context for the web Pods | `{}`
+`web.priorityClassName` | the priorityClassName for the web Pods | `""`
 `web.labels` | labels for the web Deployment | `{}`
 `web.podLabels` | Pod labels for the web Deployment | `{}`
 `web.annotations` | annotations for the web Deployment | `{}`
@@ -289,6 +292,7 @@ Parameter | Description | Default
 `workers.affinity` | the affinity configs for the worker Pods | `{}`
 `workers.tolerations` | the toleration configs for the worker Pods | `[]`
 `workers.securityContext` | the security context for the worker Pods | `{}`
+`workers.priorityClassName` | the priorityClassName for the workers Pods | `""`
 `workers.labels` | labels for the worker StatefulSet | `{}`
 `workers.podLabels` | Pod labels for the worker StatefulSet | `{}`
 `workers.annotations` | annotations for the worker StatefulSet | `{}`
@@ -317,6 +321,7 @@ Parameter | Description | Default
 `triggerer.affinity` | the affinity configs for the triggerer Pods | `{}`
 `triggerer.tolerations` | the toleration configs for the triggerer Pods | `[]`
 `triggerer.securityContext` | the security context for the triggerer Pods | `{}`
+`triggerer.priorityClassName` | the priorityClassName for the triggerer Pods | `""`
 `triggerer.labels` | labels for the triggerer Deployment | `{}`
 `triggerer.podLabels` | Pod labels for the triggerer Deployment | `{}`
 `triggerer.annotations` | annotations for the triggerer Deployment | `{}`
@@ -342,6 +347,7 @@ Parameter | Description | Default
 `flower.affinity` | the affinity configs for the flower Pods | `{}`
 `flower.tolerations` | the toleration configs for the flower Pods | `[]`
 `flower.securityContext` | the security context for the flower Pods | `{}`
+`flower.priorityClassName` | the priorityClassName for the flower Pods | `""`
 `flower.labels` | labels for the flower Deployment | `{}`
 `flower.podLabels` | Pod labels for the flower Deployment | `{}`
 `flower.annotations` | annotations for the flower Deployment | `{}`
@@ -432,6 +438,7 @@ Parameter | Description | Default
 `pgbouncer.affinity` | the affinity configs for the pgbouncer Pods | `{}`
 `pgbouncer.tolerations` | the toleration configs for the pgbouncer Pods | `[]`
 `pgbouncer.securityContext` | the security context for the pgbouncer Pods | `{}`
+`pgbouncer.priorityClassName` | the priorityClassName for the pgbouncer Pods | `""`
 `pgbouncer.labels` | labels for the pgbouncer Deployment | `{}`
 `pgbouncer.podLabels` | Pod labels for the pgbouncer Deployment | `{}`
 `pgbouncer.annotations` | annotations for the pgbouncer Deployment | `{}`

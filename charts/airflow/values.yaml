@@ -197,6 +197,9 @@ airflow:
     ## this does NOT give root permissions to Pods, only the "root" group
     fsGroup: 0
 
+  ## default priorityClassName for airflow Pods (is overridden by pod-specific values)
+  defaultPriorityClassName: ""
+
   ## extra annotations for airflow Pods
   ##
   podAnnotations: {}
@@ -412,6 +415,10 @@ airflow:
     ##
     securityContext: {}
 
+    ## the priorityClassName for the db-migrations Pods
+    ##
+    priorityClassName: ""
+
     ## Labels for the db-migrations Deployment
     ##
     labels: {}
@@ -473,6 +480,10 @@ airflow:
     ##
     securityContext: {}
 
+    ## the priorityClassName for the sync Pods
+    ##
+    priorityClassName: ""
+
     ## Labels for the sync Deployments/Jobs
     ##
     labels: {}
@@ -531,6 +542,10 @@ scheduler:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
   ##
   securityContext: {}
+
+  ## the priorityClassName for the scheduler Pods
+  ##
+  priorityClassName: ""
 
   ## labels for the scheduler Deployment
   ##
@@ -720,6 +735,10 @@ web:
   ##
   securityContext: {}
 
+  ## the priorityClassName for the web Pods
+  ##
+  priorityClassName: ""
+
   ## labels for the web Deployment
   ##
   labels: {}
@@ -849,6 +868,10 @@ workers:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
   ##
   securityContext: {}
+
+  ## the priorityClassName for the worker Pods
+  ##
+  priorityClassName: ""
 
   ## labels for the worker StatefulSet
   ##
@@ -1020,6 +1043,10 @@ triggerer:
   ##
   securityContext: {}
 
+  ## the priorityClassName for the triggerer Pods
+  ##
+  priorityClassName: ""
+
   ## labels for the triggerer Deployment
   ##
   labels: {}
@@ -1130,6 +1157,10 @@ flower:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
   ##
   securityContext: {}
+
+  ## the priorityClassName for the flower Pods
+  ##
+  priorityClassName: ""
 
   ## labels for the flower Deployment
   ##
@@ -1677,6 +1708,10 @@ pgbouncer:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
   ##
   securityContext: {}
+
+  ## the priorityClassName for the pgbouncer Pods
+  ##
+  priorityClassName: ""
 
   ## Labels for the pgbouncer Deployment
   ##

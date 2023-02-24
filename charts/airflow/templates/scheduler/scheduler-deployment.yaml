@@ -7,6 +7,7 @@
 {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
 {{- $extraVolumes := .Values.scheduler.extraVolumes }}
 {{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes "extraVolumeMounts" $extraVolumeMounts) }}
+{{- $priorityClassName := include "airflow.priorityClassName" (dict "Release" .Release "Values" .Values "priorityClassName" .Values.scheduler.priorityClassName) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -88,6 +89,9 @@ spec:
       {{- if $podSecurityContext }}
       securityContext:
         {{- $podSecurityContext | nindent 8 }}
+      {{- end }}
+      {{- if $priorityClassName }}
+      priorityClassName: {{ $priorityClassName}}
       {{- end }}
       serviceAccountName: {{ include "airflow.serviceAccountName" . }}
       initContainers:
