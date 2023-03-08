@@ -255,8 +255,6 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
           name: {{ .Values.dags.gitSync.httpSecret }}
           key: {{ .Values.dags.gitSync.httpSecretPasswordKey }}
     {{- end }}
-    {{- /* this has user-defined variables, so must be included BELOW (so the ABOVE `env` take precedence) */ -}}
-    {{- include "airflow.env" . | indent 4 }}
   volumeMounts:
     - name: dags-data
       mountPath: /dags
@@ -272,6 +270,26 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
       readOnly: true
       subPath: known_hosts
     {{- end }}
+{{- end }}
+
+{{/*
+Define a container which copies the contents of the DAG PVC to the DAG directory in the pod
+EXAMPLE USAGE: {{ include "airflow.container.dag_pvc_copy" (dict "Release" .Release "Values" .Values)  }}
+*/}}
+{{- define "airflow.container.dag_pvc_copy" }}
+- name: dags-copy-from-pvc
+  image: busybox:1.35
+  imagePullPolicy: IfNotPresent
+  securityContext:
+    runAsUser: {{ .Values.airflow.image.uid }}
+    runAsGroup: {{ .Values.airflow.image.gid }}
+  volumeMounts:
+    - name: original-dag-content
+      mountPath: /dags/original-dags
+    - name: dags-data
+      mountPath: /dags/copied-dags
+  command: ["/bin/sh","-c"]
+  args: ["cp -rL /dags/original-dags/repo /dags/copied-dags/"]
 {{- end }}
 
 {{/*
@@ -352,12 +370,17 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Value
 
 {{- /* dags */ -}}
 {{- if .Values.dags.persistence.enabled }}
+{{- if .Values.dags.gitSync.enabled }}
+- name: dags-data
+  mountPath: {{ .Values.dags.path }}
+{{- else }}
 - name: dags-data
   mountPath: {{ .Values.dags.path }}
   subPath: {{ .Values.dags.persistence.subPath }}
   {{- if eq .Values.dags.persistence.accessMode "ReadOnlyMany" }}
   readOnly: true
   {{- end }}
+{{- end }}
 {{- else if .Values.dags.gitSync.enabled }}
 - name: dags-data
   mountPath: {{ .Values.dags.path }}
@@ -414,6 +437,18 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
 
 {{- /* dags */ -}}
 {{- if .Values.dags.persistence.enabled }}
+
+{{- if .Values.dags.gitSync.enabled }}
+- name: original-dag-content
+  persistentVolumeClaim:
+    {{- if .Values.dags.persistence.existingClaim }}
+    claimName: {{ .Values.dags.persistence.existingClaim }}
+    {{- else }}
+    claimName: {{ printf "%s-dags" (include "airflow.fullname" . | trunc 58) }}
+    {{- end }}
+- name: dags-data
+  emptyDir: {}
+{{- else }}
 - name: dags-data
   persistentVolumeClaim:
     {{- if .Values.dags.persistence.existingClaim }}
@@ -421,10 +456,13 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
     {{- else }}
     claimName: {{ printf "%s-dags" (include "airflow.fullname" . | trunc 58) }}
     {{- end }}
+{{- end }}
+
 {{- else if .Values.dags.gitSync.enabled }}
 - name: dags-data
   emptyDir: {}
 {{- end }}
+
 
 {{- /* logs */ -}}
 {{- if include "airflow.extraVolumeMounts.has_log_path" . }}
@@ -445,7 +483,7 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
 {{- end }}
 
 {{- /* git-sync */ -}}
-{{- if .Values.dags.gitSync.enabled }}
+{{- if and (.Values.dags.gitSync.enabled)  (not .Values.dags.persistence.enabled)  }}
 {{- if .Values.dags.gitSync.sshSecret }}
 - name: git-secret
   secret:
