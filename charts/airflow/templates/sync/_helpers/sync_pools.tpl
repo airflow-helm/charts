@@ -70,13 +70,13 @@ class PoolWrapper(object):
         return self.auto_sync and len(self.policies) > 0
     
     @property
-    def slots(self):
+    def slots(self) -> int:
         if self.has_policies_enabled:
             return self._get_recent_schedule().slots
         return self.default_slots
 
     @property
-    def description(self):
+    def description(self) -> str:
         if self.has_policies_enabled:
             most_recent_schedule = self._get_recent_schedule()
             return f"{self.default_description}  #{most_recent_schedule.name}"
