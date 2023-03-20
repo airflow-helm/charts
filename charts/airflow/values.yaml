@@ -162,7 +162,7 @@ airflow:
   ##     - name: "pool_2"
   ##       description: "example pool with 10 slots"
   ##       slots: 10
-  ##       schedules:
+  ##       policies:
   ##          - name: "ScaleUp"
   ##            slots: 28
   ##            recurrence: 0 19 * * *

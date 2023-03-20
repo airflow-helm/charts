@@ -23,10 +23,7 @@ from typing import Tuple
 #############
 ## Classes ##
 #############
-
-
-class Schedule(object):
-
+class ScheduledPolicy(object):
     def __init__(
             self,
             name: str,
@@ -37,18 +34,13 @@ class Schedule(object):
             raise ValueError(f"Invalid recurrence {recurrence} for schedule {name}")
 
         self.name = name
-
         self.recurrence = recurrence
         self.slots = slots
 
-    def update(self, pool: "PoolWrapper"):
-        """updates pool based on the policy"""
-        pool.slots = self.slots
-
     @property
     def last_update(self) -> datetime:
-        return croniter(expr_format=self.recurrence, start_time=datetime.now()).get_prev(ret_type=datetime)
-
+        now = datetime.now()
+        return croniter(expr_format=self.recurrence, start_time=now).get_prev(ret_type=datetime)
 
 
 class PoolWrapper(object):
@@ -57,12 +49,14 @@ class PoolWrapper(object):
             name: str,
             description: str,
             slots: int,
-            schedules: List[Schedule]
+            policies: List[ScheduledPolicy],
+            auto_sync: bool
     ):
         self.name = name
-        self.description = description
-        self.slots = slots
-        self.schedules = schedules
+        self.default_description = description
+        self.default_slots = slots
+        self.policies = policies
+        self.auto_sync = auto_sync
 
     def as_pool(self) -> Pool:
         pool = Pool()
@@ -70,16 +64,26 @@ class PoolWrapper(object):
         pool.slots = self.slots
         pool.description = self.description
         return pool
+    
+    @property
+    def has_policies_enabled(self) -> bool:
+        return self.auto_sync and len(self.policies) > 0
+    
+    @property
+    def slots(self):
+        if self.has_policies_enabled:
+            return self._get_recent_schedule().slots
+        return self.default_slots
 
     @property
-    def is_scheduled(self) -> bool:
-        return len(self.schedules) > 0
+    def description(self):
+        if self.has_policies_enabled:
+            most_recent_schedule = self._get_recent_schedule()
+            return f"{self.default_description}  #{most_recent_schedule.name}"
+        return self.default_description
 
-    def update_from_schedules(self, ) -> None:
-        most_recent_schedule = sorted(self.schedules, key=lambda x: x.last_update)[-1]
-        most_recent_schedule.update(self)
-
-
+    def _get_recent_schedule(self) -> ScheduledPolicy:
+        return max(self.policies, key=lambda policy: policy.last_update)    
 
 
 ###############
@@ -98,13 +102,10 @@ VAR__POOL_WRAPPERS = {
     {{ required "each `slots` in `airflow.pools` must be int-type!" nil }}
     {{- end }}
     slots={{ (required "each `slots` in `airflow.pools` must be non-empty!" .slots) }},
-    {{- if and (not $.Values.airflow.poolsUpdate) (gt (len (default "" .schedules)) 0)  }}
-        {{ required "`airflow.poolsUpdate` must be true when specifying scheduled pools" nil }}
-    {{- end }}
-    schedules=[
-        {{- range .schedules }}
-            Schedule(
-                name={{ (required "each `name` in `airflow.pools.schedules` must be non-empty!" .name) | quote }},
+    policies=[
+        {{- range .policies }}
+            ScheduledPolicy(
+                name={{ (required "each `name` in `airflow.pools.policies` must be non-empty!" .name) | quote }},
                 recurrence={{ (required "each `recurrence` in `airflow.pools.recurrence` must be non-empty!" .recurrence) | quote }},
                 {{- if not (or (typeIs "float64" .slots) (typeIs "int64" .slots)) }}
                 {{- /* the type of a number could be float64 or int64 depending on how it was set (values.yaml, or --set) */ -}}
@@ -113,7 +114,12 @@ VAR__POOL_WRAPPERS = {
                 slots={{ (required "each `slots` in `airflow.pools` must be non-empty!" .slots) }},
             ),
         {{- end }}
-    ]
+    ],
+    {{- if .Values.airflow.poolsUpdate }}
+    auto_sync=True,
+    {{- else }}
+    auto_sync=False,
+    {{- end }}
   ),
   {{- end }}
 }
@@ -174,23 +180,10 @@ def sync_all_pools(pool_wrappers: Dict[str, PoolWrapper]) -> None:
     logging.info("END: airflow pools sync")
 
 
-def update_pool_wrappers_from_schedules(pool_wrappers: Dict[str, PoolWrapper]) -> None:
-    """
-    Sync all scheduled pools in provided `pool_wrappers` according to the most recent schedule.
-    """
-    for pool in pool_wrappers.values():
-        if pool.is_scheduled:
-            pool.update_from_schedules()
-
-
 def sync_with_airflow() -> None:
     """
     Preform a sync of all objects with airflow (note, `sync_with_airflow()` is called in `main()` template).
     """
-    {{- if .Values.airflow.poolsUpdate }}
-    update_pool_wrappers_from_schedules(pool_wrappers=VAR__POOL_WRAPPERS)
-    {{- end }}
-
     sync_all_pools(pool_wrappers=VAR__POOL_WRAPPERS)
 
 
