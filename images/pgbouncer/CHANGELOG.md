@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to the image will be documented in this file.
 
+## [1.18.0-patch.0] - 2023-04-05
+
+### Changed
+
+- Updated PgBouncer to version `1.18.0`
+- Updated Alpine Linux to `3.15` branch
+
 ## [1.17.0-patch.0] - 2022-03-28
 
 ### Added
@@ -15,5 +22,6 @@ All notable changes to the image will be documented in this file.
 ### Added
 - Initial release of Dockerfile with PgBouncer version `1.15.0`
 
+[1.18.0-patch.0]: https://github.com/airflow-helm/charts/tree/images/pgbouncer-1.18.0-patch.0/images/pgbouncer
 [1.17.0-patch.0]: https://github.com/airflow-helm/charts/tree/images/pgbouncer-1.17.0-patch.0/images/pgbouncer
 [1.15.0-patch.0]: https://github.com/airflow-helm/charts/tree/images/pgbouncer-1.15.0-patch.0/images/pgbouncer
