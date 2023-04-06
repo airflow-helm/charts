@@ -1,14 +1,14 @@
-<h1 align="center">Airflow Helm Chart (User Community)</h1>
+# Airflow Helm Chart (User Community)
 
 <br>
 
-<p align="center">
-  The <code>User-Community Airflow Helm Chart</code> is the standard way to deploy <a href="https://airflow.apache.org/">Apache Airflow</a> on <a href="https://kubernetes.io/">Kubernetes</a> with <a href="https://helm.sh/">Helm</a>.
-  <br>
-  Originally created in 2018, it has since helped thousands of companies create production-ready deployments of Airflow on Kubernetes.
-</p>
+The `User-Community Airflow Helm Chart` is the standard way to deploy [Apache Airflow](https://airflow.apache.org/) on [Kubernetes](https://kubernetes.io/) with [Helm](https://helm.sh/).
+<br>
+Originally created in 2018, it has since helped thousands of companies create production-ready deployments of Airflow on Kubernetes.
 
-<p align="center">
+<br>
+
+<p>
   <a href="https://github.com/airflow-helm/charts/releases">
     <img alt="Downloads" src="https://img.shields.io/github/downloads/airflow-helm/charts/total?style=flat-square&color=28a745">
   </a>
@@ -26,7 +26,7 @@
   </a>
 </p>
 
-<p align="center">
+<p>
   <a href="https://github.com/airflow-helm/charts/stargazers">
     <img alt="GitHub Stars" src="https://img.shields.io/github/stars/airflow-helm/charts?style=for-the-badge&color=ffcb2f&label=Support%20with%20%E2%AD%90%20on%20GitHub">
   </a>
@@ -35,7 +35,7 @@
   </a>
 </p>
 
-<p align="center">
+<p>
   <a href="https://github.com/airflow-helm/charts/discussions">
     <img alt="GitHub Discussions" src="https://img.shields.io/github/discussions/airflow-helm/charts?style=for-the-badge&color=17a2b8&label=Start%20a%20Discussion">
   </a>
@@ -61,7 +61,7 @@ and was previously known as `stable/airflow` when it was developed in the `helm/
 ## Key Features
 
 - __Support for Airflow Versions:__ 
-   - [`1.10` | `2.0` | `2.1` | `2.2` | `2.3` | `2.4`](#airflow-version-support)
+   - [`1.10` | `2.0` | `2.1` | `2.2` | `2.3` | `2.4` | `2.5`](#airflow-version-support)
 - __Support for Airflow Executors:__ 
    - [`CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor`](#airflow-executor-support)
 - __Easily Connect with your Database:__
@@ -159,6 +159,7 @@ Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.
 `2.2.X` | ❌ | ⚠️ <sub>[2]</sub> | ✔️️ | ✔️
 `2.3.X` | ❌ | ❌ | ❌ | ✔️️
 `2.4.X` | ❌ | ❌ | ❌ | ✔️️
+`2.5.X` | ❌ | ❌ | ❌ | ✔️️
 
 <sub>[1] you must set `airflow.legacyCommands = true` when using airflow version `1.10.X`</sub><br>
 <sub>[2] the [Deferrable Operators & Triggers](https://airflow.apache.org/docs/apache-airflow/stable/concepts/deferring.html) feature won't work, as there is no `airflow triggerer` Deployment</sub>
@@ -457,6 +458,7 @@ Parameter | Description | Default
 Parameter | Description | Default
 --- | --- | ---
 `postgresql.enabled` | if the `stable/postgresql` chart is used | `true`
+`postgresql.image.*` | configs for the postgres container image | `<see values.yaml>`
 `postgresql.postgresqlDatabase` | the postgres database to use | `airflow`
 `postgresql.postgresqlUsername` | the postgres user to create | `postgres`
 `postgresql.postgresqlPassword` | the postgres user's password | `airflow`
@@ -492,6 +494,7 @@ Parameter | Description | Default
 Parameter | Description | Default
 --- | --- | ---
 `redis.enabled` | if the `stable/redis` chart is used | `true`
+`redis.image.*` | configs for the redis container image | `<see values.yaml>`
 `redis.password` | the redis password | `airflow`
 `redis.existingSecret` | the name of a pre-created secret containing the redis password | `""`
 `redis.existingSecretPasswordKey` | the key within `redis.existingSecret` containing the password string | `redis-password`

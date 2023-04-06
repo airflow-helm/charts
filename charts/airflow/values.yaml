@@ -10,7 +10,7 @@ airflow:
   ##
   image:
     repository: apache/airflow
-    tag: 2.2.5-python3.8
+    tag: 2.5.3-python3.8
     pullPolicy: IfNotPresent
     pullSecret: ""
     uid: 50000
@@ -1359,8 +1359,8 @@ dags:
     ## the git-sync container image
     ##
     image:
-      repository: k8s.gcr.io/git-sync/git-sync
-      tag: v3.5.0
+      repository: registry.k8s.io/git-sync/git-sync
+      tag: v3.6.5
       pullPolicy: IfNotPresent
       uid: 65533
       gid: 65533
@@ -1886,6 +1886,14 @@ postgresql:
   ##
   enabled: true
 
+  ## configs for the postgres container image
+  ##
+  image:
+    registry: ghcr.io
+    repository: airflow-helm/postgresql-bitnami
+    tag: 11.16-patch.0
+    pullPolicy: IfNotPresent
+
   ## the postgres database to use
   ##
   postgresqlDatabase: airflow
@@ -2019,6 +2027,14 @@ redis:
   ## - set to `false` if using `externalRedis.*`
   ##
   enabled: true
+
+  ## configs for the redis container image
+  ##
+  image:
+    registry: docker.io
+    repository: bitnami/redis
+    tag: 5.0.14-debian-10-r173
+    pullPolicy: IfNotPresent
 
   ## the redis password
   ##
