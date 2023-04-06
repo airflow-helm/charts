@@ -1310,7 +1310,7 @@ dags:
     ## the git-sync container image
     ##
     image:
-      repository: k8s.gcr.io/git-sync/git-sync
+      repository: registry.k8s.io/git-sync/git-sync
       tag: v3.5.0
       pullPolicy: IfNotPresent
       uid: 65533
