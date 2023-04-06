@@ -42,7 +42,7 @@ spec:
       annotations:
         checksum/secret-config-envs: {{ include (print $.Template.BasePath "/config/secret-config-envs.yaml") . | sha256sum }}
         checksum/secret-local-settings: {{ include (print $.Template.BasePath "/config/secret-local-settings.yaml") . | sha256sum }}
-        {{- if .Values.web.webserverConfig.enabled }}
+        {{- if and (.Values.web.webserverConfig.enabled) (not .Values.web.webserverConfig.existingSecret) }}
         checksum/config-webserver-config: {{ include (print $.Template.BasePath "/config/secret-webserver-config.yaml") . | sha256sum }}
         {{- end }}
         {{- if .Values.airflow.podAnnotations }}

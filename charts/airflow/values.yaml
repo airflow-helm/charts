@@ -664,8 +664,9 @@ web:
   ########################################
   ##
   webserverConfig:
-    ## by default, the helm chart owns the webserver config, however, sometimes it may be on a
-    ## custom version of the image. If this is the case, set this to false
+    ## if the `webserver_config.py` file is mounted
+    ## - set to false if you wish to mount your own `webserver_config.py` file
+    ##
     enabled: true
 
     ## the full content of the `webserver_config.py` file (as a string)

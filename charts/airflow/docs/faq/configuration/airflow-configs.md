@@ -74,6 +74,10 @@ web:
     ## the name of an existing Secret containing a `webserver_config.py` key
     ## NOTE: if set, takes precedence over `web.webserverConfig.stringOverride`
     #existingSecret: "my-airflow-webserver-config"
+
+    ## if the `webserver_config.py` file is mounted
+    ## NOTE: set to false if you wish to mount your own `webserver_config.py` file
+    #enabled: false
 ```
 
 > 🟦 __Tip__ 🟦
