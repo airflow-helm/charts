@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to the image will be documented in this file.
 
+## [1.18.0-patch.1] - 2023-04-06
+
+### Added
+
+- Added `openssl` to image (for generating self-signed certificates)
+
 ## [1.18.0-patch.0] - 2023-04-05
 
 ### Changed
@@ -22,6 +28,7 @@ All notable changes to the image will be documented in this file.
 ### Added
 - Initial release of Dockerfile with PgBouncer version `1.15.0`
 
+[1.18.0-patch.1]: https://github.com/airflow-helm/charts/tree/images/pgbouncer-1.18.0-patch.1/images/pgbouncer
 [1.18.0-patch.0]: https://github.com/airflow-helm/charts/tree/images/pgbouncer-1.18.0-patch.0/images/pgbouncer
 [1.17.0-patch.0]: https://github.com/airflow-helm/charts/tree/images/pgbouncer-1.17.0-patch.0/images/pgbouncer
 [1.15.0-patch.0]: https://github.com/airflow-helm/charts/tree/images/pgbouncer-1.15.0-patch.0/images/pgbouncer
