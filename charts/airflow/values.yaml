@@ -921,9 +921,14 @@ workers:
   ##
   autoscaling:
     enabled: false
-    apiVersion: autoscaling/v2
     maxReplicas: 2
     metrics: []
+
+    ## the `apiVersion` to use for HorizontalPodAutoscaler resources
+    ## - for Kubernetes 1.23 and later: "autoscaling/v2"
+    ## - for Kubernetes 1.22 and before: "autoscaling/v2beta2"
+    ##
+    apiVersion: autoscaling/v2
 
   ## configs for the celery worker Pods
   ##
