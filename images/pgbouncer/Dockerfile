@@ -54,6 +54,10 @@ RUN apk --no-cache add \
     postgresql-client \
     python3
 
+# install -- openssl (used in startup script to generate self-signed certs)
+RUN apk --no-cache add \
+    openssl
+
 # install -- pgbouncer
 COPY --from=builder /usr/local/bin/pgbouncer /usr/local/bin/pgbouncer
 
