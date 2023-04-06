@@ -28,18 +28,16 @@ class ScheduledPolicy(object):
             self,
             name: str,
             recurrence: str,
-            slots: int
+            slots: int,
     ):
         if not croniter.is_valid(recurrence):
-            raise ValueError(f"Invalid recurrence {recurrence} for schedule {name}")
+            raise ValueError(f"Invalid recurrence '{recurrence}' for schedule '{name}'")
 
         self.name = name
         self.recurrence = recurrence
         self.slots = slots
 
-    @property
-    def last_update(self) -> datetime:
-        now = datetime.now()
+    def last_match_time(self, now: datetime) -> datetime:
         return croniter(expr_format=self.recurrence, start_time=now).get_prev(ret_type=datetime)
 
 
@@ -50,40 +48,32 @@ class PoolWrapper(object):
             description: str,
             slots: int,
             policies: List[ScheduledPolicy],
-            auto_sync: bool
+            enable_policies: bool,
     ):
         self.name = name
-        self.default_description = description
-        self.default_slots = slots
+        self.description = description
+        self.slots = slots
         self.policies = policies
-        self.auto_sync = auto_sync
+        self.enable_policies = enable_policies
 
     def as_pool(self) -> Pool:
         pool = Pool()
         pool.pool = self.name
-        pool.slots = self.slots
-        pool.description = self.description
+        if self._has_policies():
+            most_recent_policy = self._most_recent_policy()
+            pool.slots = most_recent_policy.slots
+            pool.description = f"{self.description} - MOST_RECENT_POLICY='{most_recent_policy.name}'"
+        else:
+            pool.slots = self.slots
+            pool.description = self.description
         return pool
-    
-    @property
-    def has_policies_enabled(self) -> bool:
-        return self.auto_sync and len(self.policies) > 0
-    
-    @property
-    def slots(self) -> int:
-        if self.has_policies_enabled:
-            return self._get_recent_schedule().slots
-        return self.default_slots
 
-    @property
-    def description(self) -> str:
-        if self.has_policies_enabled:
-            most_recent_schedule = self._get_recent_schedule()
-            return f"{self.default_description}  #{most_recent_schedule.name}"
-        return self.default_description
+    def _has_policies(self) -> bool:
+        return self.enable_policies and len(self.policies) > 0
 
-    def _get_recent_schedule(self) -> ScheduledPolicy:
-        return max(self.policies, key=lambda policy: policy.last_update)    
+    def _most_recent_policy(self) -> ScheduledPolicy:
+        now = datetime.now()
+        return max(self.policies, key=lambda policy: policy.last_match_time(now))
 
 
 ###############
@@ -95,30 +85,30 @@ VAR__TEMPLATE_VALUE_CACHE = {}
 VAR__POOL_WRAPPERS = {
   {{- range .Values.airflow.pools }}
   {{ .name | quote }}: PoolWrapper(
-    name={{ (required "each `name` in `airflow.pools` must be non-empty!" .name) | quote }},
-    description={{ (required "each `description` in `airflow.pools` must be non-empty!" .description) | quote }},
+    name={{ (required "the `name` in each `airflow.pools[]` must be non-empty!" .name) | quote }},
+    description={{ (required "the `description` in each `airflow.pools[]` must be non-empty!" .description) | quote }},
     {{- if not (or (typeIs "float64" .slots) (typeIs "int64" .slots)) }}
     {{- /* the type of a number could be float64 or int64 depending on how it was set (values.yaml, or --set) */ -}}
-    {{ required "each `slots` in `airflow.pools` must be int-type!" nil }}
+    {{ required "the `slots` in each `airflow.pools[]` must be int-type!" nil }}
     {{- end }}
-    slots={{ (required "each `slots` in `airflow.pools` must be non-empty!" .slots) }},
+    slots={{ (required "the `slots` in each `airflow.pools[]` must be non-empty!" .slots) }},
     policies=[
         {{- range .policies }}
             ScheduledPolicy(
-                name={{ (required "each `name` in `airflow.pools.policies` must be non-empty!" .name) | quote }},
-                recurrence={{ (required "each `recurrence` in `airflow.pools.recurrence` must be non-empty!" .recurrence) | quote }},
+                name={{ (required "the `name` in each `airflow.pools[].policies[]` must be non-empty!" .name) | quote }},
+                recurrence={{ (required "the `recurrence` in each `airflow.pools[].policies[]` must be non-empty!" .recurrence) | quote }},
                 {{- if not (or (typeIs "float64" .slots) (typeIs "int64" .slots)) }}
                 {{- /* the type of a number could be float64 or int64 depending on how it was set (values.yaml, or --set) */ -}}
-                {{ required "each `slots` in `airflow.pools` must be int-type!" nil }}
+                {{ required "the `slots` in each `airflow.pools[].policies[]` must be int-type!" nil }}
                 {{- end }}
-                slots={{ (required "each `slots` in `airflow.pools` must be non-empty!" .slots) }},
+                slots={{ (required "the `slots` in each `airflow.pools[].policies[]` must be non-empty!" .slots) }},
             ),
         {{- end }}
     ],
-    {{- if .Values.airflow.poolsUpdate }}
-    auto_sync=True,
+    {{- if $.Values.airflow.poolsUpdate }}
+    enable_policies=True,
     {{- else }}
-    auto_sync=False,
+    enable_policies=False,
     {{- end }}
   ),
   {{- end }}
