@@ -1401,6 +1401,11 @@ dags:
     ##
     syncTimeout: 120
 
+    ## the git submodule behavior
+    ## - allowed values: "recursive", "shallow", "off"
+    ##
+    submodules: recursive
+
     ## the name of a pre-created Secret with git http credentials
     ##
     httpSecret: ""
