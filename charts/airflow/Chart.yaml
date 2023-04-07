@@ -3,7 +3,7 @@ description: Airflow Helm Chart (User Community) - the standard way to deploy Ap
 name: airflow
 version: 8.7.0
 appVersion: 2.5.3
-icon: https://airflow.apache.org/_images/pin_large.png
+icon: https://avatars.githubusercontent.com/u/71061241
 home: https://github.com/airflow-helm/charts/tree/main/charts/airflow
 maintainers:
   - name: thesuperzapper
