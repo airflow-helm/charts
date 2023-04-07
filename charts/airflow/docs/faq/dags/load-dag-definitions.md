@@ -249,10 +249,10 @@ You may embed your DAG files directly into the container image.
 
 This chart uses the official [`apache/airflow`](https://hub.docker.com/r/apache/airflow) Docker images.
 
-Here is a Dockerfile that extends `apache/airflow:2.2.5-python3.8` by placing DAG files into `/opt/airflow/dags`:
+Here is a Dockerfile that extends `apache/airflow:2.5.3-python3.8` by placing DAG files into `/opt/airflow/dags`:
 
 ```dockerfile
-FROM apache/airflow:2.2.5-python3.8
+FROM apache/airflow:2.5.3-python3.8
 
 ## copy the content of local folder `./my_dag_folder` into container folder `/opt/airflow/dags`
 COPY ./my_dag_folder /opt/airflow/dags

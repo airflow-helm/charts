@@ -23,10 +23,10 @@ You may embed your [Airflow Plugins](https://airflow.apache.org/docs/apache-airf
 
 This chart uses the official [`apache/airflow`](https://hub.docker.com/r/apache/airflow) Docker images.
 
-Here is a Dockerfile that extends `apache/airflow:2.2.5-python3.8` with custom plugins:
+Here is a Dockerfile that extends `apache/airflow:2.5.3-python3.8` with custom plugins:
 
 ```dockerfile
-FROM apache/airflow:2.2.5-python3.8
+FROM apache/airflow:2.5.3-python3.8
 
 # plugin files can be copied under `/home/airflow/plugins`
 # (where `./plugins` is relative to the docker build context)

@@ -8,6 +8,46 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
+## [8.7.0] - 2023-04-06
+
+> 🟥 __WARNINGS__ 🟥
+>
+> - if you use a custom `pgbouncer.image.tag`, you MUST update it to `1.18.0-patch.1` or later, as we now require the `openssl` package to be installed for generating self-signed certificates
+> - if you use a custom `postgresql.image`, please take note that `postgresql.image.registry` is now `ghcr.io` by default (rather than `docker.io`)
+> - if you use "Azure File" for logs persistence, you MUST NOT update to airflow 2.5.1, 2.5.2, or 2.5.3:
+>    - there is an [issue in these versions](https://github.com/apache/airflow/issues/29112) that will cause your tasks to fail
+>    - if you wish to use these versions, you will need to use a different method of logs persistence, for example [the `Azure Blob Storage` remote provider](https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/monitoring/log-persistence.md#option-2---remote-providers)
+
+> 🟨 __NOTES__ 🟨
+>
+> - the default airflow image is now `apache/airflow:2.5.3-python3.8`, but you can still use any supported version of airflow, see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
+> - when upgrading to airflow 2.5, you may wish to rename your kubernetes `aiflow.config` from `AIRFLOW__KUBERNETES__*` to `AIRFLOW__KUBERNETES_EXECUTOR__*`, as the former was deprecated by airflow 2.5
+> - the chart should no longer be forever "out of sync" in apps like ArgoCD, as this issue was resolved by [#718](https://github.com/airflow-helm/charts/pull/718)
+
+> 🟦 __OTHER__ 🟦
+>
+> - If you appreciate the `User-Community Airflow Helm Chart` please consider supporting us!
+>    - [give a ⭐ on GitHub](https://github.com/airflow-helm/charts/stargazers)
+>    - [give a ⭐ on ArtifactHub](https://artifacthub.io/packages/helm/airflow-helm/airflow)
+
+### Changed
+- the default airflow image is now `apache/airflow:2.5.3-python3.8` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support))
+- the default git-sync image is now `registry.k8s.io/git-sync/git-sync:v3.6.5`
+- the default pgbouncer image is now `ghcr.io/airflow-helm/pgbouncer:1.18.0-patch.1`
+- the default embedded postgres image is now `ghcr.io/airflow-helm/postgresql-bitnami:11.16-patch.0` (our new [custom image](https://github.com/airflow-helm/charts/tree/main/images/postgresql-bitnami/11/alpine), with support for ARM64)
+- the default embedded redis image is now `bitnami/redis:5.0.14-debian-10-r173`
+- we now generate self-signed certificates for pgbouncer using a startup script, fixing ArgoCD being forever "out of sync" ([#718](https://github.com/airflow-helm/charts/pull/718))
+
+### Added
+- feature for automatically changing pool slots on cron schedules ([#649](https://github.com/airflow-helm/charts/pull/649))
+- ability to disable chart-managed `webserver_config.py` file with `web.webserverConfig.enabled` value ([#631](https://github.com/airflow-helm/charts/pull/631))
+- added `dags.gitSync.submodules` value ([#620](https://github.com/airflow-helm/charts/pull/620))
+
+### Fixed
+- ensure Kubernetes 1.25+ support by updating default api versions for `PodDisruptionBudget` and `HorizontalPodAutoscaler` ([#685](https://github.com/airflow-helm/charts/pull/685))
+- now also set `kubernetes_executor` airflow configs, as `kubernetes` ones are deprecated ([#719](https://github.com/airflow-helm/charts/pull/719))
+- fix typo in error message ([#696](https://github.com/airflow-helm/charts/pull/696))
+
 ## [8.6.1] - 2022-06-22
 
 > 🟥 __WARNINGS__ 🟥
@@ -31,20 +71,14 @@ TBD
 >    - [`bitnami/postgresql`](https://hub.docker.com/r/bitnami/postgresql/) → [`ghcr.io/airflow-helm/postgresql-bitnami`](https://ghcr.io/airflow-helm/postgresql-bitnami)
 >    - [`bitnami/redis`](https://hub.docker.com/r/bitnami/redis/) → `TBA`
 
-> 🟦 __OTHER__ 🟦
->
-> - If you appreciate the `User-Community Airflow Helm Chart` please consider supporting us!
->    - [give a ⭐ on GitHub](https://github.com/airflow-helm/charts/stargazers)
->    - [give a ⭐ on ArtifactHub](https://artifacthub.io/packages/helm/airflow-helm/airflow)
+### Changed
+- update `.helmignore` file to exclude docs ([#593](https://github.com/airflow-helm/charts/pull/593))
+- require release-name to have <= 40 characters ([#589](https://github.com/airflow-helm/charts/pull/589))
 
 ### Added
 - add `airflow.protectedPipPackages` ([#610](https://github.com/airflow-helm/charts/pull/610))
 - allow using `extraVolumeMounts` for log storage ([#585](https://github.com/airflow-helm/charts/pull/585))
 - minimum scheduler age before task-creation-check ([#612](https://github.com/airflow-helm/charts/pull/612))
-
-### Changed
-- update `.helmignore` file to exclude docs ([#593](https://github.com/airflow-helm/charts/pull/593))
-- require release-name to have <= 40 characters ([#589](https://github.com/airflow-helm/charts/pull/589))
 
 ### Fixed
 - fix some breaking changes from airflow 2.3.0 ([#592](https://github.com/airflow-helm/charts/pull/592)) 
@@ -75,6 +109,13 @@ TBD
 > - The new [PgBouncer startupProbe](https://github.com/airflow-helm/charts/pull/547) will only work in Kubernetes 1.18+
 > - The [`extraManifests` value](docs/faq/kubernetes/extra-manifests.md) has been significantly improved
 
+### Changed
+- the default `airflow.image` is now `apache/airflow:2.2.5-python3.8` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support))
+- support helm templating in `extraManifests` by allowing string elements ([docs](docs/faq/kubernetes/extra-manifests.md)) ([#523](https://github.com/airflow-helm/charts/pull/523))
+- update default `dags.gitSync.image.tag` to `v3.5.0` ([#544](https://github.com/airflow-helm/charts/pull/544))
+- update default `pgbouncer.image.tag` to `1.17.0-patch.0` ([#552](https://github.com/airflow-helm/charts/pull/552))
+- update default `pgbouncer.maxClientConnections` to `1000` ([#543](https://github.com/airflow-helm/charts/pull/543))
+
 ### Added
 - add "airflow triggerer" Deployment ([#555](https://github.com/airflow-helm/charts/pull/555))
 - add "log-cleanup sidecar" to scheduler and worker ([docs](docs/faq/monitoring/log-cleanup.md)) ([#554](https://github.com/airflow-helm/charts/pull/554))
@@ -89,13 +130,6 @@ TBD
 - add `airflow.kubernetesPodTemplate.extraInitContainers` value ([#446](https://github.com/airflow-helm/charts/pull/446))
 - add `airflow.kubernetesPodTemplate.shareProcessNamespace` value ([#408](https://github.com/airflow-helm/charts/pull/408))
 - add `airflow.kubernetesPodTemplate.podLabels` value ([#534](https://github.com/airflow-helm/charts/pull/534))
-
-### Changed
-- the default `airflow.image` is now `apache/airflow:2.2.5-python3.8` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support))
-- support helm templating in `extraManifests` by allowing string elements ([docs](docs/faq/kubernetes/extra-manifests.md)) ([#523](https://github.com/airflow-helm/charts/pull/523))
-- update default `dags.gitSync.image.tag` to `v3.5.0` ([#544](https://github.com/airflow-helm/charts/pull/544))
-- update default `pgbouncer.image.tag` to `1.17.0-patch.0` ([#552](https://github.com/airflow-helm/charts/pull/552))
-- update default `pgbouncer.maxClientConnections` to `1000` ([#543](https://github.com/airflow-helm/charts/pull/543))
 
 ### Fixed
 - fix `airflow.{fernetKey,webserverSecretKey}` overshadowing `_CMD` and `_SECRET` configs ([docs-1](docs/faq/security/set-fernet-key.md), [docs-2](docs/faq/security/set-webserver-secret-key.md)) ([#508](https://github.com/airflow-helm/charts/pull/508))
@@ -154,14 +188,6 @@ TBD
 > - To revert to using a post-install Job for `db-migrations`, set `airflow.dbMigrations.runAsJob` to `true`
 > - The new default of `airflow.defaultSecurityContext = {fsGroup: 0}` should prevent filesystem permission errors in mounted volumes
 
-### Added
-- PgBouncer is now supported (and enabled by default), see the new `pgbouncer.*` values ([#341](https://github.com/airflow-helm/charts/pull/341), [#330](https://github.com/airflow-helm/charts/pull/330))
-- created a new Deployment called `db-migrations` to manage airflow database schema upgrades ([#345](https://github.com/airflow-helm/charts/pull/345))
-- added the `airflow.webserverSecretKey` value with default `"THIS IS UNSAFE!"` ([#346](https://github.com/airflow-helm/charts/pull/346))
-- added the `airflow.defaultSecurityContext` value with default `{fsGroup: 0}` ([#367](https://github.com/airflow-helm/charts/pull/367))
-- added `airflow.{defaultNodeSelector,defaultAffinity,defaultTolerations}` values ([#372](https://github.com/airflow-helm/charts/pull/372))
-- added `airflow.localSettings.*` values to make specifying `airflow_local_settings.py` easier ([#374](https://github.com/airflow-helm/charts/pull/374))
-
 ### Changed
 - the default `airflow.image` is now `apache/airflow:2.1.2-python3.8` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support))
 - the default `airflow.image.gid` is now `0` ([#388](https://github.com/airflow-helm/charts/pull/388))
@@ -174,6 +200,14 @@ TBD
 - we now include `airflow.extraContainers` in the flower Deployment ([#379](https://github.com/airflow-helm/charts/pull/379))
 - the KubernetesExecutor pod-template now respects the `airflow.image.*` values ([#352](https://github.com/airflow-helm/charts/pull/352))
 - added values validation for `externalDatabase.type` ([#348](https://github.com/airflow-helm/charts/pull/348))
+
+### Added
+- PgBouncer is now supported (and enabled by default), see the new `pgbouncer.*` values ([#341](https://github.com/airflow-helm/charts/pull/341), [#330](https://github.com/airflow-helm/charts/pull/330))
+- created a new Deployment called `db-migrations` to manage airflow database schema upgrades ([#345](https://github.com/airflow-helm/charts/pull/345))
+- added the `airflow.webserverSecretKey` value with default `"THIS IS UNSAFE!"` ([#346](https://github.com/airflow-helm/charts/pull/346))
+- added the `airflow.defaultSecurityContext` value with default `{fsGroup: 0}` ([#367](https://github.com/airflow-helm/charts/pull/367))
+- added `airflow.{defaultNodeSelector,defaultAffinity,defaultTolerations}` values ([#372](https://github.com/airflow-helm/charts/pull/372))
+- added `airflow.localSettings.*` values to make specifying `airflow_local_settings.py` easier ([#374](https://github.com/airflow-helm/charts/pull/374))
 
 ### Fixed
 - fixed the scheduler livenessProbe command ([#351](https://github.com/airflow-helm/charts/pull/351))
@@ -210,10 +244,6 @@ TBD
 >    - [How to manage airflow variables?](docs/faq/dags/airflow-variables.md)
 >    - [How to manage airflow pools?](docs/faq/dags/airflow-pools.md)
 
-### Added
-- allow referencing Secrets/ConfigMaps in `airflow.{users,connections,pools,variables}` ([#281](https://github.com/airflow-helm/charts/pull/281))
-- removed the need for `helmWait` value ([#266](https://github.com/airflow-helm/charts/pull/266))
-
 ### Changed
 - the default `airflow.image` is now `apache/airflow:2.1.1-python3.8` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)) ([#286](https://github.com/airflow-helm/charts/issues/286))
 - the `Chart.yaml` now explicitly specifies `apiVersion=v2` (requiring helm 3) ([#278](https://github.com/airflow-helm/charts/issues/278))
@@ -221,6 +251,10 @@ TBD
 - git-sync containers are now deployed in webserver, regardless of `airflow.legacyCommands` ([#288](https://github.com/airflow-helm/charts/pull/288))
 - `wait-for-db-migrations` init-containers now work properly when `airflow.legacyCommands=true` ([#271](https://github.com/airflow-helm/charts/pull/271))
 - improve validation of `{logs,dags}.persistence.accessMode` ([#269](https://github.com/airflow-helm/charts/pull/269))
+
+### Added
+- allow referencing Secrets/ConfigMaps in `airflow.{users,connections,pools,variables}` ([#281](https://github.com/airflow-helm/charts/pull/281))
+- removed the need for `helmWait` value ([#266](https://github.com/airflow-helm/charts/pull/266))
 
 ### Fixed
 - include volumeMounts in init-containers ([#255](https://github.com/airflow-helm/charts/pull/255))
@@ -721,7 +755,8 @@ TBD
 >
 > - To read about versions `7.0.0` and before, please see the [legacy repo](https://github.com/helm/charts/tree/master/stable/airflow).
 
-[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.6.1...HEAD
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.7.0...HEAD
+[8.7.0]: https://github.com/airflow-helm/charts/compare/airflow-8.6.1...airflow-8.7.0
 [8.6.1]: https://github.com/airflow-helm/charts/compare/airflow-8.6.0...airflow-8.6.1
 [8.6.0]: https://github.com/airflow-helm/charts/compare/airflow-8.5.3...airflow-8.6.0
 [8.5.3]: https://github.com/airflow-helm/charts/compare/airflow-8.5.2...airflow-8.5.3
