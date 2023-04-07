@@ -670,6 +670,11 @@ web:
   ########################################
   ##
   webserverConfig:
+    ## if the `webserver_config.py` file is mounted
+    ## - set to false if you wish to mount your own `webserver_config.py` file
+    ##
+    enabled: true
+
     ## the full content of the `webserver_config.py` file (as a string)
     ## - docs for Flask-AppBuilder security configs:
     ##   https://flask-appbuilder.readthedocs.io/en/latest/security.html

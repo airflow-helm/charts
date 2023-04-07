@@ -42,7 +42,9 @@ spec:
       annotations:
         checksum/secret-config-envs: {{ include (print $.Template.BasePath "/config/secret-config-envs.yaml") . | sha256sum }}
         checksum/secret-local-settings: {{ include (print $.Template.BasePath "/config/secret-local-settings.yaml") . | sha256sum }}
+        {{- if and (.Values.web.webserverConfig.enabled) (not .Values.web.webserverConfig.existingSecret) }}
         checksum/config-webserver-config: {{ include (print $.Template.BasePath "/config/secret-webserver-config.yaml") . | sha256sum }}
+        {{- end }}
         {{- if .Values.airflow.podAnnotations }}
         {{- toYaml .Values.airflow.podAnnotations | nindent 8 }}
         {{- end }}
@@ -136,10 +138,12 @@ spec:
           {{- end }}
           volumeMounts:
             {{- $volumeMounts | indent 12 }}
+            {{- if .Values.web.webserverConfig.enabled }}
             - name: webserver-config
               mountPath: /opt/airflow/webserver_config.py
               subPath: webserver_config.py
               readOnly: true
+            {{- end }}
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.git_sync" . | indent 8 }}
         {{- end }}
@@ -148,6 +152,7 @@ spec:
         {{- end }}
       volumes:
         {{- $volumes | indent 8 }}
+        {{- if .Values.web.webserverConfig.enabled }}
         - name: webserver-config
           secret:
             {{- if .Values.web.webserverConfig.existingSecret }}
@@ -156,3 +161,4 @@ spec:
             secretName: {{ include "airflow.fullname" . }}-webserver-config
             {{- end }}
             defaultMode: 0644
+        {{- end }}
