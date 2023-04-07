@@ -105,6 +105,9 @@ spec:
             ## we generate users.txt on startup, because DATABASE_PASSWORD is defined from a Secret,
             ## and we want to pickup the new values on container restart (possibly due to livenessProbe failure)
             - |-
+              {{- if or (not .Values.pgbouncer.clientSSL.keyFile.existingSecret) (not .Values.pgbouncer.clientSSL.certFile.existingSecret) }}
+              /home/pgbouncer/config/gen_self_signed_cert.sh && \
+              {{- end }}
               /home/pgbouncer/config/gen_auth_file.sh && \
               exec pgbouncer /home/pgbouncer/config/pgbouncer.ini
           {{- if .Values.pgbouncer.livenessProbe.enabled }}
@@ -145,26 +148,16 @@ spec:
               - key: gen_auth_file.sh
                 path: gen_auth_file.sh
                 mode: 0755
+              {{- if or (not .Values.pgbouncer.clientSSL.keyFile.existingSecret) (not .Values.pgbouncer.clientSSL.certFile.existingSecret) }}
+              - key: gen_self_signed_cert.sh
+                path: gen_self_signed_cert.sh
+                mode: 0755
+              {{- end }}
               - key: pgbouncer.ini
                 path: pgbouncer.ini
         - name: pgbouncer-certs
           projected:
             sources:
-              {{- if or (not .Values.pgbouncer.clientSSL.keyFile.existingSecret) (not .Values.pgbouncer.clientSSL.certFile.existingSecret) }}
-              ## CLIENT TLS FILES (CHART GENERATED)
-              - secret:
-                  name: {{ include "airflow.fullname" . }}-pgbouncer-certs
-                  items:
-                    {{- if not .Values.pgbouncer.clientSSL.keyFile.existingSecret }}
-                    - key: client.key
-                      path: client.key
-                    {{- end }}
-                    {{- if not .Values.pgbouncer.clientSSL.certFile.existingSecret }}
-                    - key: client.crt
-                      path: client.crt
-                    {{- end }}
-              {{- end }}
-
               {{- if or (.Values.pgbouncer.clientSSL.caFile.existingSecret) (.Values.pgbouncer.clientSSL.keyFile.existingSecret) (.Values.pgbouncer.clientSSL.certFile.existingSecret) }}
               ## CLIENT TLS FILES (USER PROVIDED)
               {{- if .Values.pgbouncer.clientSSL.caFile.existingSecret }}
