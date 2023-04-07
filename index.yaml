@@ -17,7 +17,7 @@ entries:
       Apache Airflow on Kubernetes with Helm
     digest: bdee451c01c448bcb5e15427c5eaac221a913fe21487d3c8c74c5c5866fde932
     home: https://github.com/airflow-helm/charts/tree/main/charts/airflow
-    icon: https://airflow.apache.org/_images/pin_large.png
+    icon: https://avatars.githubusercontent.com/u/71061241
     keywords:
     - airflow
     - dag
