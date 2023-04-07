@@ -72,7 +72,7 @@ class PoolWrapper(object):
         return self.enable_policies and len(self.policies) > 0
 
     def _most_recent_policy(self) -> ScheduledPolicy:
-        now = datetime.now()
+        now = datetime.utcnow()
         return max(self.policies, key=lambda policy: policy.last_match_time(now))
 
 
