@@ -375,9 +375,9 @@ serviceAccount:
 
 ## Azure Blob Storage Connection
 
-The `apache-airflow-providers-microsoft-azure` provider package contains the `"wabs"` connection type.
+The `apache-airflow-providers-microsoft-azure` provider package contains the `"wasb"` connection type.
 
-The following are some options for defining [`"wabs"` type connections](https://airflow.apache.org/docs/apache-airflow-providers-microsoft-azure/stable/connections/wasb.html) using this chart.
+The following are some options for defining [`"wasb"` type connections](https://airflow.apache.org/docs/apache-airflow-providers-microsoft-azure/stable/connections/wasb.html) using this chart.
 
 <details>
 <summary>
@@ -385,13 +385,13 @@ The following are some options for defining [`"wabs"` type connections](https://
   <b>Option 1: Plain Text</b>
 </summary>
 
-The following values will create a `"wabs"` type connection called `my_wabs` using a token stored in plain-text:
+The following values will create a `"wasb"` type connection called `my_wasb` using a token stored in plain-text:
 
 ```yaml
 airflow:
   connections:
-    - id: my_wabs
-      type: wabs
+    - id: my_wasb
+      type: wasb
       description: my Azure Blob Storage connection
       
       ## your `AZURE_CLIENT_ID`
@@ -422,13 +422,13 @@ airflow:
   <b>Option 2: Secret Templates (recommended)</b>
 </summary>
 
-The following values will create a `"wabs"` type connection called `my_wabs` using a token stored in `Secret/my-wabs-token`:
+The following values will create a `"wasb"` type connection called `my_wasb` using a token stored in `Secret/my-wasb-token`:
 
 ```yaml
 airflow: 
   connections:
-    - id: my_wabs
-      type: wabs
+    - id: my_wasb
+      type: wasb
       description: my Azure Blob Storage connection
       
       ## this string template is defined by `airflow.connectionsTemplates.CLIENT_ID` 
@@ -444,32 +444,32 @@ airflow:
         }
 
   connectionsTemplates:
-    ## extracts the value of AZURE_CLIENT_ID from `Secret/my-wabs-token`
+    ## extracts the value of AZURE_CLIENT_ID from `Secret/my-wasb-token`
     CLIENT_ID:
       kind: secret
-      name: my-wabs-token
+      name: my-wasb-token
       key: AZURE_CLIENT_ID
 
-    ## extracts the value of AZURE_CLIENT_SECRET from `Secret/my-wabs-token`
+    ## extracts the value of AZURE_CLIENT_SECRET from `Secret/my-wasb-token`
     CLIENT_SECRET:
       kind: secret
-      name: my-wabs-token
+      name: my-wasb-token
       key: AZURE_CLIENT_SECRET
 
-    ## extracts the value of AZURE_TENANT_ID from `Secret/my-wabs-token`
+    ## extracts the value of AZURE_TENANT_ID from `Secret/my-wasb-token`
     TENANT_ID:
       kind: secret
-      name: my-wabs-token
+      name: my-wasb-token
       key: AZURE_TENANT_ID
 ```
 
 > 🟦 __Tip__ 🟦
 >
-> You may create the `Secret` called `my-wabs-token` with `kubectl`.
+> You may create the `Secret` called `my-wasb-token` with `kubectl`.
 > 
 > ```shell
 > kubectl create secret generic \
->   my-wabs-token \
+>   my-wasb-token \
 >   --from-literal=AZURE_CLIENT_ID='xxxxxxxxxxxxxxxxxxxx' \
 >   --from-literal=AZURE_CLIENT_SECRET='xxxxxxxxxxxxxxxxxxxx' \
 >   --from-literal=AZURE_TENANT_ID='xxxxxxxxxxxxxxxxxxxx' \
