@@ -194,17 +194,17 @@ The `apache-airflow-providers-microsoft-azure` provider supports [remote logging
 
 > 🟦 __Tip__ 🟦
 >
-> A `wabs` type airflow connection called `my_wabs` must exist for this example,
+> A `wasb` type airflow connection called `my_wasb` must exist for this example,
 > see our [guide using `airflow.connections`](../dags/airflow-connections.md#azure-blob-storage-connection) to do this.
 
-For example, to use Azure Blob Storage called `wasb-<<MY_NAME>>` with access provided by an Airflow Connection called `my_wabs`:
+For example, to use Azure Blob Storage called `wasb-<<MY_NAME>>` with access provided by an Airflow Connection called `my_wasb`:
 
 ```yaml
 airflow:
   config:
     AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
     AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "wasb-<<MY_NAME>>"
-    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "my_wabs"
+    AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "my_wasb"
 ```
 
 </details>
