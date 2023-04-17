@@ -765,7 +765,8 @@ TBD
 >
 > - To read about versions `7.0.0` and before, please see the [legacy repo](https://github.com/helm/charts/tree/master/stable/airflow).
 
-[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.7.0...HEAD
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.8.0...HEAD
+[8.8.0]: https://github.com/airflow-helm/charts/compare/airflow-8.7.0...airflow-8.8.0
 [8.7.0]: https://github.com/airflow-helm/charts/compare/airflow-8.6.1...airflow-8.7.0
 [8.6.1]: https://github.com/airflow-helm/charts/compare/airflow-8.6.0...airflow-8.6.1
 [8.6.0]: https://github.com/airflow-helm/charts/compare/airflow-8.5.3...airflow-8.6.0
