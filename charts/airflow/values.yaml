@@ -2388,4 +2388,3 @@ prometheusRule:
   ## - docs for alerting rules: https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/
   ##
   groups: []
-  
