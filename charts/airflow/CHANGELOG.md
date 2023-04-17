@@ -8,6 +8,16 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
+## 8.8.0 - 2023-04-17
+
+> 🟨 __NOTES__ 🟨
+>
+> - In order to avoid confusion with the names of the existing parameters related to the `dags.gitSync` variable, it is decised to rename the parameters git-sync with dags-git-sync and plugins-git-sync correspondingly. Affected parameters: airflow.container.git_sync to airflow.container.dags_git_sync
+
+### Added
+- added `plugins.*` values with the same structure as in the `dags.*` variables, in order to differentiate git-sync for both "dags" and "plugins", so "dags" and "airflow plugins" can be pulled from separate repositories.
+- added AIRFLOW__CORE__PLUGINS_FOLDER environment variable to point to the "plugins" folder
+
 ## [8.7.0] - 2023-04-06
 
 > 🟥 __WARNINGS__ 🟥

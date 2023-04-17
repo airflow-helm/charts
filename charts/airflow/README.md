@@ -380,6 +380,17 @@ Parameter | Description | Default
 </details>
 
 <details>
+<summary><code>plugins.*</code></summary>
+
+Parameter | Description | Default
+--- | --- | ---
+`plugins.path` | the airflow plugins folder | `/opt/airflow/plugins`
+`plugins.persistence.*` | configs for the plugins PVC | `<see values.yaml>`
+`plugins.gitSync.*` | configs for the git-sync sidecar  | `<see values.yaml>`
+
+</details>
+
+<details>
 <summary><code>ingress.*</code></summary>
 
 Parameter | Description | Default
