@@ -185,10 +185,10 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "R
 {{- end }}
 
 {{/*
-Define a container which regularly syncs a git-repo
-EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") }}
+Define a container which regularly syncs the DAGs git-repo
+EXAMPLE USAGE: {{ include "airflow.container.dags_git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") }}
 */}}
-{{- define "airflow.container.git_sync" }}
+{{- define "airflow.container.dags_git_sync" }}
 {{- if .sync_one_time }}
 - name: dags-git-clone
 {{- else }}
@@ -263,12 +263,104 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
     - name: dags-data
       mountPath: /dags
     {{- if .Values.dags.gitSync.sshSecret }}
-    - name: git-secret
+    - name: dags-git-secret
       mountPath: /etc/git-secret/id_rsa
       readOnly: true
       subPath: {{ .Values.dags.gitSync.sshSecretKey }}
     {{- end }}
     {{- if .Values.dags.gitSync.sshKnownHosts }}
+    - name: git-known-hosts
+      mountPath: /etc/git-secret/known_hosts
+      readOnly: true
+      subPath: known_hosts
+    {{- end }}
+{{- end }}
+
+{{/*
+Define a container which regularly syncs the Plugins git-repo
+EXAMPLE USAGE: {{ include "airflow.container.plugins_git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") }}
+*/}}
+{{- define "airflow.container.plugins_git_sync" }}
+{{- if .sync_one_time }}
+- name: plugins-git-clone
+{{- else }}
+- name: plugins-git-sync
+{{- end }}
+  image: {{ .Values.plugins.gitSync.image.repository }}:{{ .Values.plugins.gitSync.image.tag }}
+  imagePullPolicy: {{ .Values.plugins.gitSync.image.pullPolicy }}
+  securityContext:
+    runAsUser: {{ .Values.plugins.gitSync.image.uid }}
+    runAsGroup: {{ .Values.plugins.gitSync.image.gid }}
+  resources:
+    {{- toYaml .Values.plugins.gitSync.resources | nindent 4 }}
+  envFrom:
+    {{- include "airflow.envFrom" . | indent 4 }}
+  env:
+    {{- if .sync_one_time }}
+    - name: GIT_SYNC_ONE_TIME
+      value: "true"
+    {{- end }}
+    - name: GIT_SYNC_ROOT
+      value: "/plugins"
+    - name: GIT_SYNC_DEST
+      value: "repo"
+    - name: GIT_SYNC_REPO
+      value: {{ .Values.plugins.gitSync.repo | quote }}
+    - name: GIT_SYNC_BRANCH
+      value: {{ .Values.plugins.gitSync.branch | quote }}
+    - name: GIT_SYNC_REV
+      value: {{ .Values.plugins.gitSync.revision | quote }}
+    - name: GIT_SYNC_DEPTH
+      value: {{ .Values.plugins.gitSync.depth | quote }}
+    - name: GIT_SYNC_WAIT
+      value: {{ .Values.plugins.gitSync.syncWait | quote }}
+    - name: GIT_SYNC_TIMEOUT
+      value: {{ .Values.plugins.gitSync.syncTimeout | quote }}
+    - name: GIT_SYNC_ADD_USER
+      value: "true"
+    - name: GIT_SYNC_MAX_SYNC_FAILURES
+      value: {{ .Values.plugins.gitSync.maxFailures | quote }}
+    - name: GIT_SYNC_SUBMODULES
+      value: {{ .Values.plugins.gitSync.submodules | quote }}
+    {{- if .Values.plugins.gitSync.sshSecret }}
+    - name: GIT_SYNC_SSH
+      value: "true"
+    - name: GIT_SSH_KEY_FILE
+      value: "/etc/git-secret/id_rsa"
+    {{- end }}
+    {{- if .Values.plugins.gitSync.sshKnownHosts }}
+    - name: GIT_KNOWN_HOSTS
+      value: "true"
+    - name: GIT_SSH_KNOWN_HOSTS_FILE
+      value: "/etc/git-secret/known_hosts"
+    {{- else }}
+    - name: GIT_KNOWN_HOSTS
+      value: "false"
+    {{- end }}
+    {{- if .Values.plugins.gitSync.httpSecret }}
+    - name: GIT_SYNC_USERNAME
+      valueFrom:
+        secretKeyRef:
+          name: {{ .Values.plugins.gitSync.httpSecret }}
+          key: {{ .Values.plugins.gitSync.httpSecretUsernameKey }}
+    - name: GIT_SYNC_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: {{ .Values.plugins.gitSync.httpSecret }}
+          key: {{ .Values.plugins.gitSync.httpSecretPasswordKey }}
+    {{- end }}
+    {{- /* this has user-defined variables, so must be included BELOW (so the ABOVE `env` take precedence) */ -}}
+    {{- include "airflow.env" . | indent 4 }}
+  volumeMounts:
+    - name: plugins-data
+      mountPath: /plugins
+    {{- if .Values.plugins.gitSync.sshSecret }}
+    - name: plugins-git-secret
+      mountPath: /etc/git-secret/id_rsa
+      readOnly: true
+      subPath: {{ .Values.plugins.gitSync.sshSecretKey }}
+    {{- end }}
+    {{- if .Values.plugins.gitSync.sshKnownHosts }}
     - name: git-known-hosts
       mountPath: /etc/git-secret/known_hosts
       readOnly: true
@@ -365,6 +457,19 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Value
   mountPath: {{ .Values.dags.path }}
 {{- end }}
 
+{{- /* plugins */ -}}
+{{- if .Values.plugins.persistence.enabled }}
+- name: plugins-data
+  mountPath: {{ .Values.plugins.path }}
+  subPath: {{ .Values.plugins.persistence.subPath }}
+  {{- if eq .Values.plugins.persistence.accessMode "ReadOnlyMany" }}
+  readOnly: true
+  {{- end }}
+{{- else if .Values.plugins.gitSync.enabled }}
+- name: plugins-data
+  mountPath: {{ .Values.plugins.path }}
+{{- end }}
+
 {{- /* logs */ -}}
 {{- if include "airflow.extraVolumeMounts.has_log_path" . }}
 {{- /* when `airflow.extraVolumeMounts` has `logs.path`, we dont need a "logs-data" volume mount */ -}}
@@ -428,6 +533,20 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
   emptyDir: {}
 {{- end }}
 
+{{- /* plugins */ -}}
+{{- if .Values.plugins.persistence.enabled }}
+- name: plugins-data
+  persistentVolumeClaim:
+    {{- if .Values.plugins.persistence.existingClaim }}
+    claimName: {{ .Values.plugins.persistence.existingClaim }}
+    {{- else }}
+    claimName: {{ printf "%s-plugins" (include "airflow.fullname" . | trunc 58) }}
+    {{- end }}
+{{- else if .Values.plugins.gitSync.enabled }}
+- name: plugins-data
+  emptyDir: {}
+{{- end }}
+
 {{- /* logs */ -}}
 {{- if include "airflow.extraVolumeMounts.has_log_path" . }}
 {{- /* when `airflow.extraVolumeMounts` has `logs.path`, we dont need a "logs-data" volume */ -}}
@@ -446,10 +565,10 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
   emptyDir: {}
 {{- end }}
 
-{{- /* git-sync */ -}}
+{{- /* DAGs git-sync */ -}}
 {{- if .Values.dags.gitSync.enabled }}
 {{- if .Values.dags.gitSync.sshSecret }}
-- name: git-secret
+- name: dags-git-secret
   secret:
     secretName: {{ .Values.dags.gitSync.sshSecret }}
     defaultMode: 0644
@@ -460,6 +579,17 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
     secretName: {{ include "airflow.fullname" . }}-known-hosts
     defaultMode: 0644
 {{- end }}
+{{- end }}
+
+{{- /* Plugins git-sync */ -}}
+{{- if .Values.plugins.gitSync.enabled }}
+{{- if .Values.plugins.gitSync.sshSecret }}
+- name: plugins-git-secret
+  secret:
+    secretName: {{ .Values.plugins.gitSync.sshSecret }}
+    defaultMode: 0644
+{{- end }}
+{{- /* While we use the same known_hosts for the Plugins part, we omit the custom definition for this parameter */ -}}
 {{- end }}
 
 {{- /* pip-packages */ -}}

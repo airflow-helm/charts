@@ -281,7 +281,8 @@ airflow:
   ## FILE | pod_template.yaml
   ########################################
   ## - generates a file for `AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE`
-  ## - the `dags.gitSync` values will create a git-sync init-container in the pod
+  ## - the `dags.gitSync` values will create a dags-git-sync init-container in the pod
+  ## - the `plugins.gitSync` values will create a plugins-git-sync init-container in the pod
   ## - the `airflow.extraPipPackages` will NOT be installed
   ##
   kubernetesPodTemplate:
@@ -917,7 +918,8 @@ workers:
     minAvailable: ""
 
   ## configs for the HorizontalPodAutoscaler of the worker Pods
-  ## - [WARNING] if using git-sync, ensure `dags.gitSync.resources` is set
+  ## - [WARNING] if using dags-git-sync, ensure `dags.gitSync.resources` is set
+  ## - [WARNING] if using plugins-git-sync, ensure `plugins.gitSync.resources` is set
   ## - [WARNING] if using worker log-cleanup, ensure `workers.logCleanup.resources` is set
   ##
   ## ____ EXAMPLE _______________
@@ -1431,6 +1433,145 @@ dags:
     sshSecret: ""
 
     ## the key in `dags.gitSync.sshSecret` with your ssh-key file
+    ##
+    sshSecretKey: id_rsa
+
+    ## the string value of a "known_hosts" file (for SSH only)
+    ## - [WARNING] known_hosts verification will be disabled if left empty, making you more
+    ##   vulnerable to repo spoofing attacks
+    ##
+    ## ____ EXAMPLE _______________
+    ##   sshKnownHosts: |-
+    ##     <HOST_NAME> ssh-rsa <HOST_KEY>
+    ##
+    sshKnownHosts: ""
+
+    ## the number of consecutive failures allowed before aborting
+    ##  - the first sync must succeed
+    ##  - a value of -1 will retry forever after the initial sync
+    ##
+    maxFailures: 0
+
+###################################
+## CONFIG | Airflow Plugins
+###################################
+plugins:
+  ## the airflow plugins folder
+  ##
+  path: /opt/airflow/plugins
+
+  ## configs for the plugins PVC
+  ##
+  persistence:
+    ## if a persistent volume is mounted at `plugins.path`
+    ##
+    enabled: false
+
+    ## the name of an existing PVC to use
+    ##
+    existingClaim: ""
+
+    ## sub-path under `plugins.persistence.existingClaim` to use
+    ##
+    subPath: ""
+
+    ## the name of the StorageClass used by the PVC
+    ## - if set to "", then `PersistentVolumeClaim/spec.storageClassName` is omitted
+    ## - if set to "-", then `PersistentVolumeClaim/spec.storageClassName` is set to ""
+    ##
+    storageClass: ""
+
+    ## the access mode of the PVC
+    ## - [WARNING] must be "ReadOnlyMany" or "ReadWriteMany" otherwise airflow pods will fail to start
+    ##
+    accessMode: ReadOnlyMany
+
+    ## the size of PVC to request
+    ##
+    size: 1Gi
+
+  ## configs for the git-sync sidecar (https://github.com/kubernetes/git-sync)
+  ##
+  gitSync:
+    ## if the git-sync sidecar container is enabled
+    ##
+    enabled: false
+
+    ## the git-sync container image
+    ##
+    image:
+      repository: k8s.gcr.io/git-sync/git-sync
+      tag: v3.5.0
+      pullPolicy: IfNotPresent
+      uid: 65533
+      gid: 65533
+
+    ## resource requests/limits for the git-sync container
+    ## - spec for ResourceRequirements:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ##
+    resources: {}
+
+    ## the url of the git repo
+    ##
+    ## ____ EXAMPLE _______________
+    ##   # https git repo
+    ##   repo: "https://github.com/USERNAME/REPOSITORY.git"
+    ##
+    ## ____ EXAMPLE _______________
+    ##   # ssh git repo
+    ##   repo: "git@github.com:USERNAME/REPOSITORY.git"
+    ##
+    repo: ""
+
+    ## the sub-path within your repo where plugins are located
+    ## - only plugins under this path within your repo will be seen by airflow,
+    ##   (note, the full repo will still be cloned)
+    ##
+    repoSubPath: ""
+
+    ## the git branch to check out
+    ##
+    branch: master
+
+    ## the git revision (tag or hash) to check out
+    ##
+    revision: HEAD
+
+    ## shallow clone with a history truncated to the specified number of commits
+    ##
+    depth: 1
+
+    ## the number of seconds between syncs
+    ##
+    syncWait: 60
+
+    ## the max number of seconds allowed for a complete sync
+    ##
+    syncTimeout: 120
+
+    ## the git submodule behavior
+    ## - allowed values: "recursive", "shallow", "off"
+    ##
+    submodules: recursive
+
+    ## the name of a pre-created Secret with git http credentials
+    ##
+    httpSecret: ""
+
+    ## the key in `plugins.gitSync.httpSecret` with your git username
+    ##
+    httpSecretUsernameKey: username
+
+    ## the key in `plugins.gitSync.httpSecret` with your git password/token
+    ##
+    httpSecretPasswordKey: password
+
+    ## the name of a pre-created Secret with git ssh credentials
+    ##
+    sshSecret: ""
+
+    ## the key in `plugins.gitSync.sshSecret` with your ssh-key file
     ##
     sshSecretKey: id_rsa
 

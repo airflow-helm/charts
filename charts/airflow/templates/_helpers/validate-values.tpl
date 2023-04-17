@@ -58,6 +58,9 @@
 {{- if or .Values.airflow.config.AIRFLOW__CORE__DAGS_FOLDER }}
   {{ required "Don't define `airflow.config.AIRFLOW__CORE__DAGS_FOLDER`, it will be automatically set from `dags.path`!" nil }}
 {{- end }}
+{{- if or .Values.airflow.config.AIRFLOW__CORE__PLUGINS_FOLDER }}
+  {{ required "Don't define `airflow.config.AIRFLOW__CORE__PLUGINS_FOLDER`, it will be automatically set from `plugins.path`!" nil }}
+{{- end }}
 {{- if or (.Values.airflow.config.AIRFLOW__CELERY__BROKER_URL) (.Values.airflow.config.AIRFLOW__CELERY__BROKER_URL_CMD) }}
   {{ required "Don't define `airflow.config.AIRFLOW__CELERY__BROKER_URL`, it will be automatically set by the chart!" nil }}
 {{- end }}
@@ -129,6 +132,29 @@
   {{- end }}
   {{- if and (.Values.dags.gitSync.repo | lower | hasPrefix "git@github.com") (not .Values.dags.gitSync.sshSecret) }}
   {{ required "You must define `dags.gitSync.sshSecret` when using GitHub with SSH for `dags.gitSync.repo`!" nil }}
+  {{- end }}
+{{- end }}
+
+{{/* Checks for `plugins.persistence` */}}
+{{- if .Values.plugins.persistence.enabled }}
+  {{- if not (has .Values.plugins.persistence.accessMode (list "ReadOnlyMany" "ReadWriteMany")) }}
+  {{ required "The `plugins.persistence.accessMode` must be one of: [ReadOnlyMany, ReadWriteMany]!" nil }}
+  {{- end }}
+{{- end }}
+
+{{/* Checks for `plugins.gitSync` */}}
+{{- if .Values.plugins.gitSync.enabled }}
+  {{- if .Values.plugins.persistence.enabled }}
+  {{ required "If `plugins.gitSync.enabled=true`, then `persistence.enabled` must be disabled!" nil }}
+  {{- end }}
+  {{- if not .Values.plugins.gitSync.repo }}
+  {{ required "If `plugins.gitSync.enabled=true`, then `plugins.gitSync.repo` must be non-empty!" nil }}
+  {{- end }}
+  {{- if and (.Values.plugins.gitSync.sshSecret) (.Values.plugins.gitSync.httpSecret) }}
+  {{ required "At most, one of `plugins.gitSync.sshSecret` and `plugins.gitSync.httpSecret` can be defined!" nil }}
+  {{- end }}
+  {{- if and (.Values.plugins.gitSync.repo | lower | hasPrefix "git@github.com") (not .Values.plugins.gitSync.sshSecret) }}
+  {{ required "You must define `plugins.gitSync.sshSecret` when using GitHub with SSH for `plugins.gitSync.repo`!" nil }}
   {{- end }}
 {{- end }}
 

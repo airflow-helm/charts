@@ -91,8 +91,12 @@ spec:
         {{- if $extraPipPackages }}
         {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
         {{- end }}
-        {{- if .Values.dags.gitSync.enabled }}
-        {{- include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") | indent 8 }}
+        ## Differentiate git-sync for both dags and plugins, so "dags" and "airflow plugins" can be pulled from separate repositories
+        {{- if .Values.dags.gitSync.enabled }}        
+        {{- include "airflow.container.dags_git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") | indent 8 }}
+        {{- end }}
+        {{- if .Values.plugins.gitSync.enabled }}
+        {{- include "airflow.container.plugins_git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") | indent 8 }}
         {{- end }}
         {{- include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
         {{- include "airflow.init_container.wait_for_db_migrations" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
@@ -168,8 +172,12 @@ spec:
           volumeMounts:
             {{- $volumeMounts | indent 12 }}
           {{- end }}
+        ## Differentiate git-sync for both dags and plugins, so "dags" and "airflow plugins" can be pulled from separate repositories
         {{- if .Values.dags.gitSync.enabled }}
-        {{- include "airflow.container.git_sync" . | indent 8 }}
+        {{- include "airflow.container.dags_git_sync" . | indent 8 }}
+        {{- end }}
+        {{- if .Values.plugins.gitSync.enabled }}
+        {{- include "airflow.container.plugins_git_sync" . | indent 8 }}
         {{- end }}
         {{- if .Values.workers.logCleanup.enabled }}
         {{- $lc_resources := .Values.workers.logCleanup.resources }}

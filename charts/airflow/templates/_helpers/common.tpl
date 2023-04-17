@@ -84,6 +84,17 @@ The path containing DAG files
 {{- end -}}
 
 {{/*
+The path containing Plugins files
+*/}}
+{{- define "airflow.plugins.path" -}}
+{{- if .Values.plugins.gitSync.enabled -}}
+{{- printf "%s/repo/%s" (.Values.plugins.path | trimSuffix "/") (.Values.plugins.gitSync.repoSubPath | trimAll "/") -}}
+{{- else -}}
+{{- printf .Values.plugins.path -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Helper template which checks if `logs.path` is stored under any of the passed `volumeMounts`.
 EXAMPLE USAGE: {{ include "airflow._has_logs_path" (dict "Values" .Values "volume_mounts" .Values.xxxx.extraVolumeMounts) }}
 */}}

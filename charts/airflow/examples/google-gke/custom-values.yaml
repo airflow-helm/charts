@@ -350,6 +350,56 @@ dags:
         memory: "64Mi"
 
 ###################################
+## CONFIG | Airflow Plugins
+###################################
+plugins:
+  ## the airflow plugins folder
+  path: /opt/airflow/plugins
+
+  ## configs for the plugins PVC
+  ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/plugins/load-dag-definitions.md
+  persistence:
+    enabled: false
+
+  ## configs for the git-sync sidecar
+  ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/plugins/load-dag-definitions.md
+  gitSync:
+    enabled: true
+
+    ## the url of the git repo
+    repo: "git@github.com:USERNAME/REPOSITORY.git"
+
+    ## the git branch to check out
+    branch: master
+
+    ## the git revision (tag or hash) to check out
+    revision: HEAD
+
+    ## the name of a pre-created Secret with git ssh credentials
+    sshSecret: "airflow-cluster1-git-secret"
+    sshSecretKey: "id_rsa"
+
+    ## the string value of a "known_hosts" file (for SSH only)
+    ## NOTE: "known_hosts" verification can be disabled by setting to ""
+    sshKnownHosts: |-
+      github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+
+    ## number of seconds to wait between syncs
+    ## [NOTE] also sets `AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL` unless overwritten in `airflow.config`
+    syncWait: 60
+
+    ## the sub-path within your repo where plugins are located
+    ## [NOTE] airflow will only see plugins under this path, but the whole repo will still be synced
+    #repoSubPath: "path/to/plugins"
+
+    ## resource requests/limits for the git-sync container
+    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    resources:
+      requests:
+        cpu: "50m"
+        memory: "64Mi"
+
+###################################
 ## CONFIG | Kubernetes Ingress
 ###################################
 ingress:

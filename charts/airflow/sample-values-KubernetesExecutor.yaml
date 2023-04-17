@@ -72,7 +72,8 @@ airflow:
   extraVolumes: []
 
   ## configs generating the `pod_template.yaml` file for `AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE`
-  ## [NOTE] the `dags.gitSync` values will create a git-sync init-container in the pod
+  ## [NOTE] the `dags.gitSync` values will create a dags-git-sync init-container in the pod
+  ## [NOTE] the `plugins.gitSync` values will create a plugins-git-sync init-container in the pod
   ## [NOTE] the `airflow.extraPipPackages` will NOT be installed
   kubernetesPodTemplate:
 
@@ -218,6 +219,23 @@ dags:
 
   ## configs for the git-sync sidecar
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/dags/load-dag-definitions.md
+  gitSync:
+    enabled: false
+    
+###################################
+## CONFIG | Airflow Plugins
+###################################
+plugins:
+  ## the airflow plugins folder
+  path: /opt/airflow/plugins
+
+  ## configs for the plugins PVC
+  ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/plugins/load-plugins-definitions.md
+  persistence:
+    enabled: false
+
+  ## configs for the plugins-git-sync sidecar
+  ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/plugins/load-plugins-definitions.md
   gitSync:
     enabled: false
 
