@@ -147,6 +147,7 @@ spec:
               mountPath: /opt/airflow/webserver_config.py
               subPath: webserver_config.py
               readOnly: true
+            {{- end }}              
         ## Differentiate git-sync for both dags and plugins, so "dags" and "airflow plugins" can be pulled from separate repositories
         {{- if .Values.dags.gitSync.enabled }}
         {{- include "airflow.container.dags_git_sync" . | indent 8 }}
