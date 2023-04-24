@@ -94,14 +94,14 @@ inside the `host`, `schema`, `login`, `password` and `extra` string fields.
 
 Updates to Secrets used in `airflow.connectionsTemplates` are automatically propagated to the `airflow.connections` which reference them.
 
-This behaviour enables using the [`ExternalSecret`](https://external-secrets.io/latest/api-externalsecret/) CRD from
+This behaviour enables using the [`ExternalSecret`](https://external-secrets.io/latest/api/externalsecret/) CRD from
 [External Secrets Operator](https://github.com/external-secrets/external-secrets) to integrate with many popular 
 _secret management systems_, for example:
 
-- [AWS Secrets Manager](https://external-secrets.io/latest/provider-aws-secrets-manager/)
-- [Azure Key Vault](https://external-secrets.io/latest/provider-azure-key-vault/)
-- [Google Secret Manager](https://external-secrets.io/latest/provider-google-secrets-manager/)
-- [HashiCorp Vault](https://external-secrets.io/latest/provider-hashicorp-vault/)
+- [AWS Secrets Manager](https://external-secrets.io/latest/provider/aws-secrets-manager/)
+- [Azure Key Vault](https://external-secrets.io/latest/provider/azure-key-vault/)
+- [Google Secret Manager](https://external-secrets.io/latest/provider/google-secrets-manager/)
+- [HashiCorp Vault](https://external-secrets.io/latest/provider/hashicorp-vault/)
 
 ## How to include special characters in `extra`?
 
