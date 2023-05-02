@@ -121,14 +121,16 @@
   {{- if .Values.dags.persistence.enabled }}
   {{ required "If `dags.gitSync.enabled=true`, then `persistence.enabled` must be disabled!" nil }}
   {{- end }}
-  {{- if not .Values.dags.gitSync.repo }}
-  {{ required "If `dags.gitSync.enabled=true`, then `dags.gitSync.repo` must be non-empty!" nil }}
+  {{- if not .Values.dags.gitSync.repositories }}
+  {{ required "If `dags.gitSync.enabled=true`, then `dags.gitSync.repositories` must be non-empty!" nil }}
   {{- end }}
-  {{- if and (.Values.dags.gitSync.sshSecret) (.Values.dags.gitSync.httpSecret) }}
+  {{- range .Values.dags.gitSync.repositories }}
+  {{- if and (.sshSecret) (.httpSecret) }}
   {{ required "At most, one of `dags.gitSync.sshSecret` and `dags.gitSync.httpSecret` can be defined!" nil }}
   {{- end }}
-  {{- if and (.Values.dags.gitSync.repo | lower | hasPrefix "git@github.com") (not .Values.dags.gitSync.sshSecret) }}
+  {{- if and (.repo | lower | hasPrefix "git@github.com") (not .sshSecret) }}
   {{ required "You must define `dags.gitSync.sshSecret` when using GitHub with SSH for `dags.gitSync.repo`!" nil }}
+  {{- end }}
   {{- end }}
 {{- end }}
 

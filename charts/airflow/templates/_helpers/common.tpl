@@ -73,14 +73,19 @@ HTTP
 {{- end -}}
 
 {{/*
+Returns the name that will identify the repository internally and it will be used to create folders or
+volume names
+*/}}
+{{- define "airflow.repo.name" -}}
+{{- .name | default (regexFind "/.*$" .repo | replace "//" "" | replace "/" "" | replace "." "-") | kebabcase -}}
+{{- end -}}
+
+
+{{/*
 The path containing DAG files
 */}}
 {{- define "airflow.dags.path" -}}
-{{- if .Values.dags.gitSync.enabled -}}
-{{- printf "%s/repo/%s" (.Values.dags.path | trimSuffix "/") (.Values.dags.gitSync.repoSubPath | trimAll "/") -}}
-{{- else -}}
-{{- printf .Values.dags.path -}}
-{{- end -}}
+{{- printf $.Values.dags.path -}}
 {{- end -}}
 
 {{/*

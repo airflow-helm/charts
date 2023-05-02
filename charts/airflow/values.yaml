@@ -1356,8 +1356,102 @@ dags:
     ##
     enabled: false
 
-    ## the git-sync container image
+    ## generate git-sync sidecar container for each repository
     ##
+    repositories: []
+        ## the url of the git repo
+        ##
+        ## ____ EXAMPLE _______________
+        ##   # https git repo
+        ##   repo: "https://github.com/USERNAME/REPOSITORY.git"
+        ##
+        ## ____ EXAMPLE _______________
+        ##   # ssh git repo
+        ##   repo: "git@github.com:USERNAME/REPOSITORY.git"
+        ##
+        # - repo: ""
+        ## An unique identifier for repository, must be unique for each repository
+        ##
+        # name: ""
+        ## Path to a folder in the repository containing the dags
+        ##
+        # path: ""
+        ## the sub-path within your repo where dags are located
+        ## - only dags under this path within your repo will be seen by airflow,
+        ##   (note, the full repo will still be cloned)
+        ##
+        # repoSubPath: ""
+
+        ## the git branch to check out
+        ##
+        # branch: master
+
+        ## the git revision (tag or hash) to check out
+        ##
+        # revision: HEAD
+
+        ## shallow clone with a history truncated to the specified number of commits
+        ##
+        # depth: 1
+
+        ## the number of seconds between syncs
+        ##
+        # syncWait: 60
+
+        ## the max number of seconds allowed for a complete sync
+        ##
+        # syncTimeout: 120
+
+        ## the git submodule behavior
+        ## - allowed values: "recursive", "shallow", "off"
+        ##
+        # submodules: recursive
+
+        ## the name of a pre-created Secret with git http credentials
+        ##
+        # httpSecret: ""
+
+        ## the key in `dags.gitSync.httpSecret` with your git username
+        ##
+        # httpSecretUsernameKey: username
+
+        ## the key in `dags.gitSync.httpSecret` with your git password/token
+        ##
+        # httpSecretPasswordKey: password
+
+        ## the name of a pre-created Secret with git ssh credentials
+        ##
+        # sshSecret: ""
+
+        ## the key in `dags.gitSync.sshSecret` with your ssh-key file
+        ##
+        # sshSecretKey: id_rsa
+
+        ## the string value of a "known_hosts" file (for SSH only)
+        ## - [WARNING] known_hosts verification will be disabled if left empty, making you more
+        ##   vulnerable to repo spoofing attacks
+        ##
+        ## ____ EXAMPLE _______________
+        ##   sshKnownHosts: |-
+        ##     <HOST_NAME> ssh-rsa <HOST_KEY>
+        ##
+        # sshKnownHosts: ""
+
+        ## the number of consecutive failures allowed before aborting
+        ##  - the first sync must succeed
+        ##  - a value of -1 will retry forever after the initial sync
+        ##
+        # maxFailures: 0
+
+        ## ____ EXAMPLE _______________
+        ## - branch: master
+        ##   enabled: true
+        ##   repo: git@github.com:ORG/repo.git
+        ##   repoSubPath: /sub
+        ##   revision: HEAD
+        ##   sshSecret: gitsync-key
+        ##   sshSecretKey: key
+        ##   syncWait: 60
     image:
       repository: registry.k8s.io/git-sync/git-sync
       tag: v3.6.5
@@ -1371,84 +1465,80 @@ dags:
     ##
     resources: {}
 
-    ## the url of the git repo
+    ## default common repository config, can be overridden per repository
     ##
-    ## ____ EXAMPLE _______________
-    ##   # https git repo
-    ##   repo: "https://github.com/USERNAME/REPOSITORY.git"
-    ##
-    ## ____ EXAMPLE _______________
-    ##   # ssh git repo
-    ##   repo: "git@github.com:USERNAME/REPOSITORY.git"
-    ##
-    repo: ""
+    repository:
 
-    ## the sub-path within your repo where dags are located
-    ## - only dags under this path within your repo will be seen by airflow,
-    ##   (note, the full repo will still be cloned)
-    ##
-    repoSubPath: ""
+      ## every newly added repository without explicitly defined enabled option will use this option
+      ##
+      enabled: true
 
-    ## the git branch to check out
-    ##
-    branch: master
+      ## the sub-path within your repo where dags are located
+      ## - only dags under this path within your repo will be seen by airflow,
+      ##   (note, the full repo will still be cloned)
+      ##
+      repoSubPath: ""
 
-    ## the git revision (tag or hash) to check out
-    ##
-    revision: HEAD
+      ## the git branch to check out
+      ##
+      branch: master
 
-    ## shallow clone with a history truncated to the specified number of commits
-    ##
-    depth: 1
+      ## the git revision (tag or hash) to check out
+      ##
+      revision: HEAD
 
-    ## the number of seconds between syncs
-    ##
-    syncWait: 60
+      ## shallow clone with a history truncated to the specified number of commits
+      ##
+      depth: 1
 
-    ## the max number of seconds allowed for a complete sync
-    ##
-    syncTimeout: 120
+      ## the number of seconds between syncs
+      ##
+      syncWait: 60
 
-    ## the git submodule behavior
-    ## - allowed values: "recursive", "shallow", "off"
-    ##
-    submodules: recursive
+      ## the max number of seconds allowed for a complete sync
+      ##
+      syncTimeout: 120
 
-    ## the name of a pre-created Secret with git http credentials
-    ##
-    httpSecret: ""
+      ## the git submodule behavior
+      ## - allowed values: "recursive", "shallow", "off"
+      ##
+      submodules: recursive
 
-    ## the key in `dags.gitSync.httpSecret` with your git username
-    ##
-    httpSecretUsernameKey: username
+      ## the name of a pre-created Secret with git http credentials
+      ##
+      httpSecret: ""
 
-    ## the key in `dags.gitSync.httpSecret` with your git password/token
-    ##
-    httpSecretPasswordKey: password
+      ## the key in `dags.gitSync.httpSecret` with your git username
+      ##
+      httpSecretUsernameKey: username
 
-    ## the name of a pre-created Secret with git ssh credentials
-    ##
-    sshSecret: ""
+      ## the key in `dags.gitSync.httpSecret` with your git password/token
+      ##
+      httpSecretPasswordKey: password
 
-    ## the key in `dags.gitSync.sshSecret` with your ssh-key file
-    ##
-    sshSecretKey: id_rsa
+      ## the name of a pre-created Secret with git ssh credentials
+      ##
+      sshSecret: ""
 
-    ## the string value of a "known_hosts" file (for SSH only)
-    ## - [WARNING] known_hosts verification will be disabled if left empty, making you more
-    ##   vulnerable to repo spoofing attacks
-    ##
-    ## ____ EXAMPLE _______________
-    ##   sshKnownHosts: |-
-    ##     <HOST_NAME> ssh-rsa <HOST_KEY>
-    ##
-    sshKnownHosts: ""
+      ## the key in `dags.gitSync.sshSecret` with your ssh-key file
+      ##
+      sshSecretKey: id_rsa
 
-    ## the number of consecutive failures allowed before aborting
-    ##  - the first sync must succeed
-    ##  - a value of -1 will retry forever after the initial sync
-    ##
-    maxFailures: 0
+      ## the string value of a "known_hosts" file (for SSH only)
+      ## - [WARNING] known_hosts verification will be disabled if left empty, making you more
+      ##   vulnerable to repo spoofing attacks
+      ##
+      ## ____ EXAMPLE _______________
+      ##   sshKnownHosts: |-
+      ##     <HOST_NAME> ssh-rsa <HOST_KEY>
+      ##
+      sshKnownHosts: ""
+
+      ## the number of consecutive failures allowed before aborting
+      ##  - the first sync must succeed
+      ##  - a value of -1 will retry forever after the initial sync
+      ##
+      maxFailures: 0
 
 ###################################
 ## CONFIG | Kubernetes Ingress
