@@ -140,13 +140,25 @@ spec:
                   os.environ["AIRFLOW__LOGGING__LOGGING_LEVEL"] = "ERROR"
                   {{- end }}
 
-                  from airflow.jobs.job import Job
-                  from airflow.jobs.scheduler_job_runner import SchedulerJobRunner
+                  # check which version of airflow we are running to determine which classes to import
+                  import airflow
+                  from packaging import version
+                  useNewProbe = version.parse(airflow.__version__) >= version.parse("2.6.0")
+
+                  if useNewProbe:
+                    from airflow.jobs.job import Job
+                    from airflow.jobs.scheduler_job_runner import SchedulerJobRunner
+                  else:
+                    from airflow.jobs.scheduler_job import SchedulerJob
+
                   from airflow.utils.db import create_session
                   from airflow.utils.net import get_hostname
                   {{- if .Values.scheduler.livenessProbe.taskCreationCheck.enabled }}
-                  from airflow.jobs.local_task_job import LocalTaskJob
-                  from airflow.utils import timezone
+                  if useNewProbe:
+                    from airflow.jobs.local_task_job_runner import LocalTaskJobRunner
+                  else:
+                    from airflow.jobs.local_task_job import LocalTaskJob
+                    from airflow.utils import timezone
                   {{- end }}
 
                   with create_session() as session:
@@ -155,13 +167,21 @@ spec:
                       ########################
                       # ensure the SchedulerJob with most recent heartbeat for this `hostname` is alive
                       hostname = get_hostname()
-                      scheduler_job = session \
-                          .query(Job) \
-                          .filter_by(job_type=SchedulerJobRunner.job_type) \
-                          .filter_by(hostname=hostname) \
-                          .order_by(Job.latest_heartbeat.desc()) \
-                          .limit(1) \
-                          .first()
+                      if useNewProbe:
+                        scheduler_job = session \
+                            .query(Job) \
+                            .filter_by(job_type=SchedulerJobRunner.job_type) \
+                            .filter_by(hostname=hostname) \
+                            .order_by(Job.latest_heartbeat.desc()) \
+                            .limit(1) \
+                            .first()
+                      else:
+                        scheduler_job = session \
+                            .query(SchedulerJob) \
+                            .filter_by(hostname=hostname) \
+                            .order_by(SchedulerJob.latest_heartbeat.desc()) \
+                            .limit(1) \
+                            .first()
                       if (scheduler_job is not None) and scheduler_job.is_alive():
                           pass
                       else:
@@ -184,11 +204,19 @@ spec:
                       if (timezone.utcnow() - scheduler_job.start_date).total_seconds() > min_scheduler_age:
                           # ensure the most recent LocalTaskJob had a start_date in the last `task_job_threshold` seconds
                           task_job_threshold = {{ $task_job_threshold }}
-                          task_job = session \
-                              .query(LocalTaskJob) \
-                              .order_by(LocalTaskJob.id.desc()) \
-                              .limit(1) \
-                              .first()
+                          if useNewProbe:
+                            task_job = session \
+                                .query(Job) \
+                                .filter_by(job_type=LocalTaskJobRunner.job_type) \
+                                .order_by(Job.latest_heartbeat.desc()) \
+                                .limit(1) \
+                                .first()
+                          else:
+                            task_job = session \
+                                .query(LocalTaskJob) \
+                                .order_by(LocalTaskJob.id.desc()) \
+                                .limit(1) \
+                                .first()
                           if task_job is not None:
                               if (timezone.utcnow() - task_job.start_date).total_seconds() < task_job_threshold:
                                   pass
