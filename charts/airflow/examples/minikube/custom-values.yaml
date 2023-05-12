@@ -113,12 +113,8 @@ scheduler:
   livenessProbe:
     enabled: true
 
-    ## configs for an additional check that ensures tasks are being created by the scheduler
-    ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md
-    taskCreationCheck:
-      enabled: false
-      thresholdSeconds: 300
-      schedulerAgeBeforeCheck: 180
+  readinessProble:
+    enabled: true
 
 ###################################
 ## COMPONENT | Airflow Webserver

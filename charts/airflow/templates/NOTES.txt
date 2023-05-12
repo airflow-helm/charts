@@ -114,12 +114,6 @@
 {{- $scheduler_livenessProbe_warning = true }}
 {{- end }}
 
-{{- /* if we show the scheduler livenessProbe taskCreationCheck warning */ -}}
-{{- $scheduler_livenessProbe_taskCreationCheck_warning := false }}
-{{- if and (.Values.scheduler.livenessProbe.enabled) (not .Values.scheduler.livenessProbe.taskCreationCheck.enabled) }}
-{{- $scheduler_livenessProbe_taskCreationCheck_warning = true }}
-{{- end }}
-
 ========================================================================
 Thanks for deploying Apache Airflow with the User-Community Helm Chart!
 
@@ -218,11 +212,6 @@ Use these commands to port-forward the Services to your localhost:
 {{- if $scheduler_livenessProbe_warning }}
 [MEDIUM] the scheduler liveness probe is disabled, the scheduler may not be restarted if it becomes unhealthy!
   * HELP: enable the probe with `scheduler.livenessProbe.enabled`
-{{ end }}
-
-{{- if $scheduler_livenessProbe_taskCreationCheck_warning }}
-[MEDIUM] the scheduler "task creation check" is disabled, the scheduler may not be restarted if it deadlocks!
-  * HELP: configure the check with `scheduler.livenessProbe.taskCreationCheck.*`
 {{ end }}
 
 {{- end }}

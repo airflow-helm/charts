@@ -49,37 +49,6 @@ scheduler:
 > - https://github.com/apache/airflow/issues/7935 - patched in airflow `2.0.2`
 > - https://github.com/apache/airflow/issues/15938 - patched in airflow `2.1.1`
 
-## Scheduler "Task Creation Check"
-
-The liveness probe can additionally check if the Scheduler is creating new [tasks](https://airflow.apache.org/docs/apache-airflow/stable/concepts/tasks.html) as an indication of its health.
-This check works by ensuring that the most recent `LocalTaskJob` had a `start_date` no more than `scheduler.livenessProbe.taskCreationCheck.thresholdSeconds` seconds ago.
-
-> 🟦 __Tip__ 🟦
->
-> The "Task Creation Check" is currently disabled by default, it can be enabled with `scheduler.livenessProbe.taskCreationCheck.enabled`.
-
-Here is an overview of the `scheduler.livenessProbe.taskCreationCheck.*` values:
-
-```yaml
-scheduler:
-  livenessProbe:
-    enabled: true
-    
-    taskCreationCheck:
-      ## if the task creation check is enabled
-      enabled: true
-
-      ## the maximum number of seconds since the start_date of the most recent LocalTaskJob
-      ## WARNING: must be AT LEAST equal to your shortest DAG schedule_interval
-      ## WARNING: DummyOperator tasks will NOT be seen by this probe
-      thresholdSeconds: 300
-      
-      ## minimum number of seconds the scheduler must have run before the task creation check begins
-      ## WARNING: must be long enough for the scheduler to boot and create a task
-      ##
-      schedulerAgeBeforeCheck: 180
-```
-
 > 🟦 __Tip__ 🟦
 >
 > You might use the following `canary_dag` DAG definition to run a small task every __300 seconds__ (5 minutes).
