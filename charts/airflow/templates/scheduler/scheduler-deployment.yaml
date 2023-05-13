@@ -140,11 +140,30 @@ spec:
                   os.environ["AIRFLOW__LOGGING__LOGGING_LEVEL"] = "ERROR"
                   {{- end }}
 
-                  from airflow.jobs.scheduler_job import SchedulerJob
+                  # shared imports
+                  try:
+                      from airflow.jobs.job import Job
+                  except ImportError:
+                      # `BaseJob` was renamed to `Job` in airflow 2.6.0
+                      from airflow.jobs.base_job import BaseJob as Job
                   from airflow.utils.db import create_session
                   from airflow.utils.net import get_hostname
+
+                  # heartbeat check imports
+                  try:
+                      from airflow.jobs.scheduler_job_runner import SchedulerJobRunner
+                  except ImportError:
+                      # `SchedulerJob` is wrapped by `SchedulerJobRunner` since airflow 2.6.0
+                      from airflow.jobs.scheduler_job import SchedulerJob as SchedulerJobRunner
+
                   {{- if .Values.scheduler.livenessProbe.taskCreationCheck.enabled }}
-                  from airflow.jobs.local_task_job import LocalTaskJob
+                  {{ "" }}
+                  # task creation check imports
+                  try:
+                      from airflow.jobs.local_task_job_runner import LocalTaskJobRunner
+                  except ImportError:
+                      # `LocalTaskJob` is wrapped by `LocalTaskJobRunner` since airflow 2.6.0
+                      from airflow.jobs.local_task_job import LocalTaskJob as LocalTaskJobRunner
                   from airflow.utils import timezone
                   {{- end }}
 
@@ -155,9 +174,10 @@ spec:
                       # ensure the SchedulerJob with most recent heartbeat for this `hostname` is alive
                       hostname = get_hostname()
                       scheduler_job = session \
-                          .query(SchedulerJob) \
+                          .query(Job) \
+                          .filter_by(job_type=SchedulerJobRunner.job_type) \
                           .filter_by(hostname=hostname) \
-                          .order_by(SchedulerJob.latest_heartbeat.desc()) \
+                          .order_by(Job.latest_heartbeat.desc()) \
                           .limit(1) \
                           .first()
                       if (scheduler_job is not None) and scheduler_job.is_alive():
@@ -183,8 +203,9 @@ spec:
                           # ensure the most recent LocalTaskJob had a start_date in the last `task_job_threshold` seconds
                           task_job_threshold = {{ $task_job_threshold }}
                           task_job = session \
-                              .query(LocalTaskJob) \
-                              .order_by(LocalTaskJob.id.desc()) \
+                              .query(Job) \
+                              .filter_by(job_type=LocalTaskJobRunner.job_type) \
+                              .order_by(Job.id.desc()) \
                               .limit(1) \
                               .first()
                           if task_job is not None:
