@@ -2,7 +2,7 @@
 
 <p align="center">
   The <code>User-Community Airflow Helm Chart</code> is the standard way to deploy <a href="https://airflow.apache.org/">Apache Airflow</a> on <a href="https://kubernetes.io/">Kubernetes</a> with <a href="https://helm.sh/">Helm</a>.
-  Originally created in 2018, it has since helped thousands of companies create production-ready deployments of Airflow on Kubernetes.
+  Originally created in 2017, it has since helped thousands of companies create production-ready deployments of Airflow on Kubernetes.
 </p>
 
 <p align="center">
