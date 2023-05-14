@@ -8,6 +8,16 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
+## [8.7.1] - 2023-05-13
+
+> 🟥 __WARNINGS__ 🟥
+>
+> - this is the first version of the chart with support for airflow 2.6, along with pretty much all previous versions of airflow, see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
+
+### Fixed
+
+- fixed liveness probes in airflow 2.6.0 ([#743](https://github.com/airflow-helm/charts/pull/743))
+
 ## [8.7.0] - 2023-04-06
 
 > 🟥 __WARNINGS__ 🟥
@@ -755,7 +765,8 @@ TBD
 >
 > - To read about versions `7.0.0` and before, please see the [legacy repo](https://github.com/helm/charts/tree/master/stable/airflow).
 
-[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.7.0...HEAD
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.7.1...HEAD
+[8.7.1]: https://github.com/airflow-helm/charts/compare/airflow-8.7.0...airflow-8.7.1
 [8.7.0]: https://github.com/airflow-helm/charts/compare/airflow-8.6.1...airflow-8.7.0
 [8.6.1]: https://github.com/airflow-helm/charts/compare/airflow-8.6.0...airflow-8.6.1
 [8.6.0]: https://github.com/airflow-helm/charts/compare/airflow-8.5.3...airflow-8.6.0
