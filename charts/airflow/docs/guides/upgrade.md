@@ -40,5 +40,5 @@ helm upgrade \
 
 > 🟦 __Tip__ 🟦
 >
-> [`Watch 👀 on GitHub`](https://github.com/airflow-helm/charts/watchers) to be notified about new chart versions,
-> click "watch" → "custom" → "releases".
+> - find the full list of chart versions in our [CHANGELOG](https://github.com/airflow-helm/charts/blob/main/charts/airflow/CHANGELOG.md)
+> - `Watch 👀 on GitHub` to be notified about new chart versions, click "watch" → "custom" → "releases".

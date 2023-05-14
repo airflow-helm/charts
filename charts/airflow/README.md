@@ -4,7 +4,7 @@
 
 The `User-Community Airflow Helm Chart` is the standard way to deploy [Apache Airflow](https://airflow.apache.org/) on [Kubernetes](https://kubernetes.io/) with [Helm](https://helm.sh/).
 <br>
-Originally created in 2018, it has since helped thousands of companies create production-ready deployments of Airflow on Kubernetes.
+Originally created in 2017, it has since helped thousands of companies create production-ready deployments of Airflow on Kubernetes.
 
 <br>
 
@@ -48,8 +48,15 @@ Originally created in 2018, it has since helped thousands of companies create pr
 
 ## History
 
-This project is independent from the official chart found in the `apache/airflow` GitHub repository, 
-and was previously known as `stable/airflow` when it was developed in the `helm/charts` GitHub repository.
+The `User-Community Airflow Helm Chart` chart has a long history of being the standard way to deploy Apache Airflow on Kubernetes.
+
+Here is a brief overview of the chart's development from 2017 until today:
+
+- From October 2017 until December 2018, the chart was called `kube-airflow` and was developed in [`gsemet/kube-airflow`](https://github.com/gsemet/kube-airflow)
+- From December 2018 until November 2020, the chart was called `stable/airflow` and was developed in [`helm/charts`](https://github.com/helm/charts/tree/master/stable/airflow)
+- Since November 2020, the chart has been called `Airflow Helm Chart (User Community)` and is developed in `airflow-helm/charts`
+
+Please note, this chart is __independent__ from the official chart in the `apache/airflow` repo, which was forked from Astronomer's proprietary chart in May 2021.
 
 ## Project Goals
 
@@ -149,17 +156,18 @@ and was previously known as `stable/airflow` when it was developed in the `helm/
 
 ## Airflow Version Support
 
-The following table lists the __airflow versions__ supported by this chart (set by [`airflow.image.tag`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-version.md) value).
+The following table lists the __airflow versions__ supported by this chart (set the version with [`airflow.image.tag`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-version.md) value).
 
-Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.5.3` | `8.6.0` | `8.6.1+` |
---- | --- | --- | --- | ---
-`1.10.X` | ✔️ | ✔️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub>
-`2.0.X` | ❌ | ✔️ | ✔️ | ✔️
-`2.1.X` | ❌ | ✔️ | ✔️ | ✔️
-`2.2.X` | ❌ | ⚠️ <sub>[2]</sub> | ✔️️ | ✔️
-`2.3.X` | ❌ | ❌ | ❌ | ✔️️
-`2.4.X` | ❌ | ❌ | ❌ | ✔️️
-`2.5.X` | ❌ | ❌ | ❌ | ✔️️
+Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.5.3` | `8.6.0` | `8.6.1 - 8.7.0` | `8.7.1+`
+--- | --- | --- | --- | --- | ---
+`1.10.X` | ✔️ | ✔️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub>
+`2.0.X` | ❌ | ✔️ | ✔️ | ✔️ | ✔️️
+`2.1.X` | ❌ | ✔️ | ✔️ | ✔️ | ✔️️
+`2.2.X` | ❌ | ⚠️ <sub>[2]</sub> | ✔️️ | ✔️ | ✔️️
+`2.3.X` | ❌ | ❌ | ❌ | ✔️️ | ✔️️
+`2.4.X` | ❌ | ❌ | ❌ | ✔️️ | ✔️️
+`2.5.X` | ❌ | ❌ | ❌ | ✔️️ | ✔️️
+`2.6.X` | ❌ | ❌ | ❌ | ❌ | ✔️️
 
 <sub>[1] you must set `airflow.legacyCommands = true` when using airflow version `1.10.X`</sub><br>
 <sub>[2] the [Deferrable Operators & Triggers](https://airflow.apache.org/docs/apache-airflow/stable/concepts/deferring.html) feature won't work, as there is no `airflow triggerer` Deployment</sub>
