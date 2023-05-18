@@ -535,7 +535,8 @@ Parameter | Description | Default
 `serviceMonitor.enabled` | if ServiceMonitor resources should be deployed | `false`
 `serviceMonitor.selector` | labels for ServiceMonitor, so that Prometheus can select it | `{ prometheus: "kube-prometheus" }`
 `serviceMonitor.path` | the ServiceMonitor web endpoint path | `/admin/metrics`
-`serviceMonitor.interval` | the ServiceMonitor web endpoint path | `30s`
+`serviceMonitor.interval` | the ServiceMonitor web endpoint interval | `30s`
+`serviceMonitor.scrapeTimeout` | the ServiceMonitor web endpoint scrape timeout | `10s`
 
 </details>
 

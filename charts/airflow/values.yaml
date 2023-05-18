@@ -2227,6 +2227,10 @@ serviceMonitor:
   ##
   interval: "30s"
 
+  ## the ServiceMonitor web endpoint scrape timeout
+  ##
+  scrapeTimeout: "10s"
+
 ###################################
 ## CONFIG | PrometheusRule (Prometheus Operator)
 ###################################
