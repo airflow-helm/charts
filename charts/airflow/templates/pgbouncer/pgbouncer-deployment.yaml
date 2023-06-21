@@ -52,6 +52,7 @@
 
 {{- if include "airflow.pgbouncer.should_use" . }}
 {{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.pgbouncer.nodeSelector) }}
+{{- $podTopologySpreadConstraints := include "airflow.podTopologySpreadConstraints" (dict "Release" .Release "Values" .Values "topologySpreadConstraints" .Values.pgbouncer.topologySpreadConstraints) }}
 {{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.pgbouncer.affinity) }}
 {{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.pgbouncer.tolerations) }}
 {{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.pgbouncer.securityContext) }}
@@ -114,6 +115,10 @@ spec:
       {{- if $podNodeSelector }}
       nodeSelector:
         {{- $podNodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if $podTopologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- $podTopologySpreadConstraints | nindent 8 }}
       {{- end }}
       {{- if $podAffinity }}
       affinity:

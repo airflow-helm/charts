@@ -214,6 +214,7 @@ Parameter | Description | Default
 `airflow.pools` | a list airflow pools to create | `<see values.yaml>`
 `airflow.poolsUpdate` | if we create a Deployment to perpetually sync `airflow.pools` | `true`
 `airflow.defaultNodeSelector` | default nodeSelector for airflow Pods (is overridden by pod-specific values) | `{}`
+`airflow.defaultTopologySpreadConstraints` | default topologySpreadConstraints for airflow Pods (is overridden by pod-specific values) | `[]`
 `airflow.defaultAffinity` | default affinity configs for airflow Pods (is overridden by pod-specific values) | `{}`
 `airflow.defaultTolerations` | default toleration configs for airflow Pods (is overridden by pod-specific values) | `[]`
 `airflow.defaultSecurityContext` | default securityContext configs for Pods (is overridden by pod-specific values) | `{fsGroup: 0}`
@@ -241,6 +242,7 @@ Parameter | Description | Default
 `scheduler.replicas` | the number of scheduler Pods to run | `1`
 `scheduler.resources` | resource requests/limits for the scheduler Pods | `{}`
 `scheduler.nodeSelector` | the nodeSelector configs for the scheduler Pods | `{}`
+`scheduler.topologySpreadConstraints` | the topologySpreadConstraints configs for the scheduler Pods | `[]`
 `scheduler.affinity` | the affinity configs for the scheduler Pods | `{}`
 `scheduler.tolerations` | the toleration configs for the scheduler Pods | `[]`
 `scheduler.securityContext` | the security context for the scheduler Pods | `{}`
@@ -269,6 +271,7 @@ Parameter | Description | Default
 `web.replicas` | the number of web Pods to run | `1`
 `web.resources` | resource requests/limits for the airflow web pods | `{}`
 `web.nodeSelector` | the number of web Pods to run | `{}`
+`web.topologySpreadConstraints` | the topologySpreadConstraints configs for the web Pods | `[]`
 `web.affinity` | the affinity configs for the web Pods | `{}`
 `web.tolerations` | the toleration configs for the web Pods | `[]`
 `web.securityContext` | the security context for the web Pods | `{}`
@@ -296,6 +299,7 @@ Parameter | Description | Default
 `workers.replicas` | the number of workers Pods to run | `1`
 `workers.resources` | resource requests/limits for the airflow worker Pods | `{}`
 `workers.nodeSelector` | the nodeSelector configs for the worker Pods | `{}`
+`workers.topologySpreadConstraints` | the topologySpreadConstraints configs for the worker Pods | `[]`
 `workers.affinity` | the affinity configs for the worker Pods | `{}`
 `workers.tolerations` | the toleration configs for the worker Pods | `[]`
 `workers.securityContext` | the security context for the worker Pods | `{}`
@@ -325,6 +329,7 @@ Parameter | Description | Default
 `triggerer.replicas` | the number of triggerer Pods to run | `1`
 `triggerer.resources` | resource requests/limits for the airflow triggerer Pods | `{}`
 `triggerer.nodeSelector` | the nodeSelector configs for the triggerer Pods | `{}`
+`triggerer.topologySpreadConstraints` | the topologySpreadConstraints configs for the triggerer Pods | `[]`
 `triggerer.affinity` | the affinity configs for the triggerer Pods | `{}`
 `triggerer.tolerations` | the toleration configs for the triggerer Pods | `[]`
 `triggerer.securityContext` | the security context for the triggerer Pods | `{}`
@@ -350,6 +355,7 @@ Parameter | Description | Default
 `flower.enabled` | if the Flower UI should be deployed | `true`
 `flower.resources` | resource requests/limits for the flower Pods | `{}`
 `flower.nodeSelector` | the nodeSelector configs for the flower Pods | `{}`
+`flower.topologySpreadConstraints` | the topologySpreadConstraints configs for the flower Pods | `[]`
 `flower.affinity` | the affinity configs for the flower Pods | `{}`
 `flower.tolerations` | the toleration configs for the flower Pods | `[]`
 `flower.securityContext` | the security context for the flower Pods | `{}`
@@ -440,6 +446,7 @@ Parameter | Description | Default
 `pgbouncer.image.*` | configs for the pgbouncer container image | `<see values.yaml>`
 `pgbouncer.resources` | resource requests/limits for the pgbouncer Pods | `{}`
 `pgbouncer.nodeSelector` | the nodeSelector configs for the pgbouncer Pods | `{}`
+`pgbouncer.topologySpreadConstraints` | the topologySpreadConstraints configs for the pgbouncer Pods | `[]`
 `pgbouncer.affinity` | the affinity configs for the pgbouncer Pods | `{}`
 `pgbouncer.tolerations` | the toleration configs for the pgbouncer Pods | `[]`
 `pgbouncer.securityContext` | the security context for the pgbouncer Pods | `{}`
