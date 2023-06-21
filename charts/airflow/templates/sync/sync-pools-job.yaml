@@ -1,5 +1,6 @@
 {{- if and (.Values.airflow.pools) (not .Values.airflow.poolsUpdate) }}
 {{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.airflow.sync.nodeSelector) }}
+{{- $podTopologySpreadConstraints := include "airflow.podTopologySpreadConstraints" (dict "Release" .Release "Values" .Values "topologySpreadConstraints" .Values.airflow.sync.topologySpreadConstraints) }}
 {{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.airflow.sync.affinity) }}
 {{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.airflow.sync.tolerations) }}
 {{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.airflow.sync.securityContext) }}
@@ -58,6 +59,10 @@ spec:
       {{- if $podNodeSelector }}
       nodeSelector:
         {{- $podNodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if $podTopologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- $podTopologySpreadConstraints | nindent 8 }}
       {{- end }}
       {{- if $podAffinity }}
       affinity:
