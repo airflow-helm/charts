@@ -963,6 +963,14 @@ workers:
     ##
     gracefullTerminationPeriod: 600
 
+    ## config for celery worker liveness probes
+    livenessProbe:
+      enabled: false
+      initialDelaySeconds: 300
+      periodSeconds: 60
+      timeoutSeconds: 20
+      failureThreshold: 5
+
   ## how many seconds to wait after SIGTERM before SIGKILL of the celery worker
   ## - [WARNING] tasks that are still running during SIGKILL will be orphaned, this is important
   ##   to understand with KubernetesPodOperator(), as Pods may continue running

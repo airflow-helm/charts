@@ -150,6 +150,22 @@ spec:
                         time.sleep(10)
                         active_tasks = i.active()[local_celery_host]
           {{- end }}
+          {{- if .Values.workers.celery.livenessProbe.enabled }}
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.workers.celery.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.workers.celery.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.workers.celery.livenessProbe.failureThreshold }}
+            periodSeconds: {{ .Values.workers.celery.livenessProbe.periodSeconds }}
+            exec:
+              command:
+                - "bash"
+                - "-c"
+                {{- if .Values.workers.celery.livenessProbe.command }}
+                {{ toYaml .Values.workers.celery.livenessProbe.command | nindent 16 }}
+                {{- else}}
+                - "exec celery --app airflow.executors.celery_executor.app inspect ping -d celery@${HOSTNAME}"
+                {{- end }}
+          {{- end }}
           ports:
             - name: wlog
               containerPort: 8793
