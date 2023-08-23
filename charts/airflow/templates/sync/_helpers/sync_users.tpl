@@ -25,11 +25,14 @@ flask_app = www_app.create_app()
 flask_appbuilder = flask_app.appbuilder
 {{- end }}
 
-# airflow uses its own incompatible FAB models in 2.3.0+
+# airflow uses its own incompatible FAB models in 2.3.0+ (with a different path in 2.7.0+)
 try:
-  from airflow.www.fab_security.sqla.models import User, Role
+  from airflow.auth.managers.fab.models import User, Role
 except ModuleNotFoundError:
-  from flask_appbuilder.security.sqla.models import User, Role
+  try: 
+    from airflow.www.fab_security.sqla.models import User, Role
+  except ModuleNotFoundError:
+    from flask_appbuilder.security.sqla.models import User, Role
 
 
 #############
