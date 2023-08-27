@@ -29,7 +29,8 @@ airflow:
   pools:
     - name: "pool_1"
       description: "example pool with 2 cron policies"
-      
+      include_deferred: false
+
       ## the value of `slots` is ignored when `policies` is non-empty, but it must be set to an arbitrary value
       slots: 0
       

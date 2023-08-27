@@ -29,6 +29,7 @@ class ScheduledPolicy(object):
             name: str,
             recurrence: str,
             slots: int,
+            include_deferred: bool,
     ):
         if not croniter.is_valid(recurrence):
             raise ValueError(f"Invalid recurrence '{recurrence}' for schedule '{name}'")
@@ -36,6 +37,7 @@ class ScheduledPolicy(object):
         self.name = name
         self.recurrence = recurrence
         self.slots = slots
+        self.include_deferred = include_deferred
 
     def last_match_time(self, now: datetime) -> datetime:
         return croniter(expr_format=self.recurrence, start_time=now).get_prev(ret_type=datetime)
@@ -47,18 +49,21 @@ class PoolWrapper(object):
             name: str,
             description: str,
             slots: int,
+            include_deferred: bool,
             policies: List[ScheduledPolicy],
             enable_policies: bool,
     ):
         self.name = name
         self.description = description
         self.slots = slots
+        self.include_deferred = include_deferred
         self.policies = policies
         self.enable_policies = enable_policies
 
     def as_pool(self) -> Pool:
         pool = Pool()
         pool.pool = self.name
+        pool.include_deferred = self.include_deferred
         if self._has_policies():
             most_recent_policy = self._most_recent_policy()
             pool.slots = most_recent_policy.slots
@@ -92,6 +97,7 @@ VAR__POOL_WRAPPERS = {
     {{ required "the `slots` in each `airflow.pools[]` must be int-type!" nil }}
     {{- end }}
     slots={{ (required "the `slots` in each `airflow.pools[]` must be non-empty!" .slots) }},
+    include_deferred={{ (required "the `include_deferred` in each `airflow.pools[]` must be non-empty!" .include_deferred) | quote }}.lower() == "true",
     policies=[
         {{- range .policies }}
             ScheduledPolicy(
