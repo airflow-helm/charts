@@ -14,9 +14,12 @@ airflow:
     - name: "pool_1"
       description: "example pool with 5 slots"
       slots: 5
+      
     - name: "pool_2"
       description: "example pool with 10 slots"
       slots: 10
+      ## if deferred tasks count towards the slot limit, requires airflow 2.7.0+ (default: false)
+      #include_deferred: false
 
   ## if we create a Deployment to perpetually sync `airflow.pools`
   poolsUpdate: true
@@ -29,8 +32,7 @@ airflow:
   pools:
     - name: "pool_1"
       description: "example pool with 2 cron policies"
-      include_deferred: false
-
+      
       ## the value of `slots` is ignored when `policies` is non-empty, but it must be set to an arbitrary value
       slots: 0
       
