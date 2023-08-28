@@ -1,3 +1,55 @@
+{{- define "airflow.pgbouncer.certs_volume_sources" }}
+{{- if or (.Values.pgbouncer.clientSSL.caFile.existingSecret) (.Values.pgbouncer.clientSSL.keyFile.existingSecret) (.Values.pgbouncer.clientSSL.certFile.existingSecret) }}
+## CLIENT TLS FILES (USER PROVIDED)
+{{- if .Values.pgbouncer.clientSSL.caFile.existingSecret }}
+- secret:
+    name: {{ .Values.pgbouncer.clientSSL.caFile.existingSecret }}
+    items:
+      - key: {{ .Values.pgbouncer.clientSSL.caFile.existingSecretKey }}
+        path: client-ca.crt
+{{- end }}
+{{- if .Values.pgbouncer.clientSSL.keyFile.existingSecret }}
+- secret:
+    name: {{ .Values.pgbouncer.clientSSL.keyFile.existingSecret }}
+    items:
+      - key: {{ .Values.pgbouncer.clientSSL.keyFile.existingSecretKey }}
+        path: client.key
+{{- end }}
+{{- if .Values.pgbouncer.clientSSL.certFile.existingSecret }}
+- secret:
+    name: {{ .Values.pgbouncer.clientSSL.certFile.existingSecret }}
+    items:
+      - key: {{ .Values.pgbouncer.clientSSL.certFile.existingSecretKey }}
+        path: client.crt
+{{- end }}
+{{- end }}
+
+{{- if or (.Values.pgbouncer.serverSSL.caFile.existingSecret) (.Values.pgbouncer.serverSSL.keyFile.existingSecret) (.Values.pgbouncer.serverSSL.certFile.existingSecret) }}
+## SERVER TLS FILES (USER PROVIDED)
+{{- if .Values.pgbouncer.serverSSL.caFile.existingSecret }}
+- secret:
+    name: {{ .Values.pgbouncer.serverSSL.caFile.existingSecret }}
+    items:
+      - key: {{ .Values.pgbouncer.serverSSL.caFile.existingSecretKey }}
+        path: server-ca.crt
+{{- end }}
+{{- if .Values.pgbouncer.serverSSL.keyFile.existingSecret }}
+- secret:
+    name: {{ .Values.pgbouncer.serverSSL.keyFile.existingSecret }}
+    items:
+      - key: {{ .Values.pgbouncer.serverSSL.keyFile.existingSecretKey }}
+        path: server.key
+{{- end }}
+{{- if .Values.pgbouncer.serverSSL.certFile.existingSecret }}
+- secret:
+    name: {{ .Values.pgbouncer.serverSSL.certFile.existingSecret }}
+    items:
+      - key: {{ .Values.pgbouncer.serverSSL.certFile.existingSecretKey }}
+        path: server.crt
+{{- end }}
+{{- end }}
+{{- end }}
+
 {{- if include "airflow.pgbouncer.should_use" . }}
 {{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.pgbouncer.nodeSelector) }}
 {{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.pgbouncer.affinity) }}
@@ -137,9 +189,11 @@ spec:
             - name: pgbouncer-config
               mountPath: /home/pgbouncer/config
               readOnly: true
+            {{- if include "airflow.pgbouncer.certs_volume_sources" . }}
             - name: pgbouncer-certs
               mountPath: /home/pgbouncer/certs
               readOnly: true
+            {{- end }}
       volumes:
         - name: pgbouncer-config
           secret:
@@ -155,56 +209,10 @@ spec:
               {{- end }}
               - key: pgbouncer.ini
                 path: pgbouncer.ini
+        {{- if include "airflow.pgbouncer.certs_volume_sources" . }}
         - name: pgbouncer-certs
           projected:
             sources:
-              {{- if or (.Values.pgbouncer.clientSSL.caFile.existingSecret) (.Values.pgbouncer.clientSSL.keyFile.existingSecret) (.Values.pgbouncer.clientSSL.certFile.existingSecret) }}
-              ## CLIENT TLS FILES (USER PROVIDED)
-              {{- if .Values.pgbouncer.clientSSL.caFile.existingSecret }}
-              - secret:
-                  name: {{ .Values.pgbouncer.clientSSL.caFile.existingSecret }}
-                  items:
-                    - key: {{ .Values.pgbouncer.clientSSL.caFile.existingSecretKey }}
-                      path: client-ca.crt
-              {{- end }}
-              {{- if .Values.pgbouncer.clientSSL.keyFile.existingSecret }}
-              - secret:
-                  name: {{ .Values.pgbouncer.clientSSL.keyFile.existingSecret }}
-                  items:
-                    - key: {{ .Values.pgbouncer.clientSSL.keyFile.existingSecretKey }}
-                      path: client.key
-              {{- end }}
-              {{- if .Values.pgbouncer.clientSSL.certFile.existingSecret }}
-              - secret:
-                  name: {{ .Values.pgbouncer.clientSSL.certFile.existingSecret }}
-                  items:
-                    - key: {{ .Values.pgbouncer.clientSSL.certFile.existingSecretKey }}
-                      path: client.crt
-              {{- end }}
-              {{- end }}
-
-              {{- if or (.Values.pgbouncer.serverSSL.caFile.existingSecret) (.Values.pgbouncer.serverSSL.keyFile.existingSecret) (.Values.pgbouncer.serverSSL.certFile.existingSecret) }}
-              ## SERVER TLS FILES (USER PROVIDED)
-              {{- if .Values.pgbouncer.serverSSL.caFile.existingSecret }}
-              - secret:
-                  name: {{ .Values.pgbouncer.serverSSL.caFile.existingSecret }}
-                  items:
-                    - key: {{ .Values.pgbouncer.serverSSL.caFile.existingSecretKey }}
-                      path: server-ca.crt
-              {{- end }}
-              {{- if .Values.pgbouncer.serverSSL.keyFile.existingSecret }}
-              - secret:
-                  name: {{ .Values.pgbouncer.serverSSL.keyFile.existingSecret }}
-                  items:
-                    - key: {{ .Values.pgbouncer.serverSSL.keyFile.existingSecretKey }}
-                      path: server.key
-              {{- end }}
-              {{- if .Values.pgbouncer.serverSSL.certFile.existingSecret }}
-              - secret:
-                  name: {{ .Values.pgbouncer.serverSSL.certFile.existingSecret }}
-                  items:
-                    - key: {{ .Values.pgbouncer.serverSSL.certFile.existingSecretKey }}
-                      path: server.crt
-              {{- end }}
-              {{- end }}
+              {{- include "airflow.pgbouncer.certs_volume_sources" . | indent 14 }}
+        {{- end }}
 {{- end }}
