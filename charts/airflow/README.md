@@ -308,6 +308,7 @@ Parameter | Description | Default
 `workers.celery.*` | configs for the celery worker Pods | `<see values.yaml>`
 `workers.terminationPeriod` | how many seconds to wait after SIGTERM before SIGKILL of the celery worker | `60`
 `workers.logCleanup.*` | configs for the log-cleanup sidecar of the worker Pods | `<see values.yaml>`
+`workers.livenessProbe.*` | configs for the worker Pods' liveness probe | `<see values.yaml>`
 `workers.extraPipPackages` | extra pip packages to install in the worker Pods | `[]`
 `workers.extraVolumeMounts` | extra VolumeMounts for the worker Pods | `[]`
 `workers.extraVolumes` | extra Volumes for the worker Pods | `[]`
@@ -333,7 +334,7 @@ Parameter | Description | Default
 `triggerer.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
 `triggerer.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the triggerer Deployment | `<see values.yaml>`
 `triggerer.capacity` | maximum number of triggers each triggerer will run at once (sets `AIRFLOW__TRIGGERER__DEFAULT_CAPACITY`) | `1000`
-`triggerer.livenessProbe.*` | liveness probe for the triggerer Pods | `<see values.yaml>`
+`triggerer.livenessProbe.*` | configs for the triggerer Pods' liveness probe | `<see values.yaml>`
 `triggerer.extraPipPackages` | extra pip packages to install in the triggerer Pods | `[]`
 `triggerer.extraVolumeMounts` | extra VolumeMounts for the triggerer Pods | `[]`
 `triggerer.extraVolumes` | extra Volumes for the triggerer Pods | `[]`

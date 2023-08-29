@@ -994,6 +994,15 @@ workers:
     ##
     intervalSeconds: 900
 
+  ## configs for the worker Pods' liveness probe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 30
+    timeoutSeconds: 60
+    failureThreshold: 5
+
   ## extra pip packages to install in the worker Pod
   ##
   ## ____ EXAMPLE _______________
