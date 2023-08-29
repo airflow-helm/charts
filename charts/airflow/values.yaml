@@ -963,14 +963,6 @@ workers:
     ##
     gracefullTerminationPeriod: 600
 
-    ## config for celery worker liveness probes
-    livenessProbe:
-      enabled: false
-      initialDelaySeconds: 300
-      periodSeconds: 60
-      timeoutSeconds: 20
-      failureThreshold: 5
-
   ## how many seconds to wait after SIGTERM before SIGKILL of the celery worker
   ## - [WARNING] tasks that are still running during SIGKILL will be orphaned, this is important
   ##   to understand with KubernetesPodOperator(), as Pods may continue running
@@ -999,6 +991,15 @@ workers:
     ## the number of seconds between each check for files to delete
     ##
     intervalSeconds: 900
+
+  ## configs for the worker Pods' liveness probe
+  ##
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 30
+    timeoutSeconds: 60
+    failureThreshold: 5
 
   ## extra pip packages to install in the worker Pod
   ##

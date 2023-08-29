@@ -150,21 +150,43 @@ spec:
                         time.sleep(10)
                         active_tasks = i.active()[local_celery_host]
           {{- end }}
-          {{- if .Values.workers.celery.livenessProbe.enabled }}
+          {{- if .Values.workers.livenessProbe.enabled }}
           livenessProbe:
-            initialDelaySeconds: {{ .Values.workers.celery.livenessProbe.initialDelaySeconds }}
-            timeoutSeconds: {{ .Values.workers.celery.livenessProbe.timeoutSeconds }}
-            failureThreshold: {{ .Values.workers.celery.livenessProbe.failureThreshold }}
-            periodSeconds: {{ .Values.workers.celery.livenessProbe.periodSeconds }}
+            initialDelaySeconds: {{ .Values.workers.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.workers.livenessProbe.timeoutSeconds }}
+            failureThreshold: {{ .Values.workers.livenessProbe.failureThreshold }}
+            periodSeconds: {{ .Values.workers.livenessProbe.periodSeconds }}
             exec:
               command:
-                - "bash"
+                {{- include "airflow.command" . | indent 16 }}
+                - "python"
+                - "-Wignore"
                 - "-c"
-                {{- if .Values.workers.celery.livenessProbe.command }}
-                {{ toYaml .Values.workers.celery.livenessProbe.command | nindent 16 }}
-                {{- else}}
-                - "exec celery --app airflow.executors.celery_executor.app inspect ping -d celery@${HOSTNAME}"
-                {{- end }}
+                - |
+                  import os
+                  import sys
+                  import subprocess
+                  from celery import Celery
+                  from celery.app.control import Inspect
+                  from typing import List
+
+                  def run_command(cmd: List[str]) -> str:
+                      process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+                      output, error = process.communicate()
+                      if error is not None:
+                          raise Exception(error)
+                      else:
+                          return output.decode(encoding="utf-8")
+
+                  broker_url = run_command(["bash", "-c", "eval $AIRFLOW__CELERY__BROKER_URL_CMD"])
+                  local_celery_host = f"celery@{os.environ['HOSTNAME']}"
+                  app = Celery(broker=broker_url)
+
+                  # ping the local celery worker to see if it's ok
+                  i = Inspect(app=app, destination=[local_celery_host], timeout=5.0)
+                  ping_responses = i.ping()
+                  if local_celery_host not in ping_responses:
+                      sys.exit(f"celery worker '{local_celery_host}' did not respond to ping")
           {{- end }}
           ports:
             - name: wlog
