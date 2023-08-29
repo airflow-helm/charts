@@ -47,18 +47,23 @@ class PoolWrapper(object):
             name: str,
             description: str,
             slots: int,
+            include_deferred: bool,
             policies: List[ScheduledPolicy],
             enable_policies: bool,
     ):
         self.name = name
         self.description = description
         self.slots = slots
+        self.include_deferred = include_deferred
         self.policies = policies
         self.enable_policies = enable_policies
 
     def as_pool(self) -> Pool:
         pool = Pool()
         pool.pool = self.name
+        # NOTE: include_deferred is only available in Airflow 2.7.0+
+        if hasattr(Pool, "include_deferred"):
+            pool.include_deferred = self.include_deferred
         if self._has_policies():
             most_recent_policy = self._most_recent_policy()
             pool.slots = most_recent_policy.slots
@@ -92,6 +97,15 @@ VAR__POOL_WRAPPERS = {
     {{ required "the `slots` in each `airflow.pools[]` must be int-type!" nil }}
     {{- end }}
     slots={{ (required "the `slots` in each `airflow.pools[]` must be non-empty!" .slots) }},
+    {{- $include_deferred := dig "include_deferred" nil . }}
+    {{- if not (or (typeIs "bool" $include_deferred) (eq $include_deferred nil)) }}
+    {{ required "if specified, the `include_deferred` in each `airflow.pools[]` must be bool-type!" nil }}
+    {{- end }}
+    {{- if $include_deferred }}
+    include_deferred=True,
+    {{- else }}
+    include_deferred=False,
+    {{- end }}
     policies=[
         {{- range .policies }}
             ScheduledPolicy(
@@ -126,6 +140,7 @@ def compare_pools(p1: Pool, p2: Pool) -> bool:
             p1.pool == p1.pool
             and p1.description == p2.description
             and p1.slots == p2.slots
+            and getattr(p1, "include_deferred", False) == getattr(p2, "include_deferred", False)
     )
 
 
@@ -152,6 +167,8 @@ def sync_pool(pool_wrapper: PoolWrapper) -> None:
                 logging.info(f"Pool=`{p_name}` exists but has changed, updating...")
                 p_old.description = p_new.description
                 p_old.slots = p_new.slots
+                if hasattr(Pool, "include_deferred"):
+                    p_old.include_deferred = p_new.include_deferred
                 pool_updated = True
 
     if pool_added:
