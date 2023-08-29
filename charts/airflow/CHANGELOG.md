@@ -8,9 +8,34 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
+## [8.8.0] - 2023-08-28
+
+> 🟨 __NOTES__ 🟨
+>
+> - the default airflow image is now `apache/airflow:2.6.3-python3.9`, but you can still use any supported version of airflow, see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
+> - this is the first version of the chart with support for airflow 2.7, along with pretty much all previous versions of airflow, see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
+
+> 🟦 __OTHER__ 🟦
+>
+> - If you appreciate the `User-Community Airflow Helm Chart` please consider supporting us!
+>    - [give a ⭐ on GitHub](https://github.com/airflow-helm/charts/stargazers)
+>    - [give a ⭐ on ArtifactHub](https://artifacthub.io/packages/helm/airflow-helm/airflow)
+
+### Changed
+- the default airflow image is now `apache/airflow:2.6.3-python3.9` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support))
+
+### Added
+- add liveness probe for celery workers ([#766](https://github.com/airflow-helm/charts/pull/766))
+- support `include_deferred` in pool sync for airflow 2.7.0 ([#775](https://github.com/airflow-helm/charts/pull/775))
+
+### Fixed
+
+- sync-users for airflow 2.7.0 ([#772](https://github.com/airflow-helm/charts/pull/772))
+- invalid pgbouncer-certs volume spec when empty ([#777](https://github.com/airflow-helm/charts/pull/777))
+
 ## [8.7.1] - 2023-05-13
 
-> 🟥 __WARNINGS__ 🟥
+> 🟨 __NOTES__ 🟨
 >
 > - this is the first version of the chart with support for airflow 2.6, along with pretty much all previous versions of airflow, see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
 
@@ -33,12 +58,6 @@ TBD
 > - the default airflow image is now `apache/airflow:2.5.3-python3.8`, but you can still use any supported version of airflow, see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
 > - when upgrading to airflow 2.5, you may wish to rename your kubernetes `aiflow.config` from `AIRFLOW__KUBERNETES__*` to `AIRFLOW__KUBERNETES_EXECUTOR__*`, as the former was deprecated by airflow 2.5
 > - the chart should no longer be forever "out of sync" in apps like ArgoCD, as this issue was resolved by [#718](https://github.com/airflow-helm/charts/pull/718)
-
-> 🟦 __OTHER__ 🟦
->
-> - If you appreciate the `User-Community Airflow Helm Chart` please consider supporting us!
->    - [give a ⭐ on GitHub](https://github.com/airflow-helm/charts/stargazers)
->    - [give a ⭐ on ArtifactHub](https://artifacthub.io/packages/helm/airflow-helm/airflow)
 
 ### Changed
 - the default airflow image is now `apache/airflow:2.5.3-python3.8` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support))
@@ -765,7 +784,8 @@ TBD
 >
 > - To read about versions `7.0.0` and before, please see the [legacy repo](https://github.com/helm/charts/tree/master/stable/airflow).
 
-[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.7.1...HEAD
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.8.0...HEAD
+[8.8.0]: https://github.com/airflow-helm/charts/compare/airflow-8.7.1...airflow-8.8.0
 [8.7.1]: https://github.com/airflow-helm/charts/compare/airflow-8.7.0...airflow-8.7.1
 [8.7.0]: https://github.com/airflow-helm/charts/compare/airflow-8.6.1...airflow-8.7.0
 [8.6.1]: https://github.com/airflow-helm/charts/compare/airflow-8.6.0...airflow-8.6.1
