@@ -283,7 +283,7 @@ airflow:
   ## FILE | pod_template.yaml
   ########################################
   ## - generates a file for `AIRFLOW__KUBERNETES__POD_TEMPLATE_FILE`
-  ## - the `dags.gitSync` values will create a git-sync init-container in the pod
+  ## - the `dags.sync` values will create a sync init-container in the pod
   ## - the `airflow.extraPipPackages` will NOT be installed
   ##
   kubernetesPodTemplate:
@@ -919,7 +919,7 @@ workers:
     minAvailable: ""
 
   ## configs for the HorizontalPodAutoscaler of the worker Pods
-  ## - [WARNING] if using git-sync, ensure `dags.gitSync.resources` is set
+  ## - [WARNING] if using sync, ensure `dags.sync.resources` is set
   ## - [WARNING] if using worker log-cleanup, ensure `workers.logCleanup.resources` is set
   ##
   ## ____ EXAMPLE _______________
@@ -1360,18 +1360,21 @@ dags:
     ##
     size: 1Gi
 
-  ## configs for the git-sync sidecar (https://github.com/kubernetes/git-sync)
+  ## configs for the sync sidecar 
   ##
-  gitSync:
-    ## if the git-sync sidecar container is enabled
+  sync:
+    ## if the sync sidecar container is enabled
     ##
     enabled: false
 
-    ## the git-sync container image
+    ## type of sync
+    ## - git (https://github.com/kubernetes/git-sync)
+    ## - s3
     ##
+    type: null
+
+    ## sync container image
     image:
-      repository: registry.k8s.io/git-sync/git-sync
-      tag: v3.6.5
       pullPolicy: IfNotPresent
       uid: 65533
       gid: 65533
@@ -1382,85 +1385,128 @@ dags:
     ##
     resources: {}
 
-    ## the url of the git repo
-    ##
-    ## ____ EXAMPLE _______________
-    ##   # https git repo
-    ##   repo: "https://github.com/USERNAME/REPOSITORY.git"
-    ##
-    ## ____ EXAMPLE _______________
-    ##   # ssh git repo
-    ##   repo: "git@github.com:USERNAME/REPOSITORY.git"
-    ##
-    repo: ""
-
-    ## the sub-path within your repo where dags are located
-    ## - only dags under this path within your repo will be seen by airflow,
-    ##   (note, the full repo will still be cloned)
-    ##
-    repoSubPath: ""
-
-    ## the git branch to check out
-    ##
-    branch: master
-
-    ## the git revision (tag or hash) to check out
-    ##
-    revision: HEAD
-
-    ## shallow clone with a history truncated to the specified number of commits
-    ##
-    depth: 1
-
     ## the number of seconds between syncs
     ##
     syncWait: 60
-
-    ## the max number of seconds allowed for a complete sync
+    
+    ## git sync configs
     ##
-    syncTimeout: 120
+    git:
+      ## the git-sync container image
+      ##
+      image:
+        repository: registry.k8s.io/git-sync/git-sync
+        tag: v3.6.5
 
-    ## the git submodule behavior
-    ## - allowed values: "recursive", "shallow", "off"
-    ##
-    submodules: recursive
+      ## the url of the git repo
+      ##
+      ## ____ EXAMPLE _______________
+      ##   # https git repo
+      ##   repo: "https://github.com/USERNAME/REPOSITORY.git"
+      ##
+      ## ____ EXAMPLE _______________
+      ##   # ssh git repo
+      ##   repo: "git@github.com:USERNAME/REPOSITORY.git"
+      ##
+      repo: ""
 
-    ## the name of a pre-created Secret with git http credentials
-    ##
-    httpSecret: ""
+      ## the sub-path within your repo where dags are located
+      ## - only dags under this path within your repo will be seen by airflow,
+      ##   (note, the full repo will still be cloned)
+      ##
+      repoSubPath: ""
 
-    ## the key in `dags.gitSync.httpSecret` with your git username
-    ##
-    httpSecretUsernameKey: username
+      ## the git branch to check out
+      ##
+      branch: master
 
-    ## the key in `dags.gitSync.httpSecret` with your git password/token
-    ##
-    httpSecretPasswordKey: password
+      ## the git revision (tag or hash) to check out
+      ##
+      revision: HEAD
 
-    ## the name of a pre-created Secret with git ssh credentials
-    ##
-    sshSecret: ""
+      ## shallow clone with a history truncated to the specified number of commits
+      ##
+      depth: 1
+ 
+      ## the max number of seconds allowed for a complete sync
+      ##
+      syncTimeout: 120
 
-    ## the key in `dags.gitSync.sshSecret` with your ssh-key file
-    ##
-    sshSecretKey: id_rsa
+      ## the git submodule behavior
+      ## - allowed values: "recursive", "shallow", "off"
+      ##
+      submodules: recursive
 
-    ## the string value of a "known_hosts" file (for SSH only)
-    ## - [WARNING] known_hosts verification will be disabled if left empty, making you more
-    ##   vulnerable to repo spoofing attacks
-    ##
-    ## ____ EXAMPLE _______________
-    ##   sshKnownHosts: |-
-    ##     <HOST_NAME> ssh-rsa <HOST_KEY>
-    ##
-    sshKnownHosts: ""
+      ## the name of a pre-created Secret with git http credentials
+      ##
+      httpSecret: ""
 
-    ## the number of consecutive failures allowed before aborting
-    ##  - the first sync must succeed
-    ##  - a value of -1 will retry forever after the initial sync
-    ##
-    maxFailures: 0
+      ## the key in `dags.gitSync.httpSecret` with your git username
+      ##
+      httpSecretUsernameKey: username
 
+      ## the key in `dags.gitSync.httpSecret` with your git password/token
+      ##
+      httpSecretPasswordKey: password
+
+      ## the name of a pre-created Secret with git ssh credentials
+      ##
+      sshSecret: ""
+
+      ## the key in `dags.gitSync.sshSecret` with your ssh-key file
+      ##
+      sshSecretKey: id_rsa
+
+      ## the string value of a "known_hosts" file (for SSH only)
+      ## - [WARNING] known_hosts verification will be disabled if left empty, making you more
+      ##   vulnerable to repo spoofing attacks
+      ##
+      ## ____ EXAMPLE _______________
+      ##   sshKnownHosts: |-
+      ##     <HOST_NAME> ssh-rsa <HOST_KEY>
+      ##
+      sshKnownHosts: ""
+
+      ## the number of consecutive failures allowed before aborting
+      ##  - the first sync must succeed
+      ##  - a value of -1 will retry forever after the initial sync
+      ##
+      maxFailures: 0
+
+    ## configs for a sync from s3 object storage
+    ##
+    s3:
+      ## the s3-sync container image
+      ##
+      image:
+        repository: amazon/aws-cli
+        tag: 2.13.15
+      
+      ## the s3 path to the dags
+      ##
+      ## ____ EXAMPLE _______________
+      ##   # s3
+      ##   s3Path: "s3://<bucket>"
+      ##
+      ## ____ EXAMPLE _______________
+      ##   # s3 sub path
+      ##   s3Path: "s3://<bucket>/<path>/<to>/<dags>"
+      ##
+      s3Path: ""
+
+      ## the name of the pre-created Secret with AWS credentials
+      ##
+      secret: ""
+
+      ## the key in `dags.sync.git.secret` with your access key id
+      ##
+      idKey: keyId
+
+      ## the key in `dags.sync.git.secret` with your secret access key
+      secretKey: secretKey
+
+
+    
 ###################################
 ## CONFIG | Kubernetes Ingress
 ###################################

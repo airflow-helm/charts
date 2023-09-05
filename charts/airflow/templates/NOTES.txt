@@ -104,7 +104,7 @@
 
 {{- /* if we show the git-sync known_hosts warning */ -}}
 {{- $known_host_warning := false }}
-{{- if and (.Values.dags.gitSync.enabled) (.Values.dags.gitSync.sshSecret) (not .Values.dags.gitSync.sshKnownHosts) }}
+{{- if and (.Values.dags.sync.enabled) (.Values.dags.sync.git.sshSecret) (not .Values.dags.sync.git.sshKnownHosts) }}
 {{- $known_host_warning = true }}
 {{- end }}
 
@@ -212,7 +212,7 @@ Use these commands to port-forward the Services to your localhost:
 
 {{- if $known_host_warning }}
 [HIGH] git-sync ssh known_hosts verification is disabled!
-  * HELP: set `dags.gitSync.sshKnownHosts` with the ssh fingerprint of your git host
+  * HELP: set `dags.sync.git.sshKnownHosts` with the ssh fingerprint of your git host
 {{ end }}
 
 {{- if $scheduler_livenessProbe_warning }}

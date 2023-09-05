@@ -185,26 +185,27 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "R
 {{- end }}
 
 {{/*
-Define a container which regularly syncs a git-repo
-EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") }}
+Define a container which regularly syncs from an external service
+EXAMPLE USAGE: {{ include "airflow.container.sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") }}
 */}}
-{{- define "airflow.container.git_sync" }}
-{{- if .sync_one_time }}
-- name: dags-git-clone
-{{- else }}
-- name: dags-git-sync
+{{- define "airflow.container.sync" }}
+- name: dags-{{ .Values.dags.sync.type }}-sync
 {{- end }}
-  image: {{ .Values.dags.gitSync.image.repository }}:{{ .Values.dags.gitSync.image.tag }}
-  imagePullPolicy: {{ .Values.dags.gitSync.image.pullPolicy }}
+{{- with get .Values.dags.sync .Values.dags.sync.type }}
+  image: {{ .image.repository }}:{{ .image.tag }}
+{{- end }}
+  imagePullPolicy: {{ .Values.dags.sync.image.pullPolicy }}
   securityContext:
-    runAsUser: {{ .Values.dags.gitSync.image.uid }}
-    runAsGroup: {{ .Values.dags.gitSync.image.gid }}
+    runAsUser: {{ .Values.dags.sync.image.uid }}
+    runAsGroup: {{ .Values.dags.sync.image.gid }}
   resources:
-    {{- toYaml .Values.dags.gitSync.resources | nindent 4 }}
+    {{- toYaml .Values.dags.sync.resources | nindent 4 }}
   envFrom:
     {{- include "airflow.envFrom" . | indent 4 }}
   env:
-    {{- if .sync_one_time }}
+    {{- if eq .Values.dags.sync.type "git" }}
+    {{- with .Values.dags.sync.git }}
+    {{- if $.sync_one_time }}
     - name: GIT_SYNC_ONE_TIME
       value: "true"
     {{- end }}
@@ -213,30 +214,30 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
     - name: GIT_SYNC_DEST
       value: "repo"
     - name: GIT_SYNC_REPO
-      value: {{ .Values.dags.gitSync.repo | quote }}
+      value: {{ .repo | quote }}
     - name: GIT_SYNC_BRANCH
-      value: {{ .Values.dags.gitSync.branch | quote }}
+      value: {{ .branch | quote }}
     - name: GIT_SYNC_REV
-      value: {{ .Values.dags.gitSync.revision | quote }}
+      value: {{ .revision | quote }}
     - name: GIT_SYNC_DEPTH
-      value: {{ .Values.dags.gitSync.depth | quote }}
+      value: {{ .depth | quote }}
     - name: GIT_SYNC_WAIT
-      value: {{ .Values.dags.gitSync.syncWait | quote }}
+      value: {{ $.Values.dags.sync.syncWait | quote }}
     - name: GIT_SYNC_TIMEOUT
-      value: {{ .Values.dags.gitSync.syncTimeout | quote }}
+      value: {{ .syncTimeout | quote }}
     - name: GIT_SYNC_ADD_USER
       value: "true"
     - name: GIT_SYNC_MAX_SYNC_FAILURES
-      value: {{ .Values.dags.gitSync.maxFailures | quote }}
+      value: {{ .maxFailures | quote }}
     - name: GIT_SYNC_SUBMODULES
-      value: {{ .Values.dags.gitSync.submodules | quote }}
-    {{- if .Values.dags.gitSync.sshSecret }}
+      value: {{ .submodules | quote }}
+    {{- if .sshSecret }}
     - name: GIT_SYNC_SSH
       value: "true"
     - name: GIT_SSH_KEY_FILE
       value: "/etc/git-secret/id_rsa"
     {{- end }}
-    {{- if .Values.dags.gitSync.sshKnownHosts }}
+    {{- if .sshKnownHosts }}
     - name: GIT_KNOWN_HOSTS
       value: "true"
     - name: GIT_SSH_KNOWN_HOSTS_FILE
@@ -245,35 +246,76 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
     - name: GIT_KNOWN_HOSTS
       value: "false"
     {{- end }}
-    {{- if .Values.dags.gitSync.httpSecret }}
+    {{- if .httpSecret }}
     - name: GIT_SYNC_USERNAME
       valueFrom:
         secretKeyRef:
-          name: {{ .Values.dags.gitSync.httpSecret }}
-          key: {{ .Values.dags.gitSync.httpSecretUsernameKey }}
+          name: {{ .httpSecret }}
+          key: {{ .httpSecretUsernameKey }}
     - name: GIT_SYNC_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: {{ .Values.dags.gitSync.httpSecret }}
-          key: {{ .Values.dags.gitSync.httpSecretPasswordKey }}
+          name: {{ .httpSecret }}
+          key: {{ .httpSecretPasswordKey }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- if eq .Values.dags.sync.type "s3" }}
+    {{- with .Values.dags.sync.s3 }}
+    {{- if .secret }}
+    - name: AWS_ACCESS_KEY_ID
+      valueFrom:
+        secretKeyRef:
+          name: {{ .secret }}
+          key: {{ .idKey }}
+    - name: AWS_SECRET_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: {{ .secret }}
+          key: {{ .secretKey }}
+    {{- end }}
+    {{- end }}
     {{- end }}
     {{- /* this has user-defined variables, so must be included BELOW (so the ABOVE `env` take precedence) */ -}}
     {{- include "airflow.env" . | indent 4 }}
   volumeMounts:
     - name: dags-data
       mountPath: /dags
-    {{- if .Values.dags.gitSync.sshSecret }}
+    {{- if eq .Values.dags.sync.type "git" }}
+    {{- with .Values.dags.sync.git }}
+    {{- if .sshSecret }}
     - name: git-secret
       mountPath: /etc/git-secret/id_rsa
       readOnly: true
-      subPath: {{ .Values.dags.gitSync.sshSecretKey }}
+      subPath: {{ .sshSecretKey }}
     {{- end }}
-    {{- if .Values.dags.gitSync.sshKnownHosts }}
+    {{- if .sshKnownHosts }}
     - name: git-known-hosts
       mountPath: /etc/git-secret/known_hosts
       readOnly: true
       subPath: known_hosts
     {{- end }}
+    {{- end }}
+    {{- end }}
+  {{- if eq .Values.dags.sync.type "s3" }}
+  {{- with .Values.dags.sync.s3 }}
+  command:
+    - "/bin/sh"
+    - "-c"
+    {{- if $.sync_one_time }}
+    - |
+      aws s3 cp --recursive {{ .s3Path }} /dags
+      chown -R {{ $.Values.airflow.image.uid }} /dags
+    {{- else }}
+    - |
+      while true; do
+          aws s3 sync --delete {{ .s3Path }} /dags
+          chown -R {{ $.Values.airflow.image.uid }} /dags
+          sleep {{ $.Values.dags.sync.syncWait }}
+      done
+    {{- end }}
+  {{- end }}
+  {{- end }}
 {{- end }}
 
 {{/*
@@ -360,7 +402,7 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Value
   {{- if eq .Values.dags.persistence.accessMode "ReadOnlyMany" }}
   readOnly: true
   {{- end }}
-{{- else if .Values.dags.gitSync.enabled }}
+{{- else if .Values.dags.sync.enabled }}
 - name: dags-data
   mountPath: {{ .Values.dags.path }}
 {{- end }}
@@ -423,7 +465,7 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
     {{- else }}
     claimName: {{ printf "%s-dags" (include "airflow.fullname" . | trunc 58) }}
     {{- end }}
-{{- else if .Values.dags.gitSync.enabled }}
+{{- else if .Values.dags.sync.enabled }}
 - name: dags-data
   emptyDir: {}
 {{- end }}
@@ -447,14 +489,14 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
 {{- end }}
 
 {{- /* git-sync */ -}}
-{{- if .Values.dags.gitSync.enabled }}
-{{- if .Values.dags.gitSync.sshSecret }}
+{{- if .Values.dags.sync.enabled }}
+{{- if .Values.dags.sync.sshSecret }}
 - name: git-secret
   secret:
-    secretName: {{ .Values.dags.gitSync.sshSecret }}
+    secretName: {{ .Values.dags.sync.sshSecret }}
     defaultMode: 0644
 {{- end }}
-{{- if .Values.dags.gitSync.sshKnownHosts }}
+{{- if .Values.dags.sync.sshKnownHosts }}
 - name: git-known-hosts
   secret:
     secretName: {{ include "airflow.fullname" . }}-known-hosts
