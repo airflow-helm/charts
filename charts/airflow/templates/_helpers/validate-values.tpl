@@ -118,6 +118,9 @@
 
 {{/* Checks for `dags.sync` */}}
 {{- if .Values.dags.sync.enabled }}
+  {{- if not (has .Values.dags.sync.type (list "git" "s3")) }}
+  {{ required "The `dags.sync.type` must be one of: [git, s3]!" nil }}
+  {{- end }}
   {{- if .Values.dags.persistence.enabled }}
   {{ required "If `dags.sync.enabled=true` and `dags.sync.type='git'`, then `persistence.enabled` must be disabled!" nil }}
   {{- end }}
