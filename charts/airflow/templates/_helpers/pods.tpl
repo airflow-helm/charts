@@ -190,7 +190,6 @@ EXAMPLE USAGE: {{ include "airflow.container.sync" (dict "Release" .Release "Val
 */}}
 {{- define "airflow.container.sync" }}
 - name: dags-{{ .Values.dags.sync.type }}-sync
-{{- end }}
 {{- with get .Values.dags.sync .Values.dags.sync.type }}
   image: {{ .image.repository }}:{{ .image.tag }}
 {{- end }}

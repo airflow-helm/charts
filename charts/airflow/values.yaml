@@ -1371,7 +1371,7 @@ dags:
     ## - git (https://github.com/kubernetes/git-sync)
     ## - s3
     ##
-    type: null
+    type: ""
 
     ## sync container image
     image:
