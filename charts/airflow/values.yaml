@@ -1427,7 +1427,7 @@ dags:
       ## shallow clone with a history truncated to the specified number of commits
       ##
       depth: 1
- 
+
       ## the max number of seconds allowed for a complete sync
       ##
       syncTimeout: 120
