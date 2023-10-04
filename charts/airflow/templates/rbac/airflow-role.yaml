@@ -18,6 +18,16 @@ rules:
   - "get"
   - "list"
 {{- end }}
+{{- if .Values.rbac.secrets }}
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - "get"
+  - "list"
+  - "watch"
+{{- end }}
 - apiGroups:
   - ""
   resources:
