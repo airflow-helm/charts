@@ -1613,6 +1613,7 @@ rbac:
   ## if the created RBAC Role has GET/LIST/WATCH on Secret resources
   ## - this is a place holder to allow the implementors to over-write \
   ## if they want their service account deployed in airflow namespace to access secrets, default value set to false
+  ##
   secrets: false
 
 ###################################
