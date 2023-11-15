@@ -315,12 +315,11 @@ web:
             "icon": "fa-circle-o",
             "token_key": "access_token",
             "remote_app": {
-                "client_id": "OKTA_KEY",
-                "client_secret": "OKTA_SECRET",
+                "client_id": "OKTA_CLIENT_ID",
+                "client_secret": "OKTA_CLIENT_SECRET",
                 "api_base_url": "https://OKTA_DOMAIN.okta.com/oauth2/v1/",
                 "client_kwargs": {"scope": "openid profile email groups"},
-                "access_token_url": "https://OKTA_DOMAIN.okta.com/oauth2/v1/token",
-                "authorize_url": "https://OKTA_DOMAIN.okta.com/oauth2/v1/authorize",
+                "server_metadata_url": "https://OKTA_DOMAIN.okta.com/.well-known/openid-configuration",
             },
         },
       ]
