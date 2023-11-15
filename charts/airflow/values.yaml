@@ -16,6 +16,15 @@ airflow:
     uid: 50000
     gid: 0
 
+  ## resource requests/limits for the init containers
+  init:
+    check_db:
+      resources: {}
+    wait_for_db_migrations:
+      resources: {}
+    install_pip_packages:
+      resources: {}
+
   ## the airflow executor type to use
   ## - allowed values: "CeleryExecutor", "KubernetesExecutor", "CeleryKubernetesExecutor"
   ## - customize the "KubernetesExecutor" pod-template with `airflow.kubernetesPodTemplate.*`
