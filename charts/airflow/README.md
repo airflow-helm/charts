@@ -385,7 +385,7 @@ Parameter | Description | Default
 --- | --- | ---
 `dags.path` | the airflow dags folder | `/opt/airflow/dags`
 `dags.persistence.*` | configs for the dags PVC | `<see values.yaml>`
-`dags.gitSync.*` | configs for the git-sync sidecar  | `<see values.yaml>`
+`dags.sync.*` | configs for the sync sidecars  | `<see values.yaml>`
 
 </details>
 
