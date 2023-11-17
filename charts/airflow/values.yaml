@@ -899,6 +899,7 @@ workers:
 
   ## configs for the PodDisruptionBudget of the worker StatefulSet
   ##
+
   podDisruptionBudget:
     ## if a PodDisruptionBudget resource is created for the worker StatefulSet
     ##
@@ -917,6 +918,12 @@ workers:
     ## the minimum available pods/percentage for the worker StatefulSet
     ##
     minAvailable: ""
+
+  ## extra init containers to run in the worker Pods
+  ## - spec of Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraInitContainers: []
 
   ## configs for the HorizontalPodAutoscaler of the worker Pods
   ## - [WARNING] if using git-sync, ensure `dags.gitSync.resources` is set
