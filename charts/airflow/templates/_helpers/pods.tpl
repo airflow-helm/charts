@@ -30,6 +30,14 @@ EXAMPLE USAGE: {{ include "airflow.nodeSelector" (dict "Release" .Release "Value
 {{- end }}
 
 {{/*
+Define the topologySpreadConstraints for airflow pods
+EXAMPLE USAGE: {{ include "airflow.podTopologySpreadConstraints" (dict "Release" .Release "Values" .Values "topologySpreadConstraints" $topologySpreadConstraints) }}
+*/}}
+{{- define "airflow.podTopologySpreadConstraints" }}
+{{- .topologySpreadConstraints | default .Values.airflow.defaultTopologySpreadConstraints | toYaml }}
+{{- end }}
+
+{{/*
 Define the Affinity for airflow pods
 EXAMPLE USAGE: {{ include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" $affinity) }}
 */}}

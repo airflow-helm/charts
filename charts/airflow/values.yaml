@@ -186,6 +186,11 @@ airflow:
   ##
   defaultNodeSelector: {}
 
+  ## default topologySpreadConstraints for airflow Pods (is overridden by pod-specific values)
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  defaultTopologySpreadConstraints: []
+
   ## default affinity configs for airflow Pods (is overridden by pod-specific values)
   ## - spec for Affinity:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
@@ -312,6 +317,12 @@ airflow:
     ##
     nodeSelector: {}
 
+    ## the topologySpreadConstraints configs for the Pod template
+    ## - docs for topologySpreadConstraints:
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+    ##
+    topologySpreadConstraints: []
+
     ## the affinity configs for the Pod template
     ## - spec for Affinity:
     ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
@@ -404,6 +415,12 @@ airflow:
     ##
     nodeSelector: {}
 
+    ## the topologySpreadConstraints configs for the db-migrations Pods
+    ## - docs for topologySpreadConstraints:
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+    ##
+    topologySpreadConstraints: []
+
     ## the affinity configs for the db-migrations Pods
     ## - spec for Affinity:
     ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
@@ -465,6 +482,12 @@ airflow:
     ##
     nodeSelector: {}
 
+    ## the topologySpreadConstraints configs for the sync Pods
+    ## - docs for topologySpreadConstraints:
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+    ##
+    topologySpreadConstraints: []
+
     ## the affinity configs for the sync Pods
     ## - spec for Affinity:
     ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
@@ -523,6 +546,12 @@ scheduler:
   ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   ##
   nodeSelector: {}
+
+  ## the topologySpreadConstraints configs for the scheduler Pods
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##
+  topologySpreadConstraints: []
 
   ## the affinity configs for the scheduler Pods
   ## - spec of Affinity:
@@ -723,6 +752,12 @@ web:
   ##
   nodeSelector: {}
 
+  ## the topologySpreadConstraints configs for the web Pods
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##
+  topologySpreadConstraints: []
+
   ## the affinity configs for the web Pods
   ## - spec for Affinity:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
@@ -858,6 +893,12 @@ workers:
   ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   ##
   nodeSelector: {}
+
+  ## the topologySpreadConstraints configs for the worker Pods
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##
+  topologySpreadConstraints: []
 
   ## the affinity configs for the worker Pods
   ## - spec for Affinity:
@@ -1050,6 +1091,12 @@ triggerer:
   ##
   nodeSelector: {}
 
+  ## the topologySpreadConstraints configs for the triggerer Pods
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##
+  topologySpreadConstraints: []
+
   ## the affinity configs for the triggerer Pods
   ## - spec for Affinity:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
@@ -1166,6 +1213,12 @@ flower:
   ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   ##
   nodeSelector: {}
+
+  ## the topologySpreadConstraints configs for the flower Pods
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##
+  topologySpreadConstraints: []
 
   ## the affinity configs for the flower Pods
   ## - spec for Affinity:
@@ -1724,6 +1777,12 @@ pgbouncer:
   ##   https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   ##
   nodeSelector: {}
+
+  ## the topologySpreadConstraints configs for the pgbouncer Pods
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##
+  topologySpreadConstraints: []
 
   ## the affinity configs for the pgbouncer Pods
   ## - spec for Affinity:
