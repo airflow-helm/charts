@@ -2,6 +2,7 @@
 {{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.scheduler.affinity) }}
 {{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.scheduler.tolerations) }}
 {{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.scheduler.securityContext) }}
+{{- $env := include "airflow.env" (dict "Release" .Release "Values" .Values "extraEnv" .Values.scheduler.extraEnv) }}
 {{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.scheduler.extraPipPackages }}
 {{- $extraVolumeMounts := .Values.scheduler.extraVolumeMounts }}
 {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
@@ -110,7 +111,7 @@ spec:
           envFrom:
             {{- include "airflow.envFrom" . | indent 12 }}
           env:
-            {{- include "airflow.env" . | indent 12 }}
+            {{- $env | indent 12 }}
           command:
             {{- include "airflow.command" . | indent 12 }}
           args:

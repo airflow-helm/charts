@@ -3,6 +3,7 @@
 {{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.flower.affinity) }}
 {{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.flower.tolerations) }}
 {{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.flower.securityContext) }}
+{{- $env := include "airflow.env" (dict "Release" .Release "Values" .Values "extraEnv" .Values.flower.extraEnv) }}
 {{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.flower.extraPipPackages }}
 {{- $extraVolumeMounts := .Values.flower.extraVolumeMounts }}
 {{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
@@ -100,7 +101,7 @@ spec:
           envFrom:
             {{- include "airflow.envFrom" . | indent 12 }}
           env:
-            {{- include "airflow.env" . | indent 12 }}
+            {{- $env | indent 12 }}
           ports:
             - name: flower
               containerPort: 5555

@@ -582,6 +582,9 @@ EXAMPLE USAGE: {{ include "airflow.env" (dict "Release" .Release "Values" .Value
 {{- end }}
 
 {{- /* user-defined environment variables */ -}}
+{{- if .extraEnv }}
+{{ toYaml .extraEnv }}
+{{- end }}
 {{- if .Values.airflow.extraEnv }}
 {{ toYaml .Values.airflow.extraEnv }}
 {{- end }}

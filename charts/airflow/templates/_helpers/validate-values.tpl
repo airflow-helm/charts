@@ -51,24 +51,35 @@
   {{- end }}
 {{- end }}
 
-{{/* Checks for `airflow.config` */}}
-{{- if .Values.airflow.config.AIRFLOW__CORE__EXECUTOR }}
-  {{ required "Don't define `airflow.config.AIRFLOW__CORE__EXECUTOR`, it will be automatically set from `airflow.executor`!" nil }}
+{{/* defines checks for various environment overrides */}}
+{{- define "airflow.environment_check" }}
+  {{- if .Values.AIRFLOW__CORE__EXECUTOR }}
+    {{ required (printf "Don't define `AIRFLOW__CORE__EXECUTOR` under %s, it will be automatically set from `airflow.executor`!" .TreeName) nil }}
+  {{- end }}
+  {{- if .Values.AIRFLOW__CORE__DAGS_FOLDER }}
+    {{ required (printf "Don't define `AIRFLOW__CORE__DAGS_FOLDER` under %s, it will be automatically set from `dags.path`!" .TreeName) nil }}
+  {{- end }}
+  {{- if or (.Values.AIRFLOW__CELERY__BROKER_URL) (.Values.AIRFLOW__CELERY__BROKER_URL_CMD) }}
+    {{ required (printf "Don't define `AIRFLOW__CELERY__BROKER_URL` under %s, it will be automatically set by the chart!") nil }}
+  {{- end }}
+  {{- if or (.Values.AIRFLOW__CELERY__RESULT_BACKEND) (.Values.AIRFLOW__CELERY__RESULT_BACKEND_CMD) }}
+    {{ required (printf "Don't define `AIRFLOW__CELERY__RESULT_BACKEND` under %s, it will be automatically set by the chart!") nil }}
+  {{- end }}
+  {{- if or (.Values.AIRFLOW__CORE__SQL_ALCHEMY_CONN) (.Values.AIRFLOW__CORE__SQL_ALCHEMY_CONN_CMD) }}
+    {{ required (printf "Don't define `AIRFLOW__CORE__SQL_ALCHEMY_CONN` under %s, it will be automatically set by the chart!") nil }}
+  {{- end }}
+  {{- if or (.Values.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN) (.Values.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN_CMD) }}
+    {{ required (printf "Don't define `AIRFLOW__DATABASE__SQL_ALCHEMY_CONN` under %s, it will be automatically set by the chart!") nil }}
+  {{- end }}
 {{- end }}
-{{- if or .Values.airflow.config.AIRFLOW__CORE__DAGS_FOLDER }}
-  {{ required "Don't define `airflow.config.AIRFLOW__CORE__DAGS_FOLDER`, it will be automatically set from `dags.path`!" nil }}
-{{- end }}
-{{- if or (.Values.airflow.config.AIRFLOW__CELERY__BROKER_URL) (.Values.airflow.config.AIRFLOW__CELERY__BROKER_URL_CMD) }}
-  {{ required "Don't define `airflow.config.AIRFLOW__CELERY__BROKER_URL`, it will be automatically set by the chart!" nil }}
-{{- end }}
-{{- if or (.Values.airflow.config.AIRFLOW__CELERY__RESULT_BACKEND) (.Values.airflow.config.AIRFLOW__CELERY__RESULT_BACKEND_CMD) }}
-  {{ required "Don't define `airflow.config.AIRFLOW__CELERY__RESULT_BACKEND`, it will be automatically set by the chart!" nil }}
-{{- end }}
-{{- if or (.Values.airflow.config.AIRFLOW__CORE__SQL_ALCHEMY_CONN) (.Values.airflow.config.AIRFLOW__CORE__SQL_ALCHEMY_CONN_CMD) }}
-  {{ required "Don't define `airflow.config.AIRFLOW__CORE__SQL_ALCHEMY_CONN`, it will be automatically set by the chart!" nil }}
-{{- end }}
-{{- if or (.Values.airflow.config.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN) (.Values.airflow.config.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN_CMD) }}
-  {{ required "Don't define `airflow.config.AIRFLOW__DATABASE__SQL_ALCHEMY_CONN`, it will be automatically set by the chart!" nil }}
+{{/* Checks for `airflow.config` and the extraEnvs */}}
+{{- include "airflow.environment_check" (dict "Values" .Values.airflow.config "TreeName" "`airflow.config`") }}
+{{- range $tree := (list "airflow" "flower" "scheduler" "triggerer" "web" "workers") }}
+  {{- $envDict := (dict) }}
+  {{- range $env := (index $.Values $tree "extraEnv") }}
+    {{- $_ := (set $envDict $env.name "1") }}
+  {{- end }}
+  {{- include "airflow.environment_check" (dict "Values" $envDict "TreeName" (printf "`%s.extraEnv`" $tree)) }}
 {{- end }}
 
 {{/* Checks for `scheduler.logCleanup` */}}
