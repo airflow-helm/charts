@@ -198,6 +198,7 @@ Parameter | Description | Default
 --- | --- | ---
 `airflow.legacyCommands` | if we use legacy 1.10 airflow commands | `false`
 `airflow.image.*` | configs for the airflow container image | `<see values.yaml>`
+`airflow.init.*` | configs for the airflow init containers resources | `<see values.yaml>`
 `airflow.executor` | the airflow executor type to use | `CeleryExecutor`
 `airflow.fernetKey` | the fernet encryption key (sets `AIRFLOW__CORE__FERNET_KEY`) | `7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc=`
 `airflow.webserverSecretKey` | the secret_key for flask (sets `AIRFLOW__WEBSERVER__SECRET_KEY`) | `THIS IS UNSAFE!`
