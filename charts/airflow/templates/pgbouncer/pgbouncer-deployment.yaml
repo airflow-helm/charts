@@ -73,7 +73,7 @@ metadata:
   {{- toYaml .Values.pgbouncer.annotations | nindent 4 }}
   {{- end }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.pgbouncer.replicas | default 1 }}
   strategy:
     rollingUpdate:
       ## multiple pgbouncer pods can safely run concurrently
