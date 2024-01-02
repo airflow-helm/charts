@@ -1704,6 +1704,10 @@ pgbouncer:
   ##
   enabled: true
 
+  ## the number of pgbouncer Pods to run
+  ##
+  replicas: 1
+
   ## configs for the pgbouncer container image
   ##
   image:

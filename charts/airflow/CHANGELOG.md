@@ -8,6 +8,11 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
+## [8.9.0] - 2024-01-02
+
+### Changed
+- made possible to configure `pgbouncer` >1 replicas
+
 ## [8.8.0] - 2023-08-28
 
 > 🟨 __NOTES__ 🟨
