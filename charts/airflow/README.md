@@ -437,6 +437,7 @@ Parameter | Description | Default
 Parameter | Description | Default
 --- | --- | ---
 `pgbouncer.enabled` | if the pgbouncer Deployment is created | `true`
+`pgbouncer.replicas` | the number of pgbouncer Pods to run | `1`
 `pgbouncer.image.*` | configs for the pgbouncer container image | `<see values.yaml>`
 `pgbouncer.resources` | resource requests/limits for the pgbouncer Pods | `{}`
 `pgbouncer.nodeSelector` | the nodeSelector configs for the pgbouncer Pods | `{}`
