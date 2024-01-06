@@ -70,7 +70,7 @@ Please note, this chart is __independent__ from the official chart in the `apach
 - __Support for Airflow Versions:__ 
    - [`1.10` | `2.0` | `2.1` | `2.2` | `2.3` | `2.4` | `2.5` | `2.6` | `2.7`](#airflow-version-support)
 - __Support for Airflow Executors:__ 
-   - [`CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor`](#airflow-executor-support)
+   - [`CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor` | `DaskExecutor`](#airflow-executor-support)
 - __Easily Connect with your Database:__
    - [`Connect to Postgres`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/external-database.md#option-1---postgres) |
      [`Configure PgBouncer`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/database/pgbouncer.md) |
@@ -148,6 +148,7 @@ Please note, this chart is __independent__ from the official chart in the `apach
   - [`CeleryExecutor`](sample-values-CeleryExecutor.yaml)
   - [`KubernetesExecutor`](sample-values-KubernetesExecutor.yaml)
   - [`CeleryKubernetesExecutor`](sample-values-CeleryKubernetesExecutor.yaml)
+  - [`DaskExecutor`](sample-values-DaskExecutor.yaml)
 - __Real-World Examples:__
   - [`Minikube / Kind / K3D`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/examples/minikube)
   - [`Google Kubernetes Engine (GKE)`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/examples/google-gke)
@@ -182,6 +183,7 @@ Chart Version → <br> Airflow Executor ↓ | `7.X.X` | `8.X.X` |
 `CeleryExecutor` | ✔️ | ✔️
 `KubernetesExecutor` | ⚠️️ <sub>[1]</sub> | ✔️
 `CeleryKubernetesExecutor` | ❌ | ✔️
+`DaskExecutor` | ❌ | ✔️
 
 <sub>[1] we encourage you to use chart version `8.X.X`, so you can use the `airflow.kubernetesPodTemplate.*` values (requires airflow `1.10.11+`) </sub>
 
@@ -551,3 +553,11 @@ Parameter | Description | Default
 `prometheusRule.groups` | alerting rules for Prometheus | `[]`
 
 </details>
+
+<details>
+<summary><code>dask.*</code></summary>
+
+Please refer to the (dask chart)[https://github.com/dask/helm-chart/blob/main/dask/values.yaml] for parameter options.
+
+</details>
+

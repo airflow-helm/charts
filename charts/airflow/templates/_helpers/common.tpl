@@ -169,6 +169,23 @@ Used to discover the Service and Secret name created by the sub-chart.
 {{- end -}}
 
 {{/*
+Construct the `dask.fullname` of the dask sub-chart chart.
+Used to discover the Service created by the sub-chart.
+*/}}
+{{- define "airflow.dask.fullname" -}}
+{{- if .Values.dask.fullnameOverride -}}
+{{- .Values.dask.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "dask" .Values.dask.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Construct the `redis.fullname` of the redis sub-chat chart.
 Used to discover the master Service and Secret name created by the sub-chart.
 */}}

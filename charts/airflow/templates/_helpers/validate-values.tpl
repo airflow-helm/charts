@@ -32,8 +32,8 @@
 {{- end }}
 
 {{/* Checks for `airflow.executor` */}}
-{{- if not (has .Values.airflow.executor (list "CeleryExecutor" "CeleryKubernetesExecutor" "KubernetesExecutor")) }}
-  {{ required "The `airflow.executor` must be one of: [CeleryExecutor, CeleryKubernetesExecutor, KubernetesExecutor]!" nil }}
+{{- if not (has .Values.airflow.executor (list "CeleryExecutor" "CeleryKubernetesExecutor" "KubernetesExecutor" "DaskExecutor")) }}
+  {{ required "The `airflow.executor` must be one of: [CeleryExecutor, CeleryKubernetesExecutor, KubernetesExecutor, DaskExecutor]!" nil }}
 {{- end }}
 {{- if eq .Values.airflow.executor "CeleryExecutor" }}
   {{- if not .Values.workers.enabled }}
@@ -50,6 +50,10 @@
   {{ required "If `airflow.executor=KubernetesExecutor`, then all of [`workers.enabled`, `flower.enabled`, `redis.enabled`] should be `false`!" nil }}
   {{- end }}
 {{- end }}
+{{- if eq .Values.airflow.executor "DaskExecutor" }}
+  {{ required "If `airflow.executor=DaskExecutor`, then `dask.enabled` should be `true`!" nil }}
+{{- end }}
+
 
 {{/* Checks for `airflow.config` */}}
 {{- if .Values.airflow.config.AIRFLOW__CORE__EXECUTOR }}

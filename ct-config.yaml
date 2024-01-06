@@ -4,4 +4,5 @@ chart-dirs:
   - charts
 chart-repos:
   - stable=https://charts.helm.sh/stable
+  - dask=https://helm.dask.org/
 helm-extra-args: --timeout=900s
