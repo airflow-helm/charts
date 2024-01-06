@@ -17,8 +17,9 @@ airflow:
     gid: 0
 
   ## the airflow executor type to use
-  ## - allowed values: "CeleryExecutor", "KubernetesExecutor", "CeleryKubernetesExecutor"
+  ## - allowed values: "CeleryExecutor", "KubernetesExecutor", "CeleryKubernetesExecutor", "DaskExecutor"
   ## - customize the "KubernetesExecutor" pod-template with `airflow.kubernetesPodTemplate.*`
+  ## - customize the "DaskExecutor" chart with component `dask.*`
   ##
   executor: CeleryExecutor
 
@@ -1022,6 +1023,14 @@ workers:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
   ##
   extraVolumes: []
+
+###################################
+## COMPONENT | Dask Executor
+###################################
+dask:
+  ## if the dask helm chart should be deployed
+  ## - [WARNING] if `airflow.executor` is `DaskExecutor` the dask helm chart will be deployed
+  enabled: false
 
 ###################################
 ## COMPONENT | Triggerer
@@ -2028,6 +2037,7 @@ externalDatabase:
   ##   properties: "?sslmode=require"
   ##
   properties: ""
+
 
 ###################################
 ## DATABASE | Embedded Redis
