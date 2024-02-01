@@ -457,6 +457,7 @@ Parameter | Description | Default
 `pgbouncer.poolSize` | sets pgbouncer config: `default_pool_size` | `20`
 `pgbouncer.logDisconnections` | sets pgbouncer config: `log_disconnections` | `0`
 `pgbouncer.logConnections` | sets pgbouncer config: `log_connections` | `0`
+`pgbouncer.statsUsers` | sets pgbouncer config: `stats_users` | null
 `pgbouncer.clientSSL.*` | ssl configs for: clients -> pgbouncer | `<see values.yaml>`
 `pgbouncer.serverSSL.*` | ssl configs for: pgbouncer -> postgres | `<see values.yaml>`
 
