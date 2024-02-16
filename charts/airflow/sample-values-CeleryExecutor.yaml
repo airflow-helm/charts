@@ -33,12 +33,12 @@ airflow:
   ## a list of users to create
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/security/airflow-users.md
   users:
-    - username: admin
-      password: admin
-      role: Admin
-      email: admin@example.com
-      firstName: admin
-      lastName: admin
+  - username: admin
+    password: admin
+    role: Admin
+    email: admin@example.com
+    firstName: admin
+    lastName: admin
 
   ## a list airflow connections to create
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/dags/airflow-connections.md
@@ -216,6 +216,10 @@ dags:
   ## configs for the git-sync sidecar
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/dags/load-dag-definitions.md
   gitSync:
+    enabled: false
+
+  ## configs for the s3-sync sidecar
+  s3Sync:
     enabled: false
 
 ###################################

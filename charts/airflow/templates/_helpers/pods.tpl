@@ -276,6 +276,65 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
     {{- end }}
 {{- end }}
 
+
+
+{{/*
+Define a container which regularly syncs a s3-repo
+EXAMPLE USAGE: {{ include "airflow.container.s3_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") }}
+*/}}
+{{- define "airflow.container.s3_sync" }}
+{{- if .sync_one_time }}
+- name: dags-s3-clone
+{{- else }}
+- name: dags-s3-sync
+{{- end }}
+  image: {{ .Values.dags.s3Sync.image.repository }}:{{ .Values.dags.s3Sync.image.tag }}
+  imagePullPolicy: {{ .Values.dags.s3Sync.image.pullPolicy }}
+  securityContext:
+    runAsUser: {{ .Values.dags.s3Sync.image.uid }}
+    runAsGroup: {{ .Values.dags.s3Sync.image.gid }}
+  resources:
+    {{- toYaml .Values.dags.s3Sync.resources | nindent 4 }}
+  envFrom:
+    {{- include "airflow.envFrom" . | indent 4 }}
+  env:
+    {{- if .sync_one_time }}
+    - name: S3_SYNC_ONE_TIME
+      value: "true"
+    {{- end }}
+    {{- if .Values.dags.s3Sync.profile }}
+    - name: AWS_ACCESS_KEY_ID
+      valueFrom:
+        secretKeyRef:
+          name: {{ .Values.dags.s3Sync.profile }}
+          key: {{ .Values.dags.s3Sync.idKey }}
+    - name: AWS_SECRET_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: {{ .Values.dags.s3Sync.profile }}
+          key: {{ .Values.dags.s3Sync.secretKey }}
+    {{- end }}
+    {{- /* this has user-defined variables, so must be included BELOW (so the ABOVE `env` take precedence) */ -}}
+    {{- include "airflow.env" . | indent 4 }}
+  volumeMounts:
+    - name: dags-data
+      mountPath: {{ .Values.dags.path }}
+  command:
+    - "/bin/sh"
+    - "-c"
+    {{- if $.sync_one_time }}
+    - |
+      aws s3 cp --recursive s3://{{ .Values.dags.s3Sync.bucket }}/{{ .Values.dags.s3Sync.s3Path }} {{ include "airflow.dags.path" . }}
+    {{- else }}
+    - |
+      while true; do
+          aws s3 sync --delete s3://{{ .Values.dags.s3Sync.bucket }}/{{ .Values.dags.s3Sync.s3Path }} {{ include "airflow.dags.path" . }}
+          sleep {{ $.Values.dags.s3Sync.syncWait }}
+      done
+    {{- end }}
+{{- end }}
+
+    
 {{/*
 Define a container which regularly deletes airflow logs older than a retention period.
 EXAMPLE USAGE: {{ include "airflow.container.log_cleanup" (dict "Release" .Release "Values" .Values "resources" $lc_resources "retention_min" $lc_retention_min "interval_sec" $lc_interval_sec) }}
@@ -363,6 +422,9 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Value
 {{- else if .Values.dags.gitSync.enabled }}
 - name: dags-data
   mountPath: {{ .Values.dags.path }}
+{{- else if .Values.dags.s3Sync.enabled }}
+- name: dags-data
+  mountPath: {{ .Values.dags.path }}
 {{- end }}
 
 {{- /* logs */ -}}
@@ -424,6 +486,9 @@ EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .V
     claimName: {{ printf "%s-dags" (include "airflow.fullname" . | trunc 58) }}
     {{- end }}
 {{- else if .Values.dags.gitSync.enabled }}
+- name: dags-data
+  emptyDir: {}
+{{- else if .Values.dags.s3Sync.enabled }}
 - name: dags-data
   emptyDir: {}
 {{- end }}
