@@ -23,7 +23,7 @@ Define the command/entrypoint configs for airflow containers
 
 {{/*
 Define the nodeSelector for airflow pods
-EXAMPLE USAGE: {{ include "airflow.nodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" $nodeSelector) }}
+EXAMPLE USAGE: {{ include "airflow.nodeSelector" (dict "Release" .Release "Chart" .Chart "Values" .Values "nodeSelector" $nodeSelector) }}
 */}}
 {{- define "airflow.podNodeSelector" }}
 {{- .nodeSelector | default .Values.airflow.defaultNodeSelector | toYaml }}
@@ -31,7 +31,7 @@ EXAMPLE USAGE: {{ include "airflow.nodeSelector" (dict "Release" .Release "Value
 
 {{/*
 Define the Affinity for airflow pods
-EXAMPLE USAGE: {{ include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" $affinity) }}
+EXAMPLE USAGE: {{ include "airflow.podAffinity" (dict "Release" .Release "Chart" .Chart "Values" .Values "affinity" $affinity) }}
 */}}
 {{- define "airflow.podAffinity" }}
 {{- .affinity | default .Values.airflow.defaultAffinity | toYaml }}
@@ -39,7 +39,7 @@ EXAMPLE USAGE: {{ include "airflow.podAffinity" (dict "Release" .Release "Values
 
 {{/*
 Define the Tolerations for airflow pods
-EXAMPLE USAGE: {{ include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" $tolerations) }}
+EXAMPLE USAGE: {{ include "airflow.podTolerations" (dict "Release" .Release "Chart" .Chart "Values" .Values "tolerations" $tolerations) }}
 */}}
 {{- define "airflow.podTolerations" }}
 {{- .tolerations | default .Values.airflow.defaultTolerations | toYaml }}
@@ -47,7 +47,7 @@ EXAMPLE USAGE: {{ include "airflow.podTolerations" (dict "Release" .Release "Val
 
 {{/*
 Define the PodSecurityContext for airflow pods
-EXAMPLE USAGE: {{ include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" $securityContext) }}
+EXAMPLE USAGE: {{ include "airflow.podSecurityContext" (dict "Release" .Release "Chart" .Chart "Values" .Values "securityContext" $securityContext) }}
 */}}
 {{- define "airflow.podSecurityContext" }}
 {{- .securityContext | default .Values.airflow.defaultSecurityContext | toYaml }}
@@ -55,7 +55,7 @@ EXAMPLE USAGE: {{ include "airflow.podSecurityContext" (dict "Release" .Release 
 
 {{/*
 Define an init-container which checks the DB status
-EXAMPLE USAGE: {{ include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) }}
+EXAMPLE USAGE: {{ include "airflow.init_container.check_db" (dict "Release" .Release "Chart" .Chart "Values" .Values "volumeMounts" $volumeMounts) }}
 */}}
 {{- define "airflow.init_container.check_db" }}
 - name: check-db
@@ -82,7 +82,7 @@ EXAMPLE USAGE: {{ include "airflow.init_container.check_db" (dict "Release" .Rel
 
 {{/*
 Define an init-container which waits for DB migrations
-EXAMPLE USAGE: {{ include "airflow.init_container.wait_for_db_migrations" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) }}
+EXAMPLE USAGE: {{ include "airflow.init_container.wait_for_db_migrations" (dict "Release" .Release "Chart" .Chart "Values" .Values "volumeMounts" $volumeMounts) }}
 */}}
 {{- define "airflow.init_container.wait_for_db_migrations" }}
 - name: wait-for-db-migrations
@@ -159,7 +159,7 @@ EXAMPLE USAGE: {{ include "airflow.init_container.wait_for_db_migrations" (dict 
 
 {{/*
 Define an init-container which installs a list of pip packages
-EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) }}
+EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Chart" .Chart "Values" .Values "extraPipPackages" $extraPipPackages) }}
 */}}
 {{- define "airflow.init_container.install_pip_packages" }}
 - name: install-pip-packages
@@ -186,7 +186,7 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "R
 
 {{/*
 Define a container which regularly syncs a git-repo
-EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") }}
+EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release "Chart" .Chart "Values" .Values "sync_one_time" "true") }}
 */}}
 {{- define "airflow.container.git_sync" }}
 {{- if .sync_one_time }}
@@ -278,7 +278,7 @@ EXAMPLE USAGE: {{ include "airflow.container.git_sync" (dict "Release" .Release 
 
 {{/*
 Define a container which regularly deletes airflow logs older than a retention period.
-EXAMPLE USAGE: {{ include "airflow.container.log_cleanup" (dict "Release" .Release "Values" .Values "resources" $lc_resources "retention_min" $lc_retention_min "interval_sec" $lc_interval_sec) }}
+EXAMPLE USAGE: {{ include "airflow.container.log_cleanup" (dict "Release" .Release "Chart" .Chart "Values" .Values "resources" $lc_resources "retention_min" $lc_retention_min "interval_sec" $lc_interval_sec) }}
 */}}
 {{- define "airflow.container.log_cleanup" }}
 - name: log-cleanup
@@ -341,7 +341,7 @@ EXAMPLE USAGE: {{ include "airflow.container.log_cleanup" (dict "Release" .Relea
 
 {{/*
 The list of `volumeMounts` for web/scheduler/worker/flower container
-EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Chart" .Chart "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
 */}}
 {{- define "airflow.volumeMounts" }}
 {{- /* airflow_local_settings.py */ -}}
@@ -399,7 +399,7 @@ EXAMPLE USAGE: {{ include "airflow.volumeMounts" (dict "Release" .Release "Value
 
 {{/*
 The list of `volumes` for web/scheduler/worker/flower Pods
-EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes "extraVolumeMounts" $extraVolumeMounts) }}
+EXAMPLE USAGE: {{ include "airflow.volumes" (dict "Release" .Release "Chart" .Chart "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes "extraVolumeMounts" $extraVolumeMounts) }}
 */}}
 {{- define "airflow.volumes" }}
 {{- /* airflow_local_settings.py */ -}}
@@ -489,7 +489,7 @@ The list of `envFrom` for web/scheduler/worker/flower Pods
 
 {{/*
 The list of `env` for web/scheduler/worker/flower Pods
-EXAMPLE USAGE: {{ include "airflow.env" (dict "Release" .Release "Values" .Values "CONNECTION_CHECK_MAX_COUNT" "0") }}
+EXAMPLE USAGE: {{ include "airflow.env" (dict "Release" .Release "Chart" .Chart "Values" .Values "CONNECTION_CHECK_MAX_COUNT" "0") }}
 */}}
 {{- define "airflow.env" }}
 {{- /* set DATABASE_USER */ -}}
