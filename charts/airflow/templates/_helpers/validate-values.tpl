@@ -132,6 +132,16 @@
   {{- end }}
 {{- end }}
 
+{{/* Checks for `dags.s3Sync` */}}
+{{- if .Values.dags.s3Sync.enabled }}
+  {{- if .Values.dags.persistence.enabled }}
+  {{ required "If `dags.s3Sync.enabled=true`, then `persistence.enabled` must be disabled!" nil }}
+  {{- end }}
+  {{- if not .Values.dags.s3Sync.bucket }}
+  {{ required "If `dags.s3Sync.enabled=true`, then `dags.s3Sync.bucket` must be non-empty!" nil }}
+  {{- end }}
+{{- end }}
+
 {{/* Checks for `ingress` */}}
 {{- if .Values.ingress.enabled }}
   {{/* Checks for `ingress.apiVersion` */}}
