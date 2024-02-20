@@ -307,7 +307,7 @@ EXAMPLE USAGE: {{ include "airflow.container.s3_sync" (dict "Release" .Release "
       valueFrom:
         secretKeyRef:
           name: {{ .Values.dags.s3Sync.profile }}
-          key: {{ .Values.dags.s3Sync.idKey }}
+          key: {{ .Values.dags.s3Sync.accessKey }}
     - name: AWS_SECRET_ACCESS_KEY
       valueFrom:
         secretKeyRef:
