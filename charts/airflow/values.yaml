@@ -795,6 +795,11 @@ web:
     nodePort:
       http: ""
 
+  ## configs to determine if this runs on an ipv6 native cluster
+  ##
+  ipv6:
+    enabled: false
+
   ## configs for the web Pods' readiness probe
   ##
   readinessProbe:
