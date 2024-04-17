@@ -111,7 +111,11 @@ spec:
           args:
             - "bash"
             - "-c"
+            {{- if .Values.web.ipv6.enabled }}
+            - "exec airflow webserver --hostname [::]"
+            {{- else }}
             - "exec airflow webserver"
+            {{- end }}
           {{- if .Values.web.livenessProbe.enabled }}
           livenessProbe:
             initialDelaySeconds: {{ .Values.web.livenessProbe.initialDelaySeconds }}
