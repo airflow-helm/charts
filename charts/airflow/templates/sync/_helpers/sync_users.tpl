@@ -27,15 +27,19 @@ flask_appbuilder = flask_app.appbuilder
 
 # airflow moves the User and Role models around in different versions
 try:
-  # since 2.7.0
-  from airflow.auth.managers.fab.models import User, Role
+  # since 2.9.0
+  from airflow.providers.fab.auth_manager.models import User, Role
 except ModuleNotFoundError:
   try:
-    # from 2.3.0 to 2.6.3
-    from airflow.www.fab_security.sqla.models import User, Role
+    # from 2.7.0 to 2.8.4
+    from airflow.auth.managers.fab.models import User, Role
   except ModuleNotFoundError:
-    # before 2.3.0
-    from flask_appbuilder.security.sqla.models import User, Role
+    try:
+      # from 2.3.0 to 2.6.3
+      from airflow.www.fab_security.sqla.models import User, Role
+    except ModuleNotFoundError:
+      # before 2.3.0
+      from flask_appbuilder.security.sqla.models import User, Role
 
 
 #############
