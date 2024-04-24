@@ -116,19 +116,33 @@
   {{- end }}
 {{- end }}
 
-{{/* Checks for `dags.gitSync` */}}
-{{- if .Values.dags.gitSync.enabled }}
+{{/* Checks for `dags.sync` */}}
+{{- if .Values.dags.sync.enabled }}
+  {{- if not (has .Values.dags.sync.type (list "git" "s3")) }}
+  {{ required "The `dags.sync.type` must be one of: [git, s3]!" nil }}
+  {{- end }}
   {{- if .Values.dags.persistence.enabled }}
-  {{ required "If `dags.gitSync.enabled=true`, then `persistence.enabled` must be disabled!" nil }}
+  {{ required "If `dags.sync.enabled=true` and `dags.sync.type='git'`, then `persistence.enabled` must be disabled!" nil }}
   {{- end }}
-  {{- if not .Values.dags.gitSync.repo }}
-  {{ required "If `dags.gitSync.enabled=true`, then `dags.gitSync.repo` must be non-empty!" nil }}
+  {{- if eq .Values.dags.sync.type "git" }}
+  {{- with .Values.dags.sync.git }}
+    {{- if not .repo }}
+    {{ required "If `dags.sync.enabled=true` and `dags.sync.type='git'`, then `dags.sync.git.repo` must be non-empty!" nil }}
+    {{- end }}
+    {{- if and (.sshSecret) (.httpSecret) }}
+    {{ required "At most, one of `dags.sync.git.sshSecret` and `dags.sync.git.httpSecret` can be defined!" nil }}
+    {{- end }}
+    {{- if and (.repo | lower | hasPrefix "git@github.com") (not .sshSecret) }}
+    {{ required "You must define `dags.sync.git.sshSecret` when using GitHub with SSH for `dags.sync.git.repo`!" nil }}
+    {{- end }}
   {{- end }}
-  {{- if and (.Values.dags.gitSync.sshSecret) (.Values.dags.gitSync.httpSecret) }}
-  {{ required "At most, one of `dags.gitSync.sshSecret` and `dags.gitSync.httpSecret` can be defined!" nil }}
   {{- end }}
-  {{- if and (.Values.dags.gitSync.repo | lower | hasPrefix "git@github.com") (not .Values.dags.gitSync.sshSecret) }}
-  {{ required "You must define `dags.gitSync.sshSecret` when using GitHub with SSH for `dags.gitSync.repo`!" nil }}
+  {{- if eq .Values.dags.sync.type "s3" }}
+  {{- with .Values.dags.sync.s3 }}
+    {{- if not .s3Path }}
+    {{ required "If `dags.sync.enabled=true` and `dags.sync.type='s3'`, then `dags.sync.s3.bucket` must be non-empty!" nil }}
+    {{- end }}
+  {{- end }}
   {{- end }}
 {{- end }}
 
