@@ -23,3 +23,4 @@ The Apache Airflow helm chart under [charts/airflow](https://github.com/airflow-
        - `cd images/postgresql-bitnami/11/alpine`
        - `docker buildx create --name multiarch --driver docker-container --use || docker buildx use multiarch`
        - `docker buildx build --cache-to=type=registry,ref=ghcr.io/airflow-helm/ci/images/postgresql-bitnami/11/alpine,mode=max .`
+       - `docker buildx stop multiarch`
