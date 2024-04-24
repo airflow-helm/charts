@@ -12,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout `main` Branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Copy `README.md` to Runner
         run: |
           cp -f README.md ${{ runner.temp }}/README.md
 
       - name: Checkout `gh-pages` Branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: gh-pages
 
