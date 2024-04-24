@@ -1,13 +1,13 @@
 # ================================================================
 # REFERENCES:
-# - https://github.com/bitnami/bitnami-docker-postgresql/blob/967cb8448edd4e5571a36cc65e45d96f630d6968/11/debian-11/Dockerfile
-# - https://github.com/docker-library/postgres/blob/ba4abaac0739e6393a0ff3ecec2fa7b5ecb001a0/11/alpine/Dockerfile
+# - https://github.com/bitnami/containers/blob/1f4ef91cd6844750850be5f9c90102bf2211835a/bitnami/postgresql/11/debian-11/Dockerfile
+# - https://github.com/docker-library/postgres/blob/ef9747fb7fc9fbd703b9136b897ffa61314ca51f/11/alpine3.19/Dockerfile
 # ================================================================
 
 # ================================
 # build `nss_wrapper` from source
 # ================================
-FROM alpine:3.16 as nss-wrapper-builder
+FROM alpine:3.19 as nss-wrapper-builder
 
 # args -- software versions
 ARG NSS_WRAPPER_VERSION=1.1.11
@@ -43,10 +43,10 @@ RUN curl -sSL "https://ftp.samba.org/pub/cwrap/nss_wrapper-${NSS_WRAPPER_VERSION
 # ================================
 # build `postgresql` from source
 # ================================
-FROM alpine:3.16 as postgres-builder
+FROM alpine:3.19 as postgres-builder
 
 # args -- software versions
-ARG PG_VERSION=11.16
+ARG PG_VERSION=11.22
 # pgaudit versions 1.3.X are for postgres 11 (https://github.com/pgaudit/pgaudit#postgresql-version-compatibility)
 ARG PGAUDIT_VERSION=1.3.4
 
@@ -56,12 +56,12 @@ ENV LANG=en_US.UTF-8
 
 # install -- postgres build dependanices
 RUN apk --no-cache add \
-    bash \
     bison \
-    clang \
+    clang15 \
     coreutils \
     curl \
-    dpkg-dev dpkg \
+    dpkg \
+    dpkg-dev \
     flex \
     g++ \
     gcc \
@@ -73,7 +73,7 @@ RUN apk --no-cache add \
     libxml2-dev \
     libxslt-dev \
     linux-headers \
-    llvm-dev \
+    llvm15-dev \
     make \
     musl-libintl \
     openldap-dev \
@@ -97,6 +97,10 @@ RUN curl -sSL "https://ftp.postgresql.org/pub/source/v${PG_VERSION}/postgresql-$
  && cd /tmp/postgresql \
  # alpine seems to require all unix sockets be under `/var/run`, we set `DEFAULT_PGSOCKET_DIR` to work around this
  && sed -i -e 's|DEFAULT_PGSOCKET_DIR  "/tmp"|DEFAULT_PGSOCKET_DIR  "/var/run/postgresql"|g' src/include/pg_config_manual.h \
+ # https://git.alpinelinux.org/aports/tree/community/postgresql12/APKBUILD?h=3.18-stable&id=a470294e6d6ca7059e41c54769b7c3c26ec901d4#n158
+ && export LLVM_CONFIG="/usr/lib/llvm15/bin/llvm-config" \
+ # https://git.alpinelinux.org/aports/tree/community/postgresql12/APKBUILD?h=3.18-stable&id=a470294e6d6ca7059e41c54769b7c3c26ec901d4#n163
+ && export CLANG="clang-15" \
  && ./configure \
     --prefix=/opt/bitnami/postgresql \
     --enable-nls \
@@ -134,7 +138,7 @@ RUN curl -sSL "https://github.com/pgaudit/pgaudit/archive/refs/tags/${PGAUDIT_VE
 # ================================
 # a bitnami-like postgres image
 # ================================
-FROM alpine:3.16
+FROM alpine:3.19
 
 # args -- uid/gid
 ARG POSTGRES_USER=postgres
@@ -180,7 +184,7 @@ RUN runtime_deps="$( \
  # alias `su-exec` as `gosu` because they are fully compatible
  && ln -s /sbin/su-exec /sbin/gosu \
  # this file sets `LANG` and `LC_COLLATE`, but we want our ENV instruction to set the postgres locale
- && rm /etc/profile.d/locale.sh \
+ && rm /etc/profile.d/20locale.sh \
  # we use `/var/run/postgresql` for postgres unix sockets (set by `DEFAULT_PGSOCKET_DIR` in build)
  && mkdir -p /var/run/postgresql \
  && chown -R ${POSTGRES_UID}:${POSTGRES_GID} /var/run/postgresql
