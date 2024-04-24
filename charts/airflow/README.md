@@ -46,18 +46,6 @@ Originally created in 2017, it has since helped thousands of companies create pr
 
 <br>
 
-## History
-
-The `User-Community Airflow Helm Chart` chart has a long history of being the standard way to deploy Apache Airflow on Kubernetes.
-
-Here is a brief overview of the chart's development from 2017 until today:
-
-- From October 2017 until December 2018, the chart was called `kube-airflow` and was developed in [`gsemet/kube-airflow`](https://github.com/gsemet/kube-airflow)
-- From December 2018 until November 2020, the chart was called `stable/airflow` and was developed in [`helm/charts`](https://github.com/helm/charts/tree/master/stable/airflow)
-- Since November 2020, the chart has been called `Airflow Helm Chart (User Community)` and is developed in `airflow-helm/charts`
-
-Please note, this chart is __independent__ from the official chart in the `apache/airflow` repo, which was forked from Astronomer's proprietary chart in May 2021.
-
 ## Project Goals
 
 1. Ease of Use
@@ -68,7 +56,7 @@ Please note, this chart is __independent__ from the official chart in the `apach
 ## Key Features
 
 - __Support for Airflow Versions:__ 
-   - [`1.10` | `2.0` | `2.1` | `2.2` | `2.3` | `2.4` | `2.5` | `2.6` | `2.7`](#airflow-version-support)
+   - [`1.10` | `2.0` | `2.1` | `2.2` | `2.3` | `2.4` | `2.5` | `2.6` | `2.7` | `2.8` | `2.9`](#airflow-version-support)
 - __Support for Airflow Executors:__ 
    - [`CeleryExecutor` | `KubernetesExecutor` | `CeleryKubernetesExecutor`](#airflow-executor-support)
 - __Easily Connect with your Database:__
@@ -94,6 +82,18 @@ Please note, this chart is __independent__ from the official chart in the `apach
 - __Automatically Restart Unhealthy Airflow Schedulers:__
    - [`Heartbeat Check`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-heartbeat-check) |
      [`Task Creation Check`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/monitoring/scheduler-liveness-probe.md#scheduler-task-creation-check)
+
+## History
+
+The `User-Community Airflow Helm Chart` chart has a long history of being the standard way to deploy Apache Airflow on Kubernetes.
+
+Here is a brief overview of the chart's development from 2017 until today:
+
+- From October 2017 until December 2018, the chart was called `kube-airflow` and was developed in [`gsemet/kube-airflow`](https://github.com/gsemet/kube-airflow)
+- From December 2018 until November 2020, the chart was called `stable/airflow` and was developed in [`helm/charts`](https://github.com/helm/charts/tree/master/stable/airflow)
+- Since November 2020, the chart has been called `Airflow Helm Chart (User Community)` and is developed in `airflow-helm/charts`
+
+> Please note, this chart is __independent__ from the official chart in the `apache/airflow` repo, which was forked from Astronomer's proprietary chart in May 2021.
 
 <br>
 
@@ -158,17 +158,19 @@ Please note, this chart is __independent__ from the official chart in the `apach
 
 The following table lists the __airflow versions__ supported by this chart (set the version with [`airflow.image.tag`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/configuration/airflow-version.md) value).
 
-Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.5.3` | `8.6.0` | `8.6.1 - 8.7.0` | `8.7.1` | `8.8.0+`
---- | --- | --- | --- | --- | --- | ---
-`1.10.X` | ✔️ | ✔️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub>
-`2.0.X` | ❌ | ✔️ | ✔️ | ✔️ | ✔️️ | ✔️️
-`2.1.X` | ❌ | ✔️ | ✔️ | ✔️ | ✔️️ | ✔️️
-`2.2.X` | ❌ | ⚠️ <sub>[2]</sub> | ✔️️ | ✔️ | ✔️️ | ✔️️
-`2.3.X` | ❌ | ❌ | ❌ | ✔️️ | ✔️️ | ✔️️
-`2.4.X` | ❌ | ❌ | ❌ | ✔️️ | ✔️️ | ✔️️
-`2.5.X` | ❌ | ❌ | ❌ | ✔️️ | ✔️️ | ✔️️
-`2.6.X` | ❌ | ❌ | ❌ | ❌ | ✔️️ | ✔️️
-`2.7.X` | ❌ | ❌ | ❌ | ❌ | ❌ | ✔️️
+Chart Version → <br> Airflow Version ↓  | `7.0.0` - `7.16.0` | `8.0.0` - `8.5.3` | `8.6.0` | `8.6.1` - `8.7.0` | `8.7.1` | `8.8.0` | `8.9.0+`
+--- | --- | --- | --- | --- | --- | --- | ---
+`1.10.X` | ✔️ | ✔️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub> | ✔️️ <sub>[1]</sub>
+`2.0.X` | ❌ | ✔️ | ✔️ | ✔️ | ✔️️ | ✔️️ | ✔️️
+`2.1.X` | ❌ | ✔️ | ✔️ | ✔️ | ✔️️ | ✔️️ | ✔️️
+`2.2.X` | ❌ | ⚠️ <sub>[2]</sub> | ✔️️ | ✔️ | ✔️️ | ✔️️ | ✔️️
+`2.3.X` | ❌ | ❌ | ❌ | ✔️️ | ✔️️ | ✔️️ | ✔️️
+`2.4.X` | ❌ | ❌ | ❌ | ✔️️ | ✔️️ | ✔️️ | ✔️️
+`2.5.X` | ❌ | ❌ | ❌ | ✔️️ | ✔️️ | ✔️️ | ✔️️
+`2.6.X` | ❌ | ❌ | ❌ | ❌ | ✔️️ | ✔️️ | ✔️️
+`2.7.X` | ❌ | ❌ | ❌ | ❌ | ❌ | ✔️️ | ✔️️
+`2.8.X` | ❌ | ❌ | ❌ | ❌ | ❌ | ✔️️ | ✔️️
+`2.9.X` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌️ | ✔️️
 
 <sub>[1] you must set `airflow.legacyCommands = true` when using airflow version `1.10.X`</sub><br>
 <sub>[2] the [Deferrable Operators & Triggers](https://airflow.apache.org/docs/apache-airflow/stable/concepts/deferring.html) feature won't work, as there is no `airflow triggerer` Deployment</sub>
