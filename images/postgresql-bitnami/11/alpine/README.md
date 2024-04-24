@@ -21,4 +21,6 @@ The Apache Airflow helm chart under [charts/airflow](https://github.com/airflow-
    3. [authorize `docker` with a GitHub Token for writing to `ghcr.io`](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry)
    4. build the Dockerfile, and cache all layers to our [`ci/images/postgresql-bitnami/11/alpine`](https://ghcr.io/airflow-helm/ci/images/postgresql-bitnami/11/alpine) package:
        - `cd images/postgresql-bitnami/11/alpine`
+       - `docker buildx create --name multiarch --driver docker-container --use || docker buildx use multiarch`
        - `docker buildx build --cache-to=type=registry,ref=ghcr.io/airflow-helm/ci/images/postgresql-bitnami/11/alpine,mode=max .`
+       - `docker buildx stop multiarch`
