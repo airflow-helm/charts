@@ -134,19 +134,12 @@ spec:
                   from airflow.utils.db import create_session
                   from airflow.utils.net import get_hostname
 
-                  # heartbeat check imports
-                  try:
-                      from airflow.jobs.triggerer_job_runner import TriggererJobRunner
-                  except ImportError:
-                      # `TriggererJob` is wrapped by `TriggererJobRunner` since airflow 2.6.0
-                      from airflow.jobs.triggerer_job import TriggererJob as TriggererJobRunner
-
                   with create_session() as session:
                       # ensure the TriggererJob with most recent heartbeat for this `hostname` is alive
                       hostname = get_hostname()
                       triggerer_job = session \
                           .query(Job) \
-                          .filter_by(job_type=TriggererJobRunner.job_type) \
+                          .filter_by(job_type="TriggererJob") \
                           .filter_by(hostname=hostname) \
                           .order_by(Job.latest_heartbeat.desc()) \
                           .limit(1) \
