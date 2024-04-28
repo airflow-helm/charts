@@ -21,6 +21,8 @@ spec:
     release: {{ .Release.Name }}
   ports:
     - name: flower
+      ## NOTE: flower always uses http (only important for Istio users)
+      appProtocol: http
       protocol: TCP
       port: {{ .Values.flower.service.externalPort }}
       {{- if and (eq .Values.flower.service.type "NodePort") (.Values.flower.service.nodePort.http) }}

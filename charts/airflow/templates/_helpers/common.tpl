@@ -62,13 +62,26 @@ true
 {{- end -}}
 
 {{/*
-The scheme (HTTP, HTTPS) used by the webserver
+The scheme (HTTP, HTTPS) used by the webserver.
+NOTE: this is used in the liveness/readiness probes of the webserver
 */}}
 {{- define "airflow.web.scheme" -}}
 {{- if and (.Values.airflow.config.AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT) (.Values.airflow.config.AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY) -}}
 HTTPS
 {{- else -}}
 HTTP
+{{- end -}}
+{{- end -}}
+
+{{/*
+The app protocol used by the webserver.
+NOTE: this sets the `appProtocol` of the Service port (only important for Istio users)
+*/}}
+{{- define "airflow.web.appProtocol" -}}
+{{- if and (.Values.airflow.config.AIRFLOW__WEBSERVER__WEB_SERVER_SSL_CERT) (.Values.airflow.config.AIRFLOW__WEBSERVER__WEB_SERVER_SSL_KEY) -}}
+https
+{{- else -}}
+http
 {{- end -}}
 {{- end -}}
 

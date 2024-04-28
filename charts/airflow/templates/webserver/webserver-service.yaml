@@ -25,6 +25,7 @@ spec:
   {{- end }}
   ports:
     - name: web
+      appProtocol: {{ include "airflow.web.appProtocol" . | quote }}
       protocol: TCP
       port: {{ .Values.web.service.externalPort | default 8080 }}
       {{- if and (eq .Values.web.service.type "NodePort") (.Values.web.service.nodePort.http) }}

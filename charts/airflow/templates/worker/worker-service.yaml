@@ -13,6 +13,9 @@ metadata:
 spec:
   ports:
     - name: worker
+      ## NOTE: the worker logs port is always http (only important for Istio users)
+      ##       https://github.com/apache/airflow/blob/2.9.0/airflow/utils/log/file_task_handler.py#L415
+      appProtocol: http
       protocol: TCP
       port: 8793
   clusterIP: None
