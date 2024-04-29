@@ -25,6 +25,7 @@ log_disconnections = {{ .Values.pgbouncer.logDisconnections }}
 log_connections = {{ .Values.pgbouncer.logConnections }}
 
 {{- if .Values.pgbouncer.statsUsers }}
+{{ "" }}
 stats_users = {{ .Values.pgbouncer.statsUsers }}
 {{- end }}
 

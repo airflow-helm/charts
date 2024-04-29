@@ -1828,7 +1828,7 @@ pgbouncer:
 
   ## sets pgbouncer config: `stats_users`
   ##
-  statsUsers:
+  statsUsers: ""
 
   ## ssl configs for: clients -> pgbouncer
   ##
