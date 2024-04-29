@@ -60,6 +60,8 @@ EXAMPLE USAGE: {{ include "airflow.init_container.check_db" (dict "Release" .Rel
 {{- define "airflow.init_container.check_db" }}
 - name: check-db
   {{- include "airflow.image" . | indent 2 }}
+  resources:
+    {{- toYaml .Values.airflow.initContainers.checkDb.resources | nindent 4 }}
   envFrom:
     {{- include "airflow.envFrom" . | indent 4 }}
   env:
@@ -87,6 +89,8 @@ EXAMPLE USAGE: {{ include "airflow.init_container.wait_for_db_migrations" (dict 
 {{- define "airflow.init_container.wait_for_db_migrations" }}
 - name: wait-for-db-migrations
   {{- include "airflow.image" . | indent 2 }}
+  resources:
+    {{- toYaml .Values.airflow.initContainers.waitForDbMigrations.resources | nindent 4 }}
   envFrom:
     {{- include "airflow.envFrom" . | indent 4 }}
   env:
@@ -164,6 +168,8 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "R
 {{- define "airflow.init_container.install_pip_packages" }}
 - name: install-pip-packages
   {{- include "airflow.image" . | indent 2 }}
+  resources:
+    {{- toYaml .Values.airflow.initContainers.installPipPackages.resources | nindent 4 }}
   envFrom:
     {{- include "airflow.envFrom" . | indent 4 }}
   env:
