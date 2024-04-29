@@ -315,6 +315,8 @@ Parameter | Description | Default
 `workers.logCleanup.*` | configs for the log-cleanup sidecar of the worker Pods | `<see values.yaml>`
 `workers.livenessProbe.*` | configs for the worker Pods' liveness probe | `<see values.yaml>`
 `workers.extraPipPackages` | extra pip packages to install in the worker Pods | `[]`
+`workers.extraContainers` | extra containers for the worker Pods | `[]`
+`workers.extraInitContainers` | extra init-containers for the worker Pods | `[]`
 `workers.extraVolumeMounts` | extra VolumeMounts for the worker Pods | `[]`
 `workers.extraVolumes` | extra Volumes for the worker Pods | `[]`
 
