@@ -653,6 +653,18 @@ scheduler:
   ##
   extraPipPackages: []
 
+  ## extra containers for the scheduler Pods
+  ## - spec for Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraContainers: []
+
+  ## extra init-containers for the scheduler Pods
+  ## - spec of Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraInitContainers: []
+
   ## extra VolumeMounts for the scheduler Pods
   ## - spec of VolumeMount:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
@@ -664,12 +676,6 @@ scheduler:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
   ##
   extraVolumes: []
-
-  ## extra init containers to run in the scheduler Pods
-  ## - spec of Container:
-  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
-  ##
-  extraInitContainers: []
 
 ###################################
 ## COMPONENT | Airflow Webserver

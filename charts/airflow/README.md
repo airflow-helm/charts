@@ -252,11 +252,12 @@ Parameter | Description | Default
 `scheduler.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the scheduler | `<see values.yaml>`
 `scheduler.logCleanup.*` | configs for the log-cleanup sidecar of the scheduler | `<see values.yaml>`
 `scheduler.numRuns` | the value of the `airflow --num_runs` parameter used to run the airflow scheduler | `-1`
+`scheduler.livenessProbe.*` | configs for the scheduler Pods' liveness probe | `<see values.yaml>`
 `scheduler.extraPipPackages` | extra pip packages to install in the scheduler Pods | `[]`
+`scheduler.extraContainers` | extra containers for the scheduler Pods | `[]`
+`scheduler.extraInitContainers` | extra init-containers for the scheduler Pods | `[]`
 `scheduler.extraVolumeMounts` | extra VolumeMounts for the scheduler Pods | `[]`
 `scheduler.extraVolumes` | extra Volumes for the scheduler Pods | `[]`
-`scheduler.livenessProbe.*` | configs for the scheduler Pods' liveness probe | `<see values.yaml>`
-`scheduler.extraInitContainers` | extra init containers to run in the scheduler Pods | `[]`
 
 </details>
 
