@@ -198,10 +198,10 @@ airflow:
     fsGroup: 0
 
   ## default securityContext for Containers in airflow Pods
-  ## - `runAsUser` is ignored, please set with per-image `*.image.uid`
-  ## - `runAsGroup` is ignored, please set with per-image `*.image.gid`
   ## - spec for SecurityContext:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#securitycontext-v1-core
+  ## - `runAsUser` is ignored, please set with per-image `*.image.uid`
+  ## - `runAsGroup` is ignored, please set with per-image `*.image.gid`
   ##
   defaultContainerSecurityContext: {}
 
