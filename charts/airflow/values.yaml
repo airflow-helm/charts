@@ -237,6 +237,12 @@ airflow:
   ##
   extraContainers: []
 
+  ## extra init-containers for the airflow Pods
+  ## - spec for Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraInitContainers: []
+
   ## extra VolumeMounts for the airflow Pods
   ## - spec for VolumeMount:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core

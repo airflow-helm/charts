@@ -91,6 +91,9 @@ spec:
         {{- end }}
         {{- include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
         {{- include "airflow.init_container.wait_for_db_migrations" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
+        {{- if .Values.airflow.extraInitContainers }}
+        {{- toYaml .Values.airflow.extraInitContainers | nindent 8 }}
+        {{- end }}
       containers:
         - name: airflow-triggerer
           {{- include "airflow.image" . | indent 10 }}

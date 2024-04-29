@@ -222,6 +222,7 @@ Parameter | Description | Default
 `airflow.protectedPipPackages` | pip packages that are protected from upgrade/downgrade by `extraPipPackages` | `["apache-airflow"]`
 `airflow.extraEnv` | extra environment variables for the airflow Pods | `[]`
 `airflow.extraContainers` | extra containers for the airflow Pods | `[]`
+`airflow.extraInitContainers` | extra init-containers for the airflow Pods | `[]`
 `airflow.extraVolumeMounts` | extra VolumeMounts for the airflow Pods | `[]`
 `airflow.extraVolumes` | extra Volumes for the airflow Pods | `[]`
 `airflow.clusterDomain` | kubernetes cluster domain name | `cluster.local`
