@@ -370,7 +370,9 @@ Parameter | Description | Default
 `flower.basicAuthSecret` | the name of a pre-created secret containing the basic authentication value for flower | `""`
 `flower.basicAuthSecretKey` | the key within `flower.basicAuthSecret` containing the basic authentication string | `""`
 `flower.service.*` | configs for the Service of the flower Pods | `<see values.yaml>`
-`flower.extraPipPackages` | extra pip packages to install in the flower Pod | `[]`
+`flower.extraPipPackages` | extra pip packages to install in the flower Pods | `[]`
+`flower.extraContainers` | extra containers for the flower Pods | `[]`
+`flower.extraInitContainers` | extra init-containers for the flower Pods | `[]`
 `flower.extraVolumeMounts` | extra VolumeMounts for the flower Pods | `[]`
 `flower.extraVolumes` | extra Volumes for the flower Pods | `[]`
 

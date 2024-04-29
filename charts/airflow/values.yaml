@@ -1312,13 +1312,25 @@ flower:
     timeoutSeconds: 5
     failureThreshold: 6
 
-  ## extra pip packages to install in the flower Pod
+  ## extra pip packages to install in the flower Pods
   ##
   ## ____ EXAMPLE _______________
   ##   extraPipPackages:
   ##     - "SomeProject==1.0.0"
   ##
   extraPipPackages: []
+
+  ## extra containers for the flower Pods
+  ## - spec for Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraContainers: []
+
+  ## extra init-containers for the flower Pods
+  ## - spec of Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraInitContainers: []
 
   ## extra VolumeMounts for the flower Pods
   ## - spec for VolumeMount:
