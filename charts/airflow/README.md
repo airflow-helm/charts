@@ -284,6 +284,8 @@ Parameter | Description | Default
 `web.readinessProbe.*` | configs for the web Pods' readiness probe | `<see values.yaml>`
 `web.livenessProbe.*` | configs for the web Pods' liveness probe | `<see values.yaml>`
 `web.extraPipPackages` | extra pip packages to install in the web Pods | `[]`
+`web.extraContainers` | extra containers for the web Pods | `[]`
+`web.extraInitContainers` | extra init-containers for the web Pods | `[]`
 `web.extraVolumeMounts` | extra VolumeMounts for the web Pods | `[]`
 `web.extraVolumes` | extra Volumes for the web Pods | `[]`
 
