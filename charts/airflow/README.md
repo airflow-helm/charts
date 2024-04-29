@@ -343,6 +343,8 @@ Parameter | Description | Default
 `triggerer.capacity` | maximum number of triggers each triggerer will run at once (sets `AIRFLOW__TRIGGERER__DEFAULT_CAPACITY`) | `1000`
 `triggerer.livenessProbe.*` | configs for the triggerer Pods' liveness probe | `<see values.yaml>`
 `triggerer.extraPipPackages` | extra pip packages to install in the triggerer Pods | `[]`
+`triggerer.extraContainers` | extra containers for the triggerer Pods | `[]`
+`triggerer.extraInitContainers` | extra init-containers for the triggerer Pods | `[]`
 `triggerer.extraVolumeMounts` | extra VolumeMounts for the triggerer Pods | `[]`
 `triggerer.extraVolumes` | extra Volumes for the triggerer Pods | `[]`
 
