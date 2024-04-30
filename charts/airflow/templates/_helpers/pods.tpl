@@ -174,10 +174,31 @@ EXAMPLE USAGE: {{ include "airflow.init_container.install_pip_packages" (dict "R
     - "bash"
     - "-c"
     - |
-      unset PYTHONUSERBASE && \
-      pip freeze | grep -i {{ range .Values.airflow.protectedPipPackages }}-e {{ printf "%s==" . | quote }} {{ end }} > protected-packages.txt && \
-      pip install --constraint ./protected-packages.txt --user {{ range .extraPipPackages }}{{ . | quote }} {{ end }} && \
-      echo "copying '/home/airflow/.local/' to '/opt/home-airflow-local/.local/'..." && \
+      set -euo pipefail
+
+      echo "DANGER: the 'extraPipPackages' feature may cause unexpected runtime errors!"
+      echo "DANGER: consider building a custom image with the required packages!"
+      echo ""
+
+      pip freeze | grep -i {{ range .Values.airflow.protectedPipPackages }}-e {{ printf "%s==" . | squote }} {{ end }} > protected-packages.txt
+      {{- range .extraPipPackages }}
+      echo {{ . | squote }} >> requested-packages.txt
+      {{- end }}
+      echo "INFO: ==== PROTECTED PACKAGES ====" && cat protected-packages.txt && echo ""
+      echo "INFO: ==== REQUESTED PACKAGES ====" && cat requested-packages.txt && echo ""
+
+      echo "INFO: ==== RUNNING PIP INSTALL ===="
+      if [ -n "${VIRTUAL_ENV:-}" ]; then
+        # airflow >2.9.0 uses virtualenv
+        pip install --constraint ./protected-packages.txt --requirement ./requested-packages.txt
+      else
+        # airflow <2.9.0 uses user-site
+        pip install --constraint ./protected-packages.txt --requirement ./requested-packages.txt --user
+      fi
+      echo ""
+
+      echo "INFO: ==== COPYING PACKAGES TO VOLUME ===="
+      echo "INFO: copying from '/home/airflow/.local/' to '/opt/home-airflow-local/.local/'"
       rsync -ah --stats --delete /home/airflow/.local/ /opt/home-airflow-local/.local/
   volumeMounts:
     - name: home-airflow-local
