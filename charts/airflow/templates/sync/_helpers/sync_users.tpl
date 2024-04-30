@@ -25,18 +25,11 @@ flask_app = www_app.create_app()
 flask_appbuilder = flask_app.appbuilder
 {{- end }}
 
-# airflow moves the User and Role models around in different versions
-try:
-  # since 2.7.0
-  from airflow.auth.managers.fab.models import User, Role
-except ModuleNotFoundError:
-  try:
-    # from 2.3.0 to 2.6.3
-    from airflow.www.fab_security.sqla.models import User, Role
-  except ModuleNotFoundError:
-    # before 2.3.0
-    from flask_appbuilder.security.sqla.models import User, Role
-
+# we want type hints, but airflow keeps moving the `User` and `Role` models around
+#                                  (╯°□°)╯︵ ┻━┻
+from typing import Any
+User = Any
+Role = Any
 
 #############
 ## Classes ##
