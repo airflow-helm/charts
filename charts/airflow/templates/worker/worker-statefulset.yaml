@@ -1,13 +1,13 @@
 {{- if .Values.workers.enabled }}
-{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.workers.nodeSelector) }}
-{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.workers.affinity) }}
-{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.workers.tolerations) }}
-{{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.workers.securityContext) }}
+{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Chart" .Chart "Values" .Values "nodeSelector" .Values.workers.nodeSelector) }}
+{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Chart" .Chart "Values" .Values "affinity" .Values.workers.affinity) }}
+{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Chart" .Chart "Values" .Values "tolerations" .Values.workers.tolerations) }}
+{{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Chart" .Chart "Values" .Values "securityContext" .Values.workers.securityContext) }}
 {{- $extraPipPackages := concat .Values.airflow.extraPipPackages .Values.workers.extraPipPackages }}
 {{- $extraVolumeMounts := .Values.workers.extraVolumeMounts }}
-{{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+{{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Chart" .Chart "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
 {{- $extraVolumes := .Values.workers.extraVolumes }}
-{{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes "extraVolumeMounts" $extraVolumeMounts) }}
+{{- $volumes := include "airflow.volumes" (dict "Release" .Release "Chart" .Chart "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes "extraVolumeMounts" $extraVolumeMounts) }}
 apiVersion: apps/v1
 ## StatefulSet gives workers consistent DNS names, allowing webserver access to log files
 kind: StatefulSet
@@ -89,13 +89,13 @@ spec:
       {{- end }}
       initContainers:
         {{- if $extraPipPackages }}
-        {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
+        {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Chart" .Chart "Values" .Values "extraPipPackages" $extraPipPackages) | indent 8 }}
         {{- end }}
         {{- if .Values.dags.gitSync.enabled }}
-        {{- include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") | indent 8 }}
+        {{- include "airflow.container.git_sync" (dict "Release" .Release "Chart" .Chart "Values" .Values "sync_one_time" "true") | indent 8 }}
         {{- end }}
-        {{- include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
-        {{- include "airflow.init_container.wait_for_db_migrations" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
+        {{- include "airflow.init_container.check_db" (dict "Release" .Release "Chart" .Chart "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
+        {{- include "airflow.init_container.wait_for_db_migrations" (dict "Release" .Release "Chart" .Chart "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
       containers:
         - name: airflow-worker
           {{- include "airflow.image" . | indent 10 }}
@@ -213,7 +213,7 @@ spec:
         {{- $lc_resources := .Values.workers.logCleanup.resources }}
         {{- $lc_retention_min := .Values.workers.logCleanup.retentionMinutes }}
         {{- $lc_interval_sec := .Values.workers.logCleanup.intervalSeconds }}
-        {{- include "airflow.container.log_cleanup" (dict "Release" .Release "Values" .Values "resources" $lc_resources "retention_min" $lc_retention_min "interval_sec" $lc_interval_sec) | indent 8 }}
+        {{- include "airflow.container.log_cleanup" (dict "Release" .Release "Chart" .Chart "Values" .Values "resources" $lc_resources "retention_min" $lc_retention_min "interval_sec" $lc_interval_sec) | indent 8 }}
         {{- end }}
         {{- if .Values.airflow.extraContainers }}
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}

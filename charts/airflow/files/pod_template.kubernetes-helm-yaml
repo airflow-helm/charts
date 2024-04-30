@@ -1,12 +1,12 @@
-{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.airflow.kubernetesPodTemplate.nodeSelector) }}
-{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.airflow.kubernetesPodTemplate.affinity) }}
-{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.airflow.kubernetesPodTemplate.tolerations) }}
-{{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.airflow.kubernetesPodTemplate.securityContext) }}
+{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Chart" .Chart "Values" .Values "nodeSelector" .Values.airflow.kubernetesPodTemplate.nodeSelector) }}
+{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Chart" .Chart "Values" .Values "affinity" .Values.airflow.kubernetesPodTemplate.affinity) }}
+{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Chart" .Chart "Values" .Values "tolerations" .Values.airflow.kubernetesPodTemplate.tolerations) }}
+{{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Chart" .Chart "Values" .Values "securityContext" .Values.airflow.kubernetesPodTemplate.securityContext) }}
 {{- $extraPipPackages := .Values.airflow.kubernetesPodTemplate.extraPipPackages }}
 {{- $extraVolumeMounts := .Values.airflow.kubernetesPodTemplate.extraVolumeMounts }}
-{{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
+{{- $volumeMounts := include "airflow.volumeMounts" (dict "Release" .Release "Chart" .Chart "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumeMounts" $extraVolumeMounts) }}
 {{- $extraVolumes := .Values.airflow.kubernetesPodTemplate.extraVolumes }}
-{{- $volumes := include "airflow.volumes" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes "extraVolumeMounts" $extraVolumeMounts) }}
+{{- $volumes := include "airflow.volumes" (dict "Release" .Release "Chart" .Chart "Values" .Values "extraPipPackages" $extraPipPackages "extraVolumes" $extraVolumes "extraVolumeMounts" $extraVolumeMounts) }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -46,10 +46,10 @@ spec:
   {{- if or ($extraPipPackages) (.Values.dags.gitSync.enabled) (.Values.airflow.kubernetesPodTemplate.extraInitContainers) }}
   initContainers:
     {{- if $extraPipPackages }}
-    {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Values" .Values "extraPipPackages" $extraPipPackages) | indent 4 }}
+    {{- include "airflow.init_container.install_pip_packages" (dict "Release" .Release "Chart" .Chart "Values" .Values "extraPipPackages" $extraPipPackages) | indent 4 }}
     {{- end }}
     {{- if .Values.dags.gitSync.enabled }}
-    {{- include "airflow.container.git_sync" (dict "Release" .Release "Values" .Values "sync_one_time" "true") | indent 4 }}
+    {{- include "airflow.container.git_sync" (dict "Release" .Release "Chart" .Chart "Values" .Values "sync_one_time" "true") | indent 4 }}
     {{- end }}
     {{- if .Values.airflow.kubernetesPodTemplate.extraInitContainers }}
     {{- toYaml .Values.airflow.kubernetesPodTemplate.extraInitContainers | nindent 4 }}
@@ -66,7 +66,7 @@ spec:
           value: LocalExecutor
         {{- /* NOTE: the FIRST definition of an `env` takes precedence (so we include user-defined `env` LAST) */ -}}
         {{- /* NOTE: we set `CONNECTION_CHECK_MAX_COUNT=20` to enable airflow's `/entrypoint` db connection check */ -}}
-        {{- include "airflow.env" (dict "Release" .Release "Values" .Values "CONNECTION_CHECK_MAX_COUNT" "20")  | indent 8 }}
+        {{- include "airflow.env" (dict "Release" .Release "Chart" .Chart "Values" .Values "CONNECTION_CHECK_MAX_COUNT" "20")  | indent 8 }}
       ports: []
       command: []
       args: []

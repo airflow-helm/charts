@@ -51,10 +51,10 @@
 {{- end }}
 
 {{- if include "airflow.pgbouncer.should_use" . }}
-{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Values" .Values "nodeSelector" .Values.pgbouncer.nodeSelector) }}
-{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Values" .Values "affinity" .Values.pgbouncer.affinity) }}
-{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Values" .Values "tolerations" .Values.pgbouncer.tolerations) }}
-{{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Values" .Values "securityContext" .Values.pgbouncer.securityContext) }}
+{{- $podNodeSelector := include "airflow.podNodeSelector" (dict "Release" .Release "Chart" .Chart "Values" .Values "nodeSelector" .Values.pgbouncer.nodeSelector) }}
+{{- $podAffinity := include "airflow.podAffinity" (dict "Release" .Release "Chart" .Chart "Values" .Values "affinity" .Values.pgbouncer.affinity) }}
+{{- $podTolerations := include "airflow.podTolerations" (dict "Release" .Release "Chart" .Chart "Values" .Values "tolerations" .Values.pgbouncer.tolerations) }}
+{{- $podSecurityContext := include "airflow.podSecurityContext" (dict "Release" .Release "Chart" .Chart "Values" .Values "securityContext" .Values.pgbouncer.securityContext) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:

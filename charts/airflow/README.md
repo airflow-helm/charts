@@ -402,6 +402,24 @@ Parameter | Description | Default
 </details>
 
 <details>
+<summary><code>nameOverride</code></summary>
+
+Parameter | Description | Default
+--- | --- | ---
+`nameOverride` | replaces the name of the chart in the Construction of the base name for all resources in this chart | ``
+
+</details>
+
+<details>
+<summary><code>fullnameOverride</code></summary>
+
+Parameter | Description | Default
+--- | --- | ---
+`nameOverride` | fullnameOverride completely replaces the generated base name for all resources in this chart | ``
+
+</details>
+
+<details>
 <summary><code>rbac.*</code></summary>
 
 Parameter | Description | Default

@@ -1596,6 +1596,14 @@ ingress:
     succeedingPaths: []
 
 ###################################
+## CONFIG | Kubernetes Resources
+###################################
+## nameOverride replaces the name of the chart in the Construction of the base name for all resources in this chart
+nameOverride: ""
+## fullnameOverride completely replaces the generated base name for all resources in this chart
+fullnameOverride: ""
+
+###################################
 ## CONFIG | Kubernetes RBAC
 ###################################
 rbac:
