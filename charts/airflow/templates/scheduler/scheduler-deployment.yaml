@@ -157,21 +157,9 @@ spec:
                   from airflow.utils.db import create_session
                   from airflow.utils.net import get_hostname
 
-                  # heartbeat check imports
-                  try:
-                      from airflow.jobs.scheduler_job_runner import SchedulerJobRunner
-                  except ImportError:
-                      # `SchedulerJob` is wrapped by `SchedulerJobRunner` since airflow 2.6.0
-                      from airflow.jobs.scheduler_job import SchedulerJob as SchedulerJobRunner
-
                   {{- if .Values.scheduler.livenessProbe.taskCreationCheck.enabled }}
                   {{ "" }}
                   # task creation check imports
-                  try:
-                      from airflow.jobs.local_task_job_runner import LocalTaskJobRunner
-                  except ImportError:
-                      # `LocalTaskJob` is wrapped by `LocalTaskJobRunner` since airflow 2.6.0
-                      from airflow.jobs.local_task_job import LocalTaskJob as LocalTaskJobRunner
                   from airflow.utils import timezone
                   {{- end }}
 
@@ -183,7 +171,7 @@ spec:
                       hostname = get_hostname()
                       scheduler_job = session \
                           .query(Job) \
-                          .filter_by(job_type=SchedulerJobRunner.job_type) \
+                          .filter_by(job_type="SchedulerJob") \
                           .filter_by(hostname=hostname) \
                           .order_by(Job.latest_heartbeat.desc()) \
                           .limit(1) \
@@ -212,7 +200,7 @@ spec:
                           task_job_threshold = {{ $task_job_threshold }}
                           task_job = session \
                               .query(Job) \
-                              .filter_by(job_type=LocalTaskJobRunner.job_type) \
+                              .filter_by(job_type="LocalTaskJob") \
                               .order_by(Job.id.desc()) \
                               .limit(1) \
                               .first()
