@@ -80,7 +80,11 @@ If you __bump the version__:
 
 ## Linting
 
-Please ensure `ct lint` from [chart-testing](https://github.com/helm/chart-testing) succeeds.
+Please ensure running [chart-testing](https://github.com/helm/chart-testing) succeeds.
+
+Run the following command from the root of the repository:
+
+- `ct lint --config ct-config.yaml --check-version-increment=false`
 
 ## Versioning
 
