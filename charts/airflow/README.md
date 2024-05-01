@@ -252,6 +252,7 @@ Parameter | Description | Default
 `scheduler.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the scheduler | `<see values.yaml>`
 `scheduler.logCleanup.*` | configs for the log-cleanup sidecar of the scheduler | `<see values.yaml>`
 `scheduler.numRuns` | the value of the `airflow --num_runs` parameter used to run the airflow scheduler | `-1`
+`scheduler.extraEnv` | extra environment to make available in the scheduler Pods | `[]`
 `scheduler.extraPipPackages` | extra pip packages to install in the scheduler Pods | `[]`
 `scheduler.extraVolumeMounts` | extra VolumeMounts for the scheduler Pods | `[]`
 `scheduler.extraVolumes` | extra Volumes for the scheduler Pods | `[]`
@@ -281,6 +282,7 @@ Parameter | Description | Default
 `web.service.*` | configs for the Service of the web pods | `<see values.yaml>`
 `web.readinessProbe.*` | configs for the web Pods' readiness probe | `<see values.yaml>`
 `web.livenessProbe.*` | configs for the web Pods' liveness probe | `<see values.yaml>`
+`web.extraEnv` | extra environment to make available in the web Pods | `[]`
 `web.extraPipPackages` | extra pip packages to install in the web Pods | `[]`
 `web.extraVolumeMounts` | extra VolumeMounts for the web Pods | `[]`
 `web.extraVolumes` | extra Volumes for the web Pods | `[]`
@@ -309,6 +311,7 @@ Parameter | Description | Default
 `workers.celery.*` | configs for the celery worker Pods | `<see values.yaml>`
 `workers.terminationPeriod` | how many seconds to wait after SIGTERM before SIGKILL of the celery worker | `60`
 `workers.logCleanup.*` | configs for the log-cleanup sidecar of the worker Pods | `<see values.yaml>`
+`workers.extraEnv` | extra environment to make available in the worker Pods | `[]`
 `workers.livenessProbe.*` | configs for the worker Pods' liveness probe | `<see values.yaml>`
 `workers.extraPipPackages` | extra pip packages to install in the worker Pods | `[]`
 `workers.extraVolumeMounts` | extra VolumeMounts for the worker Pods | `[]`
@@ -336,6 +339,7 @@ Parameter | Description | Default
 `triggerer.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the triggerer Deployment | `<see values.yaml>`
 `triggerer.capacity` | maximum number of triggers each triggerer will run at once (sets `AIRFLOW__TRIGGERER__DEFAULT_CAPACITY`) | `1000`
 `triggerer.livenessProbe.*` | configs for the triggerer Pods' liveness probe | `<see values.yaml>`
+`triggerer.extraEnv` | extra environment to make available in the triggerer Pods | `[]`
 `triggerer.extraPipPackages` | extra pip packages to install in the triggerer Pods | `[]`
 `triggerer.extraVolumeMounts` | extra VolumeMounts for the triggerer Pods | `[]`
 `triggerer.extraVolumes` | extra Volumes for the triggerer Pods | `[]`
@@ -362,6 +366,7 @@ Parameter | Description | Default
 `flower.basicAuthSecret` | the name of a pre-created secret containing the basic authentication value for flower | `""`
 `flower.basicAuthSecretKey` | the key within `flower.basicAuthSecret` containing the basic authentication string | `""`
 `flower.service.*` | configs for the Service of the flower Pods | `<see values.yaml>`
+`flower.extraEnv` | extra environment to make available in the flower Pod | `[]`
 `flower.extraPipPackages` | extra pip packages to install in the flower Pod | `[]`
 `flower.extraVolumeMounts` | extra VolumeMounts for the flower Pods | `[]`
 `flower.extraVolumes` | extra Volumes for the flower Pods | `[]`
