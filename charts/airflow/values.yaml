@@ -272,6 +272,38 @@ airflow:
   clusterDomain: "cluster.local"
 
   ########################################
+  ## CONFIGS | airflow init-containers
+  ########################################
+  ##
+  initContainers:
+    ## configs for the "check-db" init-containers
+    ##
+    checkDb:
+      ## resource requests/limits for the "check-db" init-containers
+      ## - spec for ResourceRequirements:
+      ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+      ##
+      resources: {}
+
+    ## configs for the "wait-for-db-migrations" init-containers
+    ##
+    waitForDbMigrations:
+      ## resource requests/limits for the "wait-for-db-migrations" init-containers
+      ## - spec for ResourceRequirements:
+      ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+      ##
+      resources: {}
+
+    ## configs for the "install-pip-packages" init-containers
+    ##
+    installPipPackages:
+      ## resource requests/limits for the "install-pip-packages" init-containers
+      ## - spec for ResourceRequirements:
+      ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+      ##
+      resources: {}
+
+  ########################################
   ## FILE | airflow_local_settings.py
   ########################################
   ##
