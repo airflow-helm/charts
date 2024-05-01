@@ -251,6 +251,12 @@ airflow:
   ##
   extraContainers: []
 
+  ## extra init-containers for the airflow Pods
+  ## - spec for Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraInitContainers: []
+
   ## extra VolumeMounts for the airflow Pods
   ## - spec for VolumeMount:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
@@ -723,6 +729,18 @@ scheduler:
   ##
   extraPipPackages: []
 
+  ## extra containers for the scheduler Pods
+  ## - spec for Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraContainers: []
+
+  ## extra init-containers for the scheduler Pods
+  ## - spec of Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraInitContainers: []
+
   ## extra VolumeMounts for the scheduler Pods
   ## - spec of VolumeMount:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
@@ -734,12 +752,6 @@ scheduler:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
   ##
   extraVolumes: []
-
-  ## extra init containers to run in the scheduler Pods
-  ## - spec of Container:
-  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
-  ##
-  extraInitContainers: []
 
 ###################################
 ## COMPONENT | Airflow Webserver
@@ -896,6 +908,18 @@ web:
   ##     - "SomeProject==1.0.0"
   ##
   extraPipPackages: []
+
+  ## extra containers for the web Pods
+  ## - spec for Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraContainers: []
+
+  ## extra init-containers for the web Pods
+  ## - spec of Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraInitContainers: []
 
   ## extra VolumeMounts for the web Pods
   ## - spec for VolumeMount:
@@ -1093,6 +1117,18 @@ workers:
   ##
   extraPipPackages: []
 
+  ## extra containers for the worker Pods
+  ## - spec for Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraContainers: []
+
+  ## extra init-containers for the worker Pods
+  ## - spec of Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraInitContainers: []
+
   ## extra VolumeMounts for the worker Pods
   ## - spec for VolumeMount:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
@@ -1217,6 +1253,18 @@ triggerer:
   ##     - "SomeProject==1.0.0"
   ##
   extraPipPackages: []
+
+  ## extra containers for the triggerer Pods
+  ## - spec for Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraContainers: []
+
+  ## extra init-containers for the triggerer Pods
+  ## - spec of Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraInitContainers: []
 
   ## extra VolumeMounts for the triggerer Pods
   ## - spec for VolumeMount:
@@ -1358,13 +1406,25 @@ flower:
     timeoutSeconds: 5
     failureThreshold: 6
 
-  ## extra pip packages to install in the flower Pod
+  ## extra pip packages to install in the flower Pods
   ##
   ## ____ EXAMPLE _______________
   ##   extraPipPackages:
   ##     - "SomeProject==1.0.0"
   ##
   extraPipPackages: []
+
+  ## extra containers for the flower Pods
+  ## - spec for Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraContainers: []
+
+  ## extra init-containers for the flower Pods
+  ## - spec of Container:
+  ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#container-v1-core
+  ##
+  extraInitContainers: []
 
   ## extra VolumeMounts for the flower Pods
   ## - spec for VolumeMount:

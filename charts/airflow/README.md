@@ -224,6 +224,7 @@ Parameter | Description | Default
 `airflow.protectedPipPackages` | pip packages that are protected from upgrade/downgrade by `extraPipPackages` | `["apache-airflow"]`
 `airflow.extraEnv` | extra environment variables for the airflow Pods | `[]`
 `airflow.extraContainers` | extra containers for the airflow Pods | `[]`
+`airflow.extraInitContainers` | extra init-containers for the airflow Pods | `[]`
 `airflow.extraVolumeMounts` | extra VolumeMounts for the airflow Pods | `[]`
 `airflow.extraVolumes` | extra Volumes for the airflow Pods | `[]`
 `airflow.clusterDomain` | kubernetes cluster domain name | `cluster.local`
@@ -256,11 +257,12 @@ Parameter | Description | Default
 `scheduler.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the scheduler | `<see values.yaml>`
 `scheduler.logCleanup.*` | configs for the log-cleanup sidecar of the scheduler | `<see values.yaml>`
 `scheduler.numRuns` | the value of the `airflow --num_runs` parameter used to run the airflow scheduler | `-1`
+`scheduler.livenessProbe.*` | configs for the scheduler Pods' liveness probe | `<see values.yaml>`
 `scheduler.extraPipPackages` | extra pip packages to install in the scheduler Pods | `[]`
+`scheduler.extraContainers` | extra containers for the scheduler Pods | `[]`
+`scheduler.extraInitContainers` | extra init-containers for the scheduler Pods | `[]`
 `scheduler.extraVolumeMounts` | extra VolumeMounts for the scheduler Pods | `[]`
 `scheduler.extraVolumes` | extra Volumes for the scheduler Pods | `[]`
-`scheduler.livenessProbe.*` | configs for the scheduler Pods' liveness probe | `<see values.yaml>`
-`scheduler.extraInitContainers` | extra init containers to run in the scheduler Pods | `[]`
 
 </details>
 
@@ -287,6 +289,8 @@ Parameter | Description | Default
 `web.readinessProbe.*` | configs for the web Pods' readiness probe | `<see values.yaml>`
 `web.livenessProbe.*` | configs for the web Pods' liveness probe | `<see values.yaml>`
 `web.extraPipPackages` | extra pip packages to install in the web Pods | `[]`
+`web.extraContainers` | extra containers for the web Pods | `[]`
+`web.extraInitContainers` | extra init-containers for the web Pods | `[]`
 `web.extraVolumeMounts` | extra VolumeMounts for the web Pods | `[]`
 `web.extraVolumes` | extra Volumes for the web Pods | `[]`
 
@@ -317,6 +321,8 @@ Parameter | Description | Default
 `workers.logCleanup.*` | configs for the log-cleanup sidecar of the worker Pods | `<see values.yaml>`
 `workers.livenessProbe.*` | configs for the worker Pods' liveness probe | `<see values.yaml>`
 `workers.extraPipPackages` | extra pip packages to install in the worker Pods | `[]`
+`workers.extraContainers` | extra containers for the worker Pods | `[]`
+`workers.extraInitContainers` | extra init-containers for the worker Pods | `[]`
 `workers.extraVolumeMounts` | extra VolumeMounts for the worker Pods | `[]`
 `workers.extraVolumes` | extra Volumes for the worker Pods | `[]`
 
@@ -344,6 +350,8 @@ Parameter | Description | Default
 `triggerer.capacity` | maximum number of triggers each triggerer will run at once (sets `AIRFLOW__TRIGGERER__DEFAULT_CAPACITY`) | `1000`
 `triggerer.livenessProbe.*` | configs for the triggerer Pods' liveness probe | `<see values.yaml>`
 `triggerer.extraPipPackages` | extra pip packages to install in the triggerer Pods | `[]`
+`triggerer.extraContainers` | extra containers for the triggerer Pods | `[]`
+`triggerer.extraInitContainers` | extra init-containers for the triggerer Pods | `[]`
 `triggerer.extraVolumeMounts` | extra VolumeMounts for the triggerer Pods | `[]`
 `triggerer.extraVolumes` | extra Volumes for the triggerer Pods | `[]`
 
@@ -370,7 +378,9 @@ Parameter | Description | Default
 `flower.basicAuthSecret` | the name of a pre-created secret containing the basic authentication value for flower | `""`
 `flower.basicAuthSecretKey` | the key within `flower.basicAuthSecret` containing the basic authentication string | `""`
 `flower.service.*` | configs for the Service of the flower Pods | `<see values.yaml>`
-`flower.extraPipPackages` | extra pip packages to install in the flower Pod | `[]`
+`flower.extraPipPackages` | extra pip packages to install in the flower Pods | `[]`
+`flower.extraContainers` | extra containers for the flower Pods | `[]`
+`flower.extraInitContainers` | extra init-containers for the flower Pods | `[]`
 `flower.extraVolumeMounts` | extra VolumeMounts for the flower Pods | `[]`
 `flower.extraVolumes` | extra Volumes for the flower Pods | `[]`
 

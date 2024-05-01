@@ -101,6 +101,12 @@ spec:
         {{- end }}
         {{- include "airflow.init_container.check_db" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
         {{- include "airflow.init_container.wait_for_db_migrations" (dict "Release" .Release "Values" .Values "volumeMounts" $volumeMounts) | indent 8 }}
+        {{- if .Values.airflow.extraInitContainers }}
+        {{- toYaml .Values.airflow.extraInitContainers | nindent 8 }}
+        {{- end }}
+        {{- if .Values.workers.extraInitContainers }}
+        {{- toYaml .Values.workers.extraInitContainers | nindent 8 }}
+        {{- end }}
       containers:
         - name: airflow-worker
           {{- include "airflow.image" . | indent 10 }}
@@ -222,6 +228,9 @@ spec:
         {{- end }}
         {{- if .Values.airflow.extraContainers }}
         {{- toYaml .Values.airflow.extraContainers | nindent 8 }}
+        {{- end }}
+        {{- if .Values.workers.extraContainers }}
+        {{- toYaml .Values.workers.extraContainers | nindent 8 }}
         {{- end }}
       {{- if $volumes }}
       volumes:
