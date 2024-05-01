@@ -1901,6 +1901,10 @@ pgbouncer:
   ##
   logConnections: 0
 
+  ## sets pgbouncer config: `stats_users`
+  ##
+  statsUsers: ""
+
   ## ssl configs for: clients -> pgbouncer
   ##
   clientSSL:

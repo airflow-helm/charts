@@ -24,6 +24,11 @@ auth_file = /home/pgbouncer/users.txt
 log_disconnections = {{ .Values.pgbouncer.logDisconnections }}
 log_connections = {{ .Values.pgbouncer.logConnections }}
 
+{{- if .Values.pgbouncer.statsUsers }}
+{{ "" }}
+stats_users = {{ .Values.pgbouncer.statsUsers }}
+{{- end }}
+
 # locks will never be released when `pool_mode=transaction` (airflow initdb/upgradedb scripts create locks)
 server_reset_query = SELECT pg_advisory_unlock_all()
 server_reset_query_always = 1
