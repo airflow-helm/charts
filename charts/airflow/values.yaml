@@ -198,6 +198,12 @@ airflow:
   ##
   defaultTolerations: []
 
+  ## default topologySpreadConstraints for airflow Pods (is overridden by pod-specific values)
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ##
+  defaultTopologySpreadConstraints: []
+
   ## default securityContext configs for airflow Pods (is overridden by pod-specific values)
   ## - spec for PodSecurityContext:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
@@ -324,6 +330,12 @@ airflow:
     ##
     tolerations: []
 
+    ## the topologySpreadConstraints configs for the Pod template
+    ## - docs for topologySpreadConstraints:
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+    ##
+    topologySpreadConstraints: []
+
     ## labels for the Pod template
     ##
     podLabels: {}
@@ -416,6 +428,12 @@ airflow:
     ##
     tolerations: []
 
+    ## the topologySpreadConstraints configs for the db-migrations Pods
+    ## - docs for topologySpreadConstraints:
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+    ##
+    topologySpreadConstraints: []
+
     ## the security context for the db-migrations Pods
     ## - spec for PodSecurityContext:
     ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
@@ -477,6 +495,12 @@ airflow:
     ##
     tolerations: []
 
+    ## the topologySpreadConstraints configs for the sync Pods
+    ## - docs for topologySpreadConstraints:
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+    ##
+    topologySpreadConstraints: []
+
     ## the security context for the sync Pods
     ## - spec for PodSecurityContext:
     ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
@@ -535,6 +559,12 @@ scheduler:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
   ##
   tolerations: []
+
+  ## the topologySpreadConstraints configs for the scheduler Pods
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ##
+  topologySpreadConstraints: []
 
   ## the security context for the scheduler Pods
   ## - spec of PodSecurityContext:
@@ -735,6 +765,12 @@ web:
   ##
   tolerations: []
 
+  ## the topologySpreadConstraints configs for the web Pods
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ##
+  topologySpreadConstraints: []
+
   ## the security context for the web Pods
   ## - spec for PodSecurityContext:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
@@ -870,6 +906,12 @@ workers:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
   ##
   tolerations: []
+
+  ## the topologySpreadConstraints configs for the worker Pods
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ##
+  topologySpreadConstraints: []
 
   ## the security context for the worker Pods
   ## - spec for PodSecurityContext:
@@ -1062,6 +1104,12 @@ triggerer:
   ##
   tolerations: []
 
+  ## the topologySpreadConstraints configs for the triggerer Pods
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ##
+  topologySpreadConstraints: []
+
   ## the security context for the triggerer Pods
   ## - spec for PodSecurityContext:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#podsecuritycontext-v1-core
@@ -1178,6 +1226,12 @@ flower:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
   ##
   tolerations: []
+
+  ## the topologySpreadConstraints configs for the flower Pods
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ##
+  topologySpreadConstraints: []
 
   ## the security context for the flower Pods
   ## - spec for PodSecurityContext:
@@ -1736,6 +1790,12 @@ pgbouncer:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
   ##
   tolerations: []
+
+  ## the topologySpreadConstraints configs for the pgbouncer Pods
+  ## - docs for topologySpreadConstraints:
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  ##
+  topologySpreadConstraints: []
 
   ## the security context for the pgbouncer Pods
   ## - spec for PodSecurityContext:

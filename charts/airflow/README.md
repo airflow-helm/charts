@@ -139,7 +139,7 @@ Please note, this chart is __independent__ from the official chart in the `apach
   - [`Mount Extra Persistent Volumes`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/mount-persistent-volumes.md) <sup><sub>⭐</sub></sup>
   - [`Mount Files from Secrets/ConfigMaps`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/mount-files.md) <a id="how-to-mount-secretsconfigmaps-as-files-on-workers"></a>
   - [`Mount Environment Variables from Secrets/ConfigMaps`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/mount-environment-variables.md) <a id="how-to-create-airflow-variables"></a>
-  - [`Configure Pod Affinity/Selectors/Tolerations`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/affinity-node-selectors-tolerations.md) <a id="how-to-use-pod-affinity-nodeselector-and-tolerations"></a>
+  - [`Configure Pod Affinity, Selectors, Tolerations, TopologySpreadConstraints`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/affinity-node-selectors-tolerations.md) <a id="how-to-use-pod-affinity-nodeselector-and-tolerations"></a>
   - [`Include Extra Kubernetes Manifests`](https://github.com/airflow-helm/charts/tree/main/charts/airflow/docs/faq/kubernetes/extra-manifests.md) <a id="how-to-add-extra-manifests"></a>
 
 ## Examples
@@ -216,6 +216,7 @@ Parameter | Description | Default
 `airflow.defaultNodeSelector` | default nodeSelector for airflow Pods (is overridden by pod-specific values) | `{}`
 `airflow.defaultAffinity` | default affinity configs for airflow Pods (is overridden by pod-specific values) | `{}`
 `airflow.defaultTolerations` | default toleration configs for airflow Pods (is overridden by pod-specific values) | `[]`
+`airflow.defaultTopologySpreadConstraints` | default topologySpreadConstraints for airflow Pods (is overridden by pod-specific values) | `[]`
 `airflow.defaultSecurityContext` | default securityContext configs for Pods (is overridden by pod-specific values) | `{fsGroup: 0}`
 `airflow.podAnnotations` | extra annotations for airflow Pods | `{}`
 `airflow.extraPipPackages` | extra pip packages to install in airflow Pods | `[]`
@@ -243,6 +244,7 @@ Parameter | Description | Default
 `scheduler.nodeSelector` | the nodeSelector configs for the scheduler Pods | `{}`
 `scheduler.affinity` | the affinity configs for the scheduler Pods | `{}`
 `scheduler.tolerations` | the toleration configs for the scheduler Pods | `[]`
+`scheduler.topologySpreadConstraints` | the topologySpreadConstraints configs for the scheduler Pods | `[]`
 `scheduler.securityContext` | the security context for the scheduler Pods | `{}`
 `scheduler.labels` | labels for the scheduler Deployment | `{}`
 `scheduler.podLabels` | Pod labels for the scheduler Deployment | `{}`
@@ -271,6 +273,7 @@ Parameter | Description | Default
 `web.nodeSelector` | the number of web Pods to run | `{}`
 `web.affinity` | the affinity configs for the web Pods | `{}`
 `web.tolerations` | the toleration configs for the web Pods | `[]`
+`web.topologySpreadConstraints` | the topologySpreadConstraints configs for the web Pods | `[]`
 `web.securityContext` | the security context for the web Pods | `{}`
 `web.labels` | labels for the web Deployment | `{}`
 `web.podLabels` | Pod labels for the web Deployment | `{}`
@@ -298,6 +301,7 @@ Parameter | Description | Default
 `workers.nodeSelector` | the nodeSelector configs for the worker Pods | `{}`
 `workers.affinity` | the affinity configs for the worker Pods | `{}`
 `workers.tolerations` | the toleration configs for the worker Pods | `[]`
+`workers.topologySpreadConstraints` | the topologySpreadConstraints configs for the worker Pods | `[]`
 `workers.securityContext` | the security context for the worker Pods | `{}`
 `workers.labels` | labels for the worker StatefulSet | `{}`
 `workers.podLabels` | Pod labels for the worker StatefulSet | `{}`
@@ -327,6 +331,7 @@ Parameter | Description | Default
 `triggerer.nodeSelector` | the nodeSelector configs for the triggerer Pods | `{}`
 `triggerer.affinity` | the affinity configs for the triggerer Pods | `{}`
 `triggerer.tolerations` | the toleration configs for the triggerer Pods | `[]`
+`triggerer.topologySpreadConstraints` | the topologySpreadConstraints configs for the triggerer Pods | `[]`
 `triggerer.securityContext` | the security context for the triggerer Pods | `{}`
 `triggerer.labels` | labels for the triggerer Deployment | `{}`
 `triggerer.podLabels` | Pod labels for the triggerer Deployment | `{}`
@@ -352,6 +357,7 @@ Parameter | Description | Default
 `flower.nodeSelector` | the nodeSelector configs for the flower Pods | `{}`
 `flower.affinity` | the affinity configs for the flower Pods | `{}`
 `flower.tolerations` | the toleration configs for the flower Pods | `[]`
+`flower.topologySpreadConstraints` | the topologySpreadConstraints configs for the flower Pods | `[]`
 `flower.securityContext` | the security context for the flower Pods | `{}`
 `flower.labels` | labels for the flower Deployment | `{}`
 `flower.podLabels` | Pod labels for the flower Deployment | `{}`
@@ -442,6 +448,7 @@ Parameter | Description | Default
 `pgbouncer.nodeSelector` | the nodeSelector configs for the pgbouncer Pods | `{}`
 `pgbouncer.affinity` | the affinity configs for the pgbouncer Pods | `{}`
 `pgbouncer.tolerations` | the toleration configs for the pgbouncer Pods | `[]`
+`pgbouncer.topologySpreadConstraints` | the topologySpreadConstraints configs for the pgbouncer Pods | `[]`
 `pgbouncer.securityContext` | the security context for the pgbouncer Pods | `{}`
 `pgbouncer.labels` | labels for the pgbouncer Deployment | `{}`
 `pgbouncer.podLabels` | Pod labels for the pgbouncer Deployment | `{}`

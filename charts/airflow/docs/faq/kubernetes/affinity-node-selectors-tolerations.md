@@ -2,16 +2,17 @@
 
 > Note, this page was written for the [`User-Community Airflow Helm Chart`](https://github.com/airflow-helm/charts/tree/main/charts/airflow)
 
-# Configure Pod Affinity/Selectors/Tolerations
+# Configure Pod Affinity, Selectors, Tolerations, TopologySpreadConstraints
 
 If your environment needs to use Pod [affinity](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity), 
-[nodeSelector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector), 
-or [tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/), 
+[nodeSelector](https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector),
+[tolerations](https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/),
+or [topologySpreadConstraints](https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/),
 we provide many values that allow fine-grained control over the Pod definitions.
 
 ## Global Configs
 
-To set affinity, nodeSelector, and tolerations for all airflow Pods, you may use the `airflow.{defaultNodeSelector,defaultAffinity,defaultTolerations}` values:
+To set affinity, nodeSelector, tolerations, and topologySpreadConstraints for all airflow Pods, you may use the `airflow.{defaultNodeSelector,defaultAffinity,defaultTolerations,defaultTopologySpreadConstraints}` values:
 
 ```yaml
 airflow:
@@ -51,6 +52,16 @@ airflow:
     # - key: "key2"
     #   operator: "Exists"
     #   effect: "NoSchedule"
+  
+  ## https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  defaultTopologySpreadConstraints: []
+    # - maxSkew: 1
+    #   topologyKey: topology.kubernetes.io/zone
+    #   whenUnsatisfiable: DoNotSchedule
+    #   labelSelector:
+    #     matchLabels:
+    #       my_label_1: value1
+    #       my_label_2: value2
 
 ## if using the embedded postgres chart, you will also need to define these
 postgresql:
@@ -69,7 +80,7 @@ redis:
 
 ## Per-Resource Configs
 
-To set affinity, nodeSelector, and tolerations for specific pods, you may use the following values:
+To set affinity, nodeSelector, topologySpreadConstraints, and tolerations for specific pods, you may use the following values:
 
 ```yaml
 airflow:
@@ -78,44 +89,51 @@ airflow:
     nodeSelector: {}
     affinity: {}
     tolerations: []
+    topologySpreadConstraints: []
 
   ## sync deployments
   sync:
     nodeSelector: {}
     affinity: {}
     tolerations: []
+    topologySpreadConstraints: []
 
 ## airflow schedulers
 scheduler:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  topologySpreadConstraints: []
 
 ## airflow webserver
 web:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  topologySpreadConstraints: []
 
 ## airflow workers
 workers:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  topologySpreadConstraints: []
 
 ## airflow triggerer
 triggerer:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  topologySpreadConstraints: []
 
 ## airflow workers
 flower:
   nodeSelector: {}
   affinity: {}
   tolerations: []
+  topologySpreadConstraints: []
 ```
 
 > 🟦 __Tip__ 🟦
 >
-> The `airflow.{defaultNodeSelector,defaultAffinity,defaultTolerations}` values are overridden by the per-resource values like `scheduler.{nodeSelector,affinity,tolerations}`.
+> The `airflow.{defaultNodeSelector,defaultAffinity,defaultTolerations,defaultTopologySpreadConstraints}` values are overridden by the per-resource values like `scheduler.{nodeSelector,affinity,tolerations,topologySpreadConstraints}`.
