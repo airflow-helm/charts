@@ -4,7 +4,7 @@
 
 # Mount Environment Variables from Secrets/ConfigMaps
 
-You may use the `airflow.extraEnv` value to mount extra environment variables with the same structure as [EnvVar in ContainerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#envvar-v1-core).
+You may use the `airflow.extraEnv` value to mount extra environment variables with the same structure as [EnvVar in ContainerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#envvar-v1-core).
 
 > 🟦 __Tip__ 🟦
 >

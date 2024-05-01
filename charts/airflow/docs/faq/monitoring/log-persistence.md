@@ -241,12 +241,12 @@ For example, to mount a [`persistentVolumeClaim`](https://kubernetes.io/docs/con
 ```yaml
 airflow:
   extraVolumeMounts:
-    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volumemount-v1-core
     - name: logs-volume
       mountPath: /opt/airflow/logs
 
   extraVolumes:
-    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volume-v1-core
     - name: logs-volume
       persistentVolumeClaim:
         claimName: my-existing-persistent-volume-claim
@@ -281,12 +281,12 @@ For example, to mount an [`nfs`](https://kubernetes.io/docs/concepts/storage/vol
 ```yaml
 airflow:
   extraVolumeMounts:
-    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volumemount-v1-core
     - name: logs-volume
       mountPath: /opt/airflow/logs
 
   extraVolumes:
-    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volume-v1-core
     - name: logs-volume
       nfs:
         path: /path/on/nfs/server
@@ -326,12 +326,12 @@ For example, to mount a [`hostPath`](https://kubernetes.io/docs/concepts/storage
 ```yaml
 airflow:
   extraVolumeMounts:
-    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volumemount-v1-core
     - name: logs-volume
       mountPath: /opt/airflow/logs
 
   extraVolumes:
-    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+    ## spec: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volume-v1-core
     - name: logs-volume
       hostPath:
         ## WARNING: this represents a local path on the Kubernetes Node

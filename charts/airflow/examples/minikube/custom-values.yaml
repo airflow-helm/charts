@@ -99,7 +99,7 @@ scheduler:
   replicas: 1
 
   ## resource requests/limits for the scheduler Pods
-  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
   resources: {}
 
   ## configs for the log-cleanup sidecar of the scheduler
@@ -128,7 +128,7 @@ web:
   replicas: 1
 
   ## resource requests/limits for the web Pods
-  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
   resources: {}
 
   ## configs for the Service of the web Pods
@@ -164,7 +164,7 @@ workers:
   replicas: 1
 
   ## resource requests/limits for the worker Pods
-  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
   resources: {}
 
   ## configs for the log-cleanup sidecar of the worker Pods
@@ -184,7 +184,7 @@ triggerer:
   replicas: 1
 
   ## resource requests/limits for the triggerer Pods
-  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
   resources: {}
 
   ## maximum number of triggers each triggerer will run at once (sets `AIRFLOW__TRIGGERER__DEFAULT_CAPACITY`)
@@ -201,7 +201,7 @@ flower:
   replicas: 1
 
   ## resource requests/limits for the flower Pod
-  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
   resources: {}
 
   ## configs for the Service of the flower Pods
@@ -277,7 +277,7 @@ pgbouncer:
   enabled: true
 
   ## resource requests/limits for the pgbouncer Pods
-  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
   resources: {}
 
   ## sets pgbouncer config: `auth_type`
@@ -324,7 +324,7 @@ redis:
   ## configs for the redis master StatefulSet
   master:
     ## resource requests/limits for the redis master Pods
-    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
     resources: {}
 
     ## configs for the PVC of the redis master Pods
@@ -336,7 +336,7 @@ redis:
   ## configs for the redis slave StatefulSet
   slave:
     ## resource requests/limits for the slave Pods
-    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
     resources: {}
 
     ## configs for the PVC of the redis slave Pods
