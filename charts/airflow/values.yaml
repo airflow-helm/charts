@@ -200,7 +200,7 @@ airflow:
 
   ## default topologySpreadConstraints for airflow Pods (is overridden by pod-specific values)
   ## - docs for topologySpreadConstraints:
-  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ##
   defaultTopologySpreadConstraints: []
 
@@ -332,7 +332,7 @@ airflow:
 
     ## the topologySpreadConstraints configs for the Pod template
     ## - docs for topologySpreadConstraints:
-    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
     ##
     topologySpreadConstraints: []
 
@@ -430,7 +430,7 @@ airflow:
 
     ## the topologySpreadConstraints configs for the db-migrations Pods
     ## - docs for topologySpreadConstraints:
-    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
     ##
     topologySpreadConstraints: []
 
@@ -497,7 +497,7 @@ airflow:
 
     ## the topologySpreadConstraints configs for the sync Pods
     ## - docs for topologySpreadConstraints:
-    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+    ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
     ##
     topologySpreadConstraints: []
 
@@ -562,7 +562,7 @@ scheduler:
 
   ## the topologySpreadConstraints configs for the scheduler Pods
   ## - docs for topologySpreadConstraints:
-  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ##
   topologySpreadConstraints: []
 
@@ -767,7 +767,7 @@ web:
 
   ## the topologySpreadConstraints configs for the web Pods
   ## - docs for topologySpreadConstraints:
-  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ##
   topologySpreadConstraints: []
 
@@ -909,7 +909,7 @@ workers:
 
   ## the topologySpreadConstraints configs for the worker Pods
   ## - docs for topologySpreadConstraints:
-  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ##
   topologySpreadConstraints: []
 
@@ -1106,7 +1106,7 @@ triggerer:
 
   ## the topologySpreadConstraints configs for the triggerer Pods
   ## - docs for topologySpreadConstraints:
-  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ##
   topologySpreadConstraints: []
 
@@ -1229,7 +1229,7 @@ flower:
 
   ## the topologySpreadConstraints configs for the flower Pods
   ## - docs for topologySpreadConstraints:
-  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ##
   topologySpreadConstraints: []
 
@@ -1793,7 +1793,7 @@ pgbouncer:
 
   ## the topologySpreadConstraints configs for the pgbouncer Pods
   ## - docs for topologySpreadConstraints:
-  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/#topologyspreadconstraints-field
+  ##   https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
   ##
   topologySpreadConstraints: []
 
