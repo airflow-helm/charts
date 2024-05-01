@@ -14,7 +14,7 @@ TBD
 >
 > - this is the first version of the chart with support for airflow 2.9, along with [pretty much all previous versions of airflow](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
 > - the default airflow image is now `apache/airflow:2.8.4-python3.9`, but you can still use any supported version of airflow
-> - we have fixed an important bug for airflow <=2.5.3 (introduced in chart version 8.6.1), some liveness probes were creating significant load on the backend database [#853](https://github.com/airflow-helm/charts/pull/853)
+> - we have fixed an important bug for airflow <=2.5.3 (introduced in chart version 8.7.1), some liveness probes were creating significant load on the backend database [#853](https://github.com/airflow-helm/charts/pull/853)
 
 > 🟦 __OTHER__ 🟦
 >
