@@ -218,6 +218,7 @@ Parameter | Description | Default
 `airflow.defaultTolerations` | default toleration configs for airflow Pods (is overridden by pod-specific values) | `[]`
 `airflow.defaultTopologySpreadConstraints` | default topologySpreadConstraints for airflow Pods (is overridden by pod-specific values) | `[]`
 `airflow.defaultSecurityContext` | default securityContext configs for Pods (is overridden by pod-specific values) | `{fsGroup: 0}`
+`airflow.defaultContainerSecurityContext` | default securityContext for Containers in airflow Pods | `{}`
 `airflow.podAnnotations` | extra annotations for airflow Pods | `{}`
 `airflow.extraPipPackages` | extra pip packages to install in airflow Pods | `[]`
 `airflow.protectedPipPackages` | pip packages that are protected from upgrade/downgrade by `extraPipPackages` | `["apache-airflow"]`
