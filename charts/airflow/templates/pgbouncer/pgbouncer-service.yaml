@@ -17,6 +17,8 @@ spec:
     release: {{ .Release.Name }}
   ports:
     - name: pgbouncer
+      ## NOTE: pgbouncer should be treated as opaque TCP (only important for Istio users)
+      appProtocol: tcp
       protocol: TCP
       port: 6432
 {{- end }}
