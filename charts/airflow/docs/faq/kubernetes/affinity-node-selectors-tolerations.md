@@ -21,7 +21,7 @@ airflow:
     # my_node_label_1: value1
     # my_node_label_2: value2
 
-  ## https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#affinity-v1-core
+  ## https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#affinity-v1-core
   defaultAffinity: {}
     # podAffinity:
     #   requiredDuringSchedulingIgnoredDuringExecution:
@@ -44,7 +44,7 @@ airflow:
     #                 - S2
     #         topologyKey: topology.kubernetes.io/zone
 
-  ## https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#toleration-v1-core
+  ## https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#toleration-v1-core
   defaultTolerations: []
     # - key: "key1"
     #   operator: "Exists"

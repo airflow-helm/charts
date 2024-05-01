@@ -13,13 +13,13 @@ For example, to mount a Secret called `redshift-creds` at the `/opt/airflow/secr
 ```yaml
 airflow:
   extraVolumeMounts:
-    ## spec for VolumeMount: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+    ## spec for VolumeMount: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volumemount-v1-core
     - name: redshift-creds
       mountPath: /opt/airflow/secrets/redshift-creds
       readOnly: true
 
   extraVolumes:
-    ## spec for Volume: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+    ## spec for Volume: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volume-v1-core
     - name: redshift-creds
       secret:
         secretName: redshift-creds
@@ -56,13 +56,13 @@ For example, to mount a Secret called `redshift-creds` at the `/opt/airflow/secr
 ```yaml
 workers:
   extraVolumeMounts:
-    ## spec for VolumeMount: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+    ## spec for VolumeMount: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volumemount-v1-core
     - name: redshift-creds
       mountPath: /opt/airflow/secrets/redshift-creds
       readOnly: true
   
   extraVolumes:
-    ## spec for Volume: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+    ## spec for Volume: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volume-v1-core
     - name: redshift-creds
       secret:
         secretName: redshift-creds
@@ -77,13 +77,13 @@ For example, to mount a Secret called `redshift-creds` at the `/opt/airflow/secr
 ```yaml
 airflow:
   kubernetesPodTemplate:
-    ## spec for VolumeMount: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volumemount-v1-core
+    ## spec for VolumeMount: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volumemount-v1-core
     extraVolumeMounts:
       - name: redshift-creds
         mountPath: /opt/airflow/secrets/redshift-creds
         readOnly: true
   
-    ## spec for Volume: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#volume-v1-core
+    ## spec for Volume: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#volume-v1-core
     extraVolumes:
       - name: redshift-creds
         secret:

@@ -8,18 +8,47 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
-## [8.8.0] - 2023-08-28
+## [8.9.0] - 2024-04-30
 
 > 🟨 __NOTES__ 🟨
 >
-> - the default airflow image is now `apache/airflow:2.6.3-python3.9`, but you can still use any supported version of airflow, see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
-> - this is the first version of the chart with support for airflow 2.7, along with pretty much all previous versions of airflow, see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
+> - this is the first version of the chart with support for airflow 2.9, along with [pretty much all previous versions of airflow](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
+> - the default airflow image is now `apache/airflow:2.8.4-python3.9`, but you can still use any supported version of airflow
+> - we have fixed an important bug for airflow <=2.5.3 (introduced in chart version 8.7.1), some liveness probes were creating significant load on the backend database [#853](https://github.com/airflow-helm/charts/pull/853)
 
 > 🟦 __OTHER__ 🟦
 >
 > - If you appreciate the `User-Community Airflow Helm Chart` please consider supporting us!
 >    - [give a ⭐ on GitHub](https://github.com/airflow-helm/charts/stargazers)
 >    - [give a ⭐ on ArtifactHub](https://artifacthub.io/packages/helm/airflow-helm/airflow)
+
+### Changed
+- the default airflow image is now `apache/airflow:2.8.4-python3.9` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support))
+- the default git-sync image is now `registry.k8s.io/git-sync/git-sync:v3.6.9`
+- the default pgbouncer image is now `ghcr.io/airflow-helm/pgbouncer:1.22.1-patch.0`
+- the default embedded postgres image is now `ghcr.io/airflow-helm/postgresql-bitnami:11.22-patch.0`
+- the default embedded redis image is now `bitnami/redis:6.2.14-debian-12-r17`
+
+### Added
+- add `extraContainers` and `extraInitContainers` values for all components ([#856](https://github.com/airflow-helm/charts/pull/856))
+- add `topologySpreadConstraints` values  ([#752](https://github.com/airflow-helm/charts/pull/752))
+- add values to set init-container resources ([#855](https://github.com/airflow-helm/charts/pull/855))
+- add `airflow.defaultContainerSecurityContext` value ([#624](https://github.com/airflow-helm/charts/pull/624))
+- add `pgbouncer.statsUsers` value to set `stats_user` in pgbouncer ([#820](https://github.com/airflow-helm/charts/pull/820))
+- add optional `rbac.secrets` value to give GET/LIST/WATCH on Secrets ([#790](https://github.com/airflow-helm/charts/pull/790))
+
+### Fixed
+- scheduler and triggerer probe performance for airflow <2.6.0 ([#853](https://github.com/airflow-helm/charts/pull/853))
+- fix `extraPipPackages` values for airflow 2.9.0+ ([#858](https://github.com/airflow-helm/charts/pull/858))
+- don't import `User` and `Role` FAB models, fixes airflow 2.9.0+ ([#857](https://github.com/airflow-helm/charts/pull/857))
+- set `appProtocol` on Service ports (for Istio) ([#854](https://github.com/airflow-helm/charts/pull/854))
+
+## [8.8.0] - 2023-08-28
+
+> 🟨 __NOTES__ 🟨
+>
+> - this is the first version of the chart with support for airflow 2.7, along with [pretty much all previous versions of airflow](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
+> - the default airflow image is now `apache/airflow:2.6.3-python3.9`, but you can still use any supported version of airflow
 
 ### Changed
 - the default airflow image is now `apache/airflow:2.6.3-python3.9` (see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support))
@@ -29,7 +58,6 @@ TBD
 - support `include_deferred` in pool sync for airflow 2.7.0 ([#775](https://github.com/airflow-helm/charts/pull/775))
 
 ### Fixed
-
 - sync-users for airflow 2.7.0 ([#772](https://github.com/airflow-helm/charts/pull/772))
 - invalid pgbouncer-certs volume spec when empty ([#777](https://github.com/airflow-helm/charts/pull/777))
 
@@ -40,7 +68,6 @@ TBD
 > - this is the first version of the chart with support for airflow 2.6, along with pretty much all previous versions of airflow, see the [airflow version support matrix](https://github.com/airflow-helm/charts/tree/main/charts/airflow#airflow-version-support)
 
 ### Fixed
-
 - fixed liveness probes in airflow 2.6.0 ([#743](https://github.com/airflow-helm/charts/pull/743))
 
 ## [8.7.0] - 2023-04-06
@@ -784,7 +811,8 @@ TBD
 >
 > - To read about versions `7.0.0` and before, please see the [legacy repo](https://github.com/helm/charts/tree/master/stable/airflow).
 
-[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.8.0...HEAD
+[Unreleased]: https://github.com/airflow-helm/charts/compare/airflow-8.9.0...HEAD
+[8.9.0]: https://github.com/airflow-helm/charts/compare/airflow-8.8.0...airflow-8.9.0
 [8.8.0]: https://github.com/airflow-helm/charts/compare/airflow-8.7.1...airflow-8.8.0
 [8.7.1]: https://github.com/airflow-helm/charts/compare/airflow-8.7.0...airflow-8.7.1
 [8.7.0]: https://github.com/airflow-helm/charts/compare/airflow-8.6.1...airflow-8.7.0

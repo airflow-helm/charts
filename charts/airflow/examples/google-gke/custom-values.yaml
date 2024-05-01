@@ -9,7 +9,7 @@ airflow:
   ## [FAQ] https://github.com/airflow-helm/charts/blob/main/charts/airflow/docs/faq/configuration/airflow-version.md
   image:
     repository: apache/airflow
-    tag: 2.6.3-python3.9
+    tag: 2.8.4-python3.9
 
   ## the airflow executor type to use
   executor: CeleryExecutor
@@ -125,7 +125,7 @@ scheduler:
   replicas: 2
 
   ## resource requests/limits for the scheduler Pods
-  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
   resources:
     requests:
       cpu: "1000m"
@@ -138,7 +138,7 @@ scheduler:
     retentionMinutes: 21600
 
     ## resource requests/limits for the log-cleanup container
-    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
     resources:
       requests:
         cpu: "10m"
@@ -164,7 +164,7 @@ web:
   replicas: 1
 
   ## resource requests/limits for the web Pods
-  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
   resources:
     requests:
       cpu: "200m"
@@ -221,7 +221,7 @@ workers:
   replicas: 2
 
   ## resource requests/limits for the worker Pods
-  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
   resources:
     requests:
       cpu: "256m"
@@ -239,7 +239,7 @@ workers:
     retentionMinutes: 21600
 
     ## resource requests/limits for the log-cleanup container
-    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
     resources:
       requests:
         cpu: "10m"
@@ -256,7 +256,7 @@ triggerer:
   replicas: 1
 
   ## resource requests/limits for the triggerer Pods
-  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
   resources:
     requests:
       cpu: "256m"
@@ -276,7 +276,7 @@ flower:
   replicas: 1
 
   ## resource requests/limits for the flower Pod
-  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+  ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
   resources:
     requests:
       cpu: "10m"
@@ -343,7 +343,7 @@ dags:
     #repoSubPath: "path/to/dags"
 
     ## resource requests/limits for the git-sync container
-    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
     resources:
       requests:
         cpu: "50m"
@@ -441,7 +441,7 @@ redis:
   ## configs for the redis master StatefulSet
   master:
     ## resource requests/limits for the redis master Pods
-    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
     resources:
       requests:
         cpu: "10m"
@@ -456,7 +456,7 @@ redis:
   ## configs for the redis slave StatefulSet
   slave:
     ## resource requests/limits for the slave Pods
-    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ## [SPEC] https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#resourcerequirements-v1-core
     resources:
       requests:
         cpu: "10m"
