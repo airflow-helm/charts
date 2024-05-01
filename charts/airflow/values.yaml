@@ -1602,6 +1602,8 @@ rbac:
   ## if Kubernetes RBAC resources are created
   ## - these allow the service account to create/delete Pods in the airflow namespace,
   ##   which is required for the KubernetesPodOperator() to function
+  ## - if `false`, you must create a custom Role and RoleBinding
+  ##   for the ServiceAccount defined in `serviceAccount.name`
   ##
   create: true
 
@@ -1611,8 +1613,7 @@ rbac:
   events: true
 
   ## if the created RBAC Role has GET/LIST/WATCH on Secret resources
-  ## - this is a place holder to allow the implementors to over-write \
-  ## if they want their service account deployed in airflow namespace to access secrets, default value set to false
+  ## - [WARNING] when true, workers/dags can read Secrets in airflow's namespace
   ##
   secrets: false
 

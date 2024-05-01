@@ -407,7 +407,8 @@ Parameter | Description | Default
 Parameter | Description | Default
 --- | --- | ---
 `rbac.create` | if Kubernetes RBAC resources are created | `true`
-`rbac.events` | if the created RBAR role has GET/LIST access to Event resources | `false`
+`rbac.events` | if the created RBAC Role has GET/LIST on Event resources | `true`
+`rbac.secrets` | if the created RBAC Role has GET/LIST/WATCH on Secret resources | `false`
 
 </details>
 
