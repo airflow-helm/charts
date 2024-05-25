@@ -1615,6 +1615,67 @@ dags:
     ##
     maxFailures: 0
 
+  ## configs for a sync from s3 object storage
+  ##
+  s3Sync:
+    ## if the s3-sync sidecar container is enabled
+    ##
+    enabled: false
+
+    ## the s3-sync container image
+    ##
+    image:
+      repository: amazon/aws-cli
+      tag: 2.13.15
+      pullPolicy: IfNotPresent
+      uid: 50000
+      gid: 0
+
+    ## resource requests/limits for the s3-sync container
+    ## - spec for ResourceRequirements:
+    ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.20/#resourcerequirements-v1-core
+    ##
+    resources: {}
+
+    ## the sub-path within your repo where dags are located
+    ## - only dags under this path within your repo will be seen by airflow,
+    ##   (note, the full repo will still be cloned)
+    ##
+    repoSubPath: ""
+
+    ## the s3 path to the dags
+    ##
+    ## ____ EXAMPLE _______________
+    ##   # s3
+    ##   s3Path: "s3://<bucket>"
+    ##
+    ## ____ EXAMPLE _______________
+    ##   # s3 sub path
+    ##   s3Path: "s3://<bucket>/<s3Path>"
+    ##
+    bucket: ""
+    s3Path: ""
+
+    ## Due to the issue where keys must consist of alphanumeric characters, and for security reasons
+    ## it is strongly recommended to inject Secrets into Pods' environment variables from external services like ExternalSecrets.
+    ## This approach ensures sensitive information is securely managed and not embedded within source code or values.yaml,
+    ## aligning with best practices for secure application configuration.
+    ##
+    ## the name of the pre-created Secret with AWS credentials
+    profile: ""
+
+    ## the key in `dags.s3Sync.profile` with your access key id
+    ##
+    accessKey: accessKey
+
+    ## the key in `dags.s3Sync.profile` with your secret access key
+    ##
+    secretKey: secretKey
+
+    ## the number of seconds between syncs
+    ##
+    syncWait: 60
+
 ###################################
 ## CONFIG | Kubernetes Ingress
 ###################################
