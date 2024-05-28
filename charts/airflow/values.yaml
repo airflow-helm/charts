@@ -225,6 +225,10 @@ airflow:
   ##
   podAnnotations: {}
 
+  ## extra pod Spec for airflow Pods
+  ##
+  extraPodSpec: {}
+
   ## extra pip packages to install in airflow Pods
   ##
   ## ____ EXAMPLE _______________

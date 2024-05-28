@@ -223,4 +223,7 @@ spec:
             sources:
               {{- include "airflow.pgbouncer.certs_volume_sources" . | indent 14 }}
         {{- end }}
+      {{- if .Values.airflow.extraPodSpec }}
+      {{- toYaml .Values.airflow.extraPodSpec | nindent 6 }}
+      {{- end }}
 {{- end }}

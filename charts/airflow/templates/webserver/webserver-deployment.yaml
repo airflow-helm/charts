@@ -176,3 +176,6 @@ spec:
             {{- end }}
             defaultMode: 0644
         {{- end }}
+      {{- if .Values.airflow.extraPodSpec }}
+      {{- toYaml .Values.airflow.extraPodSpec | nindent 6 }}
+      {{- end }}

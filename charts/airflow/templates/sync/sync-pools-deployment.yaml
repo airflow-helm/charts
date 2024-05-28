@@ -122,4 +122,7 @@ spec:
         - name: scripts
           secret:
             secretName: {{ include "airflow.fullname" . }}-sync-pools
+      {{- if .Values.airflow.extraPodSpec }}
+      {{- toYaml .Values.airflow.extraPodSpec | nindent 6 }}
+      {{- end }}
 {{- end }}
