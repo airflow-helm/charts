@@ -360,6 +360,31 @@ Parameter | Description | Default
 </details>
 
 <details>
+<summary><code>dagProcessor.*</code></summary>
+
+Parameter | Description | Default
+--- | --- | ---
+`dagProcessor.enabled` | if the dag processor should be deployed | `true`
+`dagProcessor.replicas` | the number of dag processor Pods to run | `1`
+`dagProcessor.resources` | resource requests/limits for the airflow dag processor Pods | `{}`
+`dagProcessor.nodeSelector` | the nodeSelector configs for the dag processor Pods | `{}`
+`dagProcessor.affinity` | the affinity configs for the dag processor Pods | `{}`
+`dagProcessor.tolerations` | the toleration configs for the dag processor Pods | `[]`
+`dagProcessor.securityContext` | the security context for the dag processor Pods | `{}`
+`dagProcessor.labels` | labels for the dag processor Deployment | `{}`
+`dagProcessor.podLabels` | Pod labels for the dag processor Deployment | `{}`
+`dagProcessor.annotations` | annotations for the dag processor Deployment | `{}`
+`dagProcessor.podAnnotations` | Pod annotations for the dag processor Deployment | `{}`
+`dagProcessor.safeToEvict` | if we add the annotation: "cluster-autoscaler.kubernetes.io/safe-to-evict" = "true" | `true`
+`dagProcessor.podDisruptionBudget.*` | configs for the PodDisruptionBudget of the dag processor Deployment | `<see values.yaml>`
+`dagProcessor.livenessProbe.*` | liveness probe for the dag processor Pods | `<see values.yaml>`
+`dagProcessor.extraPipPackages` | extra pip packages to install in the dag processor Pods | `[]`
+`dagProcessor.extraVolumeMounts` | extra VolumeMounts for the dag processor Pods | `[]`
+`dagProcessor.extraVolumes` | extra Volumes for the dag processor Pods | `[]`
+
+</details>
+
+<details>
 <summary><code>flower.*</code></summary>
 
 Parameter | Description | Default
