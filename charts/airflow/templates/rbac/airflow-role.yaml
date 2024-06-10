@@ -17,6 +17,7 @@ rules:
   verbs:
   - "get"
   - "list"
+  - "watch"
 {{- end }}
 {{- if .Values.rbac.secrets }}
 - apiGroups:
