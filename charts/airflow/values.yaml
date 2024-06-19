@@ -1785,6 +1785,9 @@ serviceAccount:
   ##
   name: ""
 
+  ## mount the service account token
+  automountServiceAccountToken: false
+
   ## annotations for the ServiceAccount
   ##
   ## ____ EXAMPLE _______________

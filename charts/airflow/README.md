@@ -439,6 +439,7 @@ Parameter | Description | Default
 --- | --- | ---
 `serviceAccount.create` | if a Kubernetes ServiceAccount is created | `true`
 `serviceAccount.name` | the name of the ServiceAccount | `""`
+`serviceAccount.automountServiceAccountToken` | mount serviceAccountToken? | `false`
 `serviceAccount.annotations` | annotations for the ServiceAccount | `{}`
 
 </details>
