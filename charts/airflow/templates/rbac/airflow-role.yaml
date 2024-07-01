@@ -28,6 +28,15 @@ rules:
   - "list"
   - "watch"
 {{- end }}
+{{- if .Values.rbac.serviceaccounts }}
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - "get"
+  - "list"
+{{- end }}
 - apiGroups:
   - ""
   resources:
