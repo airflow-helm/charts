@@ -1771,6 +1771,11 @@ rbac:
   ##
   secrets: false
 
+  ## if the created RBAC Role has GET/LIST on ServiceAccount resources
+  ## - this is needed for KubernetesPodOperator() to use `service_account_name=<customServiceAccount>`
+  ##
+  serviceaccounts: false
+
 ###################################
 ## CONFIG | Kubernetes ServiceAccount
 ###################################

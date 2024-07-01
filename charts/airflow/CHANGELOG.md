@@ -8,6 +8,11 @@ This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) 
 
 TBD
 
+### Added
+- You can now give the airflow ServiceAccount GET/LIST on ServiceAccount resources
+    * This is needed for `KubernetesPodOperator(service_account_name=<customServiceAccount>)`
+    * To enable, set `rbac.serviceaccounts` to `true` (Default: `false`)
+
 ## [8.9.0] - 2024-04-30
 
 > 🟨 __NOTES__ 🟨
