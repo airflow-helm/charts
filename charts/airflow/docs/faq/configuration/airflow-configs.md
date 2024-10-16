@@ -37,7 +37,9 @@ airflow:
 
 > 🟦 __Tip__ 🟦
 >
-> To store sensitive configs in Kubernetes secrets, you may use the `airflow.extraEnv` value.
+> To store sensitive configs in Kubernetes secrets, you may use the `airflow.extraEnv` value to mount extra environment variables
+> with the same structure as [EnvVar in ContainerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#envvar-v1-core).
+> These values will be templated by Helm, so you can use variables or template functions.
 > 
 > For example, to set `AIRFLOW__CORE__FERNET_KEY` from a Secret called `airflow-fernet-key` containing a key called `value`:
 >

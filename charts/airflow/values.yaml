@@ -239,7 +239,7 @@ airflow:
   protectedPipPackages:
     - "apache-airflow"
 
-  ## extra environment variables for the airflow Pods
+  ## extra environment variables for the airflow Pods (will be templated)
   ## - spec for EnvVar:
   ##   https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#envvar-v1-core
   ##

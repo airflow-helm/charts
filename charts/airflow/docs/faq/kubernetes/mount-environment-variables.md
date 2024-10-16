@@ -4,7 +4,7 @@
 
 # Mount Environment Variables from Secrets/ConfigMaps
 
-You may use the `airflow.extraEnv` value to mount extra environment variables with the same structure as [EnvVar in ContainerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#envvar-v1-core).
+You may use the `airflow.extraEnv` value to mount extra environment variables with the same structure as [EnvVar in ContainerSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#envvar-v1-core). These values will be templated by Helm, so you can use variables or template functions.
 
 > 🟦 __Tip__ 🟦
 >
@@ -20,4 +20,13 @@ airflow:
         secretKeyRef:
           name: airflow-fernet-key
           key: value
+```
+
+Here is an example which sets `AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER` with a templated value:
+
+```yaml
+airflow:
+  extraEnv:
+    - name: AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER
+      value: "s3://{{ .Release.Namespace }}-airflow/logs"
 ```
