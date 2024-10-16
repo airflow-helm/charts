@@ -221,6 +221,10 @@ dags:
   gitSync:
     enabled: false
 
+  ## configs for the s3-sync sidecar
+  s3Sync:
+    enabled: false
+
 ###################################
 ## CONFIG | Kubernetes Ingress
 ###################################
