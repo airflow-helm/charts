@@ -83,6 +83,10 @@ spec:
       volumeMounts:
         {{- $volumeMounts | indent 8 }}
       {{- end }}
+      {{- if .Values.airflow.kubernetesPodTemplate.lifecycle }}
+      lifecycle:
+        {{- toYaml .Values.airflow.kubernetesPodTemplate.lifecycle | nindent 8 }}
+      {{- end }}
     {{- if .Values.airflow.kubernetesPodTemplate.extraContainers }}
     {{- toYaml .Values.airflow.kubernetesPodTemplate.extraContainers | nindent 4 }}
     {{- end }}
