@@ -21,7 +21,7 @@ metadata:
     {{- toYaml .Values.airflow.dbMigrations.labels | nindent 4 }}
     {{- end }}
   annotations:
-    helm.sh/hook: post-install,post-upgrade
+    helm.sh/hook: pre-upgrade,pre-install
     helm.sh/hook-weight: "-100"
     helm.sh/hook-delete-policy: before-hook-creation
     {{- if .Values.airflow.dbMigrations.annotations }}
