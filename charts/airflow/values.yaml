@@ -1869,7 +1869,7 @@ pgbouncer:
   ## - if you set this >1 we recommend defining a `pgbouncer.podDisruptionBudget`
   ##
   replicas: 1
-  
+
   ## configs for the pgbouncer container image
   ##
   image:
