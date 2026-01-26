@@ -4,9 +4,9 @@ All notable changes to the `User-Community Airflow Helm Chart` will be documente
 
 This project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
-
-TBD
+## [8.9.1] - 2026-26-01
+### Changed
+- Make pgbouncer Deployment replicas configurable via `pgbouncer.replicas`. Bumped chart version.
 
 ## [8.9.0] - 2024-04-30
 

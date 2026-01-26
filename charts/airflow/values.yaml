@@ -1865,6 +1865,11 @@ pgbouncer:
   ##
   enabled: true
 
+  ## the number of pgbouncer Pods to run
+  ## - if you set this >1 we recommend defining a `pgbouncer.podDisruptionBudget`
+  ##
+  replicas: 1
+  
   ## configs for the pgbouncer container image
   ##
   image:
